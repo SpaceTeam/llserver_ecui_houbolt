@@ -11,25 +11,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c052466-eab4-467e-8b73-a62cd50cac8b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/serialTest.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Serial.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Serial.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeFiles/Makefile2" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/Makefile2" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/CXX.includecache" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/CXX.includecache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/DependInfo.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/DependInfo.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/cmake_clean.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/cmake_clean.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/depend.internal" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/depend.internal" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/depend.make" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/depend.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/link.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/TXV_ECUI_LLSERVER.dir/progress.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeFiles/progress.marks" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/progress.marks" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TXV_ECUI_LLSERVER" beforeDir="false" afterPath="$PROJECT_DIR$/TXV_ECUI_LLSERVER" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
-    </list>
+    <list default="true" id="6c052466-eab4-467e-8b73-a62cd50cac8b" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/CMakeFiles/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -47,8 +29,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="780">
-              <caret line="52" selection-start-line="52" selection-start-column="2" selection-end-line="61" selection-end-column="3" />
+            <state>
+              <caret lean-forward="true" selection-end-line="37" selection-end-column="40" />
               <folding>
                 <element signature="e#1#20#0" expanded="true" />
               </folding>
@@ -83,8 +65,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/serialTest.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="20" selection-start-line="8" selection-start-column="20" selection-end-line="8" selection-end-column="20" />
+            <state relative-caret-position="210">
+              <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
             </state>
           </provider>
         </entry>
@@ -268,12 +250,12 @@
       <updated>1569411136169</updated>
       <workItem from="1569411137463" duration="3341000" />
       <workItem from="1569484959438" duration="21526000" />
-      <workItem from="1569696570175" duration="20838000" />
+      <workItem from="1569696570175" duration="21064000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="45705000" />
+    <option name="totallyTimeSpent" value="45931000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1200" extended-state="0" />
@@ -469,8 +451,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="780">
-          <caret line="52" selection-start-line="52" selection-start-column="2" selection-end-line="61" selection-end-column="3" />
+        <state>
+          <caret lean-forward="true" selection-end-line="37" selection-end-column="40" />
           <folding>
             <element signature="e#1#20#0" expanded="true" />
           </folding>
@@ -479,8 +461,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/serialTest.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="20" selection-start-line="8" selection-start-column="20" selection-end-line="8" selection-end-column="20" />
+        <state relative-caret-position="210">
+          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
         </state>
       </provider>
     </entry>
