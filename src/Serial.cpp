@@ -156,7 +156,7 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
             else if (rxLength == 0)
             {
                 //No data waiting
-                cout << "otpcode: no data...waiting" << endl;
+                cout << "optcode: no data...waiting" << endl;
             }
             else
             {
@@ -202,16 +202,14 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                 //cout << "end: -------------------" << endl;
 
                 //Bytes received
-
             }
         }
         else
         {
             cerr << "Device " << _uartDevice << " disconnected!" << endl;
         }
+	sleep(1);
     }
-
-    sleep(1);
     
 }
 

@@ -2,10 +2,10 @@
 // Created by Markus on 2019-09-29.
 //
 
-#ifndef TXV_ECUI_LLSERVER_HHGCOMMANDS_H
-#define TXV_ECUI_LLSERVER_HHGCOMMANDS_H
+#ifndef TXV_ECUI_LLSERVER_HCPCOMMANDS_H
+#define TXV_ECUI_LLSERVER_HCPCOMMANDS_H
 
-
+#include "common.h"
 //unused opcodes, if all 256 opcodes are used, then ACP_UNUSED should not be defined
 #define HCP_UNUSED				0xFF
 
@@ -72,8 +72,8 @@
 
 typedef struct
 {
-	uint8_t opcode; //the command's opcode
-	uint8_t flags; //flags regarding the command
+	uint8 opcode; //the command's opcode
+	uint8 flags; //flags regarding the command
 	size_t payloadLength; //the command's payload length, or 0 if variable
 
 } hcp_cmd_t;

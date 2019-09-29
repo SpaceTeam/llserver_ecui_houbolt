@@ -204,6 +204,33 @@ src/Debug.cpp.s:
 	$(MAKE) -f CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Debug.cpp.s
 .PHONY : src/Debug.cpp.s
 
+src/HcpCommands.o: src/HcpCommands.cpp.o
+
+.PHONY : src/HcpCommands.o
+
+# target to build an object file
+src/HcpCommands.cpp.o:
+	$(MAKE) -f CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make CMakeFiles/TXV_ECUI_LLSERVER.dir/src/HcpCommands.cpp.o
+.PHONY : src/HcpCommands.cpp.o
+
+src/HcpCommands.i: src/HcpCommands.cpp.i
+
+.PHONY : src/HcpCommands.i
+
+# target to preprocess a source file
+src/HcpCommands.cpp.i:
+	$(MAKE) -f CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make CMakeFiles/TXV_ECUI_LLSERVER.dir/src/HcpCommands.cpp.i
+.PHONY : src/HcpCommands.cpp.i
+
+src/HcpCommands.s: src/HcpCommands.cpp.s
+
+.PHONY : src/HcpCommands.s
+
+# target to generate assembly for a file
+src/HcpCommands.cpp.s:
+	$(MAKE) -f CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make CMakeFiles/TXV_ECUI_LLSERVER.dir/src/HcpCommands.cpp.s
+.PHONY : src/HcpCommands.cpp.s
+
 src/SequenceManager.o: src/SequenceManager.cpp.o
 
 .PHONY : src/SequenceManager.o
@@ -357,6 +384,9 @@ help:
 	@echo "... src/Debug.o"
 	@echo "... src/Debug.i"
 	@echo "... src/Debug.s"
+	@echo "... src/HcpCommands.o"
+	@echo "... src/HcpCommands.i"
+	@echo "... src/HcpCommands.s"
 	@echo "... src/SequenceManager.o"
 	@echo "... src/SequenceManager.i"
 	@echo "... src/SequenceManager.s"

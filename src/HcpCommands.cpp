@@ -261,5 +261,5 @@ hcp_cmd_t hcp_cmds[256] = {
 	{HCP_UNUSED},																		// 252
 	{HCP_UNUSED},																		// 253
 	{HCP_UNUSED},																		// 254
-	{HCP_UNUSED},																		// 255
+	{HCP_UNUSED}																		// 255
 };
