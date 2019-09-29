@@ -204,6 +204,33 @@ src/SequenceManager.cpp.s:
 	$(MAKE) -f CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.s
 .PHONY : src/SequenceManager.cpp.s
 
+src/Serial.o: src/Serial.cpp.o
+
+.PHONY : src/Serial.o
+
+# target to build an object file
+src/Serial.cpp.o:
+	$(MAKE) -f CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o
+.PHONY : src/Serial.cpp.o
+
+src/Serial.i: src/Serial.cpp.i
+
+.PHONY : src/Serial.i
+
+# target to preprocess a source file
+src/Serial.cpp.i:
+	$(MAKE) -f CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.i
+.PHONY : src/Serial.cpp.i
+
+src/Serial.s: src/Serial.cpp.s
+
+.PHONY : src/Serial.s
+
+# target to generate assembly for a file
+src/Serial.cpp.s:
+	$(MAKE) -f CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.s
+.PHONY : src/Serial.cpp.s
+
 src/Socket.o: src/Socket.cpp.o
 
 .PHONY : src/Socket.o
@@ -303,6 +330,9 @@ help:
 	@echo "... src/SequenceManager.o"
 	@echo "... src/SequenceManager.i"
 	@echo "... src/SequenceManager.s"
+	@echo "... src/Serial.o"
+	@echo "... src/Serial.i"
+	@echo "... src/Serial.s"
 	@echo "... src/Socket.o"
 	@echo "... src/Socket.i"
 	@echo "... src/Socket.s"

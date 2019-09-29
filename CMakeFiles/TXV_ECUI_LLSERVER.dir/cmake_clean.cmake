@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/TXV_ECUI_LLSERVER.dir/main.cpp.o"
   "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Debug.cpp.o"
   "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.o"
+  "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o"
   "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o"
   "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o"
   "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o"

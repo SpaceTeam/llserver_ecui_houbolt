@@ -7,6 +7,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/main.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/main.cpp.o"
   "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Debug.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Debug.cpp.o"
   "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/SequenceManager.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.o"
+  "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o"
   "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Socket.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o"
   "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Timer.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o"
   "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/utils.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o"

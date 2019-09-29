@@ -26,6 +26,12 @@ CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.o
  include/config.h
  include/json.hpp
  include/utils.h
+CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o
+ /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.cpp
+ /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.h
+ include/Debug.h
+ include/common.h
+ include/json.hpp
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o
  /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Socket.cpp
  include/Debug.h

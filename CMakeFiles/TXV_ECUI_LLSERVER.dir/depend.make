@@ -26,6 +26,12 @@ CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.o: include/config.h
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.o: include/json.hpp
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.o: include/utils.h
 
+CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o: src/Serial.cpp
+CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o: src/Serial.h
+CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o: include/Debug.h
+CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o: include/common.h
+CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o: include/json.hpp
+
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o: src/Socket.cpp
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o: include/Debug.h
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o: include/Socket.h

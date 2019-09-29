@@ -96,9 +96,22 @@ CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.s"
 	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/SequenceManager.cpp -o CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.s
 
+CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o: CMakeFiles/TXV_ECUI_LLSERVER.dir/flags.make
+CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o: src/Serial.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o -c /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.cpp
+
+CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.cpp > CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.i
+
+CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.cpp -o CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.s
+
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o: CMakeFiles/TXV_ECUI_LLSERVER.dir/flags.make
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o: src/Socket.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o"
 	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o -c /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Socket.cpp
 
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.i: cmake_force
@@ -111,7 +124,7 @@ CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.s: cmake_force
 
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o: CMakeFiles/TXV_ECUI_LLSERVER.dir/flags.make
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o: src/Timer.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o"
 	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o -c /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Timer.cpp
 
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.i: cmake_force
@@ -124,7 +137,7 @@ CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.s: cmake_force
 
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o: CMakeFiles/TXV_ECUI_LLSERVER.dir/flags.make
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o: src/utils.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o"
 	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o -c /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/utils.cpp
 
 CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.i: cmake_force
@@ -140,6 +153,7 @@ TXV_ECUI_LLSERVER_OBJECTS = \
 "CMakeFiles/TXV_ECUI_LLSERVER.dir/main.cpp.o" \
 "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Debug.cpp.o" \
 "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.o" \
+"CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o" \
 "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o" \
 "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o" \
 "CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o"
@@ -150,12 +164,13 @@ TXV_ECUI_LLSERVER_EXTERNAL_OBJECTS =
 TXV_ECUI_LLSERVER: CMakeFiles/TXV_ECUI_LLSERVER.dir/main.cpp.o
 TXV_ECUI_LLSERVER: CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Debug.cpp.o
 TXV_ECUI_LLSERVER: CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.o
+TXV_ECUI_LLSERVER: CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o
 TXV_ECUI_LLSERVER: CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o
 TXV_ECUI_LLSERVER: CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o
 TXV_ECUI_LLSERVER: CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o
 TXV_ECUI_LLSERVER: CMakeFiles/TXV_ECUI_LLSERVER.dir/build.make
 TXV_ECUI_LLSERVER: CMakeFiles/TXV_ECUI_LLSERVER.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable TXV_ECUI_LLSERVER"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable TXV_ECUI_LLSERVER"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/TXV_ECUI_LLSERVER.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
