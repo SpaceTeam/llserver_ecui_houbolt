@@ -10,6 +10,12 @@ using namespace std;
 
 void onRead(Hedgehog_Msg msg)
 {
+//    for (int i = 0; i < msg.size; i++)
+//    {
+//    	printf("%d", msg.msg[i]);
+//    }
+//    printf("\n");
+    cout << "Optcode: " << +msg.msg[0] << endl;
     cout << msg.msg << endl;
 }
 
@@ -26,4 +32,5 @@ int main(int argc, char const *argv[])
     	hhgSerial->Write(msg);
         hhgSerial->Read(onRead);
     }
+    return 0;
 }
