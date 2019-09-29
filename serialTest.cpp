@@ -18,5 +18,5 @@ int main(int argc, char const *argv[])
     Serial* hhgSerial = new Serial("/dev/ttyAMA0", 115200);
 
     hhgSerial->Write("hello");
-    hhgSerial->Read()
+    hhgSerial->Read(onRead);
 }

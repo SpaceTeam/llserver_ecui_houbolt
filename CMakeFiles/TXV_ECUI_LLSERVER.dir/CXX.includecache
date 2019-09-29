@@ -6,29 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.cpp
-unistd.h
--
-fcntl.h
--
-termios.h
--
+/home/pi/TXV_ECUI_LLServer/serialTest.cpp
 iostream
 -
-cstring
--
-common.h
-/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/common.h
 Serial.h
-/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.h
-
-/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.h
-string
--
-functional
--
-common.h
-/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/common.h
+/home/pi/TXV_ECUI_LLServer/Serial.h
 
 include/Debug.h
 mutex
@@ -44,6 +26,14 @@ stdarg.h
 unistd.h
 -
 thread
+-
+common.h
+include/common.h
+
+include/Serial.h
+string
+-
+functional
 -
 common.h
 include/common.h
