@@ -141,39 +141,39 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
 
 //    while(true)
 //    {
-        if (_uartFilestream != -1)
+    if (_uartFilestream != -1)
+    {
+
+        int msgLength;
+
+        Hedgehog_Msg msg;
+
+        msgLength = read(_uartFilestream, (void *) rxBuffer, MSG_SIZE);
+        cout << msgLength << " bytes recieved" << endl;
+        if (msgLength < 0)
         {
-
-                int msgLength;
-
-                Hedgehog_Msg msg;
-
-                    msgLength = read(_uartFilestream, (void *) rxBuffer, MSG_SIZE);
-                    cout << msgLength << " bytes recieved" << endl;
-                    if (msgLength < 0)
-                    {
-                        //NOTE: if this occurs settings of serial com is broken --> non blocking
-                        cout << "no bytes recieved" << endl;
-                    }
-                    else if (msgLength == 0)
-                    {
-                        //No data waiting
-                        cout << "no data...waiting" << endl;
-                    }
-                    else
-                    {
-			msg.size = msgLength;
-			msg.msg = new char[msg.size];
+            //NOTE: if this occurs settings of serial com is broken --> non blocking
+            cout << "no bytes recieved" << endl;
+        }
+        else if (msgLength == 0)
+        {
+            //No data waiting
+            cout << "no data...waiting" << endl;
+        }
+        else
+        {
+            msg.size = msgLength;
+            msg.msg = new char[msg.size];
                         std::memcpy(&msg.msg[0],
                                     &rxBuffer[0],
                                     msgLength);
-                    }
-                callback(msg);
+        }
+        callback(msg);
                 //cout << "end: -------------------" << endl;
 
                 //Bytes received
 
-            }
+    }
 //	sleep(1);
 //    }
     
