@@ -103,6 +103,10 @@ void Socket::sendJson(std::string type, json content)
         {
             jsonMsg["content"] = content;
         }
+        else
+        {
+            jsonMsg["content"] = json::object();
+        }
 
         string msg = jsonMsg.dump();
 

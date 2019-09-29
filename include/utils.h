@@ -17,6 +17,7 @@ int64 toMicros(float val);
 
 std::string loadFile(std::string filePath);
 
+bool keyExists(const json& j, const std::string& key);
 
 }
 

@@ -37,7 +37,8 @@ void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMic
 
 void Timer::stop()
 {
-    this->stopCallback();
+    std::thread callbackThread(this->stopCallback);
+    callbackThread.detach();
     this->isRunning = false;
 }
 
@@ -47,7 +48,8 @@ void Timer::tick(Timer* self)
 
         std::this_thread::sleep_for(std::chrono::microseconds(self->interval));
 
-        self->tickCallback(self->microTime);
+        std::thread callbackThread(self->tickCallback, self->microTime);
+        callbackThread.detach();
         self->microTime += self->interval;
 
         if (self->microTime >= self->endTime)

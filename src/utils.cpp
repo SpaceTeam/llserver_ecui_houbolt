@@ -21,4 +21,9 @@ namespace utils
 
         return content;
     }
+
+    bool keyExists(const json& j, const std::string& key)
+    {
+        return j.find(key) != j.end();
+    }
 }

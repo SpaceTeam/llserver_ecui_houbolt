@@ -20,18 +20,13 @@ void testStop()
     Debug::print("Test from Stop");
 }
 
-bool keyExists(const json& j, const std::string& key)
-{
-    return j.find(key) != j.end();
-}
-
 void processMessage(int sock, json msg)
 {
     json testmsg;
     testmsg["type"] = "success";
     testmsg["content"] = json::object();
     string strmsg = testmsg.dump() + "\n\0";
-    if (keyExists(msg, "type"))
+    if (utils::keyExists(msg, "type"))
     {
         string type = msg["type"];
 
@@ -60,6 +55,8 @@ int main(int argc, char const *argv[])
     Socket::init(processMessage);
 
     while (true){ sleep(1); }
+
+    Socket::destroy();
 
     return 0;
 }

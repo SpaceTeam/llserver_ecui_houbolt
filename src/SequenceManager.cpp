@@ -10,6 +10,8 @@
 
 using json = nlohmann::json;
 
+using namespace std;
+
 bool SequenceManager::isRunning = false;
 Timer* SequenceManager::timer;
 
@@ -21,6 +23,7 @@ void SequenceManager::StopSequence()
     //TODO: implement
     Debug::print("we're done");
     isRunning = false;
+    Socket::sendJson("timer-done");
 }
 
 void SequenceManager::AbortSequence()
@@ -52,6 +55,9 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         int64 endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
         int64 interval = utils::toMicros(jsonSeq["globals"]["interval"]);
         Debug::info("%d %d %d", startTime, endTime, interval);
+
+        Socket::sendJson("timer-start");
+
         timer->start(startTime, endTime, interval, Tick, StopSequence);
     }
 }
@@ -62,9 +68,53 @@ void SequenceManager::Tick(int64 microTime)
     {
         Debug::print("Micro Seconds: %d", microTime);
     }
-    if (microTime % 100000 == 0)
+    if (microTime % TIMER_SYNC_INTERVAL == 0)
     {
-        Socket::sendJson("sequence-sync", ((microTime/1000) / 1000.0));
+        Socket::sendJson("timer-sync", ((microTime/1000) / 1000.0));
+    }
+
+    //TODO: this is very inefficient right now; make it so actions can be accessed by timestamp as key
+    for (auto dataItem : jsonSequence["data"])
+    {
+        for (auto actionItem : dataItem["actions"])
+        {
+
+            float time;
+            if (actionItem["timestamp"].type() == json::value_t::string)
+            {
+                string timeStr = actionItem["timestamp"];
+                if (timeStr.compare("START") == 0)
+                {
+                    time = utils::toMicros(jsonSequence["globals"]["startTime"]);
+                }
+                else if (timeStr.compare("END") == 0)
+                {
+                    time = utils::toMicros(jsonSequence["globals"]["endTime"]);
+                }
+            }
+            else
+            {
+                time = actionItem["timestamp"];
+            }
+
+            int64 timestampMicros = utils::toMicros(time);
+            if (timestampMicros == microTime)
+            {
+                cout << "timestamp | " << time << endl;
+                for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
+                {
+                    if (it.key().compare("timestamp") != 0)
+                    {
+                        std::cout << it.key() << " | " << it.value() << "\n";
+                    }
+                }
+                cout << "--------------" << endl;
+            }
+            else if (timestampMicros > microTime)
+            {
+                break;
+            }
+        }
     }
 
 }
