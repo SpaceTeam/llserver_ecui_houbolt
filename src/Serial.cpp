@@ -138,9 +138,10 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
     //----- CHECK FOR ANY RX BYTES -----
     char rxBuffer[MSG_SIZE] = {0};
     //msg.msg = rxBuffer;
-
-//    while(true)
-//    {
+    bool finished = false;
+    
+    while(!finished)
+    {
     if (_uartFilestream != -1)
     {
         int rxLength = read(_uartFilestream, (void *) rxBuffer,
@@ -148,29 +149,31 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
         if (rxLength < 0)
         {
             //NOTE: if this occurs settings of serial com is broken --> non blocking
-            cout << "no bytes recieved" << endl;
+            cout << "optcode: no bytes recieved" << endl;
         }
         else if (rxLength == 0)
         {
             //No data waiting
-            cout << "no data...waiting" << endl;
+            cout << "otpcode: no data...waiting" << endl;
         }
         else
         {
             Hedgehog_Msg msg;
 
             msg.optcode = rxBuffer[0];
-            int rxLength = read(_uartFilestream, (void *) rxBuffer,
+	    while (!finished)
+	    {         
+	    int rxLength = read(_uartFilestream, (void *) rxBuffer,
                                 1);        //Filestream, buffer to store in, number of bytes to read (MSG_SIZE)
             if (rxLength < 0)
             {
                 //NOTE: if this occurs settings of serial com is broken --> non blocking
-                cout << "no bytes recieved" << endl;
+                cout << "msgLength: no bytes recieved" << endl;
             }
             else if (rxLength == 0)
             {
                 //No data waiting
-                cout << "no data...waiting" << endl;
+                cout << "msgLength: no data...waiting" << endl;
             }
             else
             {
@@ -190,12 +193,12 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                     if (rxLength < 0)
                     {
                         //NOTE: if this occurs settings of serial com is broken --> non blocking
-                        cout << "no bytes recieved" << endl;
+                        cout << "payload: no bytes recieved" << endl;
                     }
                     else if (rxLength == 0)
                     {
                         //No data waiting
-                        cout << "no data...waiting" << endl;
+                        cout << "payload: no data...waiting" << endl;
                     }
                     else
                     {
@@ -204,13 +207,16 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                                     rxLength);
                         remainingBytes -= rxLength;
                     }
+		    sleep(1);
                 } while (remainingBytes > 0);
+		finished = true; 
                 callback(msg);
                 //cout << "end: -------------------" << endl;
 
                 //Bytes received
 
             }
+	    }
         }
     }
     else
@@ -218,8 +224,8 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
         cerr << "Device " << _uartDevice << " disconnected!" << endl;
     }
 
-    //	sleep(1);
-//    }
+    sleep(1);
+    }
     
 }
 

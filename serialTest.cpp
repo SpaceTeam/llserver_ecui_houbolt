@@ -15,7 +15,7 @@ void onRead(Hedgehog_Msg msg)
 //    	printf("%d", msg.msg[i]);
 //    }
 //    printf("\n");
-    cout << "Optcode: " << +msg.msg[0] << endl;
+    cout << "Optcode: " << msg.optcode << endl;
     cout << msg.msg << endl;
 }
 
@@ -27,7 +27,7 @@ int main(int argc, char const *argv[])
     Hedgehog_Msg msg;
     msg.size = 1;
     msg.msg = msgArr;
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 100000; i++)
     {
     	hhgSerial->Write(msg);
         hhgSerial->Read(onRead);
