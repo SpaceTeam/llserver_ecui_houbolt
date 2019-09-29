@@ -4,16 +4,16 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/pi/TXV_ECUI_LLServer/main.cpp" "/home/pi/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/main.cpp.o"
-  "/home/pi/TXV_ECUI_LLServer/serialTest.cpp" "/home/pi/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/serialTest.cpp.o"
-  "/home/pi/TXV_ECUI_LLServer/src/Debug.cpp" "/home/pi/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Debug.cpp.o"
-  "/home/pi/TXV_ECUI_LLServer/src/SequenceManager.cpp" "/home/pi/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.o"
-  "/home/pi/TXV_ECUI_LLServer/src/Serial.cpp" "/home/pi/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o"
-  "/home/pi/TXV_ECUI_LLServer/src/Socket.cpp" "/home/pi/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o"
-  "/home/pi/TXV_ECUI_LLServer/src/Timer.cpp" "/home/pi/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o"
-  "/home/pi/TXV_ECUI_LLServer/src/utils.cpp" "/home/pi/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o"
+  "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/main.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/main.cpp.o"
+  "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/serialTest.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/serialTest.cpp.o"
+  "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Debug.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Debug.cpp.o"
+  "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/SequenceManager.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/SequenceManager.cpp.o"
+  "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Serial.cpp.o"
+  "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Socket.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Socket.cpp.o"
+  "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Timer.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/Timer.cpp.o"
+  "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/utils.cpp" "/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir/src/utils.cpp.o"
   )
-set(CMAKE_CXX_COMPILER_ID "GNU")
+set(CMAKE_CXX_COMPILER_ID "AppleClang")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH

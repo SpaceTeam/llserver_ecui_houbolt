@@ -11,30 +11,30 @@
 				<Option working_dir="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
 				<Option working_dir="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
 				<Option working_dir="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="TXV_ECUI_LLSERVER">
@@ -45,12 +45,18 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.1/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 TXV_ECUI_LLSERVER"/>
-					<CompileFile command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 TXV_ECUI_LLSERVER"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="TXV_ECUI_LLSERVER/fast">
@@ -61,12 +67,18 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.1/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 TXV_ECUI_LLSERVER/fast"/>
-					<CompileFile command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 TXV_ECUI_LLSERVER/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
@@ -94,16 +106,25 @@
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/main.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/serialTest.cpp">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Debug.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/SequenceManager.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Serial.cpp">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Socket.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Timer.cpp">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/utils.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeLists.txt">
