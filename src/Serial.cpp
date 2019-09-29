@@ -5,6 +5,8 @@
 #include <cstring>
 
 #include "common.h"
+#include "HcpCommands.h"
+
 #include "Serial.h"
 
 #define MSG_SIZE 2048
@@ -142,43 +144,28 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
     
     while(!finished)
     {
-    if (_uartFilestream != -1)
-    {
-        int rxLength = read(_uartFilestream, (void *) rxBuffer,
-                            1);        //Filestream, buffer to store in, number of bytes to read (MSG_SIZE)
-        if (rxLength < 0)
+        if (_uartFilestream != -1)
         {
-            //NOTE: if this occurs settings of serial com is broken --> non blocking
-            cout << "optcode: no bytes recieved" << endl;
-        }
-        else if (rxLength == 0)
-        {
-            //No data waiting
-            cout << "otpcode: no data...waiting" << endl;
-        }
-        else
-        {
-            Hedgehog_Msg msg;
-
-            msg.optcode = rxBuffer[0];
-	    while (!finished)
-	    {         
-	    int rxLength = read(_uartFilestream, (void *) rxBuffer,
+            int rxLength = read(_uartFilestream, (void *) rxBuffer,
                                 1);        //Filestream, buffer to store in, number of bytes to read (MSG_SIZE)
             if (rxLength < 0)
             {
                 //NOTE: if this occurs settings of serial com is broken --> non blocking
-                cout << "msgLength: no bytes recieved" << endl;
+                cout << "optcode: no bytes recieved" << endl;
             }
             else if (rxLength == 0)
             {
                 //No data waiting
-                cout << "msgLength: no data...waiting" << endl;
+                cout << "otpcode: no data...waiting" << endl;
             }
             else
             {
+                Hedgehog_Msg msg;
 
-                int msgLength = rxBuffer[0];
+                msg.optcode = rxBuffer[0];
+
+
+                int msgLength = hcp_cmds[msg.optcode].payloadLength;
                 cout << "Message Length: " << msgLength << endl;
                 int remainingBytes = msgLength;
 
@@ -207,25 +194,24 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                                     rxLength);
                         remainingBytes -= rxLength;
                     }
-		    sleep(1);
+                    sleep(1);
                 } while (remainingBytes > 0);
-		finished = true; 
+
+                finished = true;
                 callback(msg);
                 //cout << "end: -------------------" << endl;
 
                 //Bytes received
 
             }
-	    }
         }
-    }
-    else
-    {
-        cerr << "Device " << _uartDevice << " disconnected!" << endl;
+        else
+        {
+            cerr << "Device " << _uartDevice << " disconnected!" << endl;
+        }
     }
 
     sleep(1);
-    }
     
 }
 
