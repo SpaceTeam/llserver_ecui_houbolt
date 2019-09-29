@@ -1,3 +1,0 @@
-/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/rebuild_cache.dir
-/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/edit_cache.dir
-/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeFiles/TXV_ECUI_LLSERVER.dir

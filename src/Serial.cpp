@@ -139,67 +139,43 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
     char rxBuffer[MSG_SIZE] = {0};
     //msg.msg = rxBuffer;
 
-    while(true)
-    {
+//    while(true)
+//    {
         if (_uartFilestream != -1)
         {
-            int rxLength = read(_uartFilestream, (void *) rxBuffer,
-                                1);        //Filestream, buffer to store in, number of bytes to read (MSG_SIZE)
-            if (rxLength < 0)
-            {
-                //NOTE: if this occurs settings of serial com is broken --> non blocking
-                cout << "no bytes recieved" << endl;
-            }
-            else if (rxLength == 0)
-            {
-                //No data waiting
-                cout << "no data...waiting" << endl;
-            }
-            else
-            {
 
-                int msgLength = rxBuffer[0];
-                cout << "Message Length: " << msgLength << endl;
-                int remainingBytes = msgLength;
+                int msgLength;
 
                 Hedgehog_Msg msg;
-                msg.size = msgLength;
-                msg.msg = new char[msg.size];
 
-                do
-                {
-                    rxLength = read(_uartFilestream, (void *) rxBuffer, remainingBytes);
-                    cout << rxLength << " bytes recieved" << endl;
-                    if (rxLength < 0)
+                    msgLength = read(_uartFilestream, (void *) rxBuffer, MSG_SIZE);
+                    cout << msgLength << " bytes recieved" << endl;
+                    if (msgLength < 0)
                     {
                         //NOTE: if this occurs settings of serial com is broken --> non blocking
                         cout << "no bytes recieved" << endl;
                     }
-                    else if (rxLength == 0)
+                    else if (msgLength == 0)
                     {
                         //No data waiting
                         cout << "no data...waiting" << endl;
                     }
                     else
                     {
-                        std::memcpy(&msg.msg[msgLength - remainingBytes],
+			msg.size = msgLength;
+			msg.msg = new char[msg.size];
+                        std::memcpy(&msg.msg[0],
                                     &rxBuffer[0],
-                                    rxLength);
-                        remainingBytes -= rxLength;
+                                    msgLength);
                     }
-                } while (remainingBytes > 0);
                 callback(msg);
                 //cout << "end: -------------------" << endl;
 
                 //Bytes received
 
             }
-        }
-        else
-        {
-            cerr << "Device " << _uartDevice << " disconnected!" << endl;
-        }
-    }
+//	sleep(1);
+//    }
     
 }
 

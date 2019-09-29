@@ -15,8 +15,15 @@ void onRead(Hedgehog_Msg msg)
 
 int main(int argc, char const *argv[])
 {
-    Serial* hhgSerial = new Serial("/dev/ttyAMA0", 115200);
+    Serial* hhgSerial = new Serial("/dev/serial0", 115200);
 
-    hhgSerial->Write("hello");
-    hhgSerial->Read(onRead);
+    char msgArr[] = {0x01};
+    Hedgehog_Msg msg;
+    msg.size = 1;
+    msg.msg = msgArr;
+    for (int i = 0; i < 4; i++)
+    {
+    	hhgSerial->Write(msg);
+        hhgSerial->Read(onRead);
+    }
 }
