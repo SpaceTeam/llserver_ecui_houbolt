@@ -12,13 +12,32 @@ using namespace std;
 
 void onRead(Hedgehog_Msg msg)
 {
-    cout << "Optcode: " << msg.optcode << endl;
-
-    for (int i = 0; i < msg.size; i++)
+    printf("Optcode: %d\n", msg.optcode);
+    
+    switch (msg.optcode)
     {
-    	printf("%d\n", msg.msg[i]);
-    }
-    //printf("\n");
+	case HCP_ANALOG_REP:
+	{
+            int16 val = msg.msg[1] << 8 + msg.msg[2];
+	    printf("Analog Port: %d | Value: %d\n", msg.msg[0], val);
+	    break;
+	}
+	case HCP_INVALID_PORT:
+	{
+	    printf("Invalid Port \n");
+	    break;
+	}
+	default:
+	{
+	    cout << "Msg not implemented, printing bytes" << endl; 
+   
+    	    for (int i = 0; i < msg.size; i++)
+    	    {
+    	    	printf("%d\n", msg.msg[i]);
+    	    }
+	    break;
+    	}
+    }    
 }
 
 int main(int argc, char const *argv[])
@@ -43,7 +62,7 @@ int main(int argc, char const *argv[])
 
 	hhgSerial->Write(msg2);
 	hhgSerial->Read(onRead);
-	sleep(1);
+//	sleep(1);
     }
     return 0;
 }

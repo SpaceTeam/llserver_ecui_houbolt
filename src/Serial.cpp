@@ -156,7 +156,7 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
             else if (rxLength == 0)
             {
                 //No data waiting
-                cout << "optcode: no data...waiting" << endl;
+//                cout << "optcode: no data...waiting" << endl;
             }
             else
             {
@@ -173,7 +173,7 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                 msg.size = msgLength;
                 msg.msg = new char[msg.size];
 
-                do
+                while (remainingBytes > 0)
                 {
                     rxLength = read(_uartFilestream, (void *) rxBuffer, remainingBytes);
                     cout << rxLength << " bytes recieved" << endl;
@@ -195,7 +195,7 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                         remainingBytes -= rxLength;
                     }
                     sleep(1);
-                } while (remainingBytes > 0);
+                }
 
                 finished = true;
                 callback(msg);
@@ -208,7 +208,7 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
         {
             cerr << "Device " << _uartDevice << " disconnected!" << endl;
         }
-	sleep(1);
+//	sleep(1);
     }
     
 }
