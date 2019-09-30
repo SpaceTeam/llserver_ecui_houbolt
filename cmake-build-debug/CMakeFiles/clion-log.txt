@@ -13,11 +13,6 @@
 -- Detecting CXX compiler ABI info - done
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
--- Looking for pthread.h
--- Looking for pthread.h - found
--- Looking for pthread_create
--- Looking for pthread_create - found
--- Found Threads: TRUE  
 -- Configuring done
 -- Generating done
--- Build files have been written to: /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/cmake-build-debug
+-- Build files have been written to: /Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer

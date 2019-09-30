@@ -7,6 +7,7 @@
 #include "Socket.h"
 
 #include "utils.h"
+#include "HcpManager.h"
 
 using json = nlohmann::json;
 
@@ -17,6 +18,11 @@ Timer* SequenceManager::timer;
 
 json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
+
+void SequenceManager::init()
+{
+    HcpManager::init();
+}
 
 void SequenceManager::StopSequence()
 {
@@ -106,6 +112,7 @@ void SequenceManager::Tick(int64 microTime)
                     if (it.key().compare("timestamp") != 0)
                     {
                         std::cout << it.key() << " | " << it.value() << "\n";
+                        HcpManager::ExecCommand(it.key(), it.value());
                     }
                 }
                 cout << "--------------" << endl;

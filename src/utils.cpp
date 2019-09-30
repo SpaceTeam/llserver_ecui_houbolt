@@ -4,6 +4,7 @@
 
 #include "utils.h"
 
+
 namespace utils
 {
 
@@ -20,6 +21,13 @@ namespace utils
                             (std::istreambuf_iterator<char>()));
 
         return content;
+    }
+
+    void saveFile(std::string filePath, std::string content)
+    {
+        std::ofstream ostr(filePath);
+        ostr << content;
+        ostr.close();
     }
 
     bool keyExists(const json& j, const std::string& key)

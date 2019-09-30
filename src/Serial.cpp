@@ -135,13 +135,13 @@ Serial::~Serial()
 	close(_uartFilestream);
 }
 
-void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
+HCP_MSG Serial::ReadSync()
 {
     //----- CHECK FOR ANY RX BYTES -----
-    char rxBuffer[MSG_SIZE] = {0};
+    uint8 rxBuffer[MSG_SIZE] = {0};
     //msg.msg = rxBuffer;
     bool finished = false;
-    
+
     while(!finished)
     {
         if (_uartFilestream != -1)
@@ -160,7 +160,7 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
             }
             else
             {
-                Hedgehog_Msg msg;
+                HCP_MSG msg;
 
                 msg.optcode = rxBuffer[0];
 
@@ -170,8 +170,8 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                 int remainingBytes = msgLength;
 
 
-                msg.size = msgLength;
-                msg.msg = new char[msg.size];
+                msg.payloadSize = msgLength;
+                msg.payload = new uint8[msg.payloadSize];
 
                 while (remainingBytes > 0)
                 {
@@ -189,7 +189,82 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                     }
                     else
                     {
-                        std::memcpy(&msg.msg[msgLength - remainingBytes],
+                        std::memcpy(&msg.payload[msgLength - remainingBytes],
+                                    &rxBuffer[0],
+                                    rxLength);
+                        remainingBytes -= rxLength;
+                    }
+//                    sleep(1);
+                }
+
+                finished = true;
+                return msg;
+
+            }
+        }
+        else
+        {
+            cerr << "Device " << _uartDevice << " disconnected!" << endl;
+        }
+//	sleep(1);
+    }
+}
+
+void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
+{
+    //----- CHECK FOR ANY RX BYTES -----
+    uint8 rxBuffer[MSG_SIZE] = {0};
+    //msg.msg = rxBuffer;
+    bool finished = false;
+
+    while(!finished)
+    {
+        if (_uartFilestream != -1)
+        {
+            int rxLength = read(_uartFilestream, (void *) rxBuffer,
+                                1);        //Filestream, buffer to store in, number of bytes to read (MSG_SIZE)
+            if (rxLength < 0)
+            {
+                //NOTE: if this occurs settings of serial com is broken --> non blocking
+                cout << "optcode: no bytes recieved" << endl;
+            }
+            else if (rxLength == 0)
+            {
+                //No data waiting
+//                cout << "optcode: no data...waiting" << endl;
+            }
+            else
+            {
+                HCP_MSG msg;
+
+                msg.optcode = rxBuffer[0];
+
+
+                int msgLength = hcp_cmds[msg.optcode].payloadLength;
+                cout << "Message Length: " << msgLength << endl;
+                int remainingBytes = msgLength;
+
+
+                msg.payloadSize = msgLength;
+                msg.payload = new uint8[msg.payloadSize];
+
+                while (remainingBytes > 0)
+                {
+                    rxLength = read(_uartFilestream, (void *) rxBuffer, remainingBytes);
+//                    cout << rxLength << " bytes recieved" << endl;
+                    if (rxLength < 0)
+                    {
+                        //NOTE: if this occurs settings of serial com is broken --> non blocking
+                        cout << "payload: no bytes recieved" << endl;
+                    }
+                    else if (rxLength == 0)
+                    {
+                        //No data waiting
+//                        cout << "payload: no data...waiting" << endl;
+                    }
+                    else
+                    {
+                        std::memcpy(&msg.payload[msgLength - remainingBytes],
                                     &rxBuffer[0],
                                     rxLength);
                         remainingBytes -= rxLength;
@@ -199,9 +274,7 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
 
                 finished = true;
                 callback(msg);
-                //cout << "end: -------------------" << endl;
 
-                //Bytes received
             }
         }
         else
@@ -210,31 +283,16 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
         }
 //	sleep(1);
     }
-    
 }
 
-void Serial::Write(string message)
+void Serial::Write(HCP_MSG message)
 {
-	const char* msg = message.c_str();
+    uint8 buffer[message.payloadSize+1];
+    buffer[0] = message.optcode;
+    std::copy(&message.payload[0], &message.payload[message.payloadSize-1], &buffer[1]);
     if (_uartFilestream != -1)
     {
-        int count = write(_uartFilestream, &msg[0], message.size());		//Filestream, bytes to write, number of bytes to write
-        if (count < 0)
-        {
-            printf("UART Write error\n");
-        }
-    }
-    else
-    {
-    	cerr << "Device " << _uartDevice << " disconnected!" << endl;
-    }
-}
-
-void Serial::Write(Hedgehog_Msg message)
-{
-    if (_uartFilestream != -1)
-    {
-        int count = write(_uartFilestream, &message.msg[0], message.size);        //Filestream, bytes to write, number of bytes to write
+        int count = write(_uartFilestream, &buffer[0], message.payloadSize+1);        //Filestream, bytes to write, number of bytes to write
         if (count < 0)
         {
             printf("UART Write error\n");

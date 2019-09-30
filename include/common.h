@@ -10,6 +10,7 @@
 #include <functional>
 
 #include "Debug.h"
+//TODO: move it elsewhere
 #include "json.hpp"
 
 
@@ -25,6 +26,7 @@ typedef int16_t int16;
 typedef int32_t int32;
 typedef int64_t int64;
 
+//TODO: move it elsewhere
 using json = nlohmann::json;
 
 #define TXV_ECUI_LLSERVER_COMMON_H

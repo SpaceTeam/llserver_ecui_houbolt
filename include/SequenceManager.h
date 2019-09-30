@@ -31,6 +31,8 @@ private:
 
 public:
 
+    static void init();
+
     static void AbortSequence();
     static void StopSequence();
     static void StartSequence(json jsonSeq, json jsonAbortSeq);

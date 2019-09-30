@@ -10,11 +10,11 @@
 
 #include "common.h"
 
-struct Hedgehog_Msg
+struct HCP_MSG
 {
 	uint8 optcode;
-	uint8 size;
-	char* msg = nullptr;
+	uint8 payloadSize;
+	uint8* payload = nullptr;
 };
 
 class Serial {
@@ -32,9 +32,9 @@ public:
 
     Serial(std::string device, int baudRate);
     ~Serial();
-    void Read(std::function<void(Hedgehog_Msg)> callback);
-    void Write(std::string message);
-    void Write(Hedgehog_Msg message);
+    HCP_MSG ReadSync();
+    void ReadAsync(std::function<void(HCP_MSG)> callback);
+    void Write(HCP_MSG message);
 
     std::string GetDevice();
     int GetBaud();

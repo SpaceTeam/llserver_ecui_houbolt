@@ -1,0 +1,38 @@
+{
+    "servo":
+    {
+        "fuel": {
+            "port": 0,
+            "feedbackPortAnalog": 0,
+            "endpoints": [200, 2500],
+            "feedbackEndpoints": [220, 2200]
+
+        },
+        "oxidizer": {
+            "port": 1,
+            "feedbackPortAnalog": 1,
+            "endpoints": [200, 2500],
+            "feedbackEndpoints": [220, 2200]
+
+        },
+        "igniter": {
+            "port": 2,
+            "endpoints": [0, 2500]
+
+        }
+
+    },
+    "analog": {
+        "fuel feedback": {
+            "port": 0
+
+        },
+        "oxidizer feedback": {
+            "port": 1
+
+        }
+
+    },
+    "digital": {
+    }
+}

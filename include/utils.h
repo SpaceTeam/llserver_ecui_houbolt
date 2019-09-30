@@ -16,6 +16,7 @@ namespace utils
 int64 toMicros(float val);
 
 std::string loadFile(std::string filePath);
+void saveFile(std::string filePath, std::string content);
 
 bool keyExists(const json& j, const std::string& key);
 
