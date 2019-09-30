@@ -18,7 +18,7 @@ void onRead(Hedgehog_Msg msg)
     {
 	case HCP_ANALOG_REP:
 	{
-            int16 val = msg.msg[1] << 8 + msg.msg[2];
+            int16 val = (msg.msg[1] << 8) + msg.msg[2];
 	    printf("Analog Port: %d | Value: %d\n", msg.msg[0], val);
 	    break;
 	}
@@ -63,11 +63,11 @@ int main(int argc, char const *argv[])
     //	hhgSerial->Write(msg);
       //  hhgSerial->Read(onRead);
 
-	uint16 pos = (i % 2500);
-	printf("%d\n", pos);
-	msg3.msg[2] = (pos >> 8) | 0x80;
-	msg3.msg[3] = pos & 0x00FF;  
-	hhgSerial->Write(msg3);
+//	uint16 pos = (i % 2500);
+//	printf("%d\n", pos);
+//	msg3.msg[2] = (pos >> 8) | 0x80;
+//	msg3.msg[3] = pos & 0x00FF;  
+	hhgSerial->Write(msg2);
 	hhgSerial->Read(onRead);
 	usleep(100000);
     }
