@@ -176,7 +176,7 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                 while (remainingBytes > 0)
                 {
                     rxLength = read(_uartFilestream, (void *) rxBuffer, remainingBytes);
-                    cout << rxLength << " bytes recieved" << endl;
+//                    cout << rxLength << " bytes recieved" << endl;
                     if (rxLength < 0)
                     {
                         //NOTE: if this occurs settings of serial com is broken --> non blocking
@@ -185,7 +185,7 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                     else if (rxLength == 0)
                     {
                         //No data waiting
-                        cout << "payload: no data...waiting" << endl;
+//                        cout << "payload: no data...waiting" << endl;
                     }
                     else
                     {
@@ -194,7 +194,7 @@ void Serial::Read(std::function<void(Hedgehog_Msg)> callback)
                                     rxLength);
                         remainingBytes -= rxLength;
                     }
-                    sleep(1);
+//                    sleep(1);
                 }
 
                 finished = true;

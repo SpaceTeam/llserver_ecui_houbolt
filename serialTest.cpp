@@ -54,15 +54,22 @@ int main(int argc, char const *argv[])
 	char anaArr[] = {HCP_ANALOG_REQ, 0x01};
 	msg2.msg = anaArr;
 
-    for (int i = 0; i < 10000; i++)
+    Hedgehog_Msg msg3;
+    msg3.size = 4;
+    char serArr[] = {HCP_SERVO, 0x01, 0, 0};
+    msg3.msg = serArr;    
+    for (int i = 0; i < 200000; i+= 50)
     {
     //	hhgSerial->Write(msg);
       //  hhgSerial->Read(onRead);
 
-
-	hhgSerial->Write(msg2);
+	uint16 pos = (i % 2500);
+	printf("%d\n", pos);
+	msg3.msg[2] = (pos >> 8) | 0x80;
+	msg3.msg[3] = pos & 0x00FF;  
+	hhgSerial->Write(msg3);
 	hhgSerial->Read(onRead);
-//	sleep(1);
+	usleep(100000);
     }
     return 0;
 }
