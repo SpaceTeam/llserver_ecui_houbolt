@@ -209,6 +209,10 @@ bool HcpManager::ExecCommand(std::string name, uint8 percent)
                 Debug::error("unknown type name");
             }
         }
+        else
+        {
+            Debug::error("no device with name '" + name + "' found");
+        }
     }
     else
     {

@@ -104,7 +104,7 @@ int main(int argc, char const *argv[])
 
     string fuel = "fuel";
     string analog = "fuel feedback";
-    string digital = "saftey";
+    string digital = "safety";
     for (int i = 0; i < 8000; i++)
     {
         if (!HcpManager::ExecCommand(fuel, i))
