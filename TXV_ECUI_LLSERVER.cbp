@@ -76,6 +76,9 @@
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/HcpCommands.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/HcpManager.h">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/SequenceManager.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
@@ -110,9 +113,6 @@
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/HcpManager.cpp">
-			<Option target="TXV_ECUI_LLSERVER"/>
-		</Unit>
-		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/HcpManager.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/SequenceManager.cpp">

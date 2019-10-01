@@ -49,6 +49,8 @@ private:
 
     static std::string GetTypeName(Device_Type type);
     static nlohmann::json FindObjectByName(std::string name, Device_Type type);
+
+    //note: use FindObjectByName if possible, it is faster
     static nlohmann::json FindObjectByPort(uint8 port, Device_Type type);
 
     static bool SetServo(json device, uint8 percent);
@@ -69,6 +71,10 @@ public:
     static bool EnableAllServos();
     static bool DisableAllServos();
 
+    static void SetServoMin(std::string name, uint16 min);
+    static void SetServoMax(std::string name, uint16 max);
+
+    static bool SetServoRaw(std::string port, uint16 onTime);
     static bool SetServoRaw(uint8 port, uint16 onTime);
     static bool SetServo(uint8 port, uint8 percent);
     static bool SetServo(std::string name, uint8 percent);

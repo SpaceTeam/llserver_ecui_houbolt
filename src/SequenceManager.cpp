@@ -23,7 +23,6 @@ json SequenceManager::jsonAbortSequence = json::object();
 
 void SequenceManager::init()
 {
-    HcpManager::init();
     timer = new Timer();
 }
 

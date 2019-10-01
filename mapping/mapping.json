@@ -3,21 +3,16 @@
     {
         "fuel": {
             "port": 0,
-            "feedbackPortAnalog": 0,
+            "feedbackAnalog": "fuel feedback",
             "endpoints": [200, 2500],
-            "feedbackEndpoints": [220, 2200]
+            "feedbackEndpoints": [300, 2200]
 
         },
         "oxidizer": {
             "port": 1,
-            "feedbackPortAnalog": 1,
+            "feedbackAnalog": "oxidizer feedback",
             "endpoints": [200, 2500],
             "feedbackEndpoints": [220, 2200]
-
-        },
-        "igniter": {
-            "port": 2,
-            "endpoints": [0, 2500]
 
         }
 

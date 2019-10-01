@@ -165,7 +165,7 @@ HCP_MSG* Serial::ReadSync()
 
 
                 int msgLength = hcp_cmds[msg->optcode].payloadLength;
-                cout << "Message Length: " << msgLength << endl;
+                Debug::info("Message Length: %d", msgLength);
                 int remainingBytes = msgLength;
 
 
@@ -242,7 +242,7 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
 
 
                 int msgLength = hcp_cmds[msg.optcode].payloadLength;
-                cout << "Message Length: " << msgLength << endl;
+                Debug::info("Message Length: %d", msgLength);
                 int remainingBytes = msgLength;
 
 

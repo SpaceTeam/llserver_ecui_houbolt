@@ -3,6 +3,7 @@
 #include "utils.h"
 
 #include "Socket.h"
+#include "HcpManager.h"
 #include "SequenceManager.h"
 
 
@@ -10,15 +11,6 @@
 
 using namespace std;
 
-void testTick(uint64 time)
-{
-    Debug::print("Hello from tick");
-}
-
-void testStop()
-{
-    Debug::print("Test from Stop");
-}
 
 void processMessage(int sock, json msg)
 {
@@ -42,6 +34,47 @@ void processMessage(int sock, json msg)
         {
             SequenceManager::AbortSequence();
         }
+        else if (type.compare("servos-set") == 0)
+        {
+            string name;
+            uint8 value;
+            for (auto servo : msg)
+            {
+                name = servo["id"];
+                value = servo["value"];
+                HcpManager::SetServo(name, value);
+            }
+        }
+        else if (type.compare("servos-set-raw") == 0)
+        {
+            string name;
+            uint8 value;
+            for (auto servo : msg)
+            {
+                name = servo["id"];
+                value = servo["value"];
+                HcpManager::SetServoRaw(name, value);
+            }
+        }
+        else if (type.compare("servos-calibrate") == 0)
+        {
+            for (auto servo : msg)
+            {
+                if (utils::keyExists(servo, "min"))
+                {
+                    HcpManager::SetServoMin(servo["id"], servo["min"]);
+                }
+                else if (utils::keyExists(servo, "max"))
+                {
+                    HcpManager::SetServoMax(servo["id"], servo["max"]);
+                }
+                else
+                {
+                    Debug::error("no valid key in servos-calibrate found");
+                }
+            }
+
+        }
         else
         {
             cerr << "message not supported" << endl;
@@ -53,6 +86,9 @@ void processMessage(int sock, json msg)
 int main(int argc, char const *argv[])
 {
     Socket::init(processMessage);
+
+    //TODO: make another class which manages inits, so seq manager doesn't need initialized hcp manager
+    HcpManager::init();
     SequenceManager::init();
 
     while (true){ sleep(1); }

@@ -275,6 +275,104 @@ bool HcpManager::DisableAllServos()
     return success;
 }
 
+void HcpManager::SetServoMin(std::string name, uint16 min)
+{
+    if (utils::keyExists(mapping["servo"], name))
+    {
+        json servo = mapping["servo"][name];
+        if (utils::keyExists(servo, "feedbackAnalog"))
+        {
+            string fbckName = servo["feedbackAnalog"];
+            if (utils::keyExists(mapping["analog"], fbckName))
+            {
+                json fbckAnalog = mapping["analog"][fbckName];
+
+                bool success = SetServoRaw((uint8)servo["port"], min);
+                if (success)
+                {
+                    uint16 fbckValue = GetAnalog((uint8)fbckAnalog["port"]);
+
+                    //set new feedback endpoint
+                    servo["feedbackEndpoints"][0] = fbckValue;
+                }
+            }
+            else
+            {
+                Debug::error("no analog sensor with name " + fbckName + " as feedback found");
+            }
+
+        }
+        else
+        {
+            Debug::info("no feedback label found");
+        }
+        servo["endpoints"][0] = min;
+        SaveMapping();
+    }
+    else
+    {
+        Debug::error("no servo with name '" + name + "' found");
+    }
+
+}
+
+void HcpManager::SetServoMax(std::string name, uint16 max)
+{
+    if (utils::keyExists(mapping["servo"], name))
+    {
+        json servo = mapping["servo"][name];
+        if (utils::keyExists(servo, "feedbackAnalog"))
+        {
+            string fbckName = servo["feedbackAnalog"];
+            if (utils::keyExists(mapping["analog"], fbckName))
+            {
+                json fbckAnalog = mapping["analog"][fbckName];
+
+                bool success = SetServoRaw((uint8)servo["port"], max);
+                if (success)
+                {
+                    uint16 fbckValue = GetAnalog((uint8)fbckAnalog["port"]);
+
+                    //set new feedback endpoint
+                    servo["feedbackEndpoints"][1] = fbckValue;
+                }
+            }
+            else
+            {
+                Debug::error("no analog sensor with name " + fbckName + " as feedback found");
+            }
+
+        }
+        else
+        {
+            Debug::info("no feedback label found");
+        }
+        servo["endpoints"][1] = max;
+        SaveMapping();
+    }
+    else
+    {
+        Debug::error("no servo with name '" + name + "' found");
+    }
+}
+
+bool HcpManager::SetServoRaw(std::string name, uint16 onTime)
+{
+    bool success = false;
+
+    json device = FindObjectByName(name, Device_Type::SERVO);
+
+    if (device != nullptr)
+    {
+        uint8 port = device["port"];
+        success = SetServoRaw(port, onTime);
+    }
+    else
+    {
+        Debug::error("name not found");
+    }
+    return success;
+}
 
 bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
 {
@@ -331,6 +429,10 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
         }
 
         delete[] msg.payload;
+    }
+    else
+    {
+        Debug::error("Servo Port %d not valid in mapping", port);
     }
     return success;
 }
@@ -390,7 +492,7 @@ bool HcpManager::SetServo(json device, uint8 percent)
         }
         else
         {
-            Debug::error("Port not valid in mapping");
+            Debug::error("Servo Port %d not valid in mapping", port);
         }
     }
     else
@@ -467,7 +569,7 @@ bool HcpManager::SetMotor(uint8 port, Motor_Mode mode, int16 amount)
     }
     else
     {
-        Debug::error("Port not valid in mapping");
+        Debug::error("Motor Port %d not valid in mapping", port);
     }
 
     return success;
@@ -484,6 +586,19 @@ uint16 HcpManager::GetAnalog(std::string name)
     if (device != nullptr)
     {
         value = GetAnalog((uint8)device["port"]);
+
+        if (utils::keyExists(device, "servo"))
+        {
+            Debug::info("converting feedback sensor to percentage");
+            //get servo of fbck sensor
+            string servoName = device["servo"];
+            json servo = mapping["servo"][servoName];
+
+            vector<uint8> fbckEndpoints = servo["feedbackEndpoints"];
+
+            //convert to percentage
+            value = (((value-fbckEndpoints[0])*1.0) / (fbckEndpoints[1] - fbckEndpoints[0])) * 100.0;
+        }
     }
     else
     {
@@ -517,6 +632,7 @@ uint16 HcpManager::GetAnalog(uint8 port)
             {
                 if (rep->payload[0] == port)
                 {
+
                     value = (rep->payload[1] << 8) | rep->payload[2];
                 }
                 else
@@ -535,7 +651,7 @@ uint16 HcpManager::GetAnalog(uint8 port)
     }
     else
     {
-        Debug::error("Port not valid in mapping");
+        Debug::error("Analog Port %d not valid in mapping", port);
     }
     return value;
 }
@@ -604,7 +720,7 @@ uint8 HcpManager::GetDigital(uint8 port)
     }
     else
     {
-        Debug::error("Port not valid in mapping");
+        Debug::error("Digital Port %d not valid in mapping", port);
     }
     return state;
 }
