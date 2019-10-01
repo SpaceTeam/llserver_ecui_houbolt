@@ -78,17 +78,23 @@ int main(int argc, char const *argv[])
     }
     return 0;*/
 
+    string fuel = "fuel";
+    string analog = "fuel feedback";
     HcpManager::init();
 
-    HcpManager::SetServoRaw(0, 2200);
+    HcpManager::EnableServo(0);
+    HcpManager::SetServo(fuel, 200);
     sleep(1);
     HcpManager::SetServoRaw(0, 200);
     sleep(1);
-    HcpManager::SetServoRaw(0, 1500);
+    HcpManager::SetServo(fuel, 80);
     sleep(1);
+    HcpManager::SetServoRaw(0, 0);
 
     for (int i = 0; i < 100; i++)
     {
-        cout << HcpManager::GetAnalog(0) << endl;
+        cout << HcpManager::GetAnalog(analog) << endl;
+    	usleep(50000);
     }
+    HcpManager::DisableServo(0);
 }

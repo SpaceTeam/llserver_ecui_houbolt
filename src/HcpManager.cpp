@@ -333,7 +333,7 @@ bool HcpManager::SetServo(json device, uint8 percent)
             endpoints[0] = device["endpoints"][0];
             endpoints[1] = device["endpoints"][1];
 
-            uint16 onTime = ((endpoints[1] - endpoints[0]) / 100.0) * percent;
+            uint16 onTime = (((endpoints[1] - endpoints[0]) / 100.0) * percent) + endpoints[0];
             success = SetServoRaw(port, onTime);
         }
         else
