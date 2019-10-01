@@ -468,7 +468,7 @@ uint16 HcpManager::GetAnalog(uint8 port)
         HCP_MSG msg;
         msg.optcode = HCP_ANALOG_REQ;
         msg.payloadSize = 1;
-        msg.payload = new uint8[msg.payloadSize];;
+        msg.payload = new uint8[msg.payloadSize];
 
         msg.payload[0] = port;
 
@@ -533,7 +533,7 @@ uint8 HcpManager::GetDigital(uint8 port)
         HCP_MSG msg;
         msg.optcode = HCP_DIGITAL_REQ;
         msg.payloadSize = 1;
-        msg.payload[msg.payloadSize];
+        msg.payload = new uint8[msg.payloadSize];
 
         msg.payload[0] = port;
 
