@@ -32,7 +32,7 @@ public:
 
     Serial(std::string device, int baudRate);
     ~Serial();
-    HCP_MSG ReadSync();
+    HCP_MSG* ReadSync();
     void ReadAsync(std::function<void(HCP_MSG)> callback);
     void Write(HCP_MSG message);
 

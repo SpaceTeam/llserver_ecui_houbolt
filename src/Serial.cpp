@@ -135,16 +135,15 @@ Serial::~Serial()
 	close(_uartFilestream);
 }
 
-HCP_MSG Serial::ReadSync()
+HCP_MSG* Serial::ReadSync()
 {
     //----- CHECK FOR ANY RX BYTES -----
     uint8 rxBuffer[MSG_SIZE] = {0};
     //msg.msg = rxBuffer;
     bool finished = false;
-
-    while(!finished)
+    if (_uartFilestream != -1)
     {
-        if (_uartFilestream != -1)
+        while(!finished)
         {
             int rxLength = read(_uartFilestream, (void *) rxBuffer,
                                 1);        //Filestream, buffer to store in, number of bytes to read (MSG_SIZE)
@@ -160,18 +159,18 @@ HCP_MSG Serial::ReadSync()
             }
             else
             {
-                HCP_MSG msg;
+                HCP_MSG* msg = new HCP_MSG;
 
-                msg.optcode = rxBuffer[0];
+                msg->optcode = rxBuffer[0];
 
 
-                int msgLength = hcp_cmds[msg.optcode].payloadLength;
+                int msgLength = hcp_cmds[msg->optcode].payloadLength;
                 cout << "Message Length: " << msgLength << endl;
                 int remainingBytes = msgLength;
 
 
-                msg.payloadSize = msgLength;
-                msg.payload = new uint8[msg.payloadSize];
+                msg->payloadSize = msgLength;
+                msg->payload = new uint8[msg->payloadSize];
 
                 while (remainingBytes > 0)
                 {
@@ -189,7 +188,7 @@ HCP_MSG Serial::ReadSync()
                     }
                     else
                     {
-                        std::memcpy(&msg.payload[msgLength - remainingBytes],
+                        std::memcpy(&msg->payload[msgLength - remainingBytes],
                                     &rxBuffer[0],
                                     rxLength);
                         remainingBytes -= rxLength;
@@ -202,12 +201,14 @@ HCP_MSG Serial::ReadSync()
 
             }
         }
-        else
-        {
-            cerr << "Device " << _uartDevice << " disconnected!" << endl;
-        }
-//	sleep(1);
+
+    //	sleep(1);
     }
+    else
+    {
+        cerr << "Device " << _uartDevice << " disconnected!" << endl;
+    }
+    return nullptr;
 }
 
 void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
@@ -217,9 +218,9 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
     //msg.msg = rxBuffer;
     bool finished = false;
 
-    while(!finished)
+    if (_uartFilestream != -1)
     {
-        if (_uartFilestream != -1)
+        while(!finished)
         {
             int rxLength = read(_uartFilestream, (void *) rxBuffer,
                                 1);        //Filestream, buffer to store in, number of bytes to read (MSG_SIZE)
@@ -277,11 +278,12 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
 
             }
         }
-        else
-        {
-            cerr << "Device " << _uartDevice << " disconnected!" << endl;
-        }
+
 //	sleep(1);
+    }
+    else
+    {
+        cerr << "Device " << _uartDevice << " disconnected!" << endl;
     }
 }
 

@@ -19,7 +19,7 @@ bool HcpManager::servoEnabledArr[SERVO_COUNT] = {false};
 
 void HcpManager::init()
 {
-    //hcpSerial = new Serial(HCP_DEVICE, HCP_BAUD_RATE);
+    hcpSerial = new Serial(HCP_DEVICE, HCP_BAUD_RATE);
     LoadMapping();
 }
 
@@ -256,13 +256,17 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
         Debug::info("set servo %d to %d", port, onTime);
 
         hcpSerial->Write(msg);
-        HCP_MSG rep = hcpSerial->ReadSync();
+        HCP_MSG* rep = hcpSerial->ReadSync();
 
-        if (rep.optcode == HCP_OK)
+        if (rep != nullptr)
         {
-            success = true;
+            if (rep->optcode == HCP_OK)
+            {
+                success = true;
+            }
+            delete rep->payload;
+            delete rep;
         }
-
         delete[] msg.payload;
     }
     return success;
@@ -378,18 +382,23 @@ uint16 HcpManager::GetAnalog(uint8 port)
         Debug::info("get analog %d", port);
 
         hcpSerial->Write(msg);
-        HCP_MSG rep = hcpSerial->ReadSync();
+        HCP_MSG* rep = hcpSerial->ReadSync();
 
-        if (rep.optcode == HCP_ANALOG_REP)
+        if (rep != nullptr)
         {
-            if (rep.payload[0] == port)
+            if (rep->optcode == HCP_ANALOG_REP)
             {
-                value = (rep.payload[1] << 8) + rep.payload[2];
+                if (rep->payload[0] == port)
+                {
+                    value = (rep->payload[1] << 8) + rep->payload[2];
+                }
+                else
+                {
+                    Debug::error("Ports of Analog REQ and REP are not the same");
+                }
             }
-            else
-            {
-                Debug::error("Ports of Analog REQ and REP are not the same");
-            }
+            delete rep->payload;
+            delete rep;
         }
         delete[] msg.payload;
     }
@@ -433,20 +442,26 @@ uint8 HcpManager::GetDigital(uint8 port)
 
         Debug::info("get digital %d", port);
 
-//        hcpSerial->Write(msg);
-//        HCP_MSG rep = hcpSerial->ReadSync();
-//
-//        if (rep.optcode == HCP_DIGITAL_REP)
-//        {
-//            if (rep.payload[0] == port)
-//            {
-//                state = rep.payload[1];
-//            }
-//            else
-//            {
-//                Debug::error("Ports of Digital REQ and REP are not the same");
-//            }
-//        }
+        hcpSerial->Write(msg);
+        HCP_MSG* rep = hcpSerial->ReadSync();
+
+        if (rep != nullptr)
+        {
+            if (rep->optcode == HCP_DIGITAL_REP)
+            {
+                if (rep->payload[0] == port)
+                {
+                    state = rep->payload[1];
+                }
+                else
+                {
+                    Debug::error("Ports of Digital REQ and REP are not the same");
+                }
+            }
+            delete rep->payload;
+            delete rep;
+        }
+        delete[] msg.payload;
     }
     else
     {
