@@ -4,31 +4,31 @@
 
 #include "Timer.h"
 
-void tickFunc(uint64 interval, int64 endTime, int64 microTime)
-{
-    std::cout << interval << std::endl;
-    bool running = true;
-    while(running) {
-
-        usleep(interval);
-
-        //std::thread callbackThread(self->tickCallback, self->microTime);
-        //callbackThread.detach();
+//void tickFunc(std::function<void()> stopCallback, std::function<void()> stopCallback, uint64 interval, int64 endTime, int64 microTime)
+//{
+//    std::cout << interval << std::endl;
+//    bool running = true;
+//    while(running) {
+//
+//        usleep(interval);
+//
+//        std::thread callbackThread(self->tickCallback, self->microTime);
+//        callbackThread.detach();
 //        if (self->microTime % 500000 == 0)
 //        {
 //            Debug::print("Micro Seconds: %d", self->microTime);
 //            std::cout << self->microTime << std::endl;
 //        }
-        microTime += interval;
-
-        if (microTime >= endTime)
-        {
-            std::cout << "sequence done" << std::endl;
+//        microTime += interval;
+//
+//        if (microTime >= endTime)
+//        {
+//            std::cout << "sequence done" << std::endl;
 //            self->stop();
-            running = false;
-        }
-    }
-}
+//            running = false;
+//        }
+//    }
+//}
 
 Timer::Timer()
 {
@@ -51,7 +51,7 @@ void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMic
         this->microTime = startTimeMicros;
 
         this->isRunning = true;
-        this->timerThread = new std::thread(tickFunc, intervalMicros, endTimeMicros, startTimeMicros);
+        this->timerThread = new std::thread(Timer::tick, intervalMicros, endTimeMicros, startTimeMicros);
 
         this->timerThread->detach();
     }
@@ -65,8 +65,8 @@ void Timer::stop()
 {
     if (this->isRunning)
     {
-        //std::thread callbackThread(this->stopCallback);
-        //callbackThread.detach();
+        std::thread callbackThread(this->stopCallback);
+        callbackThread.detach();
         this->isRunning = false;
 
     }
@@ -79,19 +79,19 @@ void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
 
         usleep(interval);
 
-        //std::thread callbackThread(self->tickCallback, self->microTime);
-        //callbackThread.detach();
-//        if (self->microTime % 500000 == 0)
-//        {
-//            Debug::print("Micro Seconds: %d", self->microTime);
-//            std::cout << self->microTime << std::endl;
-//        }
+        std::thread callbackThread(self->tickCallback, microTime);
+        callbackThread.detach();
+        if (microTime % 500000 == 0)
+        {
+            Debug::print("Micro Seconds: %d", microTime);
+            std::cout << microTime << std::endl;
+        }
         microTime += interval;
 
         if (microTime >= endTime)
         {
             std::cout << "sequence done" << std::endl;
-//            self->stop();
+            self->stop();
             running = false;
         }
     }
