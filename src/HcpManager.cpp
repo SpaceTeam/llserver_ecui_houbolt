@@ -546,9 +546,13 @@ uint8 HcpManager::GetDigital(uint8 port)
         {
             if (rep->optcode == HCP_DIGITAL_REP)
             {
+		Debug::info("REP Port %d", rep->payload[0]);
+		Debug::info("REP Val %d", rep->payload[2]);
+
+                    state = rep->payload[1];
+
                 if (rep->payload[0] == port)
                 {
-                    state = rep->payload[1];
                 }
                 else
                 {

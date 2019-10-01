@@ -102,20 +102,20 @@ int main(int argc, char const *argv[])
 
     HcpManager::EnableServo(0);
 
-    string fuel = "fuel";
+    string fuel = "igniter";
     string analog = "fuel feedback";
     string digital = "safety";
-    for (int i = 0; i < 8000; i++)
+    for (int i = 0; i < 2000; i++)
     {
-        if (!HcpManager::ExecCommand(fuel, i))
-        {
-            cout << "not working" << endl;
-            break;
-        }
-        cout << HcpManager::GetAnalog(analog) << endl;
-        cout << HcpManager::GetDigital(digital) << endl;
-
-        usleep(10000);
+//        if (!HcpManager::ExecCommand(fuel, i))
+//        {
+//            cout << "not working" << endl;
+//            break;
+//        }
+//        cout << HcpManager::GetAnalog(analog) << endl;
+//        cout << HcpManager::GetDigital(digital) << endl;
+	HcpManager::SetMotor(fuel, Motor_Mode::POWER, i-1000);
+        usleep(100000);
     }
     HcpManager::DisableServo(0);
 }
