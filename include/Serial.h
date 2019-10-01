@@ -13,8 +13,8 @@
 struct HCP_MSG
 {
 	uint8 optcode;
-	uint8 payloadSize;
-	uint8* payload = nullptr;
+	size_t payloadSize;
+	uint8 *payload = nullptr;
 };
 
 class Serial {

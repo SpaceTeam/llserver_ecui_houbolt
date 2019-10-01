@@ -79,10 +79,16 @@ int main(int argc, char const *argv[])
     return 0;*/
 
     HcpManager::init();
-    
+
     HcpManager::SetServoRaw(0, 2200);
     sleep(1);
     HcpManager::SetServoRaw(0, 200);
     sleep(1);
     HcpManager::SetServoRaw(0, 1500);
+    sleep(1);
+
+    for (int i = 0; i < 100; i++)
+    {
+        cout << HcpManager::GetAnalog(0) << endl;
+    }
 }
