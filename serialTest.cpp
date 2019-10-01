@@ -102,10 +102,14 @@ int main(int argc, char const *argv[])
 
     HcpManager::EnableServo(0);
 
-
+    string fuel = "fuel";
     for (int i = 0; i < 8000; i++)
     {
-        HcpManager::SetServoRaw(0, i);
+	if (!HcpManager::ExecCommand(fuel, i))
+	{
+	    cout << "not working" << endl;
+	    break;
+	}
         usleep(10000);
     }
     HcpManager::DisableServo(0);

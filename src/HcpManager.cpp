@@ -186,7 +186,7 @@ bool HcpManager::ExecCommand(std::string name, uint8 percent)
         {
             if (typeName.compare("servo") == 0)
             {
-                SetServo(device, percent);
+                success = SetServo(device, percent);
             }
 //            else if (typeName.compare("motor") == 0)
 //            {
@@ -240,13 +240,14 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
         msg.payloadSize = 3;
         msg.payload = new uint8[msg.payloadSize];
 
-        uint8 highOnTime = onTime >> 8;
+	uint16 dblOnTime = onTime * 2;
+        uint8 highOnTime = dblOnTime >> 8;
         if (servoEnabledArr[port])
         {
             highOnTime |= 0x80;
         }
 
-        uint8 lowOnTime = onTime & 0x00FF;
+        uint8 lowOnTime = dblOnTime & 0x00FF;
 
         msg.payload[0] = port;
         msg.payload[1] = highOnTime;

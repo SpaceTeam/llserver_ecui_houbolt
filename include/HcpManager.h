@@ -32,7 +32,7 @@ private:
     static json mapping;
     static uint8 lastServoPosArr[];
     static bool servoEnabledArr[];
-    static
+
     static void LoadMapping();
     static void SaveMapping();
 
