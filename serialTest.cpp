@@ -112,9 +112,9 @@ int main(int argc, char const *argv[])
 //            cout << "not working" << endl;
 //            break;
 //        }
-//        cout << HcpManager::GetAnalog(analog) << endl;
-//        cout << HcpManager::GetDigital(digital) << endl;
-	HcpManager::SetMotor(fuel, Motor_Mode::POWER, i-1000);
+        cout << HcpManager::GetAnalog(analog) << endl;
+//        cout << HcpManager::GetDigital(2) << endl;
+//	HcpManager::SetMotor(fuel, Motor_Mode::POWER, i-1000);
         usleep(100000);
     }
     HcpManager::DisableServo(0);
