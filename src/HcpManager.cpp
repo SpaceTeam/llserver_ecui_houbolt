@@ -242,6 +242,40 @@ bool HcpManager::DisableServo(uint8 port)
     return false;
 }
 
+bool HcpManager::EnableAllServos()
+{
+    bool success = true;
+
+    bool currSuccess;
+    for (uint8 i = 0; i < SERVO_COUNT; i++)
+    {
+        currSuccess = EnableServo(i);
+        if (!currSuccess)
+        {
+            success = false;
+        }
+    }
+
+    return success;
+}
+
+bool HcpManager::DisableAllServos()
+{
+    bool success = true;
+
+    bool currSuccess;
+    for (uint8 i = 0; i < SERVO_COUNT; i++)
+    {
+        currSuccess = DisableServo(i);
+        if (!currSuccess)
+        {
+            success = false;
+        }
+    }
+    return success;
+}
+
+
 bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
 {
     bool success = false;

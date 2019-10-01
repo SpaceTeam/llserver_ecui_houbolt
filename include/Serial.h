@@ -36,6 +36,7 @@ public:
     void ReadAsync(std::function<void(HCP_MSG)> callback);
     void Write(HCP_MSG message);
 
+    bool IsConnected();
     std::string GetDevice();
     int GetBaud();
 

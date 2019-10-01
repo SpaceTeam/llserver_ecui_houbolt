@@ -14,6 +14,8 @@ using json = nlohmann::json;
 using namespace std;
 
 bool SequenceManager::isRunning = false;
+bool SequenceManager::isAbort = false;
+bool SequenceManager::isAbortRunning = false;
 Timer* SequenceManager::timer;
 
 json SequenceManager::jsonSequence = json::object();
@@ -22,24 +24,32 @@ json SequenceManager::jsonAbortSequence = json::object();
 void SequenceManager::init()
 {
     HcpManager::init();
+    timer = new Timer();
 }
 
 void SequenceManager::StopSequence()
 {
     //TODO: implement
-    Debug::print("we're done");
+    Debug::info("sequence done");
     isRunning = false;
-    Socket::sendJson("timer-done");
+    if (!isAbort)
+    {
+        Socket::sendJson("timer-done");
+    }
 }
 
 void SequenceManager::AbortSequence()
 {
     if (isRunning)
     {
+        isAbort = true;
         timer->stop();
-        Debug::print("aborted");
+        Socket::sendJson("abort");
+        Debug::print("aborting...");
 
-        //TODO: start abort sequence
+        isRunning = false;
+        StartAbortSequence();
+        isAbort = false;
     }
     else
     {
@@ -50,13 +60,13 @@ void SequenceManager::AbortSequence()
 
 void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 {
-    if (!isRunning)
+    if (!isRunning && !isAbortRunning)
     {
         isRunning = true;
         jsonSequence = jsonSeq;
-        jsonAbortSequence = jsonAbortSequence;
+        jsonAbortSequence = jsonAbortSeq;
 
-        timer = new Timer();
+
         int64 startTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
         int64 endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
         int64 interval = utils::toMicros(jsonSeq["globals"]["interval"]);
@@ -64,7 +74,19 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 
         Socket::sendJson("timer-start");
 
+        HcpManager::EnableAllServos();
         timer->start(startTime, endTime, interval, Tick, StopSequence);
+        //TODO: discuss if we need that feature
+//        if (HcpManager::EnableAllServos())
+//        {
+//            timer->start(startTime, endTime, interval, Tick, StopSequence);
+//        }
+//        else
+//        {
+//            Debug::error("couldn't enable all servos, aborting...");
+//            AbortSequence();
+//        }
+
     }
 }
 
@@ -106,22 +128,52 @@ void SequenceManager::Tick(int64 microTime)
             int64 timestampMicros = utils::toMicros(time);
             if (timestampMicros == microTime)
             {
-                cout << "timestamp | " << time << endl;
+                Debug::print("timestamp | %d", time);
                 for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
                 {
                     if (it.key().compare("timestamp") != 0)
                     {
-                        std::cout << it.key() << " | " << it.value() << "\n";
+                        Debug::print(it.key() + " | %d", (uint8)it.value());
                         HcpManager::ExecCommand(it.key(), it.value());
                     }
                 }
-                cout << "--------------" << endl;
+                Debug::print("--------------");
             }
             else if (timestampMicros > microTime)
             {
                 break;
             }
         }
+    }
+
+}
+
+void SequenceManager::StopAbortSequence()
+{
+    if (isAbortRunning)
+    {
+        Debug::info("abort sequence done");
+        isAbortRunning = false;
+        HcpManager::DisableAllServos();
+    }
+}
+
+void SequenceManager::StartAbortSequence()
+{
+    if (!isRunning && !isAbortRunning)
+    {
+        isAbortRunning = true;
+
+        for (auto it = jsonAbortSequence["actions"].begin(); it != jsonAbortSequence["actions"].end(); ++it)
+        {
+            if (it.key().compare("timestamp") != 0)
+            {
+                Debug::print(it.key() + " | %d", (uint8)it.value());
+                HcpManager::ExecCommand(it.key(), it.value());
+            }
+        }
+        Debug::print("--------------");
+        StopAbortSequence();
     }
 
 }

@@ -65,6 +65,10 @@ public:
 
     static bool EnableServo(uint8 port);
     static bool DisableServo(uint8 port);
+
+    static bool EnableAllServos();
+    static bool DisableAllServos();
+
     static bool SetServoRaw(uint8 port, uint16 onTime);
     static bool SetServo(uint8 port, uint8 percent);
     static bool SetServo(std::string name, uint8 percent);

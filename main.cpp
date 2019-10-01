@@ -50,15 +50,15 @@ void processMessage(int sock, json msg)
 
 }
 
-//int main(int argc, char const *argv[])
-//{
-//    Socket::init(processMessage);
-//    SequenceManager::init();
-//
-//    while (true){ sleep(1); }
-//
-//    Socket::destroy();
-//
-//    return 0;
-//}
+int main(int argc, char const *argv[])
+{
+    Socket::init(processMessage);
+    SequenceManager::init();
+
+    while (true){ sleep(1); }
+
+    Socket::destroy();
+
+    return 0;
+}
 

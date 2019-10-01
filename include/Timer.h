@@ -27,7 +27,7 @@ private:
     std::function<void(int64)> tickCallback;
     std::function<void()> stopCallback;
 
-    static void tick(Timer* self);
+    static void tick(Timer* self, uint64 interval, int64 endTime, int64 microTime);
 
 public:
 

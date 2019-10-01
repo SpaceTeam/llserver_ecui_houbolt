@@ -18,12 +18,17 @@ class SequenceManager
 private:
 
     static bool isRunning;
+    static bool isAbort;
+    static bool isAbortRunning;
     static Timer* timer;
 
     static json jsonSequence;
     static json jsonAbortSequence;
 
     static void Tick(int64 microTime);
+
+    static void StopAbortSequence();
+    static void StartAbortSequence();
 
     SequenceManager();
 
@@ -36,6 +41,7 @@ public:
     static void AbortSequence();
     static void StopSequence();
     static void StartSequence(json jsonSeq, json jsonAbortSeq);
+
 
 
 

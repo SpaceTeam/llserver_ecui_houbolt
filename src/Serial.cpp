@@ -26,7 +26,7 @@ Serial::Serial(string device, int baudRate)
     if (_uartFilestream == -1)
     {
         //ERROR - CAN'T OPEN SERIAL PORT
-        cerr << "Error - Unable to open UART.  Ensure it is not in use by another application\n" << endl;
+        Debug::error("Error - Unable to open UART.  Ensure it is not in use by another application\n");
         return;
     }
     else
@@ -206,7 +206,7 @@ HCP_MSG* Serial::ReadSync()
     }
     else
     {
-        cerr << "Device " << _uartDevice << " disconnected!" << endl;
+        Debug::error("Device " + _uartDevice + " disconnected!");
     }
     return nullptr;
 }
@@ -283,7 +283,7 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
     }
     else
     {
-        cerr << "Device " << _uartDevice << " disconnected!" << endl;
+        Debug::error("Device " + _uartDevice + " disconnected!");
     }
 }
 
@@ -302,8 +302,13 @@ void Serial::Write(HCP_MSG message)
     }
     else
     {
-        cerr << "Device " << _uartDevice << " disconnected!" << endl;
+        Debug::error("Device " + _uartDevice + " disconnected!");
     }
+}
+
+bool Serial::IsConnected()
+{
+    return _uartFilestream != -1;
 }
 
 string Serial::GetDevice()

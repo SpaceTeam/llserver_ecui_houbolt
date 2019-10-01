@@ -14,6 +14,9 @@
 
 std::recursive_mutex Debug::_outMutex;
 
+#ifdef LLSERVER_DEBUG
+
+
 int32 Debug::print(std::string fmt, ...)
 {
     std::lock_guard<std::recursive_mutex> lock(_outMutex);
@@ -73,3 +76,27 @@ int32 Debug::warning(std::string fmt, ...)
 
     return printed;
 }
+
+#else
+
+int32 Debug::print(std::string fmt, ...)
+{
+    return 0;
+}
+
+int32 Debug::error(std::string fmt, ...)
+{
+    return 0;
+}
+
+int32 Debug::info(std::string fmt, ...)
+{
+    return 0;
+}
+
+int32 Debug::warning(std::string fmt, ...)
+{
+    return 0;
+}
+
+#endif
