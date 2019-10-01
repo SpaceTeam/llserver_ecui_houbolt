@@ -7,6 +7,7 @@
 
 #include "config.h"
 
+#include "HcpCommands.h"
 #include "Serial.h"
 #include "json.hpp"
 
@@ -20,9 +21,17 @@ typedef enum class battery_status_e
 typedef enum class device_type_e
 {
 	SERVO,
+	MOTOR,
 	ANALOG,
 	DIGITAL
 } Device_Type;
+
+typedef enum class motor_mode_e
+{
+	POWER = HCP_MOTOR_MODE_POWER,
+	BRAKE = HCP_MOTOR_MODE_BRAKE,
+	VELOCITY = HCP_MOTOR_MODE_VELOCITY
+} Motor_Mode;
 
 class HcpManager
 {
@@ -37,6 +46,8 @@ private:
     static void SaveMapping();
 
     static bool CheckPort(uint8 port, Device_Type type);
+
+    static std::string GetTypeName(Device_Type type);
     static nlohmann::json FindObjectByName(std::string name, Device_Type type);
     static nlohmann::json FindObjectByPort(uint8 port, Device_Type type);
 
@@ -57,6 +68,10 @@ public:
     static bool SetServoRaw(uint8 port, uint16 onTime);
     static bool SetServo(uint8 port, uint8 percent);
     static bool SetServo(std::string name, uint8 percent);
+
+    static bool SetMotor(uint8 port, int16 amount);
+    static bool SetMotor(uint8 port, Motor_Mode mode, int16 amount);
+    static bool SetMotor(std::string name, Motor_Mode mode, int16 amount);
 
     static uint16 GetAnalog(std::string name);
     static uint16 GetAnalog(uint8 port);

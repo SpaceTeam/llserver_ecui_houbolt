@@ -57,6 +57,18 @@ bool HcpManager::CheckPort(uint8 port, Device_Type type)
             return false;
         }
     }
+    else if (type == Device_Type::MOTOR)
+    {
+        if (port < MOTOR_COUNT)
+        {
+            return true;
+        }
+        else
+        {
+            Debug::error("Motor Port %d above maxium port number", port);
+            return false;
+        }
+    }
     else if (type == Device_Type::ANALOG)
     {
         if (port < ANALOG_COUNT)
@@ -84,25 +96,35 @@ bool HcpManager::CheckPort(uint8 port, Device_Type type)
 
 }
 
+std::string HcpManager::GetTypeName(Device_Type type)
+{
+    string typeName;
+    if (type == Device_Type::SERVO)
+    {
+        typeName = "servo";
+    }
+    else if (type == Device_Type::MOTOR)
+    {
+        typeName = "motor";
+    }
+    else if (type == Device_Type::ANALOG)
+    {
+        typeName = "analog";
+    }
+    else if (type == Device_Type::DIGITAL)
+    {
+        typeName = "digital";
+    }
+    return typeName;
+}
+
 json HcpManager::FindObjectByName(std::string name, Device_Type type)
 {
     json device = nullptr;
 
     if (mapping != nullptr)
     {
-        string typeName;
-        if (type == Device_Type::SERVO)
-        {
-            typeName = "servo";
-        }
-        else if (type == Device_Type::ANALOG)
-        {
-            typeName = "analog";
-        }
-        else if (type == Device_Type::DIGITAL)
-        {
-            typeName = "digital";
-        }
+        string typeName = GetTypeName(type);
 
         for (auto it = mapping[typeName].begin(); it != mapping[typeName].end(); ++it)
         {
@@ -126,19 +148,7 @@ json HcpManager::FindObjectByPort(uint8 port, Device_Type type)
 
     if (mapping != nullptr)
     {
-        string typeName;
-        if (type == Device_Type::SERVO)
-        {
-            typeName = "servo";
-        }
-        else if (type == Device_Type::ANALOG)
-        {
-            typeName = "analog";
-        }
-        else if (type == Device_Type::DIGITAL)
-        {
-            typeName = "digital";
-        }
+        string typeName = GetTypeName(type);
 
         for (auto dev : mapping[typeName])
         {
@@ -188,10 +198,12 @@ bool HcpManager::ExecCommand(std::string name, uint8 percent)
             {
                 success = SetServo(device, percent);
             }
-//            else if (typeName.compare("motor") == 0)
-//            {
-//                SetMotor(device, percent);
-//            }
+            else if (typeName.compare("motor") == 0)
+            {
+                //TODO: change so negative values can be set as well
+                uint8 port = device["port"];
+                success = SetMotor(port, percent*10);
+            }
             else
             {
                 Debug::error("unknown type name");
@@ -240,34 +252,46 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
         msg.payloadSize = 3;
         msg.payload = new uint8[msg.payloadSize];
 
-	uint16 dblOnTime = onTime * 2;
-        uint8 highOnTime = dblOnTime >> 8;
-        if (servoEnabledArr[port])
+	    uint16 dblOnTime = onTime * 2;
+	    if (dblOnTime <= SERVO_MAX_ONTIME)
         {
-            highOnTime |= 0x80;
-        }
-
-        uint8 lowOnTime = dblOnTime & 0x00FF;
-
-        msg.payload[0] = port;
-        msg.payload[1] = highOnTime;
-        msg.payload[2] = lowOnTime;
-
-
-        Debug::info("set servo %d to %d", port, onTime);
-
-        hcpSerial->Write(msg);
-        HCP_MSG* rep = hcpSerial->ReadSync();
-
-        if (rep != nullptr)
-        {
-            if (rep->optcode == HCP_OK)
+	        uint8 highOnTime = dblOnTime >> 8;
+            if (servoEnabledArr[port])
             {
-                success = true;
+                highOnTime |= 0x80;
             }
-            delete rep->payload;
-            delete rep;
+
+            uint8 lowOnTime = dblOnTime & 0x00FF;
+
+            msg.payload[0] = port;
+            msg.payload[1] = highOnTime;
+            msg.payload[2] = lowOnTime;
+
+
+            Debug::info("set servo %d to %d", port, onTime);
+
+            hcpSerial->Write(msg);
+            HCP_MSG* rep = hcpSerial->ReadSync();
+
+            if (rep != nullptr)
+            {
+                if (rep->optcode == HCP_OK)
+                {
+                    success = true;
+                }
+                delete rep->payload;
+                delete rep;
+            }
+            else
+            {
+                Debug::error("hcp response message is null");
+            }
         }
+        else
+        {
+            Debug::error("onTime longer than maximum allowed");
+        }
+
         delete[] msg.payload;
     }
     return success;
@@ -320,17 +344,6 @@ bool HcpManager::SetServo(json device, uint8 percent)
 
             uint16 endpoints[2];
 
-//            if (utils::keyExists(device, "feedbackEndpoints"))
-//            {
-//                endpoints[0] = device["feedbackEndpoints"][0];
-//                endpoints[1] = device["feedbackEndpoints"][1];
-//            }
-//            else
-//            {
-//                endpoints[0] = device["endpoints"][0];
-//                endpoints[1] = device["endpoints"][1];
-//            }
-
             endpoints[0] = device["endpoints"][0];
             endpoints[1] = device["endpoints"][1];
 
@@ -348,6 +361,81 @@ bool HcpManager::SetServo(json device, uint8 percent)
     }
     return success;
 }
+
+bool HcpManager::SetMotor(uint8 port, int16 amount)
+{
+    return SetMotor(port, Motor_Mode::POWER, amount);
+}
+
+bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16 amount)
+{
+    bool success = false;
+
+    json device = FindObjectByName(name, Device_Type::MOTOR);
+
+    if (device != nullptr)
+    {
+        uint8 port = device["port"];
+        success = SetMotor(port, mode, amount);
+    }
+    else
+    {
+        Debug::error("port not found");
+    }
+    return success;
+}
+
+bool HcpManager::SetMotor(uint8 port, Motor_Mode mode, int16 amount)
+{
+    bool success = false;
+
+    if (CheckPort(port, Device_Type::MOTOR))
+    {
+        amount = clamp((int)amount, -1000, 1000);
+
+        HCP_MSG msg;
+        msg.optcode = HCP_MOTOR;
+        msg.payloadSize = 4;
+        msg.payload = new uint8[msg.payloadSize];
+
+        uint8 highAmount = amount >> 8;
+
+        uint8 lowAmount = amount & 0x00FF;
+
+        msg.payload[0] = port;
+        msg.payload[1] = (uint8) mode;
+        msg.payload[2] = highAmount;
+        msg.payload[3] = lowAmount;
+
+        Debug::info("set motor %d to %d", port, amount);
+
+        hcpSerial->Write(msg);
+        HCP_MSG* rep = hcpSerial->ReadSync();
+
+        if (rep != nullptr)
+        {
+            if (rep->optcode == HCP_OK)
+            {
+                success = true;
+            }
+            delete rep->payload;
+            delete rep;
+        }
+        else
+        {
+            Debug::error("hcp response message is null");
+        }
+        delete[] msg.payload;
+    }
+    else
+    {
+        Debug::error("Port not valid in mapping");
+    }
+
+    return success;
+}
+
+
 
 uint16 HcpManager::GetAnalog(std::string name)
 {
@@ -391,7 +479,7 @@ uint16 HcpManager::GetAnalog(uint8 port)
             {
                 if (rep->payload[0] == port)
                 {
-                    value = (rep->payload[1] << 8) + rep->payload[2];
+                    value = (rep->payload[1] << 8) | rep->payload[2];
                 }
                 else
                 {
@@ -400,6 +488,10 @@ uint16 HcpManager::GetAnalog(uint8 port)
             }
             delete rep->payload;
             delete rep;
+        }
+        else
+        {
+            Debug::error("hcp response message is null");
         }
         delete[] msg.payload;
     }
@@ -462,6 +554,10 @@ uint8 HcpManager::GetDigital(uint8 port)
             delete rep->payload;
             delete rep;
         }
+        else
+        {
+            Debug::error("hcp response message is null");
+        }
         delete[] msg.payload;
     }
     else
@@ -473,5 +569,5 @@ uint8 HcpManager::GetDigital(uint8 port)
 
 uint16 HcpManager::GetBatteryLevel()
 {
-    return 0;
+    return GetAnalog(HCP_ANALOG_SUPPLY_PORT);
 }
