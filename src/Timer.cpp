@@ -2,7 +2,10 @@
 // Created by Markus on 2019-09-27.
 //
 
+
 #include "Timer.h"
+
+#include <chrono>
 
 //void tickFunc(std::function<void()> stopCallback, std::function<void()> stopCallback, uint64 interval, int64 endTime, int64 microTime)
 //{
@@ -30,6 +33,8 @@
 //    }
 //}
 
+typedef std::chrono::high_resolution_clock Clock;
+
 Timer::Timer()
 {
 
@@ -51,7 +56,7 @@ void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMic
         this->microTime = startTimeMicros;
 
         this->isRunning = true;
-        this->timerThread = new std::thread(Timer::tick, this, intervalMicros, endTimeMicros, startTimeMicros);
+        this->timerThread = new std::thread(Timer::highPerformanceTimerLoop, this, intervalMicros, endTimeMicros, startTimeMicros);
 
         this->timerThread->detach();
     }
@@ -77,10 +82,11 @@ void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
     bool running = true;
     while(running) {
 
-        usleep(interval);
-
         std::thread callbackThread(self->tickCallback, microTime);
         callbackThread.detach();
+
+        usleep(interval);
+
         if (microTime % 500000 == 0)
         {
             Debug::print("Micro Seconds: %d", microTime);
@@ -88,12 +94,50 @@ void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
         }
         microTime += interval;
 
+
         if (microTime >= endTime)
         {
             std::cout << "sequence done" << std::endl;
             self->stop();
             running = false;
         }
+    }
+}
+
+void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime, int64 microTime)
+{
+    bool running = true;
+    auto lastTime = Clock::now();
+    auto currTime = lastTime;
+
+    std::thread callbackThread(self->tickCallback, microTime);
+    callbackThread.detach();
+    while(running) {
+
+        currTime = Clock::now();
+        if (std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count() >= interval)
+        {
+            microTime += interval;
+
+            std::thread callbackThread(self->tickCallback, microTime);
+            callbackThread.detach();
+
+            lastTime = currTime;
+
+            if (microTime % 500000 == 0)
+            {
+                Debug::print("Micro Seconds: %d", microTime);
+            }
+
+            if (microTime >= endTime)
+            {
+                std::cout << "sequence done" << std::endl;
+                self->stop();
+                running = false;
+            }
+        }
+
+
     }
 }
 

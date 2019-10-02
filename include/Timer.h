@@ -28,6 +28,7 @@ private:
     std::function<void()> stopCallback;
 
     static void tick(Timer* self, uint64 interval, int64 endTime, int64 microTime);
+    static void highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime, int64 microTime);
 
 public:
 

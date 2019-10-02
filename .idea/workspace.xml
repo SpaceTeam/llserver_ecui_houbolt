@@ -13,17 +13,9 @@
   <component name="ChangeListManager">
     <list default="true" id="6c052466-eab4-467e-8b73-a62cd50cac8b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TXV_ECUI_LLSERVER" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TXV_ECUI_LLSERVER.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/TXV_ECUI_LLSERVER.cbp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake_install.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/HcpManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/HcpManager.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mapping/mapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/mapping/mapping.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/HcpManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/HcpManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SequenceManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/SequenceManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Serial.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Serial.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TXV_ECUI_LLSERVER" beforeDir="false" afterPath="$PROJECT_DIR$/TXV_ECUI_LLSERVER" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/Timer.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/Timer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/config.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Timer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Timer.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -40,18 +32,6 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/main.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="358">
-              <caret line="51" column="34" selection-start-line="51" selection-start-column="34" selection-end-line="51" selection-end-column="34" />
-              <folding>
-                <element signature="e#1#20#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/SequenceManager.cpp">
           <provider selected="true" editor-type-id="text-editor">
@@ -79,7 +59,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/HcpManager.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="198">
+            <state relative-caret-position="5355">
               <caret line="357" selection-start-line="357" selection-end-line="357" />
               <folding>
                 <element signature="e#43#61#0" expanded="true" />
@@ -100,7 +80,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/include/HcpManager.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="328">
+            <state relative-caret-position="780">
               <caret line="52" column="58" selection-start-line="52" selection-start-column="58" selection-end-line="52" selection-end-column="58" />
               <folding>
                 <element signature="e#122#141#0" expanded="true" />
@@ -112,7 +92,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Serial.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1282">
+            <state relative-caret-position="1053">
               <caret line="244" column="61" selection-start-line="244" selection-start-column="61" selection-end-line="244" selection-end-column="61" />
               <folding>
                 <element signature="e#0#37#0" expanded="true" />
@@ -124,7 +104,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Socket.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-596">
+            <state relative-caret-position="615">
               <caret line="41" column="35" selection-start-line="41" selection-start-column="35" selection-end-line="41" selection-end-column="35" />
               <folding>
                 <element signature="e#43#61#0" expanded="true" />
@@ -133,11 +113,23 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Timer.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="182">
-              <caret line="53" column="63" selection-start-line="53" selection-start-column="63" selection-end-line="53" selection-end-column="63" />
+            <state relative-caret-position="767">
+              <caret line="128" column="61" selection-start-line="128" selection-start-column="61" selection-end-line="128" selection-end-column="61" />
+              <folding>
+                <element signature="e#44#62#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/include/config.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="165">
+              <caret line="11" column="29" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -146,7 +138,7 @@
         <entry file="file://$PROJECT_DIR$/include/Timer.h">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="405">
-              <caret line="29" column="34" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="34" />
+              <caret line="29" column="16" selection-start-line="29" selection-start-column="16" selection-end-line="29" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -185,10 +177,7 @@
         <option value="$PROJECT_DIR$/include/Serial.h" />
         <option value="$PROJECT_DIR$/src/Debug.cpp" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/include/config.h" />
         <option value="$PROJECT_DIR$/src/Socket.cpp" />
-        <option value="$PROJECT_DIR$/include/Timer.h" />
-        <option value="$PROJECT_DIR$/src/Timer.cpp" />
         <option value="$PROJECT_DIR$/src/Serial.cpp" />
         <option value="$PROJECT_DIR$/include/Debug.h" />
         <option value="$PROJECT_DIR$/mapping/mapping.json" />
@@ -196,13 +185,17 @@
         <option value="$PROJECT_DIR$/main.cpp" />
         <option value="$PROJECT_DIR$/src/HcpManager.cpp" />
         <option value="$PROJECT_DIR$/include/HcpManager.h" />
+        <option value="$PROJECT_DIR$/include/config.h" />
+        <option value="$PROJECT_DIR$/include/Timer.h" />
+        <option value="$PROJECT_DIR$/src/Timer.cpp" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="x" value="1920" />
-    <option name="width" value="1920" />
-    <option name="height" value="1080" />
+    <option name="x" value="240" />
+    <option name="y" value="162" />
+    <option name="width" value="1440" />
+    <option name="height" value="835" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -287,17 +280,18 @@
       <workItem from="1569484959438" duration="21526000" />
       <workItem from="1569696570175" duration="24652000" />
       <workItem from="1569832811279" duration="43970000" />
+      <workItem from="1570010668640" duration="2199000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="93489000" />
+    <option name="totallyTimeSpent" value="95688000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1920" y="0" width="1920" height="1080" extended-state="0" />
+    <frame x="0" y="0" width="1920" height="1200" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17784877" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17944622" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="CMake" order="0" />
@@ -444,33 +438,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/include/config.h">
+    <entry file="file://$PROJECT_DIR$/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" column="17" selection-start-line="11" selection-start-column="8" selection-end-line="11" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/Timer.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="29" column="34" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Timer.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="53" column="63" selection-start-line="53" selection-start-column="63" selection-end-line="53" selection-end-column="63" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Serial.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1282">
-          <caret line="244" column="61" selection-start-line="244" selection-start-column="61" selection-end-line="244" selection-end-column="61" />
+        <state relative-caret-position="765">
+          <caret line="51" column="34" selection-start-line="51" selection-start-column="34" selection-end-line="51" selection-end-column="34" />
           <folding>
-            <element signature="e#0#37#0" expanded="true" />
+            <element signature="e#1#20#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/SequenceManager.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
+          <folding>
+            <element signature="e#43#71#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -485,10 +468,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Socket.cpp">
+    <entry file="file://$PROJECT_DIR$/src/HcpManager.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-596">
-          <caret line="41" column="35" selection-start-line="41" selection-start-column="35" selection-end-line="41" selection-end-column="35" />
+        <state relative-caret-position="5355">
+          <caret line="357" selection-start-line="357" selection-end-line="357" />
           <folding>
             <element signature="e#43#61#0" expanded="true" />
           </folding>
@@ -504,7 +487,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/include/HcpManager.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="328">
+        <state relative-caret-position="780">
           <caret line="52" column="58" selection-start-line="52" selection-start-column="58" selection-end-line="52" selection-end-column="58" />
           <folding>
             <element signature="e#122#141#0" expanded="true" />
@@ -512,32 +495,46 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/HcpManager.cpp">
+    <entry file="file://$PROJECT_DIR$/src/Socket.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="357" selection-start-line="357" selection-end-line="357" />
+        <state relative-caret-position="615">
+          <caret line="41" column="35" selection-start-line="41" selection-start-column="35" selection-end-line="41" selection-end-column="35" />
           <folding>
             <element signature="e#43#61#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/SequenceManager.cpp">
+    <entry file="file://$PROJECT_DIR$/src/Serial.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
+        <state relative-caret-position="1053">
+          <caret line="244" column="61" selection-start-line="244" selection-start-column="61" selection-end-line="244" selection-end-column="61" />
           <folding>
-            <element signature="e#43#71#0" expanded="true" />
+            <element signature="e#0#37#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.cpp">
+    <entry file="file://$PROJECT_DIR$/include/config.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="358">
-          <caret line="51" column="34" selection-start-line="51" selection-start-column="34" selection-end-line="51" selection-end-column="34" />
+        <state relative-caret-position="165">
+          <caret line="11" column="29" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/Timer.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="29" column="16" selection-start-line="29" selection-start-column="16" selection-end-line="29" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Timer.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="767">
+          <caret line="128" column="61" selection-start-line="128" selection-start-column="61" selection-end-line="128" selection-end-column="61" />
           <folding>
-            <element signature="e#1#20#0" expanded="true" />
+            <element signature="e#44#62#0" expanded="true" />
           </folding>
         </state>
       </provider>
