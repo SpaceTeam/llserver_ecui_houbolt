@@ -41,6 +41,7 @@ private:
     static json mapping;
     static uint8 lastServoPosArr[];
     static bool servoEnabledArr[];
+    static std::recursive_mutex serialMtx;
 
     static void LoadMapping();
     static void SaveMapping();

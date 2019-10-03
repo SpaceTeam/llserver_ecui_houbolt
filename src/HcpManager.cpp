@@ -17,6 +17,8 @@ json HcpManager::mapping = nullptr;
 uint8 HcpManager::lastServoPosArr[SERVO_COUNT] = {0};
 bool HcpManager::servoEnabledArr[SERVO_COUNT] = {false};
 
+std::recursive_mutex HcpManager::serialMtx;
+
 void HcpManager::init()
 {
     hcpSerial = new Serial(HCP_DEVICE, HCP_BAUD_RATE);
@@ -456,8 +458,10 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
 
             Debug::info("set servo %d to %d", port, onTime);
 
+            serialMtx.lock();
             hcpSerial->Write(msg);
             HCP_MSG* rep = hcpSerial->ReadSync();
+            serialMtx.unlock();
 
             if (rep != nullptr)
             {
@@ -603,8 +607,10 @@ bool HcpManager::SetMotor(uint8 port, Motor_Mode mode, int16 amount)
 
         Debug::info("set motor %d to %d", port, amount);
 
+        serialMtx.lock();
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
+        serialMtx.unlock();
 
         if (rep != nullptr)
         {
@@ -677,8 +683,10 @@ uint16 HcpManager::GetAnalog(uint8 port)
 
         Debug::info("get analog %d", port);
 
+        serialMtx.lock();
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
+        serialMtx.unlock();
 
         if (rep != nullptr)
         {
@@ -743,8 +751,10 @@ uint8 HcpManager::GetDigital(uint8 port)
 
         Debug::info("get digital %d", port);
 
+        serialMtx.lock();
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
+        serialMtx.unlock();
 
         if (rep != nullptr)
         {
