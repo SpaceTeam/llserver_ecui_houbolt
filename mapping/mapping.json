@@ -27,22 +27,22 @@
     },
     "analog": {
         "fuel feedback": {
-            "port": 0,
+            "port": 1,
             "servo": "fuel"
 
         },
         "oxidizer feedback": {
-            "port": 1,
+            "port": 2,
             "servo" : "oxidizer"
 
         },
 	"test": {
-	    "port": 3
+	    "port": 0
 	}
     },
     "digital": {
         "safety": {
-            "port": 2
+            "port": 3
 
         }
     }

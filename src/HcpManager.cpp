@@ -465,6 +465,10 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
                 {
                     success = true;
                 }
+		else
+		{
+		    Debug::error("REP yields optcode %x", rep->optcode);
+		}
                 delete rep->payload;
                 delete rep;
             }

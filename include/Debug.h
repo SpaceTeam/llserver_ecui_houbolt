@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <thread>
 
+#include "config.h"
 #include "common.h"
 
 class Debug {

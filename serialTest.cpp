@@ -107,7 +107,7 @@ int main(int argc, char const *argv[])
     string digital = "safety";
     for (int i = 0; i < 2000; i+=10)
     {
-        if (!HcpManager::ExecCommand(fuel, i))
+        if (!HcpManager::SetServoRaw(fuel, i))
         {
             cout << "not working" << endl;
             break;
