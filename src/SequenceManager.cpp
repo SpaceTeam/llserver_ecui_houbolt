@@ -9,8 +9,8 @@
 #include "utils.h"
 #include "HcpManager.h"
 
-#include "spdlog/async.h"
-#include "spdlog/sinks/basic_file_sink.h"
+//#include "spdlog/async.h"
+//#include "spdlog/sinks/basic_file_sink.h"
 
 using json = nlohmann::json;
 
@@ -166,8 +166,9 @@ void SequenceManager::GetSensors(int64 microTime)
 
     if (microTime % SENSOR_TRANSMISSION_INTERVAL == 0)
     {
-        std::thread callbackThread(SequenceManager::TransmitSensors, microTime, sensors);
-        callbackThread.detach();
+//        std::thread callbackThread(SequenceManager::TransmitSensors, microTime, sensors);
+//        callbackThread.detach();
+	TransmitSensors(microTime, sensors);
     }
 
 }

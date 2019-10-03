@@ -35,8 +35,10 @@
             "port": 1,
             "servo" : "oxidizer"
 
-        }
-
+        },
+	"test": {
+	    "port": 3
+	}
     },
     "digital": {
         "safety": {

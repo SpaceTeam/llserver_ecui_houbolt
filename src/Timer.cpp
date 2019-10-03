@@ -118,9 +118,9 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
         {
             microTime += interval;
 
-            std::thread callbackThread(self->tickCallback, microTime);
-            callbackThread.detach();
-
+//            std::thread callbackThread(self->tickCallback, microTime);
+//            callbackThread.detach();
+	    self->tickCallback(microTime);
             lastTime = currTime;
 
             if (microTime % 500000 == 0)
