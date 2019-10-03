@@ -291,6 +291,7 @@ void Serial::Write(HCP_MSG message)
 {
     uint8 buffer[message.payloadSize+1];
     buffer[0] = message.optcode;
+    Debug::info("Writing Optcode %x...", message.optcode);
     std::copy(&message.payload[0], &message.payload[message.payloadSize-1], &buffer[1]);
     if (_uartFilestream != -1)
     {

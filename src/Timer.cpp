@@ -56,7 +56,7 @@ void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMic
         this->microTime = startTimeMicros;
 
         this->isRunning = true;
-        this->timerThread = new std::thread(Timer::tick, this, intervalMicros, endTimeMicros, startTimeMicros);
+        this->timerThread = new std::thread(Timer::highPerformanceTimerLoop, this, intervalMicros, endTimeMicros, startTimeMicros);
 
         this->timerThread->detach();
     }
@@ -116,9 +116,9 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
         {
             microTime += interval;
 
-//            std::thread callbackThread(self->tickCallback, microTime);
-//            callbackThread.detach();
-	    self->tickCallback(microTime);
+            std::thread callbackThread(self->tickCallback, microTime);
+            callbackThread.detach();
+	    //self->tickCallback(microTime);
             lastTime = currTime;
 
             if (microTime % 500000 == 0)
