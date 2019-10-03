@@ -82,6 +82,7 @@ void processMessage(int sock, json msg)
 
 }
 
+/*
 int main(int argc, char const *argv[])
 {
     Socket::init(processMessage);
@@ -95,5 +96,5 @@ int main(int argc, char const *argv[])
     Socket::destroy();
 
     return 0;
-}
+}*/
 

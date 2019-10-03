@@ -42,7 +42,7 @@ void onRead(HCP_MSG msg)
     }    
 }
 
-/*int main(int argc, char const *argv[])
+int main(int argc, char const *argv[])
 {
     /*Serial* hhgSerial = new Serial("/dev/serial0", 115200);
 
@@ -76,7 +76,7 @@ void onRead(HCP_MSG msg)
 	hhgSerial->ReadAsync(onRead);
 	usleep(100000);
     }
-    return 0;
+    return 0;*/
 
 //    string fuel = "fuel";
 //    string analog = "fuel feedback";
@@ -102,20 +102,20 @@ void onRead(HCP_MSG msg)
 
     HcpManager::EnableServo(0);
 
-    string fuel = "igniter";
-    string analog = "fuel feedback";
+    string fuel = "fuel";
+    string analog = "test";
     string digital = "safety";
     for (int i = 0; i < 2000; i+=10)
     {
-//        if (!HcpManager::ExecCommand(fuel, i))
-//        {
-//            cout << "not working" << endl;
-//            break;
-//        }
+        if (!HcpManager::ExecCommand(fuel, i))
+        {
+            cout << "not working" << endl;
+            break;
+        }
         cout << HcpManager::GetAnalog(analog) << endl;
 //        cout << HcpManager::GetDigital(2) << endl;
 //	HcpManager::SetMotor(fuel, Motor_Mode::POWER, i-1000);
         usleep(100000);
     }
     HcpManager::DisableServo(0);
-}*/
+}
