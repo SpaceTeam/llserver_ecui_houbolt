@@ -4,14 +4,14 @@
         "fuel": {
             "port": 0,
             "feedbackAnalog": "fuel feedback",
-            "endpoints": [200, 2500],
+            "endpoints": [1000, 2000],
             "feedbackEndpoints": [300, 2200]
 
         },
         "oxidizer": {
             "port": 1,
             "feedbackAnalog": "oxidizer feedback",
-            "endpoints": [200, 2500],
+            "endpoints": [1000, 2000],
             "feedbackEndpoints": [220, 2200]
 
         }

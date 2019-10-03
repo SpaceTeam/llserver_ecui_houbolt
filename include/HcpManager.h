@@ -39,7 +39,7 @@ class HcpManager
 private:
     static Serial* hcpSerial;
     static json mapping;
-    static uint8 lastServoPosArr[];
+    static uint16 lastServoPosArr[];
     static bool servoEnabledArr[];
     static std::recursive_mutex serialMtx;
 

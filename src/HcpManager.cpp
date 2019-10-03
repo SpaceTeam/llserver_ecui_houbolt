@@ -14,7 +14,7 @@ using namespace std;
 
 Serial* HcpManager::hcpSerial;
 json HcpManager::mapping = nullptr;
-uint8 HcpManager::lastServoPosArr[SERVO_COUNT] = {0};
+uint16 HcpManager::lastServoPosArr[SERVO_COUNT] = {1000};
 bool HcpManager::servoEnabledArr[SERVO_COUNT] = {false};
 
 std::recursive_mutex HcpManager::serialMtx;
