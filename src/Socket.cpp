@@ -24,6 +24,7 @@ bool Socket::connectionActive;
 bool Socket::shallClose = false;
 
 std::thread* Socket::asyncListenThread;
+std::mutex Socket::sendMtx;
 
 int Socket::init(std::function<void(int32, json)> onMsgCallback)
 {
@@ -110,7 +111,9 @@ void Socket::sendJson(std::string type, json content)
 
         string msg = jsonMsg.dump();
 
+        sendMtx.lock();
         send(socketfd, msg.c_str(), msg.size(), 0);
+        sendMtx.unlock();
 
     }
     else
@@ -131,8 +134,9 @@ void Socket::sendJson(std::string type, float content)
 
         string msg = jsonMsg.dump();
 
+        sendMtx.lock();
         send(socketfd, msg.c_str(), msg.size(), 0);
-
+        sendMtx.unlock();
     }
     else
     {
@@ -142,6 +146,7 @@ void Socket::sendJson(std::string type, float content)
 
 int32 Socket::readJson()
 {
+    std::lock_guard<std::mutex> lock(sendMtx);
     std::fill(std::begin(buffer), std::end(buffer), 0);
     return recv(socketfd, buffer, SOCKET_MSG_SIZE, 0);
 }

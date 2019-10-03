@@ -9,6 +9,9 @@
 #include "utils.h"
 #include "HcpManager.h"
 
+#include "spdlog/async.h"
+#include "spdlog/sinks/basic_file_sink.h"
+
 using json = nlohmann::json;
 
 using namespace std;
@@ -17,6 +20,9 @@ bool SequenceManager::isRunning = false;
 bool SequenceManager::isAbort = false;
 bool SequenceManager::isAbortRunning = false;
 Timer* SequenceManager::timer;
+Timer* SequenceManager::sensorTimer;
+
+//std::shared_ptr<spdlog::logger> SequenceManager::async_file;
 
 json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
@@ -24,15 +30,18 @@ json SequenceManager::jsonAbortSequence = json::object();
 void SequenceManager::init()
 {
     timer = new Timer();
+    sensorTimer = new Timer();
 }
+
 
 void SequenceManager::StopSequence()
 {
-    //TODO: implement
     Debug::info("sequence done");
+    std::cout << "i'm called" << std::endl;
     isRunning = false;
     if (!isAbort)
     {
+        std::cout << "hello timer" << std::endl;
         Socket::sendJson("timer-done");
     }
 }
@@ -43,9 +52,9 @@ void SequenceManager::AbortSequence()
     {
         isAbort = true;
         timer->stop();
+        sensorTimer->stop();
         Socket::sendJson("abort");
         Debug::print("aborting...");
-
         isRunning = false;
         StartAbortSequence();
         isAbort = false;
@@ -61,6 +70,27 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 {
     if (!isRunning && !isAbortRunning)
     {
+        time_t curr_time;
+        tm * curr_tm;
+        char dateTime_string[100];
+
+        time(&curr_time);
+        curr_tm = localtime(&curr_time);
+
+        strftime(dateTime_string, 100, "%d_%m_%Y__%H_%M_%S", curr_tm);
+//        async_file = spdlog::basic_logger_mt<spdlog::async_factory>("async_file_logger", "logs/" + string(dateTime_string) + ".csv");
+        logging::configure({ {"type", "file"}, {"file_name", "logs/" + string(dateTime_string) + ".csv"}, {"reopen_interval", "1"} });
+
+        //get sensor names
+        vector<string> sensorNames = HcpManager::GetAllSensorNames();
+        string msg;
+        for (int i = 0; i < sensorNames.size(); i++)
+        {
+            msg += sensorNames[i] + ";";
+        }
+        //async_file->info("Timestep;" + msg);
+        logging::INFO("Timestep;" + msg);
+
         isRunning = true;
         jsonSequence = jsonSeq;
         jsonAbortSequence = jsonAbortSeq;
@@ -74,7 +104,8 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         Socket::sendJson("timer-start");
 
         HcpManager::EnableAllServos();
-        timer->start(startTime, endTime, interval, Tick, StopSequence);
+        sensorTimer->start(startTime, endTime+3, 1000000/SENSOR_SAMPLE_RATE, SequenceManager::GetSensors, SequenceManager::StopGetSensors);
+        timer->start(startTime, endTime, interval, SequenceManager::Tick, SequenceManager::StopSequence);
         //TODO: discuss if we need that feature
 //        if (HcpManager::EnableAllServos())
 //        {
@@ -87,6 +118,58 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 //        }
 
     }
+}
+
+void SequenceManager::TransmitSensors(int64 microTime, std::map<std::string, uint16> sensors)
+{
+    json content = json::array();
+    json sen;
+    for (const auto& sensor : sensors)
+    {
+        sen = json::object();
+
+        sen["name"] = sensor.first;
+        sen["value"] = sensor.second;
+        sen["time"] = (double)((microTime / 1000) / 1000.0);
+
+        content.push_back(sen);
+    }
+    Socket::sendJson("sensors", content);
+}
+
+void SequenceManager::LogSensors(int64 microTime, vector<uint16> sensors)
+{
+    string msg;
+    for (int i = 0; i < sensors.size(); i++)
+    {
+        msg += to_string(sensors[i]) + ";";
+    }
+    //async_file->info(to_string(microTime) + ";" + msg);
+    logging::INFO(to_string(microTime) + ";" + msg);
+}
+
+void SequenceManager::StopGetSensors()
+{
+//    async_file->flush();
+}
+
+void SequenceManager::GetSensors(int64 microTime)
+{
+    map<string, uint16> sensors = HcpManager::GetAllSensors();
+
+    vector<uint16> vals;
+    for (const auto& sensor : sensors)
+    {
+        vals.push_back(sensor.second);
+    }
+    LogSensors(microTime, vals);
+
+    if (microTime % SENSOR_TRANSMISSION_INTERVAL == 0)
+    {
+        std::thread callbackThread(SequenceManager::TransmitSensors, microTime, sensors);
+        callbackThread.detach();
+    }
+
 }
 
 void SequenceManager::Tick(int64 microTime)

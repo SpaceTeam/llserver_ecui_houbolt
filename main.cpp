@@ -27,7 +27,6 @@ void processMessage(int sock, json msg)
             //send(sock, strmsg.c_str(), strmsg.size(), 0);
             json seq = msg["content"][0];
             json abortSeq = msg["content"][1];
-            cout << "it works!" << endl;
             SequenceManager::StartSequence(msg["content"][0], msg["content"][1]);
         }
         else if (type.compare("abort") == 0)

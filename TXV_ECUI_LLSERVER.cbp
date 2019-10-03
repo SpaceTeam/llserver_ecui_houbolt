@@ -5,7 +5,7 @@
 		<Option title="TXV_ECUI_LLSERVER"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
-		<Option virtualFolders="CMake Files\;"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\usr\;CMake Files\..\..\..\..\..\..\usr\local\;CMake Files\..\..\..\..\..\..\usr\local\lib\;CMake Files\..\..\..\..\..\..\usr\local\lib\spdlog\;CMake Files\..\..\..\..\..\..\usr\local\lib\spdlog\cmake\;"/>
 		<Build>
 			<Target title="all">
 				<Option working_dir="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer"/>
@@ -44,7 +44,9 @@
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
+					<Add option="-DSPDLOG_COMPILED_LIB"/>
 					<Add directory="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include"/>
+					<Add directory="/usr/local/include"/>
 				</Compiler>
 				<MakeCommands>
 					<Build command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 TXV_ECUI_LLSERVER"/>
@@ -60,7 +62,9 @@
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
+					<Add option="-DSPDLOG_COMPILED_LIB"/>
 					<Add directory="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include"/>
+					<Add directory="/usr/local/include"/>
 				</Compiler>
 				<MakeCommands>
 					<Build command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 TXV_ECUI_LLSERVER/fast"/>
@@ -77,6 +81,9 @@
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/HcpManager.h">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/LogManager.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/SequenceManager.h">
@@ -115,6 +122,9 @@
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/HcpManager.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/LogManager.cpp">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/SequenceManager.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
@@ -132,6 +142,18 @@
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/../../../../../../usr/local/lib/spdlog/cmake/spdlogConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\spdlog\cmake\"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/../../../../../../usr/local/lib/spdlog/cmake/spdlogConfigTargets-release.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\spdlog\cmake\"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/../../../../../../usr/local/lib/spdlog/cmake/spdlogConfigTargets.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\spdlog\cmake\"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/../../../../../../usr/local/lib/spdlog/cmake/spdlogConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\spdlog\cmake\"/>
 		</Unit>
 	</Project>
 </CodeBlocks_project_file>

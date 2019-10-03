@@ -20,6 +20,7 @@ private:
     static bool shallClose;
 
     static std::thread* asyncListenThread;
+    static std::mutex sendMtx;
 
     Socket();
 

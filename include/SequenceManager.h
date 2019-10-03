@@ -8,6 +8,11 @@
 #include "common.h"
 #include "json.hpp"
 
+#include "Logging.h"
+
+//#include "spdlog/async.h"
+//#include "spdlog/sinks/basic_file_sink.h"
+
 #include "Timer.h"
 
 using json = nlohmann::json;
@@ -21,10 +26,17 @@ private:
     static bool isAbort;
     static bool isAbortRunning;
     static Timer* timer;
+    static Timer* sensorTimer;
 
     static json jsonSequence;
     static json jsonAbortSequence;
 
+//    static std::shared_ptr<spdlog::logger> async_file;
+
+    static void TransmitSensors(int64 microTime, std::map<std::string, uint16> sensors);
+    static void LogSensors(int64 microTime, std::vector<uint16> sensors);
+    static void StopGetSensors();
+    static void GetSensors(int64 microTime);
     static void Tick(int64 microTime);
 
     static void StopAbortSequence();

@@ -9,10 +9,13 @@
 #define SEQUENCE_FILE_PATH "../TXV_ECUI_WEB/sequence/Sequence.json"
 #define ABORT_EQUENCE_FILE_PATH "../TXV_ECUI_WEB/sequence/AbortSequence.json"
 
-#define SOCKET_IP "127.0.0.1"
+#define SOCKET_IP "192.168.0.213"
 #define SOCKET_MSG_SIZE 65536
 #define PORT 5555
 
+#define SENSOR_SAMPLE_RATE 1000 //hz
+
+#define SENSOR_TRANSMISSION_INTERVAL 100000 //us
 #define TIMER_SYNC_INTERVAL 5000000 //us
 
 #define MAPPING_FILE_PATH "mapping/mapping.json"

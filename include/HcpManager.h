@@ -63,6 +63,9 @@ public:
     static void init();
     static void restart();
 
+    static std::vector<std::string> GetAllSensorNames();
+    static std::map<std::string, uint16> GetAllSensors();
+
     static bool ExecCommand(std::string name, uint8 percent);
 
     static bool EnableServo(uint8 port);

@@ -166,6 +166,56 @@ json HcpManager::FindObjectByPort(uint8 port, Device_Type type)
     return device;
 }
 
+std::vector<std::string> HcpManager::GetAllSensorNames()
+{
+    vector<std::string> sensorNames;
+
+    if (mapping != nullptr)
+    {
+        uint8 port;
+        for (auto it = mapping["analog"].begin(); it != mapping["analog"].end(); ++it)
+        {
+            sensorNames.push_back(it.key());
+        }
+        for (auto it = mapping["digital"].begin(); it != mapping["digital"].end(); ++it)
+        {
+            sensorNames.push_back(it.key());
+        }
+    }
+    else
+    {
+        Debug::error("Mapping is null");
+    }
+
+    return sensorNames;
+}
+
+std::map<std::string, uint16> HcpManager::GetAllSensors()
+{
+    map<std::string, uint16> sensors;
+
+    if (mapping != nullptr)
+    {
+        uint8 port;
+        for (auto it = mapping["analog"].begin(); it != mapping["analog"].end(); ++it)
+        {
+            port = it.value()["port"];
+            sensors[it.key()] = GetAnalog(port);
+        }
+        for (auto it = mapping["digital"].begin(); it != mapping["digital"].end(); ++it)
+        {
+            port = it.value()["port"];
+            sensors[it.key()] = GetDigital(port);
+        }
+    }
+    else
+    {
+        Debug::error("Mapping is null");
+    }
+
+    return sensors;
+}
+
 bool HcpManager::ExecCommand(std::string name, uint8 percent)
 {
     bool success = false;
