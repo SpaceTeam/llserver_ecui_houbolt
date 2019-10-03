@@ -38,6 +38,7 @@ void SequenceManager::StopSequence()
 {
     Debug::info("sequence done");
     std::cout << "i'm called" << std::endl;
+    HcpManager::DisableAllServos();
     isRunning = false;
     if (!isAbort)
     {
