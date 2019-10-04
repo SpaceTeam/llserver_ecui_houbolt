@@ -288,7 +288,7 @@ bool HcpManager::DisableServo(uint8 port)
 {
     if (CheckPort(port, Device_Type::SERVO))
     {
-        servoEnabledArr[port] = true;
+        servoEnabledArr[port] = false;
         return SetServoRaw(port, lastServoPosArr[port]);
     }
     return false;
