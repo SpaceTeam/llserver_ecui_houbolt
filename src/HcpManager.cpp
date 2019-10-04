@@ -14,6 +14,7 @@ using namespace std;
 
 Serial* HcpManager::hcpSerial;
 json HcpManager::mapping = nullptr;
+//TODO: set default position at the beginning instead
 uint16 HcpManager::lastServoPosArr[SERVO_COUNT] = {1000};
 bool HcpManager::servoEnabledArr[SERVO_COUNT] = {false};
 

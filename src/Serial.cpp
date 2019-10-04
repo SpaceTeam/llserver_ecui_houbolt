@@ -197,6 +197,7 @@ HCP_MSG* Serial::ReadSync()
                 }
 
                 finished = true;
+                printf("First Byte in Buffer: %x and in msg: %x", rxBuffer[0], msg->payload[0]);
                 return msg;
 
             }
