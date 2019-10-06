@@ -166,7 +166,7 @@ HCP_MSG* Serial::ReadSync()
 
 
                 int msgLength = hcp_cmds[msg->optcode].payloadLength;
-//                Debug::info("Message Length: %d", msgLength);
+                Debug::info("Opcode: %x | Message Length: %d", msg->optcode, msgLength);
                 int remainingBytes = msgLength;
 
 
@@ -204,7 +204,7 @@ HCP_MSG* Serial::ReadSync()
                 }
 
                 finished = true;
-  //              printf("First Byte in Buffer: %x and in msg: %x\n", rxBuffer[0], msg->payload[0]);
+                //printf("First Byte in Buffer: %x and in msg: %x\n", rxBuffer[0], msg->payload[0]);
                 return msg;
 
             }
@@ -303,7 +303,9 @@ void Serial::Write(HCP_MSG message)
     uint8 buffer[message.payloadSize+1];
     buffer[0] = message.optcode;
     Debug::info("Writing Optcode %x...", message.optcode);
-    std::copy(&message.payload[0], &message.payload[message.payloadSize-1], &buffer[1]);
+    std::copy_n(message.payload, message.payloadSize, &(buffer[1]));
+    //std::copy(&message.payload[0], &message.payload[message.payloadSize-1], &buffer[1]);
+    Debug::info("first byte: %x", buffer[1]);
     if (_uartFilestream != -1)
     {
         int count = write(_uartFilestream, &buffer[0], message.payloadSize+1);        //Filestream, bytes to write, number of bytes to write

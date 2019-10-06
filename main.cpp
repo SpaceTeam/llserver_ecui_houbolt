@@ -37,7 +37,7 @@ void processMessage(int sock, json msg)
         {
             string name;
             uint8 value;
-            for (auto servo : msg)
+            for (auto servo : msg["content"])
             {
                 name = servo["id"];
                 value = servo["value"];
@@ -47,8 +47,8 @@ void processMessage(int sock, json msg)
         else if (type.compare("servos-set-raw") == 0)
         {
             string name;
-            uint8 value;
-            for (auto servo : msg)
+            uint16 value;
+            for (auto servo : msg["content"])
             {
                 name = servo["id"];
                 value = servo["value"];
@@ -57,7 +57,7 @@ void processMessage(int sock, json msg)
         }
         else if (type.compare("servos-calibrate") == 0)
         {
-            for (auto servo : msg)
+            for (auto servo : msg["content"])
             {
                 if (utils::keyExists(servo, "min"))
                 {

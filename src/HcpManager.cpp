@@ -360,6 +360,7 @@ void HcpManager::SetServoMin(std::string name, uint16 min)
             Debug::info("no feedback label found");
         }
         servo["endpoints"][0] = min;
+	mapping["servo"][name] = servo;
         SaveMapping();
     }
     else
@@ -401,6 +402,7 @@ void HcpManager::SetServoMax(std::string name, uint16 max)
             Debug::info("no feedback label found");
         }
         servo["endpoints"][1] = max;
+	mapping["servo"][name] = servo;
         SaveMapping();
     }
     else
@@ -693,6 +695,9 @@ uint16 HcpManager::GetAnalog(uint8 port)
         {
             if (rep->optcode == HCP_ANALOG_REP)
             {
+                Debug::info("REP Port %d", rep->payload[0]);
+                Debug::info("REP Val %d", rep->payload[1]);
+
                 if (rep->payload[0] == port)
                 {
 
@@ -703,6 +708,10 @@ uint16 HcpManager::GetAnalog(uint8 port)
                     Debug::error("Ports of Analog REQ and REP are not the same");
                 }
             }
+	    else
+	    {
+		Debug::info("Other REP opcode than expected: %x", rep->optcode); 
+	    }
             delete rep->payload;
             delete rep;
         }
@@ -774,6 +783,11 @@ uint8 HcpManager::GetDigital(uint8 port)
                     Debug::error("Ports of Digital REQ and REP are not the same");
                 }
             }
+	    else
+	    {
+		Debug::info("Other REP opcode than expected: %x", rep->optcode); 
+	    }
+
             delete rep->payload;
             delete rep;
         }

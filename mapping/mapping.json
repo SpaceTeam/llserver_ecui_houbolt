@@ -1,49 +1,51 @@
 {
-    "servo":
-    {
-        "fuel": {
-            "port": 0,
-            "feedbackAnalog": "fuel feedback",
-            "endpoints": [1000, 2000],
-            "feedbackEndpoints": [300, 2200]
-
-        },
-        "oxidizer": {
-            "port": 1,
-            "feedbackAnalog": "oxidizer feedback",
-            "endpoints": [1000, 2000],
-            "feedbackEndpoints": [220, 2200]
-
-        }
-
-    },
-    "motor":
-    {
-        "igniter": {
-            "port": 0
-
-        }
-
-    },
     "analog": {
         "fuel feedback": {
-            "port": 1,
+            "port": 0,
             "servo": "fuel"
-
         },
         "oxidizer feedback": {
             "port": 2,
-            "servo" : "oxidizer"
-
+            "servo": "oxidizer"
         },
-	"test": {
-	    "port": 0
-	}
+        "test": {
+            "port": 1
+        }
     },
     "digital": {
         "safety": {
             "port": 3
-
+        }
+    },
+    "motor": {
+        "igniter": {
+            "port": 0
+        }
+    },
+    "servo": {
+        "fuel": {
+            "endpoints": [
+                1200,
+                1800
+            ],
+            "feedbackAnalog": "fuel feedback",
+            "feedbackEndpoints": [
+                2955,
+                101
+            ],
+            "port": 0
+        },
+        "oxidizer": {
+            "endpoints": [
+                1000,
+                2000
+            ],
+            "feedbackAnalog": "oxidizer feedback",
+            "feedbackEndpoints": [
+                220,
+                2200
+            ],
+            "port": 1
         }
     }
 }
