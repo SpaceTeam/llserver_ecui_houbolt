@@ -33,6 +33,14 @@ void processMessage(int sock, json msg)
         {
             SequenceManager::AbortSequence();
         }
+        else if (type.compare("servos-enable") == 0)
+	{
+	    HcpManager::EnableAllServos();
+	}	
+        else if (type.compare("servos-disable") == 0)
+	{
+	    HcpManager::DisableAllServos();
+	}	
         else if (type.compare("servos-set") == 0)
         {
             string name;
