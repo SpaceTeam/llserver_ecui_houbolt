@@ -23,6 +23,8 @@ private:
 	std::string _uartDevice;
 	int _baudRate;
 	int _uartFilestream;
+
+	std::mutex serialMtx;
     //unsigned int _msgLength = 0;
     //int _remainingBytes = 0;
     //char _buffer[255];

@@ -137,6 +137,7 @@ Serial::~Serial()
 
 HCP_MSG* Serial::ReadSync()
 {
+    std::lock_guard<std::mutex> lock(serialMtx);
     //----- CHECK FOR ANY RX BYTES -----
     uint8 rxBuffer[MSG_SIZE] = {0};
     //msg.msg = rxBuffer;
@@ -188,15 +189,15 @@ HCP_MSG* Serial::ReadSync()
                     }
                     else
                     {
-			for (int i = 0; i < rxLength; i++) 
-    				cout << std::hex << (int)rxBuffer[i];
-                        cout << endl;
-//                        std::memcpy(&msg->payload[msgLength - remainingBytes],
-//                                    &rxBuffer[0],
-//                                    rxLength);
-			int32 startIndex = msgLength - remainingBytes;
-			cout << "here with startInd " << startIndex << endl;
-			std::copy_n(rxBuffer, rxLength, &(msg->payload[startIndex])); 
+                        for (int i = 0; i < rxLength; i++)
+                                cout << std::hex << (int)rxBuffer[i];
+                                    cout << endl;
+            //                        std::memcpy(&msg->payload[msgLength - remainingBytes],
+            //                                    &rxBuffer[0],
+            //                                    rxLength);
+                        int32 startIndex = msgLength - remainingBytes;
+                        cout << "here with startInd " << startIndex << endl;
+                        std::copy_n(rxBuffer, rxLength, &(msg->payload[startIndex]));
                         remainingBytes -= rxLength;
                     }
 //                    sleep(1);
@@ -220,6 +221,7 @@ HCP_MSG* Serial::ReadSync()
 
 void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
 {
+    std::lock_guard<std::mutex> lock(serialMtx);
     //----- CHECK FOR ANY RX BYTES -----
     uint8 rxBuffer[MSG_SIZE] = {0};
     //msg.msg = rxBuffer;
@@ -296,6 +298,8 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
 
 void Serial::Write(HCP_MSG message)
 {
+    std::lock_guard<std::mutex> lock(serialMtx);
+
     uint8 buffer[message.payloadSize+1];
     buffer[0] = message.optcode;
     Debug::info("Writing Optcode %x...", message.optcode);
