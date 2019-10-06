@@ -165,7 +165,7 @@ HCP_MSG* Serial::ReadSync()
 
 
                 int msgLength = hcp_cmds[msg->optcode].payloadLength;
-                Debug::info("Message Length: %d", msgLength);
+//                Debug::info("Message Length: %d", msgLength);
                 int remainingBytes = msgLength;
 
 
@@ -175,7 +175,7 @@ HCP_MSG* Serial::ReadSync()
                 while (remainingBytes > 0)
                 {
                     rxLength = read(_uartFilestream, (void *) rxBuffer, remainingBytes);
-//                    cout << rxLength << " bytes recieved" << endl;
+  //                  cout << rxLength << " bytes recieved" << endl;
                     if (rxLength < 0)
                     {
                         //NOTE: if this occurs settings of serial com is broken --> non blocking
@@ -188,16 +188,22 @@ HCP_MSG* Serial::ReadSync()
                     }
                     else
                     {
-                        std::memcpy(&msg->payload[msgLength - remainingBytes],
-                                    &rxBuffer[0],
-                                    rxLength);
+			for (int i = 0; i < rxLength; i++) 
+    				cout << std::hex << (int)rxBuffer[i];
+                        cout << endl;
+//                        std::memcpy(&msg->payload[msgLength - remainingBytes],
+//                                    &rxBuffer[0],
+//                                    rxLength);
+			int32 startIndex = msgLength - remainingBytes;
+			cout << "here with startInd " << startIndex << endl;
+			std::copy_n(rxBuffer, rxLength, &(msg->payload[startIndex])); 
                         remainingBytes -= rxLength;
                     }
 //                    sleep(1);
                 }
 
                 finished = true;
-                printf("First Byte in Buffer: %x and in msg: %x", rxBuffer[0], msg->payload[0]);
+  //              printf("First Byte in Buffer: %x and in msg: %x\n", rxBuffer[0], msg->payload[0]);
                 return msg;
 
             }
@@ -266,7 +272,7 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
                     }
                     else
                     {
-                        std::memcpy(&msg.payload[msgLength - remainingBytes],
+			std::memcpy(&msg.payload[msgLength - remainingBytes],
                                     &rxBuffer[0],
                                     rxLength);
                         remainingBytes -= rxLength;

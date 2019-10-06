@@ -74,9 +74,9 @@ void Socket::asyncListen(std::function<void(int32, json)> onMsgCallback)
             exit(0);
 
         }
-        cout << valread << endl;
+//        cout << valread << endl;
         string msg(buffer);
-        cout << msg << endl;
+//        cout << msg << endl;
 
         json jsonMsg = json::parse(msg);
 
@@ -97,6 +97,8 @@ void Socket::sendJson(std::string type, json content)
 {
     if (connectionActive)
     {
+        sendMtx.lock();
+
         json jsonMsg = json::object();
         jsonMsg["type"] = type;
 
@@ -108,10 +110,10 @@ void Socket::sendJson(std::string type, json content)
         {
             jsonMsg["content"] = json::object();
         }
+//	cout << "Content: "<< content.dump() << endl;
+//	cout << "Msg: "<< jsonMsg.dump() << endl;
+        string msg = jsonMsg.dump() + "\n";
 
-        string msg = jsonMsg.dump();
-
-        sendMtx.lock();
         send(socketfd, msg.c_str(), msg.size(), 0);
         sendMtx.unlock();
 
@@ -126,15 +128,17 @@ void Socket::sendJson(std::string type, float content)
 {
     if (connectionActive)
     {
+        sendMtx.lock();
+
         json jsonMsg = json::object();
         jsonMsg["type"] = type;
 
         jsonMsg["content"] = content;
 
+//	cout << "Content from float: "<< content << " Type: " << type << endl;
 
-        string msg = jsonMsg.dump();
+        string msg = jsonMsg.dump() + "\n";
 
-        sendMtx.lock();
         send(socketfd, msg.c_str(), msg.size(), 0);
         sendMtx.unlock();
     }
