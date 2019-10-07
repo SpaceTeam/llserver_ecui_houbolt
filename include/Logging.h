@@ -81,6 +81,7 @@ namespace logging {
     virtual ~logger() {};
     virtual void log(const std::string&, const log_level) {};
     virtual void log(const std::string&) {};
+    virtual void setFilePath(std::string filePath) {};
    protected:
     std::mutex lock;
   };
@@ -158,6 +159,13 @@ namespace logging {
       file.flush();
       lock.unlock();
       reopen();
+    }
+    virtual void setFilePath(std::string filePath)
+    {
+        lock.lock();
+        file_name = filePath;
+        lock.unlock();
+        reopen();
     }
    protected:
     void reopen() {

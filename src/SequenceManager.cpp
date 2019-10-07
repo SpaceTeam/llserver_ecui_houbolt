@@ -85,6 +85,7 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         strftime(dateTime_string, 100, "%d_%m_%Y__%H_%M_%S", curr_tm);
 //        async_file = spdlog::basic_logger_mt<spdlog::async_factory>("async_file_logger", "logs/" + string(dateTime_string) + ".csv");
         logging::configure({ {"type", "file"}, {"file_name", "logs/" + string(dateTime_string) + ".csv"}, {"reopen_interval", "1"} });
+        logging::get_logger().setFilePath("logs/" + string(dateTime_string) + ".csv");
 
         //get sensor names
         vector<string> sensorNames = HcpManager::GetAllSensorNames();
@@ -101,7 +102,6 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         jsonAbortSequence = jsonAbortSeq;
 
         LoadIntervalMap();
-
 
         int64 startTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
         int64 endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
@@ -337,10 +337,8 @@ void SequenceManager::Tick(int64 microTime)
                 double scale = ((next.y - prev.y)*1.0) / (next.x - prev.x);
                 nextValue = (scale * (microTime-prev.x)) + prev.y;
             }
-            if (nextValue > 0 && nextValue < 100 && nextValue != 5)
-            {
-                Debug::print("writing " + seqItem.first + " with value %d", nextValue);
-            }
+            Debug::info("writing " + seqItem.first + " with value %d", nextValue);
+
             HcpManager::ExecCommand(seqItem.first, nextValue);
         }
     }

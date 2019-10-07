@@ -33,14 +33,19 @@ void processMessage(int sock, json msg)
         {
             SequenceManager::AbortSequence();
         }
+        else if (type.compare("servos-load") == 0)
+        {
+            json servosData = HcpManager::GetAllServoData();
+            Socket::sendJson("servos-load", servosData);
+        }
         else if (type.compare("servos-enable") == 0)
-	{
-	    HcpManager::EnableAllServos();
-	}	
+        {
+            HcpManager::EnableAllServos();
+        }
         else if (type.compare("servos-disable") == 0)
-	{
-	    HcpManager::DisableAllServos();
-	}	
+        {
+            HcpManager::DisableAllServos();
+        }
         else if (type.compare("servos-set") == 0)
         {
             string name;
@@ -80,6 +85,9 @@ void processMessage(int sock, json msg)
                     Debug::error("no valid key in servos-calibrate found");
                 }
             }
+            //Could be more efficient if new min and max are saved from for loop above
+            json servosData = HcpManager::GetAllServoData();
+            Socket::sendJson("servos-load", servosData);
 
         }
         else

@@ -219,6 +219,31 @@ std::map<std::string, uint16> HcpManager::GetAllSensors()
     return sensors;
 }
 
+json HcpManager::GetAllServoData()
+{
+    json data = json::array();
+
+    if (mapping != nullptr)
+    {
+        uint8 port;
+        json currServo;
+        for (auto it = mapping["servo"].begin(); it != mapping["servo"].end(); ++it)
+        {
+            currServo = json::object();
+            currServo["name"] = it.key();
+            currServo["endpoints"] = it.value()["endpoints"];
+
+            data.push_back(currServo);
+        }
+    }
+    else
+    {
+        Debug::error("Mapping is null");
+    }
+
+    return data;
+}
+
 bool HcpManager::ExecCommand(std::string name, uint8 percent)
 {
     bool success = false;
