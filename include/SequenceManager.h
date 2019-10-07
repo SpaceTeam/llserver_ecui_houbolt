@@ -17,6 +17,12 @@
 
 using json = nlohmann::json;
 
+typedef struct point_s
+{
+    int64 x;
+    int64 y;
+} Point;
+
 class SequenceManager
 {
 
@@ -31,7 +37,12 @@ private:
     static json jsonSequence;
     static json jsonAbortSequence;
 
+    static std::map<std::string, Point[2]> sequenceIntervalMap;
+
 //    static std::shared_ptr<spdlog::logger> async_file;
+
+    static void LoadIntervalMap();
+    static void UpdateIntervalMap(std::string name, int64 microTime, uint8 newValue);
 
     static void TransmitSensors(int64 microTime, std::map<std::string, uint16> sensors);
     static void LogSensors(int64 microTime, std::vector<uint16> sensors);

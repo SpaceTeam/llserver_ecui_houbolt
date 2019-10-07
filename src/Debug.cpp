@@ -81,7 +81,18 @@ int32 Debug::warning(std::string fmt, ...)
 
 int32 Debug::print(std::string fmt, ...)
 {
-    return 0;
+    std::lock_guard<std::recursive_mutex> lock(_outMutex);
+
+    int printed;
+    va_list args;
+
+    fmt.append("\n");
+
+    va_start(args, fmt);
+    printed = vprintf(fmt.c_str(), args);
+    va_end(args);
+
+    return printed;
 }
 
 int32 Debug::error(std::string fmt, ...)

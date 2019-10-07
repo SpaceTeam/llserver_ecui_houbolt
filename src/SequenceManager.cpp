@@ -27,6 +27,8 @@ Timer* SequenceManager::sensorTimer;
 json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
 
+std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
+
 void SequenceManager::init()
 {
     timer = new Timer();
@@ -67,6 +69,8 @@ void SequenceManager::AbortSequence()
 
 }
 
+
+
 void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 {
     if (!isRunning && !isAbortRunning)
@@ -96,6 +100,8 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         jsonSequence = jsonSeq;
         jsonAbortSequence = jsonAbortSeq;
 
+        LoadIntervalMap();
+
 
         int64 startTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
         int64 endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
@@ -118,6 +124,62 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 //            AbortSequence();
 //        }
 
+    }
+}
+
+void SequenceManager::LoadIntervalMap()
+{
+    for (auto dataItem : jsonSequence["data"])
+    {
+        for (auto actionItem : dataItem["actions"])
+        {
+
+            float time;
+            if (actionItem["timestamp"].type() == json::value_t::string)
+            {
+                string timeStr = actionItem["timestamp"];
+                if (timeStr.compare("START") == 0)
+                {
+                    time = utils::toMicros(jsonSequence["globals"]["startTime"]);
+
+                    int64 timestampMicros = utils::toMicros(time);
+                    for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
+                    {
+                        if (it.key().compare("timestamp") != 0)
+                        {
+                            sequenceIntervalMap[it.key()][0].x = timestampMicros;
+                            sequenceIntervalMap[it.key()][0].y = (uint8)it.value();
+                            sequenceIntervalMap[it.key()][1].x = timestampMicros;
+                            sequenceIntervalMap[it.key()][1].y = (uint8)it.value();
+
+                            Debug::print("Interval created for " + it.key());
+                            Debug::print("prev: x: %d, y: %d", sequenceIntervalMap[it.key()][0].x, sequenceIntervalMap[it.key()][0].y);
+                            Debug::print("next: x: %d, y: %d", sequenceIntervalMap[it.key()][1].x, sequenceIntervalMap[it.key()][1].y);
+                        }
+                    }
+                }
+            }
+
+
+        }
+    }
+}
+
+void SequenceManager::UpdateIntervalMap(std::string name, int64 microTime, uint8 newValue)
+{
+    if (sequenceIntervalMap.find(name) != sequenceIntervalMap.end())
+    {
+        sequenceIntervalMap[name][0] = sequenceIntervalMap[name][1];
+
+        Point newPt = {};
+        newPt.x = microTime;
+        newPt.y = newValue;
+
+        sequenceIntervalMap[name][1] = newPt;
+    }
+    else
+    {
+        Debug::error("Cannot find name in sequenceIntervalMap, please define every device at the START timestamp");
     }
 }
 
@@ -169,7 +231,7 @@ void SequenceManager::GetSensors(int64 microTime)
     {
 //        std::thread callbackThread(SequenceManager::TransmitSensors, microTime, sensors);
 //        callbackThread.detach();
-	TransmitSensors(microTime, sensors);
+	    TransmitSensors(microTime, sensors);
     }
 
 }
@@ -185,6 +247,10 @@ void SequenceManager::Tick(int64 microTime)
         Socket::sendJson("timer-sync", ((microTime/1000) / 1000.0));
     }
 
+    bool findNext = false;
+    map<string, uint8> namesUpdated;
+
+
     //TODO: this is very inefficient right now; make it so actions can be accessed by timestamp as key
     for (auto dataItem : jsonSequence["data"])
     {
@@ -197,11 +263,11 @@ void SequenceManager::Tick(int64 microTime)
                 string timeStr = actionItem["timestamp"];
                 if (timeStr.compare("START") == 0)
                 {
-                    time = utils::toMicros(jsonSequence["globals"]["startTime"]);
+                    time = jsonSequence["globals"]["startTime"];
                 }
                 else if (timeStr.compare("END") == 0)
                 {
-                    time = utils::toMicros(jsonSequence["globals"]["endTime"]);
+                    time = jsonSequence["globals"]["endTime"];
                 }
             }
             else
@@ -217,16 +283,65 @@ void SequenceManager::Tick(int64 microTime)
                 {
                     if (it.key().compare("timestamp") != 0)
                     {
+                        findNext = true;
                         Debug::print(it.key() + " | %d", (uint8)it.value());
-                        HcpManager::ExecCommand(it.key(), it.value());
+                        namesUpdated[it.key()] = (uint8)it.value();
                     }
                 }
                 Debug::print("--------------");
             }
             else if (timestampMicros > microTime)
             {
-                break;
+                if (findNext)
+                {
+                    for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
+                    {
+                        if (namesUpdated.find(it.key()) != namesUpdated.end())
+                        {
+                            UpdateIntervalMap(it.key(), timestampMicros, (uint8)it.value());
+
+                            namesUpdated.erase(it.key());
+                        }
+                    }
+                    if (namesUpdated.empty())
+                    {
+                        //all values updated
+                        findNext = false;
+                        break;
+                    }
+
+                }
             }
+        }
+    }
+
+    if (findNext)
+    {
+        //not all values found yet; microTimes > endTime;
+
+    }
+    else
+    {
+        for (const auto& seqItem : sequenceIntervalMap)
+        {
+            Point prev = sequenceIntervalMap[seqItem.first][0];
+            Point next = sequenceIntervalMap[seqItem.first][1];
+
+            uint8 nextValue;
+            if (prev.x == microTime)
+            {
+                nextValue = (uint8)prev.y;
+            }
+            else
+            {
+                double scale = ((next.y - prev.y)*1.0) / (next.x - prev.x);
+                nextValue = (scale * (microTime-prev.x)) + prev.y;
+            }
+            if (nextValue > 0 && nextValue < 100 && nextValue != 5)
+            {
+                Debug::print("writing " + seqItem.first + " with value %d", nextValue);
+            }
+            HcpManager::ExecCommand(seqItem.first, nextValue);
         }
     }
 
