@@ -35,6 +35,7 @@ void HcpManager::restart()
 
 void HcpManager::LoadMapping()
 {
+    Debug::info("loading mapping...");
     mapping = json::parse(utils::loadFile(MAPPING_FILE_PATH));
     Debug::info("mapping loaded");
 }
