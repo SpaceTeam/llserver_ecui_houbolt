@@ -76,7 +76,7 @@ void Socket::asyncListen(std::function<void(int32, json)> onMsgCallback)
         }
 //        cout << valread << endl;
         string msg(buffer);
-//        cout << msg << endl;
+        cout << msg << endl;
 
         json jsonMsg = json::parse(msg);
 

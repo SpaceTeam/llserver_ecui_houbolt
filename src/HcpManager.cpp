@@ -633,7 +633,7 @@ bool HcpManager::SetMotor(uint8 port, Motor_Mode mode, int16 amount)
         msg.payload[2] = highAmount;
         msg.payload[3] = lowAmount;
 
-        Debug::info("set motor %d to %d", port, amount);
+        printf("set motor %d to %d", port, amount);
 
         serialMtx.lock();
         hcpSerial->Write(msg);
@@ -642,10 +642,16 @@ bool HcpManager::SetMotor(uint8 port, Motor_Mode mode, int16 amount)
 
         if (rep != nullptr)
         {
+	        printf("REP yields optcode %x", rep->optcode);
+
             if (rep->optcode == HCP_OK)
             {
                 success = true;
             }
+	    else
+	    {
+	        printf("REP yields optcode %x", rep->optcode);
+	    }
             delete rep->payload;
             delete rep;
         }

@@ -25,24 +25,24 @@
     "servo": {
         "fuel": {
             "endpoints": [
-                1000,
+                1300,
                 1800
             ],
             "feedbackAnalog": "fuel feedback",
             "feedbackEndpoints": [
-                2955,
-                101
+                272,
+                269
             ],
             "port": 0
         },
         "oxidizer": {
             "endpoints": [
-                1200,
+                1100,
                 2200
             ],
             "feedbackAnalog": "oxidizer feedback",
             "feedbackEndpoints": [
-                220,
+                1756,
                 2200
             ],
             "port": 1
