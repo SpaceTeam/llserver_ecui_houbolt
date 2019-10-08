@@ -688,10 +688,13 @@ uint16 HcpManager::GetAnalog(std::string name)
             vector<uint16> servoEndpoints = servo["endpoints"];
             vector<uint16> fbckEndpoints = servo["feedbackEndpoints"];
 
-            //convert to percentage
             float norm = (((value-fbckEndpoints[0])*1.0) / (fbckEndpoints[1] - fbckEndpoints[0]));
-	    value = ((servoEndpoints[1] - servoEndpoints[0])*norm) + servoEndpoints[0]; 
-	    cout << fbckEndpoints[0] << " : " << fbckEndpoints[1] << " :value: " << value << endl;
+
+            //convert to us
+            //value = ((servoEndpoints[1] - servoEndpoints[0])*norm) + servoEndpoints[0];
+
+            //convert to percentage
+            value = norm * 100;
         }
     }
     else
