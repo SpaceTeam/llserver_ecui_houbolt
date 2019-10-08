@@ -30,29 +30,35 @@ int Socket::init(std::function<void(int32, json)> onMsgCallback)
 {
     struct sockaddr_in serv_addr;
 
-    if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    while (!connectionActive)
     {
-        printf("\n Socket creation error \n");
-        return -1;
+        if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        {
+            printf("\n Socket creation error \n");
+            continue;
+        }
+
+        serv_addr.sin_family = AF_INET;
+        serv_addr.sin_port = htons(PORT);
+
+        // Convert IPv4 and IPv6 addresses from text to binary form
+        if (inet_pton(AF_INET, SOCKET_IP, &serv_addr.sin_addr) <= 0)
+        {
+            printf("\nInvalid address/ Address not supported \n");
+            continue;
+        }
+
+        if (connect(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+        {
+            printf("\nWaiting for connection...\n");
+            sleep(3);
+            continue;
+
+        }
+
+        connectionActive = true;
     }
-
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
-
-    // Convert IPv4 and IPv6 addresses from text to binary form
-    if(inet_pton(AF_INET, SOCKET_IP, &serv_addr.sin_addr)<=0)
-    {
-        printf("\nInvalid address/ Address not supported \n");
-        return -1;
-    }
-
-    if (connect(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-    {
-        printf("\nConnection Failed \n");
-        return -1;
-    }
-
-    connectionActive = true;
+    printf("Connected \n");
 
     asyncListenThread = new thread(asyncListen, onMsgCallback);
 
