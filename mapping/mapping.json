@@ -26,12 +26,12 @@
         "fuel": {
             "endpoints": [
                 1300,
-                1800
+                1700
             ],
             "feedbackAnalog": "fuel feedback",
             "feedbackEndpoints": [
-                272,
-                269
+                92,
+                4093
             ],
             "port": 0
         },

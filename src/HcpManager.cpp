@@ -203,13 +203,11 @@ std::map<std::string, uint16> HcpManager::GetAllSensors()
         uint8 port;
         for (auto it = mapping["analog"].begin(); it != mapping["analog"].end(); ++it)
         {
-            port = it.value()["port"];
-            sensors[it.key()] = GetAnalog(port);
+            sensors[it.key()] = GetAnalog(it.key());
         }
         for (auto it = mapping["digital"].begin(); it != mapping["digital"].end(); ++it)
         {
-            port = it.value()["port"];
-            sensors[it.key()] = GetDigital(port);
+            sensors[it.key()] = GetDigital(it.key());
         }
     }
     else
@@ -634,7 +632,7 @@ bool HcpManager::SetMotor(uint8 port, Motor_Mode mode, int16 amount)
         msg.payload[2] = highAmount;
         msg.payload[3] = lowAmount;
 
-        printf("set motor %d to %d", port, amount);
+        Debug::print("set motor %d to %d", port, amount);
 
         serialMtx.lock();
         hcpSerial->Write(msg);
@@ -643,8 +641,6 @@ bool HcpManager::SetMotor(uint8 port, Motor_Mode mode, int16 amount)
 
         if (rep != nullptr)
         {
-	        printf("REP yields optcode %x", rep->optcode);
-
             if (rep->optcode == HCP_OK)
             {
                 success = true;
@@ -689,10 +685,13 @@ uint16 HcpManager::GetAnalog(std::string name)
             string servoName = device["servo"];
             json servo = mapping["servo"][servoName];
 
-            vector<uint8> fbckEndpoints = servo["feedbackEndpoints"];
+            vector<uint16> servoEndpoints = servo["endpoints"];
+            vector<uint16> fbckEndpoints = servo["feedbackEndpoints"];
 
             //convert to percentage
-            value = (((value-fbckEndpoints[0])*1.0) / (fbckEndpoints[1] - fbckEndpoints[0])) * 100.0;
+            float norm = (((value-fbckEndpoints[0])*1.0) / (fbckEndpoints[1] - fbckEndpoints[0]));
+	    value = ((servoEndpoints[1] - servoEndpoints[0])*norm) + servoEndpoints[0]; 
+	    cout << fbckEndpoints[0] << " : " << fbckEndpoints[1] << " :value: " << value << endl;
         }
     }
     else
