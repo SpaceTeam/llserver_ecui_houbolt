@@ -14,10 +14,6 @@ using namespace std;
 
 void processMessage(int sock, json msg)
 {
-    json testmsg;
-    testmsg["type"] = "success";
-    testmsg["content"] = json::object();
-    string strmsg = testmsg.dump() + "\n\0";
     if (utils::keyExists(msg, "type"))
     {
         string type = msg["type"];
@@ -89,6 +85,17 @@ void processMessage(int sock, json msg)
             json servosData = HcpManager::GetAllServoData();
             Socket::sendJson("servos-load", servosData);
 
+        }
+        else if (type.compare("digital-outs-set") == 0)
+        {
+            string name;
+            bool value;
+            for (auto digitalOutputs : msg["content"])
+            {
+                name = digitalOutputs["id"];
+                value = digitalOutputs["value"];
+                HcpManager::SetDigitalOutputs(name, value);
+            }
         }
         else
         {

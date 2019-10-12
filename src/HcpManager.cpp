@@ -73,6 +73,19 @@ bool HcpManager::CheckPort(uint8 port, Device_Type type)
             return false;
         }
     }
+    //NOTE : currently digital out is using motor ports!
+    else if (type == Device_Type::DIGITAL_OUT)
+    {
+        if (port < MOTOR_COUNT)
+        {
+            return true;
+        }
+        else
+        {
+            Debug::error("Digital Output Port %d above maxium port number", port);
+            return false;
+        }
+    }
     else if (type == Device_Type::ANALOG)
     {
         if (port < ANALOG_COUNT)
@@ -110,6 +123,10 @@ std::string HcpManager::GetTypeName(Device_Type type)
     else if (type == Device_Type::MOTOR)
     {
         typeName = "motor";
+    }
+    else if (type == Device_Type::DIGITAL_OUT)
+    {
+        typeName = "digitalOut";
     }
     else if (type == Device_Type::ANALOG)
     {
@@ -279,7 +296,13 @@ bool HcpManager::ExecCommand(std::string name, uint8 percent)
             {
                 //TODO: change so negative values can be set as well
                 uint8 port = device["port"];
-                success = SetMotor(port, percent*10);
+                success = SetMotor(port, (int8)percent);
+            }
+            else if (typeName.compare("digitalOut") == 0)
+            {
+
+                uint8 port = device["port"];
+                success = SetDigitalOutputs(port, (bool)percent);
             }
             else
             {
@@ -426,7 +449,7 @@ void HcpManager::SetServoMax(std::string name, uint16 max)
             Debug::info("no feedback label found");
         }
         servo["endpoints"][1] = max;
-	mapping["servo"][name] = servo;
+	    mapping["servo"][name] = servo;
         SaveMapping();
     }
     else
@@ -587,9 +610,9 @@ bool HcpManager::SetServo(json device, uint8 percent)
     return success;
 }
 
-bool HcpManager::SetMotor(uint8 port, int16 amount)
+bool HcpManager::SetMotor(uint8 port, int8 percent)
 {
-    return SetMotor(port, Motor_Mode::POWER, amount);
+    return SetMotorRaw(port, Motor_Mode::POWER, percent*10);
 }
 
 bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16 amount)
@@ -601,7 +624,7 @@ bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16 amount)
     if (device != nullptr)
     {
         uint8 port = device["port"];
-        success = SetMotor(port, mode, amount);
+        success = SetMotorRaw(port, mode, amount);
     }
     else
     {
@@ -610,7 +633,7 @@ bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16 amount)
     return success;
 }
 
-bool HcpManager::SetMotor(uint8 port, Motor_Mode mode, int16 amount)
+bool HcpManager::SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount)
 {
     bool success = false;
 
@@ -666,7 +689,48 @@ bool HcpManager::SetMotor(uint8 port, Motor_Mode mode, int16 amount)
     return success;
 }
 
+bool HcpManager::SetDigitalOutputs(std::string name, bool enable)
+{
+    bool success = false;
 
+    json device = FindObjectByName(name, Device_Type::DIGITAL_OUT);
+
+    if (device != nullptr)
+    {
+        uint8 port = device["port"];
+        SetDigitalOutputs(port, enable);
+    }
+    else
+    {
+        Debug::error("digital output not found");
+    }
+    return success;
+}
+
+//careful: digitalOut and motor share the same ports
+bool HcpManager::SetDigitalOutputs(uint8 port, bool enable)
+{
+    bool success = false;
+
+    if (CheckPort(port, Device_Type::DIGITAL_OUT))
+    {
+        Debug::info("set digital output %d to %d", port, enable);
+        if (enable)
+        {
+            success = SetMotorRaw(port, Motor_Mode::POWER, 1000);
+        }
+        else
+        {
+            success = SetMotorRaw(port, Motor_Mode::POWER, 0);
+        }
+    }
+    else
+    {
+        Debug::error("Digital Output Port %d not valid in mapping", port);
+    }
+
+    return success;
+}
 
 uint16 HcpManager::GetAnalog(std::string name)
 {

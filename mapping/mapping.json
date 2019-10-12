@@ -17,16 +17,17 @@
             "port": 3
         }
     },
-    "motor": {
+    "digitalOut": {
         "igniter": {
             "port": 0
         }
     },
+    "motor": {},
     "servo": {
         "fuel": {
             "endpoints": [
-                1300,
-                1700
+                1200,
+                1800
             ],
             "feedbackAnalog": "fuel feedback",
             "feedbackEndpoints": [

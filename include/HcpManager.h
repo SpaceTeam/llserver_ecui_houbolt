@@ -22,6 +22,7 @@ typedef enum class device_type_e
 {
 	SERVO,
 	MOTOR,
+	DIGITAL_OUT,
 	ANALOG,
 	DIGITAL
 } Device_Type;
@@ -85,9 +86,12 @@ public:
     static bool SetServo(uint8 port, uint8 percent);
     static bool SetServo(std::string name, uint8 percent);
 
-    static bool SetMotor(uint8 port, int16 amount);
-    static bool SetMotor(uint8 port, Motor_Mode mode, int16 amount);
+    static bool SetMotor(uint8 port, int8 percent);
+    static bool SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount);
     static bool SetMotor(std::string name, Motor_Mode mode, int16 amount);
+
+    static bool SetDigitalOutputs(uint8 port, bool enable);
+    static bool SetDigitalOutputs(std::string name, bool enable);
 
     static uint16 GetAnalog(std::string name);
     static uint16 GetAnalog(uint8 port);
