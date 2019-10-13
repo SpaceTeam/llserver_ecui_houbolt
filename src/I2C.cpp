@@ -14,6 +14,7 @@ using namespace std;
 
 I2C::I2C(int devId)
 {
+    cout << "WiringPi detected" << endl;
     this->devId = devId;
     this->i2cFile = wiringPiI2CSetup(devId); //0x20
 
