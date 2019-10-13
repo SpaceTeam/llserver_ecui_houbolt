@@ -16,4 +16,14 @@ file(GLOB sources ./*.cpp src/*.cpp include/*.h)
 
 add_executable(${PROJECT_NAME} ${sources})
 #spdlog_enable_warnings(${PROJECT_NAME})
-target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads )#spdlog::spdlog)
+
+
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+endif()
+
+if(LINUX)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads wiringPi)#spdlog::spdlog)
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)#spdlog::spdlog)
+endif()

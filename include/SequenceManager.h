@@ -14,6 +14,7 @@
 //#include "spdlog/sinks/basic_file_sink.h"
 
 #include "Timer.h"
+#include "I2C.h"
 
 using json = nlohmann::json;
 
@@ -38,6 +39,9 @@ private:
     static json jsonAbortSequence;
 
     static std::map<std::string, Point[2]> sequenceIntervalMap;
+
+    //TODO: move this to another class
+    static I2C* i2cDevice;
 
 //    static std::shared_ptr<spdlog::logger> async_file;
 

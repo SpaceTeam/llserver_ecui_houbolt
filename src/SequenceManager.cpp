@@ -29,10 +29,14 @@ json SequenceManager::jsonAbortSequence = json::object();
 
 std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
 
+I2C* SequenceManager::i2cDevice;
+
 void SequenceManager::init()
 {
     timer = new Timer();
     sensorTimer = new Timer();
+
+    i2cDevice = new I2C(I2C_DEVICE_ADDRESS);
 }
 
 
@@ -94,6 +98,9 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         {
             msg += sensorNames[i] + ";";
         }
+        //add thrust sensor
+        msg += "thrust;";
+
         //async_file->info("Timestep;" + msg);
         logging::INFO("Timestep;" + msg);
 
@@ -220,11 +227,15 @@ void SequenceManager::GetSensors(int64 microTime)
 {
     map<string, uint16> sensors = HcpManager::GetAllSensors();
 
+    //add thrust sensor value
+    sensors["thrust"] = i2cDevice->ReadByte();
+
     vector<uint16> vals;
     for (const auto& sensor : sensors)
     {
         vals.push_back(sensor.second);
     }
+
     LogSensors(microTime, vals);
 
     if (microTime % SENSOR_TRANSMISSION_INTERVAL == 0)
