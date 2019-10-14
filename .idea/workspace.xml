@@ -13,7 +13,7 @@
   <component name="ChangeListManager">
     <list default="true" id="6c052466-eab4-467e-8b73-a62cd50cac8b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/TXV_ECUI_LLSERVER" beforeDir="false" afterPath="$PROJECT_DIR$/TXV_ECUI_LLSERVER" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/SequenceManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/SequenceManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/config.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SequenceManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/SequenceManager.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -45,8 +45,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/SequenceManager.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="200">
-              <caret line="241" column="55" selection-start-line="241" selection-start-column="55" selection-end-line="241" selection-end-column="55" />
+            <state relative-caret-position="185">
+              <caret line="240" column="46" selection-start-line="240" selection-start-column="46" selection-end-line="240" selection-end-column="46" />
               <folding>
                 <element signature="e#43#71#0" expanded="true" />
               </folding>
@@ -126,7 +126,7 @@
         <entry file="file://$PROJECT_DIR$/src/Socket.cpp">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-572">
-              <caret line="58" column="32" lean-forward="true" selection-start-line="58" selection-start-column="32" selection-end-line="58" selection-end-column="32" />
+              <caret line="58" column="32" selection-start-line="58" selection-start-column="32" selection-end-line="58" selection-end-column="32" />
               <folding>
                 <element signature="e#43#61#0" expanded="true" />
               </folding>
@@ -137,8 +137,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/include/config.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" selection-start-line="7" selection-end-line="7" />
+            <state relative-caret-position="135">
+              <caret line="9" column="67" lean-forward="true" selection-start-line="9" selection-start-column="67" selection-end-line="9" selection-end-column="67" />
             </state>
           </provider>
         </entry>
@@ -204,8 +204,8 @@
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/src/I2C.cpp" />
         <option value="$PROJECT_DIR$/mapping/mapping.json" />
-        <option value="$PROJECT_DIR$/include/config.h" />
         <option value="$PROJECT_DIR$/include/SequenceManager.h" />
+        <option value="$PROJECT_DIR$/include/config.h" />
         <option value="$PROJECT_DIR$/src/SequenceManager.cpp" />
       </list>
     </option>
@@ -312,7 +312,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="149249000" />
+    <option name="totallyTimeSpent" value="149685000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1920" y="0" width="1920" height="1080" extended-state="0" />
@@ -587,13 +587,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/include/config.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" selection-start-line="7" selection-end-line="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Debug.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1430">
@@ -619,7 +612,7 @@
     <entry file="file://$PROJECT_DIR$/src/Socket.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-572">
-          <caret line="58" column="32" lean-forward="true" selection-start-line="58" selection-start-column="32" selection-end-line="58" selection-end-column="32" />
+          <caret line="58" column="32" selection-start-line="58" selection-start-column="32" selection-end-line="58" selection-end-column="32" />
           <folding>
             <element signature="e#43#61#0" expanded="true" />
           </folding>
@@ -643,10 +636,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/include/config.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="67" lean-forward="true" selection-start-line="9" selection-start-column="67" selection-end-line="9" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/SequenceManager.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="241" column="55" selection-start-line="241" selection-start-column="55" selection-end-line="241" selection-end-column="55" />
+        <state relative-caret-position="185">
+          <caret line="240" column="46" selection-start-line="240" selection-start-column="46" selection-end-line="240" selection-end-column="46" />
           <folding>
             <element signature="e#43#71#0" expanded="true" />
           </folding>
