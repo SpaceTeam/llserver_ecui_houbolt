@@ -5,7 +5,7 @@
 #ifndef TXV_ECUI_LLSERVER_CONFIG_H
 #define TXV_ECUI_LLSERVER_CONFIG_H
 
-//#define LLSERVER_DEBUG
+#define LLSERVER_DEBUG
 
 #define SEQUENCE_FILE_PATH "../TXV_ECUI_WEB/sequence/Sequence.json"
 #define ABORT_EQUENCE_FILE_PATH "../TXV_ECUI_WEB/sequence/AbortSequence.json"
