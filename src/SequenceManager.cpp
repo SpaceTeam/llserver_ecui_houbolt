@@ -28,7 +28,7 @@ json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
 
 std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
-std::map<std::string, int16[2]> SequenceManager::sensorsNominalRangeMap;
+std::map<std::string, double[2]> SequenceManager::sensorsNominalRangeMap;
 
 I2C* SequenceManager::i2cDevice;
 
@@ -54,15 +54,15 @@ void SequenceManager::StopSequence()
     }
 }
 
-void SequenceManager::AbortSequence()
+void SequenceManager::AbortSequence(std::string abortMsg)
 {
     if (isRunning)
     {
         isAbort = true;
         timer->stop();
         sensorTimer->stop();
-        Socket::sendJson("abort");
-        Debug::print("aborting...");
+        Socket::sendJson("abort", abortMsg);
+        Debug::print("aborting... " + abortMsg);
         isRunning = false;
         StartAbortSequence();
         isAbort = false;
@@ -238,8 +238,8 @@ void SequenceManager::GetSensors(int64 microTime)
         {
             if (sensorsNominalRangeMap[sensor.first][0] > sensor.second || sensor.second > sensorsNominalRangeMap[sensor.first][1])
             {
-                cout << "Sensor: " << sensor.first << " FATAL value : " << sensor.second << " auto abort" << endl;
-                SequenceManager::AbortSequence();
+                string abortMsg = "Sensor: " + sensor.first + " FATAL value : " + to_string(sensor.second) + " auto abort";
+                SequenceManager::AbortSequence(abortMsg);
             }
         }
         vals.push_back(sensor.second);
