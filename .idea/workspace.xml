@@ -43,8 +43,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/SequenceManager.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="154">
-              <caret line="241" column="16" selection-start-line="241" selection-start-column="16" selection-end-line="241" selection-end-column="16" />
+            <state relative-caret-position="422">
+              <caret line="246" column="57" selection-start-line="246" selection-start-column="57" selection-end-line="246" selection-end-column="57" />
               <folding>
                 <element signature="e#43#71#0" expanded="true" />
               </folding>
@@ -313,7 +313,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="150555000" />
+    <option name="totallyTimeSpent" value="150823000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1920" y="0" width="1920" height="1080" extended-state="0" />
@@ -646,8 +646,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/SequenceManager.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="154">
-          <caret line="241" column="16" selection-start-line="241" selection-start-column="16" selection-end-line="241" selection-end-column="16" />
+        <state relative-caret-position="422">
+          <caret line="246" column="57" selection-start-line="246" selection-start-column="57" selection-end-line="246" selection-end-column="57" />
           <folding>
             <element signature="e#43#71#0" expanded="true" />
           </folding>
