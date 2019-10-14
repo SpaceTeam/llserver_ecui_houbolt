@@ -5,16 +5,16 @@
             "servo": "fuel"
         },
         "oxidizer feedback": {
-            "port": 2,
+            "port": 1,
             "servo": "oxidizer"
         },
-        "test": {
-            "port": 1
+        "chamberPressure": {
+            "port": 2
         }
     },
     "digital": {
         "safety": {
-            "port": 3
+            "port": 4
         }
     },
     "digitalOut": {

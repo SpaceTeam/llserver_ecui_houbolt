@@ -39,6 +39,7 @@ private:
     static json jsonAbortSequence;
 
     static std::map<std::string, Point[2]> sequenceIntervalMap;
+    static std::map<std::string, int16[2]> sensorsNominalRangeMap;
 
     //TODO: move this to another class
     static I2C* i2cDevice;

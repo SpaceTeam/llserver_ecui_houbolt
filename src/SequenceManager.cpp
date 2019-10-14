@@ -28,6 +28,7 @@ json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
 
 std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
+std::map<std::string, int16[2]> SequenceManager::sensorsNominalRangeMap;
 
 I2C* SequenceManager::i2cDevice;
 
@@ -152,7 +153,7 @@ void SequenceManager::LoadIntervalMap()
                     int64 timestampMicros = utils::toMicros(time);
                     for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
                     {
-                        if (it.key().compare("timestamp") != 0)
+                        if (it.key().compare("timestamp") != 0 && it.key().compare("sensorsNominalRange") != 0)
                         {
                             sequenceIntervalMap[it.key()][0].x = timestampMicros;
                             sequenceIntervalMap[it.key()][0].y = (uint8)it.value();
@@ -233,6 +234,14 @@ void SequenceManager::GetSensors(int64 microTime)
     vector<uint16> vals;
     for (const auto& sensor : sensors)
     {
+        if (sensorsNominalRangeMap.find(sensor.first) != sensorsNominalRangeMap.end())
+        {
+            if (sensorsNominalRangeMap[sensor.first][0] > sensor.second || sensor.second > sensorsNominalRangeMap[sensor.first][1])
+            {
+                cout << "Sensor: " << sensor.first << " FATAL value : " << sensor.second << " auto abort" << endl;
+                SequenceManager::AbortSequence();
+            }
+        }
         vals.push_back(sensor.second);
     }
 
@@ -292,7 +301,23 @@ void SequenceManager::Tick(int64 microTime)
                 Debug::print("timestamp | %d", time);
                 for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
                 {
-                    if (it.key().compare("timestamp") != 0)
+                    if (it.key().compare("sensorsNominalRange") == 0)
+                    {
+                        json sensorsRanges = it.value();
+                        for (auto sensorsIt = sensorsRanges.begin(); sensorsIt != sensorsRanges.end(); ++sensorsIt)
+                        {
+                            if (sensorsIt.value().type() == json::value_t::array && sensorsIt.value().size() == 2)
+                            {
+                                sensorsNominalRangeMap[sensorsIt.key()][0] = sensorsIt.value()[0];
+                                sensorsNominalRangeMap[sensorsIt.key()][1] = sensorsIt.value()[1];
+                            }
+                            else
+                            {
+                                cout << "Range of " << sensorsIt.key() << " not valid" << endl;
+                            }
+                        }
+                    }
+                    else if (it.key().compare("timestamp") != 0)
                     {
                         findNext = true;
                         Debug::print(it.key() + " | %d", (uint8)it.value());
