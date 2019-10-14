@@ -239,7 +239,7 @@ void SequenceManager::GetSensors(int64 microTime)
             if (sensorsNominalRangeMap[sensor.first][0] > sensor.second || sensor.second > sensorsNominalRangeMap[sensor.first][1])
             {
                 string abortMsg = "auto abort Sensor: " + sensor.first + " FATAL value : " + to_string(sensor.second);
-                //SequenceManager::AbortSequence(abortMsg);
+                SequenceManager::AbortSequence(abortMsg);
             }
         }
         vals.push_back(sensor.second);
