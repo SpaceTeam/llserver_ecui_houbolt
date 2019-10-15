@@ -23,7 +23,7 @@
 #define SENSOR_TRANSMISSION_INTERVAL 100000 //us
 #define TIMER_SYNC_INTERVAL 5000000 //us
 
-#define MAPPING_FILE_PATH "mapping/mapping.json"
+#define HCP_MAPPING_FILE_PATH "mapping/hcpMapping.json"
 
 #define HCP_DEVICE "/dev/serial0"
 #define HCP_BAUD_RATE 115200

@@ -12,6 +12,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c052466-eab4-467e-8b73-a62cd50cac8b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/include/Mapping.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Mapping.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TXV_ECUI_LLSERVER.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/TXV_ECUI_LLSERVER.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/HcpManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/HcpManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mapping/mapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/mapping/hcpMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/HcpManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/HcpManager.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SequenceManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/SequenceManager.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -27,124 +35,142 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/main.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="407">
-              <caret line="29" column="43" lean-forward="true" selection-start-line="29" selection-start-column="43" selection-end-line="29" selection-end-column="43" />
-              <folding>
-                <element signature="e#1#20#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/SequenceManager.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="422">
-              <caret line="246" column="57" selection-start-line="246" selection-start-column="57" selection-end-line="246" selection-end-column="57" />
-              <folding>
-                <element signature="e#43#71#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Timer.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-315">
-              <caret line="77" column="1" lean-forward="true" selection-start-line="77" selection-start-column="1" selection-end-line="77" selection-end-column="1" />
-              <folding>
-                <element signature="e#44#62#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/include/SequenceManager.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="523">
-              <caret line="68" column="58" selection-start-line="68" selection-start-column="58" selection-end-line="68" selection-end-column="58" />
-              <folding>
-                <element signature="e#132#151#0" expanded="true" />
-                <element signature="e#268#286#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/I2C.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-639">
-              <caret line="16" column="30" selection-start-line="16" selection-start-column="30" selection-end-line="16" selection-end-column="30" />
-              <folding>
-                <element signature="e#43#59#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mapping/mapping.json">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="14" column="16" lean-forward="true" selection-start-line="14" selection-start-column="16" selection-end-line="14" selection-end-column="16" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Debug.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1430">
-              <caret line="100" selection-start-line="100" selection-end-line="100" />
-              <folding>
-                <element signature="e#43#62#0" expanded="true" />
-                <element signature="e#1247#1486#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/HcpManager.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1319">
-              <caret line="303" column="44" selection-start-line="303" selection-start-column="44" selection-end-line="303" selection-end-column="44" />
-              <folding>
-                <element signature="e#43#61#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Socket.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-572">
-              <caret line="58" column="32" selection-start-line="58" selection-start-column="32" selection-end-line="58" selection-end-column="32" />
-              <folding>
-                <element signature="e#43#61#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/include/config.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <splitter split-orientation="horizontal" split-proportion="0.5">
+      <split-first>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/src/SequenceManager.cpp">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="570">
+                  <caret line="241" column="18" selection-start-line="241" selection-start-column="18" selection-end-line="241" selection-end-column="18" />
+                  <folding>
+                    <element signature="e#43#71#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/include/Socket.h">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="330">
+                  <caret line="22" column="4" selection-start-line="22" selection-start-column="4" selection-end-line="22" selection-end-column="30" />
+                  <folding>
+                    <element signature="e#114#133#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/include/Serial.h">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="495">
+                  <caret line="33" selection-start-line="33" selection-end-line="33" />
+                  <folding>
+                    <element signature="e#114#131#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/Timer.cpp">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="15">
+                  <caret line="77" column="1" selection-start-line="77" selection-start-column="1" selection-end-line="77" selection-end-column="1" />
+                  <folding>
+                    <element signature="e#44#62#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/mapping/hcpMapping.json">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="210">
+                  <caret line="14" column="16" selection-start-line="14" selection-start-column="16" selection-end-line="14" selection-end-column="16" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/HcpManager.cpp">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="223">
+                  <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
+                  <folding>
+                    <element signature="e#43#61#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/include/HcpManager.h">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="475">
+                  <caret line="50" column="56" lean-forward="true" selection-start-line="50" selection-start-column="56" selection-end-line="50" selection-end-column="56" />
+                  <folding>
+                    <element signature="e#122#141#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/include/config.h">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="375">
+                  <caret line="25" column="29" selection-start-line="25" selection-start-column="8" selection-end-line="25" selection-end-column="29" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/include/Mapping.h">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="330">
+                  <caret line="22" column="1" lean-forward="true" selection-start-line="22" selection-start-column="1" selection-end-line="22" selection-end-column="1" />
+                  <folding>
+                    <element signature="e#116#135#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/include/utils.h">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="330">
+                  <caret line="22" column="1" selection-start-line="22" selection-start-column="1" selection-end-line="22" selection-end-column="1" />
+                  <folding>
+                    <element signature="e#112#130#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/Mapping.cpp">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="1710">
+                  <caret line="114" column="23" selection-start-line="114" selection-start-column="14" selection-end-line="114" selection-end-column="23" />
+                  <folding>
+                    <element signature="e#43#63#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -159,6 +185,8 @@
       <find>abortSeq</find>
       <find>abortSeque</find>
       <find>abortSe</find>
+      <find>socket</find>
+      <find>Findobject</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -179,7 +207,6 @@
         <option value="$PROJECT_DIR$/src/HcpCommands.h" />
         <option value="$PROJECT_DIR$/src/HcpCommands.cpp" />
         <option value="$PROJECT_DIR$/src/utils.cpp" />
-        <option value="$PROJECT_DIR$/include/utils.h" />
         <option value="$PROJECT_DIR$/include/common.h" />
         <option value="$PROJECT_DIR$/src/HcpManager.h" />
         <option value="$PROJECT_DIR$/include/Debug.h" />
@@ -195,8 +222,6 @@
         <option value="$PROJECT_DIR$/include/Logging.h" />
         <option value="$PROJECT_DIR$/src/Socket.cpp" />
         <option value="$PROJECT_DIR$/main.cpp" />
-        <option value="$PROJECT_DIR$/include/HcpManager.h" />
-        <option value="$PROJECT_DIR$/src/HcpManager.cpp" />
         <option value="$PROJECT_DIR$/ecui-llserver.service" />
         <option value="$PROJECT_DIR$/install.sh" />
         <option value="$PROJECT_DIR$/update.sh" />
@@ -206,7 +231,12 @@
         <option value="$PROJECT_DIR$/src/I2C.cpp" />
         <option value="$PROJECT_DIR$/mapping/mapping.json" />
         <option value="$PROJECT_DIR$/include/SequenceManager.h" />
+        <option value="$PROJECT_DIR$/include/utils.h" />
         <option value="$PROJECT_DIR$/include/config.h" />
+        <option value="$PROJECT_DIR$/src/Mapping.cpp" />
+        <option value="$PROJECT_DIR$/include/HcpManager.h" />
+        <option value="$PROJECT_DIR$/include/Mapping.h" />
+        <option value="$PROJECT_DIR$/src/HcpManager.cpp" />
         <option value="$PROJECT_DIR$/src/SequenceManager.cpp" />
       </list>
     </option>
@@ -222,6 +252,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -237,11 +268,6 @@
             <path>
               <item name="TXV_ECUI_LLSERVER" type="b2602c69:ProjectViewProjectNode" />
               <item name="TXV_ECUI_LLServer" type="462c0819:PsiDirectoryNode" />
-              <item name="logs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="TXV_ECUI_LLSERVER" type="b2602c69:ProjectViewProjectNode" />
-              <item name="TXV_ECUI_LLServer" type="462c0819:PsiDirectoryNode" />
               <item name="mapping" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -253,7 +279,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -265,11 +290,11 @@
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/include" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -313,13 +338,13 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="150823000" />
+    <option name="totallyTimeSpent" value="158142000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1920" y="0" width="1920" height="1080" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.185836" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18743344" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="CMake" order="0" />
@@ -332,7 +357,7 @@
       <window_info anchor="bottom" id="Inspection" order="7" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
-      <window_info anchor="bottom" id="Version Control" order="10" />
+      <window_info anchor="bottom" id="Version Control" order="10" weight="0.32970297" />
       <window_info anchor="bottom" id="Terminal" order="11" />
       <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -348,14 +373,6 @@
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.csv" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Server.cpp" />
-    <entry file="file://$PROJECT_DIR$/include/json.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-333249">
-          <caret line="84" column="1" lean-forward="true" selection-start-line="84" selection-start-column="1" selection-end-line="84" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CMakeCache.txt" />
     <entry file="file://$PROJECT_DIR$/src/Serial.h" />
     <entry file="file://$PROJECT_DIR$/include/common.h">
@@ -379,16 +396,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="405">
           <caret line="29" column="16" selection-start-line="29" selection-start-column="16" selection-end-line="29" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/utils.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="57" selection-start-line="18" selection-start-column="57" selection-end-line="18" selection-end-column="57" />
-          <folding>
-            <element signature="e#112#130#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -421,13 +428,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/logs/03_10_2019__18_44_29.csv" />
-    <entry file="file://$PROJECT_DIR$/src/utils.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="18" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="SPLIT">
@@ -452,16 +452,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/include/HcpManager.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-475">
-          <caret line="24" column="16" selection-start-line="24" selection-start-column="16" selection-end-line="24" selection-end-column="16" />
-          <folding>
-            <element signature="e#122#141#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ecui-llserver.service">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="195">
@@ -483,30 +473,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/include/Serial.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="22" selection-start-line="22" selection-end-line="42" selection-end-column="18" />
-          <folding>
-            <element signature="e#114#131#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/unistd.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="244">
           <caret line="435" column="5" selection-start-line="435" selection-start-column="5" selection-end-line="435" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/Socket.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="22" column="4" selection-start-line="22" selection-start-column="4" selection-end-line="22" selection-end-column="30" />
-          <folding>
-            <element signature="e#114#133#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -560,7 +530,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/I2C.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-639">
+        <state relative-caret-position="199">
           <caret line="16" column="30" selection-start-line="16" selection-start-column="30" selection-end-line="16" selection-end-column="30" />
           <folding>
             <element signature="e#43#59#0" expanded="true" />
@@ -568,19 +538,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/HcpManager.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1319">
-          <caret line="303" column="44" selection-start-line="303" selection-start-column="44" selection-end-line="303" selection-end-column="44" />
-          <folding>
-            <element signature="e#43#61#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Debug.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1430">
+        <state relative-caret-position="1500">
           <caret line="100" selection-start-line="100" selection-end-line="100" />
           <folding>
             <element signature="e#43#62#0" expanded="true" />
@@ -591,7 +551,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/include/SequenceManager.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="523">
+        <state relative-caret-position="1020">
           <caret line="68" column="58" selection-start-line="68" selection-start-column="58" selection-end-line="68" selection-end-column="58" />
           <folding>
             <element signature="e#132#151#0" expanded="true" />
@@ -602,7 +562,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Socket.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-572">
+        <state relative-caret-position="870">
           <caret line="58" column="32" selection-start-line="58" selection-start-column="32" selection-end-line="58" selection-end-column="32" />
           <folding>
             <element signature="e#43#61#0" expanded="true" />
@@ -610,44 +570,121 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mapping/mapping.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="16" lean-forward="true" selection-start-line="14" selection-start-column="16" selection-end-line="14" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="407">
-          <caret line="29" column="43" lean-forward="true" selection-start-line="29" selection-start-column="43" selection-end-line="29" selection-end-column="43" />
+        <state relative-caret-position="63">
+          <caret line="29" column="43" selection-start-line="29" selection-start-column="43" selection-end-line="29" selection-end-column="43" />
           <folding>
             <element signature="e#1#20#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Timer.cpp">
+    <entry file="file://$PROJECT_DIR$/include/Serial.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-315">
-          <caret line="77" column="1" lean-forward="true" selection-start-line="77" selection-start-column="1" selection-end-line="77" selection-end-column="1" />
+        <state relative-caret-position="495">
+          <caret line="33" selection-start-line="33" selection-end-line="33" />
           <folding>
-            <element signature="e#44#62#0" expanded="true" />
+            <element signature="e#114#131#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/utils.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="18" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/utils.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" column="1" selection-start-line="22" selection-start-column="1" selection-end-line="22" selection-end-column="1" />
+          <folding>
+            <element signature="e#112#130#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/include/config.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+        <state relative-caret-position="375">
+          <caret line="25" column="29" selection-start-line="25" selection-start-column="8" selection-end-line="25" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/Socket.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" column="4" selection-start-line="22" selection-start-column="4" selection-end-line="22" selection-end-column="30" />
+          <folding>
+            <element signature="e#114#133#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Mapping.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1710">
+          <caret line="114" column="23" selection-start-line="114" selection-start-column="14" selection-end-line="114" selection-end-column="23" />
+          <folding>
+            <element signature="e#43#63#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/HcpManager.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="475">
+          <caret line="50" column="56" lean-forward="true" selection-start-line="50" selection-start-column="56" selection-end-line="50" selection-end-column="56" />
+          <folding>
+            <element signature="e#122#141#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/Mapping.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" column="1" lean-forward="true" selection-start-line="22" selection-start-column="1" selection-end-line="22" selection-end-column="1" />
+          <folding>
+            <element signature="e#116#135#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/HcpManager.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="223">
+          <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
+          <folding>
+            <element signature="e#43#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mapping/hcpMapping.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="16" selection-start-line="14" selection-start-column="16" selection-end-line="14" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Timer.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="77" column="1" selection-start-line="77" selection-start-column="1" selection-end-line="77" selection-end-column="1" />
+          <folding>
+            <element signature="e#44#62#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/SequenceManager.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="422">
-          <caret line="246" column="57" selection-start-line="246" selection-start-column="57" selection-end-line="246" selection-end-column="57" />
+        <state relative-caret-position="570">
+          <caret line="241" column="18" selection-start-line="241" selection-start-column="18" selection-end-line="241" selection-end-column="18" />
           <folding>
             <element signature="e#43#71#0" expanded="true" />
           </folding>

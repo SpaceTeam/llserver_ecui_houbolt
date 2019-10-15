@@ -6,6 +6,7 @@
 #include "config.h"
 #include "HcpCommands.h"
 
+
 #include "HcpManager.h"
 
 using json = nlohmann::json;
@@ -13,7 +14,7 @@ using json = nlohmann::json;
 using namespace std;
 
 Serial* HcpManager::hcpSerial;
-json HcpManager::mapping = nullptr;
+Mapping* HcpManager::mapping;
 //TODO: set default position at the beginning instead
 uint16 HcpManager::lastServoPosArr[SERVO_COUNT] = {1000};
 bool HcpManager::servoEnabledArr[SERVO_COUNT] = {false};
@@ -23,7 +24,7 @@ std::recursive_mutex HcpManager::serialMtx;
 void HcpManager::init()
 {
     hcpSerial = new Serial(HCP_DEVICE, HCP_BAUD_RATE);
-    LoadMapping();
+    mapping = new Mapping(HCP_MAPPING_FILE_PATH);
 }
 
 //TODO: check if connected
@@ -31,19 +32,6 @@ void HcpManager::restart()
 {
     delete hcpSerial;
     hcpSerial = new Serial(HCP_DEVICE, HCP_BAUD_RATE);
-}
-
-void HcpManager::LoadMapping()
-{
-    Debug::info("loading mapping...");
-    mapping = json::parse(utils::loadFile(MAPPING_FILE_PATH));
-    Debug::info("mapping loaded");
-}
-
-void HcpManager::SaveMapping()
-{
-    utils::saveFile(MAPPING_FILE_PATH, mapping.dump(4));
-    Debug::info("mapping saved");
 }
 
 bool HcpManager::CheckPort(uint8 port, Device_Type type)
@@ -113,99 +101,34 @@ bool HcpManager::CheckPort(uint8 port, Device_Type type)
 
 }
 
-std::string HcpManager::GetTypeName(Device_Type type)
-{
-    string typeName;
-    if (type == Device_Type::SERVO)
-    {
-        typeName = "servo";
-    }
-    else if (type == Device_Type::MOTOR)
-    {
-        typeName = "motor";
-    }
-    else if (type == Device_Type::DIGITAL_OUT)
-    {
-        typeName = "digitalOut";
-    }
-    else if (type == Device_Type::ANALOG)
-    {
-        typeName = "analog";
-    }
-    else if (type == Device_Type::DIGITAL)
-    {
-        typeName = "digital";
-    }
-    return typeName;
-}
-
-json HcpManager::FindObjectByName(std::string name, Device_Type type)
-{
-    json device = nullptr;
-
-    if (mapping != nullptr)
-    {
-        string typeName = GetTypeName(type);
-
-        for (auto it = mapping[typeName].begin(); it != mapping[typeName].end(); ++it)
-        {
-            if (it.key().compare(name) == 0)
-            {
-                device = it.value();
-                break;
-            }
-        }
-    }
-    else
-    {
-        Debug::error("Mapping is null");
-    }
-    return device;
-}
-
-json HcpManager::FindObjectByPort(uint8 port, Device_Type type)
-{
-    json device = nullptr;
-
-    if (mapping != nullptr)
-    {
-        string typeName = GetTypeName(type);
-
-        for (auto dev : mapping[typeName])
-        {
-            if (dev["port"] == port)
-            {
-                device = dev;
-                break;
-            }
-        }
-    }
-    else
-    {
-        Debug::error("Mapping is null");
-    }
-    return device;
-}
-
 std::vector<std::string> HcpManager::GetAllSensorNames()
 {
     vector<std::string> sensorNames;
 
-    if (mapping != nullptr)
+    json analogs = mapping->GetDevices(Device_Type::ANALOG);
+    json digitals = mapping->GetDevices(Device_Type::DIGITAL);
+    if (analogs != nullptr)
     {
-        uint8 port;
-        for (auto it = mapping["analog"].begin(); it != mapping["analog"].end(); ++it)
-        {
-            sensorNames.push_back(it.key());
-        }
-        for (auto it = mapping["digital"].begin(); it != mapping["digital"].end(); ++it)
+        for (auto it = analogs.begin(); it != analogs.end(); ++it)
         {
             sensorNames.push_back(it.key());
         }
     }
     else
     {
-        Debug::error("Mapping is null");
+        Debug::error("No analogs found");
+    }
+
+    if (digitals != nullptr)
+    {
+        for (auto it = digitals.begin(); it != digitals.end(); ++it)
+        {
+            sensorNames.push_back(it.key());
+        }
+    }
+    else
+    {
+        Debug::error("No digitals found");
     }
 
     return sensorNames;
@@ -215,21 +138,30 @@ std::map<std::string, uint16> HcpManager::GetAllSensors()
 {
     map<std::string, uint16> sensors;
 
-    if (mapping != nullptr)
+    json analogs = mapping->GetDevices(Device_Type::ANALOG);
+    json digitals = mapping->GetDevices(Device_Type::DIGITAL);
+    if (analogs != nullptr)
     {
-        uint8 port;
-        for (auto it = mapping["analog"].begin(); it != mapping["analog"].end(); ++it)
+        for (auto it = analogs.begin(); it != analogs.end(); ++it)
         {
             sensors[it.key()] = GetAnalog(it.key());
         }
-        for (auto it = mapping["digital"].begin(); it != mapping["digital"].end(); ++it)
+    }
+    else
+    {
+        Debug::error("No analogs found");
+    }
+
+    if (digitals != nullptr)
+    {
+        for (auto it = digitals.begin(); it != digitals.end(); ++it)
         {
             sensors[it.key()] = GetDigital(it.key());
         }
     }
     else
     {
-        Debug::error("Mapping is null");
+        Debug::error("No digitals found");
     }
 
     return sensors;
@@ -239,11 +171,11 @@ json HcpManager::GetAllServoData()
 {
     json data = json::array();
 
-    if (mapping != nullptr)
+    json servos = mapping->GetDevices(Device_Type::SERVO);
+    if (servos != nullptr)
     {
-        uint8 port;
         json currServo;
-        for (auto it = mapping["servo"].begin(); it != mapping["servo"].end(); ++it)
+        for (auto it = servos.begin(); it != servos.end(); ++it)
         {
             currServo = json::object();
             currServo["name"] = it.key();
@@ -254,7 +186,7 @@ json HcpManager::GetAllServoData()
     }
     else
     {
-        Debug::error("Mapping is null");
+        Debug::error("No Servos found");
     }
 
     return data;
@@ -267,9 +199,10 @@ bool HcpManager::ExecCommand(std::string name, uint8 percent)
     string typeName;
     json device = nullptr;
 
-    if (mapping != nullptr)
+    json jsonMapping = mapping->GetMapping();
+    if (jsonMapping != nullptr)
     {
-        for (auto typeIt = mapping.begin(); typeIt != mapping.end(); ++typeIt)
+        for (auto typeIt = jsonMapping.begin(); typeIt != jsonMapping.end(); ++typeIt)
         {
             for (auto it = typeIt.value().begin(); it != typeIt.value().end(); ++it)
             {
@@ -294,7 +227,6 @@ bool HcpManager::ExecCommand(std::string name, uint8 percent)
             }
             else if (typeName.compare("motor") == 0)
             {
-                //TODO: change so negative values can be set as well
                 uint8 port = device["port"];
                 success = SetMotor(port, (int8)percent);
             }
@@ -377,15 +309,18 @@ bool HcpManager::DisableAllServos()
 
 void HcpManager::SetServoMin(std::string name, uint16 min)
 {
-    if (utils::keyExists(mapping["servo"], name))
+    json servos = mapping->GetDevices(Device_Type::SERVO);
+    json analogs = mapping->GetDevices(Device_Type::ANALOG);
+
+    if (utils::keyExists(servos, name))
     {
-        json servo = mapping["servo"][name];
+        json servo = servos[name];
         if (utils::keyExists(servo, "feedbackAnalog"))
         {
             string fbckName = servo["feedbackAnalog"];
-            if (utils::keyExists(mapping["analog"], fbckName))
+            if (utils::keyExists(analogs, fbckName))
             {
-                json fbckAnalog = mapping["analog"][fbckName];
+                json fbckAnalog = analogs[fbckName];
 
                 bool success = SetServoRaw((uint8)servo["port"], min);
                 if (success)
@@ -407,8 +342,7 @@ void HcpManager::SetServoMin(std::string name, uint16 min)
             Debug::info("no feedback label found");
         }
         servo["endpoints"][0] = min;
-	mapping["servo"][name] = servo;
-        SaveMapping();
+	    mapping->SetDevice(name, servo, Device_Type::SERVO);
     }
     else
     {
@@ -419,15 +353,19 @@ void HcpManager::SetServoMin(std::string name, uint16 min)
 
 void HcpManager::SetServoMax(std::string name, uint16 max)
 {
-    if (utils::keyExists(mapping["servo"], name))
+
+    json servos = mapping->GetDevices(Device_Type::SERVO);
+    json analogs = mapping->GetDevices(Device_Type::ANALOG);
+
+    if (utils::keyExists(servos, name))
     {
-        json servo = mapping["servo"][name];
+        json servo = servos[name];
         if (utils::keyExists(servo, "feedbackAnalog"))
         {
             string fbckName = servo["feedbackAnalog"];
-            if (utils::keyExists(mapping["analog"], fbckName))
+            if (utils::keyExists(analogs, fbckName))
             {
-                json fbckAnalog = mapping["analog"][fbckName];
+                json fbckAnalog = analogs[fbckName];
 
                 bool success = SetServoRaw((uint8)servo["port"], max);
                 if (success)
@@ -449,8 +387,7 @@ void HcpManager::SetServoMax(std::string name, uint16 max)
             Debug::info("no feedback label found");
         }
         servo["endpoints"][1] = max;
-	    mapping["servo"][name] = servo;
-        SaveMapping();
+	    mapping->SetDevice(name, servo, Device_Type::SERVO);
     }
     else
     {
@@ -462,7 +399,7 @@ bool HcpManager::SetServoRaw(std::string name, uint16 onTime)
 {
     bool success = false;
 
-    json device = FindObjectByName(name, Device_Type::SERVO);
+    json device = mapping->GetDeviceByName(name, Device_Type::SERVO);
 
     if (device != nullptr)
     {
@@ -549,7 +486,7 @@ bool HcpManager::SetServo(string name, uint8 percent)
 {
     bool success = false;
 
-    json device = FindObjectByName(name, Device_Type::SERVO);
+    json device = mapping->GetDeviceByName(name, Device_Type::SERVO);
 
     if (device != nullptr)
     {
@@ -566,7 +503,7 @@ bool HcpManager::SetServo(uint8 port, uint8 percent)
 {
     bool success = false;
 
-    json device = FindObjectByPort(port, Device_Type::SERVO);
+    json device = mapping->GetDeviceByPort(port, Device_Type::SERVO);
 
     if (device != nullptr)
     {
@@ -619,7 +556,7 @@ bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16 amount)
 {
     bool success = false;
 
-    json device = FindObjectByName(name, Device_Type::MOTOR);
+    json device = mapping->GetDeviceByName(name, Device_Type::MOTOR);
 
     if (device != nullptr)
     {
@@ -693,7 +630,7 @@ bool HcpManager::SetDigitalOutputs(std::string name, bool enable)
 {
     bool success = false;
 
-    json device = FindObjectByName(name, Device_Type::DIGITAL_OUT);
+    json device = mapping->GetDeviceByName(name, Device_Type::DIGITAL_OUT);
 
     if (device != nullptr)
     {
@@ -736,7 +673,7 @@ uint16 HcpManager::GetAnalog(std::string name)
 {
     uint16 value = -1;
 
-    json device = FindObjectByName(name, Device_Type::ANALOG);
+    json device = mapping->GetDeviceByName(name, Device_Type::ANALOG);
 
     if (device != nullptr)
     {
@@ -746,8 +683,9 @@ uint16 HcpManager::GetAnalog(std::string name)
         {
             Debug::info("converting feedback sensor to percentage");
             //get servo of fbck sensor
+
             string servoName = device["servo"];
-            json servo = mapping["servo"][servoName];
+            json servo = mapping->GetDeviceByName(servoName, Device_Type::SERVO);
 
             vector<uint16> servoEndpoints = servo["endpoints"];
             vector<uint16> fbckEndpoints = servo["feedbackEndpoints"];
@@ -759,6 +697,17 @@ uint16 HcpManager::GetAnalog(std::string name)
 
             //convert to percentage
             value = norm * 100;
+        }
+        else if (utils::keyExists(device, "map"))
+        {
+            Debug::info("mapping sensor value");
+
+            vector<double> mapFrom = device["map"][0];
+            vector<double> mapTo = device["map"][0];
+
+            double norm = (((value-mapFrom[0])*1.0) / (mapFrom[1] - mapFrom[0]));
+
+            value = ((mapTo[1] - mapTo[0])*norm) + mapTo[0];
         }
     }
     else
@@ -830,7 +779,7 @@ uint8 HcpManager::GetDigital(std::string name)
 {
     uint8 state = -1;
 
-    json device = FindObjectByName(name, Device_Type::DIGITAL);
+    json device = mapping->GetDeviceByName(name, Device_Type::DIGITAL);
 
     if (device != nullptr)
     {

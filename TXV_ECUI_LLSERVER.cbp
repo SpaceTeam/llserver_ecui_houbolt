@@ -79,7 +79,13 @@
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/HcpManager.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/I2C.h">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/Logging.h">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/Mapping.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include/SequenceManager.h">
@@ -116,6 +122,12 @@
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/HcpManager.cpp">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/I2C.cpp">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/Mapping.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/src/SequenceManager.cpp">

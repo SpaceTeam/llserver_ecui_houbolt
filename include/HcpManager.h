@@ -9,6 +9,7 @@
 
 #include "HcpCommands.h"
 #include "Serial.h"
+#include "Mapping.h"
 #include "json.hpp"
 
 typedef enum class battery_status_e
@@ -17,15 +18,6 @@ typedef enum class battery_status_e
 	BATTERY_STATUS_LOW,
 	BATTERY_STATUS_OK
 } Battery_Status;
-
-typedef enum class device_type_e
-{
-	SERVO,
-	MOTOR,
-	DIGITAL_OUT,
-	ANALOG,
-	DIGITAL
-} Device_Type;
 
 typedef enum class motor_mode_e
 {
@@ -39,21 +31,12 @@ class HcpManager
 
 private:
     static Serial* hcpSerial;
-    static json mapping;
+    static Mapping* mapping;
     static uint16 lastServoPosArr[];
     static bool servoEnabledArr[];
     static std::recursive_mutex serialMtx;
 
-    static void LoadMapping();
-    static void SaveMapping();
-
     static bool CheckPort(uint8 port, Device_Type type);
-
-    static std::string GetTypeName(Device_Type type);
-    static nlohmann::json FindObjectByName(std::string name, Device_Type type);
-
-    //note: use FindObjectByName if possible, it is faster
-    static nlohmann::json FindObjectByPort(uint8 port, Device_Type type);
 
     static bool SetServo(json device, uint8 percent);
 
