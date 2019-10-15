@@ -44,6 +44,8 @@ private:
     //TODO: move this to another class
     static I2C* i2cDevice;
 
+    static void ChangeLogFile();
+
 //    static std::shared_ptr<spdlog::logger> async_file;
 
     static void LoadIntervalMap();

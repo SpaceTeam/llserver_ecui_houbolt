@@ -13,6 +13,7 @@ class I2C
 private:
 
     int devId;
+    std::string devName;
 	int baudRate;
 	int i2cFile;
 
@@ -22,12 +23,14 @@ private:
 
 public:
 
-    I2C(int devId);
+    I2C(int devId, std::string devName);
 
     ~I2C();
 
     uint8 ReadByte();
     bool WriteByte(uint8 byte);
+
+    std::string GetName();
 
 };
 

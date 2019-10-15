@@ -12,10 +12,11 @@ using namespace std;
 
 #include <wiringPiI2C.h>
 
-I2C::I2C(int devId)
+I2C::I2C(int devId, std::string devName)
 {
     cout << "WiringPi detected" << endl;
     this->devId = devId;
+    this->devName = devName;
     this->i2cFile = wiringPiI2CSetup(devId); //0x20
 
     if (this->i2cFile < 0)
@@ -61,10 +62,12 @@ bool I2C::WriteByte(uint8 byte)
 
 #else
 
-I2C::I2C(int devId)
+I2C::I2C(int devId, std::string devName)
 {
     cout << "Not on LINUX ... simulate connection" << endl;
     this->connected = true;
+    this->devId = devId;
+    this->devName = devName;
 }
 
 I2C::~I2C()
@@ -91,3 +94,8 @@ bool I2C::WriteByte(uint8 byte)
 }
 
 #endif
+
+std::string I2C::GetName()
+{
+    return this->devName;
+}

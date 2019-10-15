@@ -5,7 +5,7 @@
 #ifndef TXV_ECUI_LLSERVER_CONFIG_H
 #define TXV_ECUI_LLSERVER_CONFIG_H
 
-#define LLSERVER_DEBUG
+//#define LLSERVER_DEBUG
 
 #define SEQUENCE_FILE_PATH "../TXV_ECUI_WEB/sequence/Sequence.json"
 #define ABORT_EQUENCE_FILE_PATH "../TXV_ECUI_WEB/sequence/AbortSequence.json"
@@ -16,7 +16,7 @@
 #define SOCKET_IP "127.0.0.1"
 
 #define SOCKET_MSG_SIZE 65536
-#define PORT 5555
+#define ECUI_PORT 5555
 
 #define SENSOR_SAMPLE_RATE 100 //hz
 

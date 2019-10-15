@@ -38,6 +38,7 @@ int32 Debug::error(std::string fmt, ...)
     int printed;
     va_list args;
 
+    fmt = "error: " + fmt;
     fmt.append("\n");
 
     va_start(args, fmt);

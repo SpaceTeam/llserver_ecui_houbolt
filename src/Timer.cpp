@@ -96,7 +96,6 @@ void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
 
         if (microTime >= endTime)
         {
-            std::cout << "sequence done" << std::endl;
             self->stop();
         }
     }
@@ -121,14 +120,13 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
 	    //self->tickCallback(microTime);
             lastTime = currTime;
 
-            if (microTime % 500000 == 0)
-            {
-                std::cout << "Curr Interval: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count() << std::endl;
-            }
+//            if (microTime % 500000 == 0)
+//            {
+//                std::cout << "Curr Interval: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count() << std::endl;
+//            }
 
             if (microTime >= endTime)
             {
-                std::cout << "sequence done" << std::endl;
                 self->stop();
             }
         }

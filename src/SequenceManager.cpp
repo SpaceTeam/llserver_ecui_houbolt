@@ -1,13 +1,15 @@
 //
 // Created by Markus on 2019-09-27.
 //
+#include <iomanip>
+#include <sstream>
 
 #include "SequenceManager.h"
 #include "json.hpp"
-#include "Socket.h"
+#include "EcuiSocket.h"
 
 #include "utils.h"
-#include "HcpManager.h"
+#include "LLInterface.h"
 
 //#include "spdlog/async.h"
 //#include "spdlog/sinks/basic_file_sink.h"
@@ -30,27 +32,21 @@ json SequenceManager::jsonAbortSequence = json::object();
 std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
 std::map<std::string, double[2]> SequenceManager::sensorsNominalRangeMap;
 
-I2C* SequenceManager::i2cDevice;
-
 void SequenceManager::init()
 {
     timer = new Timer();
     sensorTimer = new Timer();
-
-    i2cDevice = new I2C(I2C_DEVICE_ADDRESS);
 }
 
 
 void SequenceManager::StopSequence()
 {
     Debug::info("sequence done");
-    std::cout << "i'm called" << std::endl;
-    HcpManager::DisableAllServos();
+    LLInterface::DisableAllOutputDevices();
     isRunning = false;
     if (!isAbort)
     {
-        std::cout << "hello timer" << std::endl;
-        Socket::sendJson("timer-done");
+        EcuiSocket::SendJson("timer-done");
     }
 }
 
@@ -61,7 +57,7 @@ void SequenceManager::AbortSequence(std::string abortMsg)
         isAbort = true;
         timer->stop();
         sensorTimer->stop();
-        Socket::sendJson("abort", abortMsg);
+        EcuiSocket::SendJson("abort", abortMsg);
         Debug::print("aborting... " + abortMsg);
         isRunning = false;
         StartAbortSequence();
@@ -74,33 +70,33 @@ void SequenceManager::AbortSequence(std::string abortMsg)
 
 }
 
+void SequenceManager::ChangeLogFile()
+{
+    time_t curr_time;
+    tm * curr_tm;
+    char dateTime_string[100];
 
+    time(&curr_time);
+    curr_tm = localtime(&curr_time);
+
+    strftime(dateTime_string, 100, "%d_%m_%Y__%H_%M_%S", curr_tm);
+    logging::configure({ {"type", "file"}, {"file_name", "logs/" + string(dateTime_string) + ".csv"}, {"reopen_interval", "1"} });
+    logging::get_logger().setFilePath("logs/" + string(dateTime_string) + ".csv");
+}
 
 void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 {
     if (!isRunning && !isAbortRunning)
     {
-        time_t curr_time;
-        tm * curr_tm;
-        char dateTime_string[100];
-
-        time(&curr_time);
-        curr_tm = localtime(&curr_time);
-
-        strftime(dateTime_string, 100, "%d_%m_%Y__%H_%M_%S", curr_tm);
-//        async_file = spdlog::basic_logger_mt<spdlog::async_factory>("async_file_logger", "logs/" + string(dateTime_string) + ".csv");
-        logging::configure({ {"type", "file"}, {"file_name", "logs/" + string(dateTime_string) + ".csv"}, {"reopen_interval", "1"} });
-        logging::get_logger().setFilePath("logs/" + string(dateTime_string) + ".csv");
+        ChangeLogFile();
 
         //get sensor names
-        vector<string> sensorNames = HcpManager::GetAllSensorNames();
+        vector<string> sensorNames = LLInterface::GetAllSensorNames();
         string msg;
         for (int i = 0; i < sensorNames.size(); i++)
         {
             msg += sensorNames[i] + ";";
         }
-        //add thrust sensor
-        msg += "thrust;";
 
         //async_file->info("Timestep;" + msg);
         logging::INFO("Timestep;" + msg);
@@ -116,9 +112,9 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         int64 interval = utils::toMicros(jsonSeq["globals"]["interval"]);
         Debug::info("%d %d %d", startTime, endTime, interval);
 
-        Socket::sendJson("timer-start");
+        EcuiSocket::SendJson("timer-start");
 
-        HcpManager::EnableAllServos();
+        LLInterface::EnableAllOutputDevices();
         sensorTimer->start(startTime, endTime+3, 1000000/SENSOR_SAMPLE_RATE, SequenceManager::GetSensors, SequenceManager::StopGetSensors);
         timer->start(startTime, endTime, interval, SequenceManager::Tick, SequenceManager::StopSequence);
         //TODO: discuss if we need that feature
@@ -205,7 +201,7 @@ void SequenceManager::TransmitSensors(int64 microTime, std::map<std::string, uin
 
         content.push_back(sen);
     }
-    Socket::sendJson("sensors", content);
+    EcuiSocket::SendJson("sensors", content);
 }
 
 void SequenceManager::LogSensors(int64 microTime, vector<uint16> sensors)
@@ -226,10 +222,7 @@ void SequenceManager::StopGetSensors()
 
 void SequenceManager::GetSensors(int64 microTime)
 {
-    map<string, uint16> sensors = HcpManager::GetAllSensors();
-
-    //add thrust sensor value
-    sensors["thrust"] = i2cDevice->ReadByte();
+    map<string, uint16> sensors = LLInterface::GetAllSensors();
 
     vector<uint16> vals;
     for (const auto& sensor : sensors)
@@ -238,13 +231,17 @@ void SequenceManager::GetSensors(int64 microTime)
         {
             if (sensorsNominalRangeMap[sensor.first][0] > sensor.second)
             {
-                string abortMsg = "auto abort Sensor: " + sensor.first + " at Time " + to_string((microTime/1000)/1000.0) + " seconds value " + to_string(sensor.second) + " too low";
-                //SequenceManager::AbortSequence(abortMsg);
+                std::stringstream stream;
+                stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
+                string abortMsg = stream.str();
+                SequenceManager::AbortSequence(abortMsg);
             }
             else if (sensor.second > sensorsNominalRangeMap[sensor.first][1])
             {
-                string abortMsg = "auto abort Sensor: " + sensor.first + " at Time " + to_string((microTime/1000)/1000.0) + " seconds value " + to_string(sensor.second) + " too high";
-                //SequenceManager::AbortSequence(abortMsg);
+                std::stringstream stream;
+                stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
+                string abortMsg = stream.str();
+                SequenceManager::AbortSequence(abortMsg);
             }
         }
         vals.push_back(sensor.second);
@@ -269,7 +266,7 @@ void SequenceManager::Tick(int64 microTime)
     }
     if (microTime % TIMER_SYNC_INTERVAL == 0)
     {
-        Socket::sendJson("timer-sync", ((microTime/1000) / 1000.0));
+        EcuiSocket::SendJson("timer-sync", ((microTime/1000) / 1000.0));
     }
 
     bool findNext = false;
@@ -380,7 +377,7 @@ void SequenceManager::Tick(int64 microTime)
             }
             Debug::info("writing " + seqItem.first + " with value %d", nextValue);
 
-            HcpManager::ExecCommand(seqItem.first, nextValue);
+            LLInterface::ExecCommand(seqItem.first, nextValue);
         }
     }
 
@@ -392,7 +389,7 @@ void SequenceManager::StopAbortSequence()
     {
         Debug::info("abort sequence done");
         isAbortRunning = false;
-        HcpManager::DisableAllServos();
+        LLInterface::DisableAllOutputDevices();
     }
 }
 
@@ -407,7 +404,7 @@ void SequenceManager::StartAbortSequence()
             if (it.key().compare("timestamp") != 0)
             {
                 Debug::print(it.key() + " | %d", (uint8)it.value());
-                HcpManager::ExecCommand(it.key(), it.value());
+                LLInterface::ExecCommand(it.key(), it.value());
             }
         }
         Debug::print("--------------");
