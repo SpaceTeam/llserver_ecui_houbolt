@@ -703,11 +703,14 @@ uint16 HcpManager::GetAnalog(std::string name)
             Debug::info("mapping sensor value");
 
             vector<double> mapFrom = device["map"][0];
-            vector<double> mapTo = device["map"][0];
+            vector<double> mapTo = device["map"][1];
 
             double norm = (((value-mapFrom[0])*1.0) / (mapFrom[1] - mapFrom[0]));
 
+            uint16 before = value;
             value = ((mapTo[1] - mapTo[0])*norm) + mapTo[0];
+
+            Debug::info("from %d to %d", before, value);
         }
     }
     else
