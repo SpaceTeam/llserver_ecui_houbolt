@@ -34,3 +34,5 @@
 CMakeFiles/
 CMakeCache.txt
 Makefile
+logs/
+.idea/
