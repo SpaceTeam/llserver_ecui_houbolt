@@ -16,14 +16,14 @@ void LLInterface::Init()
 {
     HcpManager::init();
     i2cDevice = new I2C(I2C_DEVICE_ADDRESS, "thrust");
-    warnLight = new WarnLight(0);
-
-    warnLight->Error();
-    warnLight->ServoCal();
-    warnLight->NoConnection();
-    warnLight->SafeOn();
-    warnLight->SafeOff();
-    warnLight->Standby();
+//    warnLight = new WarnLight(0);
+//
+//    warnLight->Error();
+//    warnLight->ServoCal();
+//    warnLight->NoConnection();
+//    warnLight->SafeOn();
+//    warnLight->SafeOff();
+//    warnLight->Standby();
 }
 
 void LLInterface::Destroy()
@@ -50,11 +50,11 @@ std::vector<std::string> LLInterface::GetAllSensorNames()
     return sensorNames;
 }
 
-std::map<std::string, uint16> LLInterface::GetAllSensors()
+std::map<std::string, int32> LLInterface::GetAllSensors()
 {
-    std::map<std::string, uint16> sensors;
+    std::map<std::string, int32> sensors;
     sensors = HcpManager::GetAllSensors();
-    sensors[i2cDevice->GetName()] = i2cDevice->ReadByte();
+    sensors[i2cDevice->GetName()] = i2cDevice->ReadByte() - 128;
     return sensors;
 }
 

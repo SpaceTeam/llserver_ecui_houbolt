@@ -35,7 +35,7 @@ public:
     static void DisableAllOutputDevices();
 
     static std::vector<std::string> GetAllSensorNames();
-    static std::map<std::string, uint16> GetAllSensors();
+    static std::map<std::string, int32> GetAllSensors();
 
     static nlohmann::json GetAllServoData();
 

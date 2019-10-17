@@ -49,7 +49,7 @@ public:
     static void restart();
 
     static std::vector<std::string> GetAllSensorNames();
-    static std::map<std::string, uint16> GetAllSensors();
+    static std::map<std::string, int32> GetAllSensors();
 
     static nlohmann::json GetAllServoData();
 
@@ -76,8 +76,8 @@ public:
     static bool SetDigitalOutputs(uint8 port, bool enable);
     static bool SetDigitalOutputs(std::string name, bool enable);
 
-    static uint16 GetAnalog(std::string name);
-    static uint16 GetAnalog(uint8 port);
+    static int32 GetAnalog(std::string name);
+    static int32 GetAnalog(uint8 port);
 
     static uint8 GetDigital(std::string name);
     static uint8 GetDigital(uint8 port);

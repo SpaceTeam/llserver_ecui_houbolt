@@ -134,9 +134,9 @@ std::vector<std::string> HcpManager::GetAllSensorNames()
     return sensorNames;
 }
 
-std::map<std::string, uint16> HcpManager::GetAllSensors()
+std::map<std::string, int32> HcpManager::GetAllSensors()
 {
-    map<std::string, uint16> sensors;
+    map<std::string, int32> sensors;
 
     json analogs = mapping->GetDevices(Device_Type::ANALOG);
     json digitals = mapping->GetDevices(Device_Type::DIGITAL);
@@ -669,7 +669,7 @@ bool HcpManager::SetDigitalOutputs(uint8 port, bool enable)
     return success;
 }
 
-uint16 HcpManager::GetAnalog(std::string name)
+int32 HcpManager::GetAnalog(std::string name)
 {
     uint16 value = -1;
 
@@ -721,7 +721,7 @@ uint16 HcpManager::GetAnalog(std::string name)
     return value;
 }
 
-uint16 HcpManager::GetAnalog(uint8 port)
+int32 HcpManager::GetAnalog(uint8 port)
 {
     uint16 value = -1;
 

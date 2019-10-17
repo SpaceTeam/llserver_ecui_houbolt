@@ -187,7 +187,7 @@ void SequenceManager::UpdateIntervalMap(std::string name, int64 microTime, uint8
     }
 }
 
-void SequenceManager::TransmitSensors(int64 microTime, std::map<std::string, uint16> sensors)
+void SequenceManager::TransmitSensors(int64 microTime, std::map<std::string, int32> sensors)
 {
     json content = json::array();
     json sen;
@@ -204,7 +204,7 @@ void SequenceManager::TransmitSensors(int64 microTime, std::map<std::string, uin
     EcuiSocket::SendJson("sensors", content);
 }
 
-void SequenceManager::LogSensors(int64 microTime, vector<uint16> sensors)
+void SequenceManager::LogSensors(int64 microTime, vector<int32> sensors)
 {
     string msg;
     for (int i = 0; i < sensors.size(); i++)
@@ -222,9 +222,9 @@ void SequenceManager::StopGetSensors()
 
 void SequenceManager::GetSensors(int64 microTime)
 {
-    map<string, uint16> sensors = LLInterface::GetAllSensors();
+    map<string, int32> sensors = LLInterface::GetAllSensors();
 
-    vector<uint16> vals;
+    vector<int32> vals;
     for (const auto& sensor : sensors)
     {
         if (sensorsNominalRangeMap.find(sensor.first) != sensorsNominalRangeMap.end())
@@ -234,14 +234,14 @@ void SequenceManager::GetSensors(int64 microTime)
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                SequenceManager::AbortSequence(abortMsg);
+                //SequenceManager::AbortSequence(abortMsg);
             }
             else if (sensor.second > sensorsNominalRangeMap[sensor.first][1])
             {
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                SequenceManager::AbortSequence(abortMsg);
+                //SequenceManager::AbortSequence(abortMsg);
             }
         }
         vals.push_back(sensor.second);
