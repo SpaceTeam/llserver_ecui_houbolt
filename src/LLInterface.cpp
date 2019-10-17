@@ -19,11 +19,16 @@ void LLInterface::Init()
     warnLight = new WarnLight(0);
 
     warnLight->Error();
-   // warnLight->ServoCal();
-   // warnLight->NoConnection();
-   // warnLight->SafeOn();
-   // warnLight->SafeOff();
-   // warnLight->Standby();
+    sleep(4);
+    warnLight->ServoCal();
+    sleep(4);
+    warnLight->NoConnection();
+    sleep(4);
+    warnLight->SafeOn();
+    sleep(4);
+    warnLight->SafeOff();
+    sleep(4);
+    warnLight->Standby();
 }
 
 void LLInterface::Destroy()
