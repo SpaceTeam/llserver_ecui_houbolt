@@ -10,15 +10,15 @@
         },
         "chamberPressure": {
             "port": 10,
-            "map": {"k": 0.0141, "d": 621}
+            "map": {"k": 14.1, "d": 621}
         },
         "fuelPressure": {
             "port": 8,
-            "map": {"k": 0.0141, "d": 621}
+            "map": {"k": 14.1, "d": 621}
         },
         "oxidizerPressure": {
             "port": 9,
-            "map": {"k": 0.0141, "d": 621}
+            "map": {"k": 14.1, "d": 621}
         }
     },
     "digital": {
