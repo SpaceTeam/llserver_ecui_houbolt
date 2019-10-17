@@ -16,14 +16,14 @@ void LLInterface::Init()
 {
     HcpManager::init();
     i2cDevice = new I2C(I2C_DEVICE_ADDRESS, "thrust");
-//    warnLight = new WarnLight(0);
-//
-//    warnLight->Error();
-//    warnLight->ServoCal();
-//    warnLight->NoConnection();
-//    warnLight->SafeOn();
-//    warnLight->SafeOff();
-//    warnLight->Standby();
+    warnLight = new WarnLight(0);
+
+    warnLight->Error();
+    warnLight->ServoCal();
+    warnLight->NoConnection();
+    warnLight->SafeOn();
+    warnLight->SafeOff();
+    warnLight->Standby();
 }
 
 void LLInterface::Destroy()
