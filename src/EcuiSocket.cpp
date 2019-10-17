@@ -23,6 +23,7 @@ void EcuiSocket::Init(std::function<void(json)> onMsgCallback)
     socket = new Socket(ECUI_PORT);
     connectionActive = true;
     asyncListenThread = new thread(AsyncListen, onMsgCallback);
+    asyncListenThread->detach();
 
 }
 
@@ -98,8 +99,6 @@ void EcuiSocket::SendJson(std::string type, float content)
 void EcuiSocket::Destroy()
 {
     shallClose = true;
-
-    asyncListenThread->join();
     delete asyncListenThread;
     delete socket;
     connectionActive = false;

@@ -7,7 +7,7 @@
 #include "LLInterface.h"
 
 I2C* LLInterface::i2cDevice;
-    //WarningLight* LLInterface::wl;
+WarnLight* LLInterface::warnLight;
     //GPIO[] LLInterface::gpioDevices;
 
     //SPI* LLInterface::spiDevice;
@@ -16,11 +16,20 @@ void LLInterface::Init()
 {
     HcpManager::init();
     i2cDevice = new I2C(I2C_DEVICE_ADDRESS, "thrust");
+    warnLight = new WarnLight(0);
+
+    warnLight->Error();
+    warnLight->ServoCal();
+    warnLight->NoConnection();
+    warnLight->SafeOn();
+    warnLight->SafeOff();
+    warnLight->Standby();
 }
 
 void LLInterface::Destroy()
 {
-
+    delete i2cDevice;
+    delete warnLight;
 }
 
 void LLInterface::EnableAllOutputDevices()

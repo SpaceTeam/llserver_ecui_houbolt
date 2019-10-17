@@ -1,6 +1,8 @@
 
 #include "LLController.h"
 
+#include <string>
+
 bool running = true;
 
 int main(int argc, char const *argv[])
@@ -8,7 +10,10 @@ int main(int argc, char const *argv[])
 
     LLController::Init();
 
-    while (running){ sleep(1); }
+    std::string inputStr;
+    while (getline (std::cin, inputStr)){
+    }
+    std::cout << "quit" << std::endl;
 
     LLController::Destroy();
 

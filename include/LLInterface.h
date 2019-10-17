@@ -10,6 +10,7 @@
 
 #include "json.hpp"
 
+#include "WarnLight.h"
 
 class LLInterface
 {
@@ -17,7 +18,7 @@ class LLInterface
 private:
 
     static I2C* i2cDevice;
-    //static WarningLight* wl;
+    static WarnLight* warnLight;
     //static GPIO[] gpioDevices;
 
     //static SPI* spiDevice;
