@@ -527,7 +527,7 @@ bool HcpManager::SetServo(json device, uint8 percent)
         {
             percent = clamp((int)percent, 0, 100);
 
-            uint16 endpoints[2];
+            int32 endpoints[2];
 
             endpoints[0] = device["endpoints"][0];
             endpoints[1] = device["endpoints"][1];
@@ -671,7 +671,7 @@ bool HcpManager::SetDigitalOutputs(uint8 port, bool enable)
 
 int32 HcpManager::GetAnalog(std::string name)
 {
-    uint16 value = -1;
+    int32 value = -1;
 
     json device = mapping->GetDeviceByName(name, Device_Type::ANALOG);
 
@@ -702,13 +702,10 @@ int32 HcpManager::GetAnalog(std::string name)
         {
             Debug::info("mapping sensor value");
 
-            vector<double> mapFrom = device["map"][0];
-            vector<double> mapTo = device["map"][1];
+            json map = device["map"];
 
-            double norm = (((value-mapFrom[0])*1.0) / (mapFrom[1] - mapFrom[0]));
-
-            uint16 before = value;
-            value = ((mapTo[1] - mapTo[0])*norm) + mapTo[0];
+            int32 before = value;
+            value = ((double)value - (double)map["d"]) * (double)map["k"];
 
             Debug::info("from %d to %d", before, value);
         }
@@ -723,7 +720,7 @@ int32 HcpManager::GetAnalog(std::string name)
 
 int32 HcpManager::GetAnalog(uint8 port)
 {
-    uint16 value = -1;
+    int32 value = -1;
 
     if (CheckPort(port, Device_Type::ANALOG))
     {

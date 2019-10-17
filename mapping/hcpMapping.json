@@ -9,14 +9,19 @@
             "servo": "oxidizer"
         },
         "chamberPressure": {
-            "port": 2,
-            "map": [[100, 2000], [0, 20]]
+            "port": 10,
+            "map": {"k": 0.0141, "d": 621}
+        },
+        "fuelPressure": {
+            "port": 8,
+            "map": {"k": 0.0141, "d": 621}
+        },
+        "oxidizerPressure": {
+            "port": 9,
+            "map": {"k": 0.0141, "d": 621}
         }
     },
     "digital": {
-        "safety": {
-            "port": 4
-        }
     },
     "digitalOut": {
         "igniter": {
@@ -27,20 +32,20 @@
     "servo": {
         "fuel": {
             "endpoints": [
-                1200,
-                1800
+                1000,
+                2000
             ],
             "feedbackAnalog": "fuel feedback",
             "feedbackEndpoints": [
-                92,
-                4093
+                1129,
+                2506
             ],
             "port": 0
         },
         "oxidizer": {
             "endpoints": [
-                1100,
-                2200
+                1850,
+                850
             ],
             "feedbackAnalog": "oxidizer feedback",
             "feedbackEndpoints": [
