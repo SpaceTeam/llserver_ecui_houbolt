@@ -8,7 +8,7 @@
 #include "common.h"
 #include "Socket.h"
 
-#define WARNLIGHT_PORT 25565
+#define WARNLIGHT_PORT 25556
 
 class WarnLight
 {
