@@ -39,6 +39,9 @@ public:
 
     static nlohmann::json GetAllServoData();
 
+    static void turnRed();
+    static void turnGreen();
+
 
     static bool ExecCommand(std::string name, json value);
 

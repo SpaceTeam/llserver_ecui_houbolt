@@ -43,6 +43,7 @@ void SequenceManager::StopSequence()
 {
     Debug::info("sequence done");
     LLInterface::DisableAllOutputDevices();
+    LLInterface::turnGreen();
     isRunning = false;
     if (!isAbort)
     {
@@ -61,6 +62,7 @@ void SequenceManager::AbortSequence(std::string abortMsg)
         Debug::print("aborting... " + abortMsg);
         isRunning = false;
         StartAbortSequence();
+        LLInterface::turnGreen();
         isAbort = false;
     }
     else
@@ -89,6 +91,8 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
     if (!isRunning && !isAbortRunning)
     {
         ChangeLogFile();
+
+        LLInterface::turnRed();
 
         //get sensor names
         vector<string> sensorNames = LLInterface::GetAllSensorNames();

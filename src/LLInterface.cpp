@@ -18,17 +18,6 @@ void LLInterface::Init()
     i2cDevice = new I2C(I2C_DEVICE_ADDRESS, "thrust");
     warnLight = new WarnLight(0);
 
-    warnLight->Error();
-    sleep(4);
-    warnLight->ServoCal();
-    sleep(4);
-    warnLight->NoConnection();
-    sleep(4);
-    warnLight->SafeOn();
-    sleep(4);
-    warnLight->SafeOff();
-    sleep(4);
-    warnLight->Standby();
 }
 
 void LLInterface::Destroy()
@@ -77,4 +66,14 @@ bool LLInterface::ExecCommand(std::string name, json value)
         return false;
     }
     return HcpManager::ExecCommand(name, (uint8)value);
+}
+
+void LLInterface::turnRed()
+{
+    warnLight->Error();
+}
+
+void LLInterface::turnGreen()
+{
+    warnLight->SafeOn();
 }
