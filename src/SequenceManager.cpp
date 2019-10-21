@@ -65,9 +65,6 @@ void SequenceManager::AbortSequence(std::string abortMsg)
         Debug::print("aborting... " + abortMsg);
         isRunning = false;
 
-        HcpManager::SetServo(std::string("fuel"), 0);
-        HcpManager::SetServo(std::string("oxidizer"), 0);
-        sleep(3);
         StartAbortSequence();
 
 
@@ -401,6 +398,9 @@ void SequenceManager::StopAbortSequence()
     {
         Debug::info("abort sequence done");
         isAbortRunning = false;
+
+        //wait some time so servos can move
+        //sleep(3);
         LLInterface::DisableAllOutputDevices();
     }
 }
