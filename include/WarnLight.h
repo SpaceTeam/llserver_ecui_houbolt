@@ -31,6 +31,7 @@ public:
     void NoConnection();
     void SafeOn();
     void SafeOff();
+    void Testing();
     void Standby();
 
     //RGB(uint8 r, uint8 g, uint8 b);

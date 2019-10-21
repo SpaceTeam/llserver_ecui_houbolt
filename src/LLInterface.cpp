@@ -106,12 +106,12 @@ void LLInterface::GetSensors(int64 microTime)
     {
         if (sensors["fuelPressure"] >= 5000 && !isYellow)
         {
-            turnYellow();
+            TurnYellow();
             isYellow = true;
         }
         else if (sensors["fuelPressure"] < 5000 && isYellow)
         {
-            turnGreen();
+            TurnGreen();
             isYellow = false;
         }
     }
@@ -135,17 +135,22 @@ void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, int32> 
     EcuiSocket::SendJson("sensors", content);
 }
 
-void LLInterface::turnRed()
+void LLInterface::TurnRed()
 {
     warnLight->Error();
 }
 
-void LLInterface::turnGreen()
+void LLInterface::TurnGreen()
 {
     warnLight->SafeOn();
 }
 
-void LLInterface::turnYellow()
+void LLInterface::TurnYellow()
 {
     warnLight->NoConnection();
+}
+
+void LLInterface::BeepRed()
+{
+    warnLight->Testing();
 }

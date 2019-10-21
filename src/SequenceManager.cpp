@@ -43,7 +43,7 @@ void SequenceManager::init()
 void SequenceManager::StopSequence()
 {
     Debug::info("sequence done");
-    LLInterface::turnYellow();
+    LLInterface::TurnYellow();
     isRunning = false;
     if (!isAbort)
     {
@@ -97,7 +97,7 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
     {
         ChangeLogFile();
 
-        LLInterface::turnRed();
+        LLInterface::BeepRed();
 
         //get sensor names
         vector<string> sensorNames = LLInterface::GetAllSensorNames();
@@ -259,6 +259,10 @@ void SequenceManager::Tick(int64 microTime)
     if (microTime % TIMER_SYNC_INTERVAL == 0)
     {
         EcuiSocket::SendJson("timer-sync", ((microTime/1000) / 1000.0));
+    }
+    if (microTime == 0)
+    {
+        LLInterface::TurnRed();
     }
 
     bool findNext = false;

@@ -51,9 +51,10 @@ public:
 
     static nlohmann::json GetAllServoData();
 
-    static void turnRed();
-    static void turnGreen();
-    static void turnYellow();
+    static void TurnRed();
+    static void TurnGreen();
+    static void TurnYellow();
+    static void BeepRed();
 
 
     static bool ExecCommand(std::string name, json value);

@@ -40,6 +40,11 @@ void WarnLight::SafeOff()
     socket->Send("SafeOff");
 }
 
+void WarnLight::Testing()
+{
+    socket->Send("Testing");
+}
+
 void WarnLight::Standby()
 {
     socket->Send("Standby");
