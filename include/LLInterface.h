@@ -23,6 +23,8 @@ private:
 
     //static SPI* spiDevice;
 
+    static bool isTransmittingSensors;
+
     LLInterface();
 
     ~LLInterface();
@@ -37,10 +39,14 @@ public:
     static std::vector<std::string> GetAllSensorNames();
     static std::map<std::string, int32> GetAllSensors();
 
+    static void StartSensorTransmission();
+    static void StopSensorTransmission();
+
     static nlohmann::json GetAllServoData();
 
     static void turnRed();
     static void turnGreen();
+    static void turnYellow();
 
 
     static bool ExecCommand(std::string name, json value);

@@ -34,6 +34,9 @@ void LLController::OnECUISocketRecv(json msg)
 
         if (type.compare("sequence-start") == 0)
         {
+            //stop Transmission first
+            LLInterface::StopSensorTransmission();
+
             //send(sock, strmsg.c_str(), strmsg.size(), 0);
             json seq = msg["content"][0];
             json abortSeq = msg["content"][1];
@@ -110,6 +113,14 @@ void LLController::OnECUISocketRecv(json msg)
                 value = digitalOutputs["value"];
                 HcpManager::SetDigitalOutputs(name, value);
             }
+        }
+        else if (type.compare("sensors-start") == 0)
+        {
+            LLInterface::StartSensorTransmission();
+        }
+        else if (type.compare("sensors-stop") == 0)
+        {
+            LLInterface::StopSensorTransmission();
         }
         else
         {

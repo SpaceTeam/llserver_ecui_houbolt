@@ -12,6 +12,8 @@ WarnLight* LLInterface::warnLight;
 
     //SPI* LLInterface::spiDevice;
 
+bool LLInterface::isTransmittingSensors = false;
+
 void LLInterface::Init()
 {
     HcpManager::init();
@@ -68,6 +70,16 @@ bool LLInterface::ExecCommand(std::string name, json value)
     return HcpManager::ExecCommand(name, (uint8)value);
 }
 
+void LLInterface::StartSensorTransmission()
+{
+    isTransmittingSensors = true;
+}
+
+void LLInterface::StopSensorTransmission()
+{
+    isTransmittingSensors = false;
+}
+
 void LLInterface::turnRed()
 {
     warnLight->Error();
@@ -76,4 +88,9 @@ void LLInterface::turnRed()
 void LLInterface::turnGreen()
 {
     warnLight->SafeOn();
+}
+
+void LLInterface::turnYellow()
+{
+    warnLight->NoConnection();
 }

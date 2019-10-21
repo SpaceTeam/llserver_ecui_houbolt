@@ -66,6 +66,30 @@ void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMic
     }
 }
 
+void Timer::startContinous(uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback)
+{
+    if (!this->isRunning)
+    {
+
+        this->startTime = 0;
+        this->endTime = 0;
+        this->interval = intervalMicros;
+        this->tickCallback = tickCallback;
+        this->stopCallback = stopCallback;
+
+        this->microTime = 0;
+
+        this->isRunning = true;
+        this->timerThread = new std::thread(Timer::highPerformanceContinousTimerLoop, this, intervalMicros);
+
+        this->timerThread->detach();
+    }
+    else
+    {
+        Debug::error("timer already running");
+    }
+}
+
 void Timer::stop()
 {
     if (this->isRunning)
@@ -132,6 +156,29 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
         }
 
 
+    }
+}
+
+void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval)
+{
+    auto lastTime = Clock::now();
+    auto currTime = lastTime;
+    int64 microTime = 0;
+
+    std::thread callbackThread(self->tickCallback, microTime);
+    callbackThread.detach();
+    while(self->isRunning) {
+
+        currTime = Clock::now();
+        if (std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count() >= interval)
+        {
+            microTime += interval;
+
+            std::thread callbackThread(self->tickCallback, microTime);
+            callbackThread.detach();
+	        //self->tickCallback(microTime);
+            lastTime = currTime;
+        }
     }
 }
 

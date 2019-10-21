@@ -43,11 +43,11 @@ void SequenceManager::init()
 void SequenceManager::StopSequence()
 {
     Debug::info("sequence done");
-    LLInterface::DisableAllOutputDevices();
-    LLInterface::turnGreen();
+    LLInterface::turnYellow();
     isRunning = false;
     if (!isAbort)
     {
+        LLInterface::DisableAllOutputDevices();
         EcuiSocket::SendJson("timer-done");
     }
 }
@@ -60,18 +60,16 @@ void SequenceManager::AbortSequence(std::string abortMsg)
         sensorTimer->stop();
         timer->stop();
 
-	usleep(500000);
-	LLInterface::EnableAllOutputDevices();
 
         EcuiSocket::SendJson("abort", abortMsg);
         Debug::print("aborting... " + abortMsg);
         isRunning = false;
 
-	HcpManager::SetServo(std::string("fuel"), 0);
-	HcpManager::SetServo(std::string("oxidizer"), 0);	
-	sleep(3);
+        HcpManager::SetServo(std::string("fuel"), 0);
+        HcpManager::SetServo(std::string("oxidizer"), 0);
+        sleep(3);
         StartAbortSequence();
-	sleep(3);
+
         LLInterface::turnGreen();
 
 
