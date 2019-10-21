@@ -10,6 +10,7 @@
 
 #include "utils.h"
 #include "LLInterface.h"
+#include "HcpManager.h"
 
 //#include "spdlog/async.h"
 //#include "spdlog/sinks/basic_file_sink.h"
@@ -56,13 +57,24 @@ void SequenceManager::AbortSequence(std::string abortMsg)
     if (isRunning)
     {
         isAbort = true;
-        timer->stop();
         sensorTimer->stop();
+        timer->stop();
+
+	usleep(500000);
+	LLInterface::EnableAllOutputDevices();
+
         EcuiSocket::SendJson("abort", abortMsg);
         Debug::print("aborting... " + abortMsg);
         isRunning = false;
+
+	HcpManager::SetServo(std::string("fuel"), 0);
+	HcpManager::SetServo(std::string("oxidizer"), 0);	
+	sleep(3);
         StartAbortSequence();
+	sleep(3);
         LLInterface::turnGreen();
+
+
         isAbort = false;
     }
     else

@@ -1,31 +1,42 @@
 {
     "analog": {
+        "chamberPressure": {
+            "map": {
+                "d": 621,
+                "k": 14.1
+            },
+            "port": 10
+        },
         "fuel feedback": {
             "port": 0,
             "servo": "fuel"
+        },
+        "fuelPressure": {
+            "map": {
+                "d": 621,
+                "k": 14.1
+            },
+            "port": 8
         },
         "oxidizer feedback": {
             "port": 1,
             "servo": "oxidizer"
         },
-        "chamberPressure": {
-            "port": 10,
-            "map": {"k": 14.1, "d": 621}
-        },
-        "fuelPressure": {
-            "port": 8,
-            "map": {"k": 14.1, "d": 621}
-        },
         "oxidizerPressure": {
-            "port": 9,
-            "map": {"k": 14.1, "d": 621}
-        }
+            "map": {
+                "d": 621,
+                "k": 14.1
+            },
+            "port": 9
+        },
+        "batteryVoltage": {
+           "port": 128
+       }
     },
-    "digital": {
-    },
+    "digital": {},
     "digitalOut": {
         "igniter": {
-            "port": 0
+            "port": 1
         }
     },
     "motor": {},
@@ -49,8 +60,8 @@
             ],
             "feedbackAnalog": "oxidizer feedback",
             "feedbackEndpoints": [
-                1756,
-                2200
+                2092,
+                939
             ],
             "port": 1
         }
