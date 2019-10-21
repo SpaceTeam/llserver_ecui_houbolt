@@ -400,8 +400,11 @@ void SequenceManager::StopAbortSequence()
         isAbortRunning = false;
 
         //wait some time so servos can move
-        //sleep(3);
-        LLInterface::DisableAllOutputDevices();
+        std::thread disableThread([](){
+		sleep(3);
+       		LLInterface::DisableAllOutputDevices();
+	});
+	disableThread.detach();    	
     }
 }
 
