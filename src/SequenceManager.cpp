@@ -69,11 +69,6 @@ void SequenceManager::AbortSequence(std::string abortMsg)
         HcpManager::SetServo(std::string("oxidizer"), 0);
         sleep(3);
         StartAbortSequence();
-
-        LLInterface::turnGreen();
-
-
-        isAbort = false;
     }
     else
     {
@@ -403,6 +398,7 @@ void SequenceManager::StopAbortSequence()
     {
         Debug::info("abort sequence done");
         isAbortRunning = false;
+        isAbort = false;
         LLInterface::DisableAllOutputDevices();
     }
 }
