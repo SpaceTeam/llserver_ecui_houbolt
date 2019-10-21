@@ -20,7 +20,7 @@ std::thread* EcuiSocket::asyncListenThread;
 void EcuiSocket::Init(std::function<void(json)> onMsgCallback)
 {
 
-    socket = new Socket(ECUI_PORT);
+    socket = new Socket(ECUI_IP, ECUI_PORT);
     connectionActive = true;
     asyncListenThread = new thread(AsyncListen, onMsgCallback);
     asyncListenThread->detach();

@@ -10,7 +10,6 @@
 
 #include "utils.h"
 #include "LLInterface.h"
-#include "HcpManager.h"
 
 //#include "spdlog/async.h"
 //#include "spdlog/sinks/basic_file_sink.h"
@@ -24,6 +23,7 @@ bool SequenceManager::isAbort = false;
 bool SequenceManager::isAbortRunning = false;
 Timer* SequenceManager::timer;
 Timer* SequenceManager::sensorTimer;
+
 
 //std::shared_ptr<spdlog::logger> SequenceManager::async_file;
 
@@ -86,7 +86,7 @@ void SequenceManager::ChangeLogFile()
     time(&curr_time);
     curr_tm = localtime(&curr_time);
 
-    strftime(dateTime_string, 100, "%d_%m_%Y__%H_%M_%S", curr_tm);
+    strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
     logging::configure({ {"type", "file"}, {"file_name", "logs/" + string(dateTime_string) + ".csv"}, {"reopen_interval", "1"} });
     logging::get_logger().setFilePath("logs/" + string(dateTime_string) + ".csv");
 }
@@ -196,23 +196,6 @@ void SequenceManager::UpdateIntervalMap(std::string name, int64 microTime, uint8
     }
 }
 
-void SequenceManager::TransmitSensors(int64 microTime, std::map<std::string, int32> sensors)
-{
-    json content = json::array();
-    json sen;
-    for (const auto& sensor : sensors)
-    {
-        sen = json::object();
-
-        sen["name"] = sensor.first;
-        sen["value"] = sensor.second;
-        sen["time"] = (double)((microTime / 1000) / 1000.0);
-
-        content.push_back(sen);
-    }
-    EcuiSocket::SendJson("sensors", content);
-}
-
 void SequenceManager::LogSensors(int64 microTime, vector<int32> sensors)
 {
     string msg;
@@ -243,14 +226,14 @@ void SequenceManager::GetSensors(int64 microTime)
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                SequenceManager::AbortSequence(abortMsg);
+                //SequenceManager::AbortSequence(abortMsg);
             }
             else if (sensor.second > sensorsNominalRangeMap[sensor.first][1])
             {
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                SequenceManager::AbortSequence(abortMsg);
+                //SequenceManager::AbortSequence(abortMsg);
             }
         }
         vals.push_back(sensor.second);
@@ -262,7 +245,7 @@ void SequenceManager::GetSensors(int64 microTime)
     {
 //        std::thread callbackThread(SequenceManager::TransmitSensors, microTime, sensors);
 //        callbackThread.detach();
-	    TransmitSensors(microTime, sensors);
+	    LLInterface::TransmitSensors(microTime, sensors);
     }
 
 }
@@ -401,10 +384,10 @@ void SequenceManager::StopAbortSequence()
 
         //wait some time so servos can move
         std::thread disableThread([](){
-		sleep(3);
+		    sleep(3);
        		LLInterface::DisableAllOutputDevices();
-	});
-	disableThread.detach();    	
+        });
+        disableThread.detach();
     }
 }
 

@@ -7,7 +7,7 @@
 WarnLight::WarnLight(uint16 id)
 {
     this->id = id;
-    socket = new Socket(WARNLIGHT_PORT);
+    socket = new Socket(WARNLIGHT_IP, WARNLIGHT_PORT, 1);
 }
 
 WarnLight::~WarnLight()

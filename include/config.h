@@ -13,7 +13,8 @@
 //#define SOCKET_IP "192.168.0.213"
 //#define SOCKET_IP "192.168.43.93"
 //#define SOCKET_IP "192.168.0.16"
-#define SOCKET_IP "127.0.0.1"
+#define ECUI_IP "127.0.0.1"
+#define WARNLIGHT_IP "127.0.0.1"
 
 #define SOCKET_MSG_SIZE 65536
 #define ECUI_PORT 5555
@@ -21,7 +22,7 @@
 #define SENSOR_SAMPLE_RATE 100 //hz
 
 #define SENSOR_TRANSMISSION_INTERVAL 100000 //us
-#define TIMER_SYNC_INTERVAL 5000000 //us
+#define TIMER_SYNC_INTERVAL 1000000 //us
 
 #define HCP_MAPPING_FILE_PATH "mapping/hcpMapping.json"
 

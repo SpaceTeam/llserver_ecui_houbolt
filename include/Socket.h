@@ -21,10 +21,10 @@ private:
 
     std::mutex socketMtx;
 
-    void Connect(uint16 port);
+    void Connect(std::string address, uint16 port, int32 tries=-1);
 public:
 
-    Socket(uint16 port);
+    Socket(std::string address, uint16 port, int32 tries=-1);
 
     ~Socket();
 

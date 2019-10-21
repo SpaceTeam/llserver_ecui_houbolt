@@ -17,9 +17,9 @@
 
 using namespace std;
 
-Socket::Socket(uint16 port)
+Socket::Socket(std::string address, uint16 port, int32 tries)
 {
-    Connect(port);
+    Connect(address, port, tries);
 }
 
 Socket::~Socket()
@@ -31,12 +31,12 @@ Socket::~Socket()
     this->connectionActive = false;
 }
 
-void Socket::Connect(uint16 port)
+void Socket::Connect(std::string address, uint16 port, int32 tries)
 {
 
     struct sockaddr_in serv_addr;
 
-    while (!connectionActive && !shallClose)
+    while (!connectionActive && !shallClose && tries != 0)
     {
         if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         {
@@ -48,7 +48,7 @@ void Socket::Connect(uint16 port)
         serv_addr.sin_port = htons(port);
 
         // Convert IPv4 and IPv6 addresses from text to binary form
-        if (inet_pton(AF_INET, SOCKET_IP, &serv_addr.sin_addr) <= 0)
+        if (inet_pton(AF_INET, address.c_str(), &serv_addr.sin_addr) <= 0)
         {
             printf("\nInvalid address/ Address not supported \n");
             continue;
@@ -58,13 +58,18 @@ void Socket::Connect(uint16 port)
         {
             printf("\nWaiting for connection...\n");
             sleep(3);
+            tries -= 1;
             continue;
 
         }
 
         connectionActive = true;
+        printf("Connected \n");
     }
-    printf("Connected \n");
+    if (tries == 0)
+    {
+        printf("Couldn't connect to %s PORT: %d\n", address.c_str(), port);
+    }
 }
 
 void Socket::Send(std::string msg)

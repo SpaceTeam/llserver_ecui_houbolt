@@ -24,6 +24,11 @@ private:
     //static SPI* spiDevice;
 
     static bool isTransmittingSensors;
+    static bool isYellow;
+    static Timer* sensorTimer;
+
+    static void GetSensors(int64 microTime);
+    static void StopGetSensors();
 
     LLInterface();
 
@@ -35,6 +40,8 @@ public:
 
     static void EnableAllOutputDevices();
     static void DisableAllOutputDevices();
+
+    static void TransmitSensors(int64 microTime, std::map<std::string, int32> sensors);
 
     static std::vector<std::string> GetAllSensorNames();
     static std::map<std::string, int32> GetAllSensors();

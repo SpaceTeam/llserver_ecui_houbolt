@@ -3,6 +3,8 @@
 //
 
 #include "HcpManager.h"
+#include "EcuiSocket.h"
+#include "Timer.h"
 
 #include "LLInterface.h"
 
@@ -13,13 +15,15 @@ WarnLight* LLInterface::warnLight;
     //SPI* LLInterface::spiDevice;
 
 bool LLInterface::isTransmittingSensors = false;
+bool LLInterface::isYellow = true;
+Timer* LLInterface::sensorTimer;
 
 void LLInterface::Init()
 {
     HcpManager::init();
     i2cDevice = new I2C(I2C_DEVICE_ADDRESS, "thrust");
     warnLight = new WarnLight(0);
-
+    sensorTimer = new Timer();
 }
 
 void LLInterface::Destroy()
@@ -72,12 +76,63 @@ bool LLInterface::ExecCommand(std::string name, json value)
 
 void LLInterface::StartSensorTransmission()
 {
-    isTransmittingSensors = true;
+    if (!isTransmittingSensors)
+    {
+        isTransmittingSensors = true;
+        sensorTimer->startContinous(100000, LLInterface::GetSensors, LLInterface::StopGetSensors);
+    }
 }
 
 void LLInterface::StopSensorTransmission()
 {
+    if (isTransmittingSensors)
+    {
+        sensorTimer->stop();
+    }
+}
+
+void LLInterface::StopGetSensors()
+{
     isTransmittingSensors = false;
+}
+
+void LLInterface::GetSensors(int64 microTime)
+{
+    std::map<std::string, int32> sensors = GetAllSensors();
+
+    TransmitSensors(microTime, sensors);
+
+    if (sensors.find("fuelPressure") != sensors.end())
+    {
+        if (sensors["fuelPressure"] >= 5000 && !isYellow)
+        {
+            turnYellow();
+            isYellow = true;
+        }
+        else if (sensors["fuelPressure"] < 5000 && isYellow)
+        {
+            turnGreen();
+            isYellow = false;
+        }
+    }
+
+}
+
+void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, int32> sensors)
+{
+    json content = json::array();
+    json sen;
+    for (const auto& sensor : sensors)
+    {
+        sen = json::object();
+
+        sen["name"] = sensor.first;
+        sen["value"] = sensor.second;
+        sen["time"] = (double)((microTime / 1000) / 1000.0);
+
+        content.push_back(sen);
+    }
+    EcuiSocket::SendJson("sensors", content);
 }
 
 void LLInterface::turnRed()
