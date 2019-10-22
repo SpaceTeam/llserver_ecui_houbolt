@@ -98,7 +98,7 @@ bool HcpManager::CheckPort(uint8 port, Device_Type type)
             return false;
         }
     }
-
+    return false;
 }
 
 std::vector<std::string> HcpManager::GetAllSensorNames()

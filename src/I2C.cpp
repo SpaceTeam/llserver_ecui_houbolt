@@ -37,20 +37,27 @@ I2C::~I2C()
     }
 }
 
-uint8 I2C::ReadByte()
+uint8 I2C::Read8()
 {
     std::lock_guard<std::mutex> lock(i2cMtx);
 
     return wiringPiI2CRead(this->i2cFile);
 }
 
-bool I2C::WriteByte(uint8 byte)
+uint16 I2C::Read16()
+{
+    std::lock_guard<std::mutex> lock(i2cMtx);
+
+    return wiringPiI2CReadReg16(this->i2cFile, 0);
+}
+
+bool I2C::Write8(uint8 byte)
 {
     std::lock_guard<std::mutex> lock(i2cMtx);
 
     bool success = true;
 
-    cout << "write " << byte << " to i2c" << endl;
+    //cout << "write 0x" << std::hex << (int)byte << " to i2c" << endl;
     if (wiringPiI2CWrite(this->i2cFile, byte) < 0)
     {
         success = false;
@@ -75,20 +82,27 @@ I2C::~I2C()
 
 }
 
-uint8 I2C::ReadByte()
+uint8 I2C::Read8()
 {
     std::lock_guard<std::mutex> lock(i2cMtx);
 
     return rand() % 255;
 }
 
-bool I2C::WriteByte(uint8 byte)
+uint16 I2C::Read16()
+{
+    std::lock_guard<std::mutex> lock(i2cMtx);
+
+    return rand() % 0xFFFF;
+}
+
+bool I2C::Write8(uint8 byte)
 {
     std::lock_guard<std::mutex> lock(i2cMtx);
 
     bool success = true;
 
-    cout << "write " << byte << " to i2c" << endl;
+    //cout << "write 0x" << std::hex << (int)byte << " to i2c" << endl;
 
     return success;
 }
