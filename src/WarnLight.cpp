@@ -17,35 +17,35 @@ WarnLight::~WarnLight()
 
 void WarnLight::Error()
 {
-    socket->Send("Error");
+    socket->Send("Error\n");
 }
 
 void WarnLight::ServoCal()
 {
-    socket->Send("SerCal");
+    socket->Send("SerCal\n");
 }
 
 void WarnLight::NoConnection()
 {
-    socket->Send("NoConn");
+    socket->Send("NoConn\n");
 }
 
 void WarnLight::SafeOn()
 {
-    socket->Send("SafeOn");
+    socket->Send("SafeOn\n");
 }
 
 void WarnLight::SafeOff()
 {
-    socket->Send("SafeOff");
+    socket->Send("SafeOff\n");
 }
 
 void WarnLight::Testing()
 {
-    socket->Send("Testing");
+    socket->Send("Testing\n");
 }
 
 void WarnLight::Standby()
 {
-    socket->Send("Standby");
+    socket->Send("Standby\n");
 }
