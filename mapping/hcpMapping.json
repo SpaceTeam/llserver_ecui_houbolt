@@ -33,7 +33,11 @@
            "port": 128
        }
     },
-    "digital": {},
+    "digital": {
+        "igniter feedback": {
+            "port": 10
+        }
+    },
     "digitalOut": {
         "igniter": {
             "port": 1
