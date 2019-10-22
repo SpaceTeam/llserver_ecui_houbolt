@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(TXV_ECUI_LLSERVER)
 
 find_package(Threads REQUIRED)
+find_package(nlohmann_json 3.2.0 REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -23,7 +24,8 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(LINUX)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads wiringPi)#spdlog::spdlog)
+    target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json Threads::Threads wiringPi)#spdlog::spdlog)
 else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)#spdlog::spdlog)
+    target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json Threads::Threads)#spdlog::spdlog)
 endif()
+
