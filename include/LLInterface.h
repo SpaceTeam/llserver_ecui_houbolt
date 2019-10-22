@@ -24,7 +24,7 @@ private:
     //static SPI* spiDevice;
 
     static bool isTransmittingSensors;
-    static bool isYellow;
+    static int32 warnlightStatus;
     static Timer* sensorTimer;
 
     static void GetSensors(int64 microTime);

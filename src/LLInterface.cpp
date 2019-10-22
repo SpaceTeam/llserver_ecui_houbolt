@@ -15,7 +15,7 @@ WarnLight* LLInterface::warnLight;
     //SPI* LLInterface::spiDevice;
 
 bool LLInterface::isTransmittingSensors = false;
-bool LLInterface::isYellow = true;
+int32 LLInterface::warnlightStatus = true;
 Timer* LLInterface::sensorTimer;
 
 void LLInterface::Init()
@@ -133,17 +133,30 @@ void LLInterface::GetSensors(int64 microTime)
 
     TransmitSensors(microTime, sensors);
 
-    if (sensors.find("fuelPressure") != sensors.end())
+    if (sensors.find("igniter feedback") != sensors.end())
     {
-        if ((sensors["fuelPressure"] >= 5000 || sensors["oxidizerPressure"] >= 5000) && !isYellow)
+        if (sensors["igniter feedback"] > 0)
+        {
+            TurnRed();
+            warnlightStatus = 2;
+        }
+        else if (warnlightStatus == 2)
         {
             TurnYellow();
-            isYellow = true;
+            warnlightStatus = 1;
         }
-        else if ((sensors["fuelPressure"] < 5000 && sensors["oxidizerPressure"] < 5000) && isYellow)
+    }
+    if (sensors.find("fuelPressure") != sensors.end())
+    {
+        if ((sensors["fuelPressure"] >= 5000 || sensors["oxidizerPressure"] >= 5000) && warnlightStatus==0)
+        {
+            TurnYellow();
+            warnlightStatus = 1;
+        }
+        else if ((sensors["fuelPressure"] < 5000 && sensors["oxidizerPressure"] < 5000) && warnlightStatus==1)
         {
             TurnGreen();
-            isYellow = false;
+            warnlightStatus = 0;
         }
     }
 
