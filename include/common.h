@@ -11,7 +11,7 @@
 
 #include "Debug.h"
 //TODO: move it elsewhere
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 
 
 typedef uint8_t uint8;

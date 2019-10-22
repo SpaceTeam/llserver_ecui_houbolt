@@ -29,7 +29,7 @@
 #define HCP_DEVICE "/dev/serial0"
 #define HCP_BAUD_RATE 115200
 
-#define I2C_DEVICE_ADDRESS 0x20
+#define I2C_DEVICE_ADDRESS 0x68
 
 #define SERVO_COUNT 6
 #define SERVO_MAX_ONTIME 40000

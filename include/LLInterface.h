@@ -8,7 +8,7 @@
 #include "common.h"
 #include "I2C.h"
 
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 
 #include "WarnLight.h"
 
