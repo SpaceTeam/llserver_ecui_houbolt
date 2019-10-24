@@ -10,7 +10,7 @@
 #include "HcpCommands.h"
 #include "Serial.h"
 #include "Mapping.h"
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 
 typedef enum class battery_status_e
 {

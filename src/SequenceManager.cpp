@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "SequenceManager.h"
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 #include "EcuiSocket.h"
 
 #include "utils.h"

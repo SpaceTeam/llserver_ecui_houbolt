@@ -35,7 +35,7 @@
     },
     "digital": {
         "igniter feedback": {
-            "port": 10
+            "port": 2
         }
     },
     "digitalOut": {

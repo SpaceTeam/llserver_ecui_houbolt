@@ -8,7 +8,7 @@
 #include "config.h"
 #include "common.h"
 
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 
 typedef enum class device_type_e
 {
