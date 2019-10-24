@@ -5,7 +5,7 @@
 		<Option title="TXV_ECUI_LLSERVER"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
-		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\usr\;CMake Files\..\..\..\..\..\..\usr\local\;CMake Files\..\..\..\..\..\..\usr\local\lib\;CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\;CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\nlohmann_json\;"/>
+		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
 				<Option working_dir="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer"/>
@@ -45,7 +45,6 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include"/>
-					<Add directory="/usr/local/include"/>
 				</Compiler>
 				<MakeCommands>
 					<Build command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 TXV_ECUI_LLSERVER"/>
@@ -62,7 +61,6 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/include"/>
-					<Add directory="/usr/local/include"/>
 				</Compiler>
 				<MakeCommands>
 					<Build command="/usr/bin/make -f &quot;/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 TXV_ECUI_LLSERVER/fast"/>
@@ -173,15 +171,6 @@
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
-		</Unit>
-		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/../../../../../../usr/local/lib/cmake/nlohmann_json/nlohmann_jsonConfig.cmake">
-			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\nlohmann_json\"/>
-		</Unit>
-		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/../../../../../../usr/local/lib/cmake/nlohmann_json/nlohmann_jsonConfigVersion.cmake">
-			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\nlohmann_json\"/>
-		</Unit>
-		<Unit filename="/Volumes/Data/markus/Programming/SpaceTeam/TXV_ECUI_LLServer/../../../../../../usr/local/lib/cmake/nlohmann_json/nlohmann_jsonTargets.cmake">
-			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\nlohmann_json\"/>
 		</Unit>
 	</Project>
 </CodeBlocks_project_file>
