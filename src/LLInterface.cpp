@@ -135,15 +135,10 @@ void LLInterface::GetSensors(int64 microTime)
 
     if (sensors.find("igniter feedback") != sensors.end())
     {
-        if (sensors["igniter feedback"] > 0)
+        if (sensors["igniter feedback"] == 0 && warnlightStatus != 2)
         {
             TurnRed();
             warnlightStatus = 2;
-        }
-        else if (warnlightStatus == 2)
-        {
-            TurnYellow();
-            warnlightStatus = 1;
         }
     }
     if (sensors.find("fuelPressure") != sensors.end())

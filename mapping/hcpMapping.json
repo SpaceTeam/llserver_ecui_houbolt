@@ -1,5 +1,8 @@
 {
     "analog": {
+        "batteryVoltage": {
+            "port": 128
+        },
         "chamberPressure": {
             "map": {
                 "d": 621,
@@ -28,10 +31,7 @@
                 "k": 14.1
             },
             "port": 9
-        },
-        "batteryVoltage": {
-           "port": 128
-       }
+        }
     },
     "digital": {
         "igniter feedback": {
@@ -48,12 +48,12 @@
         "fuel": {
             "endpoints": [
                 1000,
-                2000
+                2200
             ],
             "feedbackAnalog": "fuel feedback",
             "feedbackEndpoints": [
-                1129,
-                2506
+                1098,
+                2449
             ],
             "port": 0
         },
