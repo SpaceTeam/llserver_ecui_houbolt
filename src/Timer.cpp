@@ -57,7 +57,6 @@ void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMic
 
         this->isRunning = true;
         this->timerThread = new std::thread(Timer::highPerformanceTimerLoop, this, intervalMicros, endTimeMicros, startTimeMicros);
-
         this->timerThread->detach();
     }
     else
@@ -81,7 +80,6 @@ void Timer::startContinous(uint64 intervalMicros, std::function<void(int64)> tic
 
         this->isRunning = true;
         this->timerThread = new std::thread(Timer::highPerformanceContinousTimerLoop, this, intervalMicros);
-
         this->timerThread->detach();
     }
     else
@@ -94,15 +92,18 @@ void Timer::stop()
 {
     if (this->isRunning)
     {
+        this->isRunning = false;
+        syncMtx.lock();
         std::thread callbackThread(this->stopCallback);
         callbackThread.detach();
-        this->isRunning = false;
-
+        delete this->timerThread;
+        syncMtx.unlock();
     }
 }
 
 void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
 {
+    std::lock_guard<std::mutex> lock(self->syncMtx);
     while(self->isRunning) {
 
         std::thread callbackThread(self->tickCallback, microTime);

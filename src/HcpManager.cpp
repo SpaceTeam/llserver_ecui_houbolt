@@ -131,6 +131,7 @@ std::vector<std::string> HcpManager::GetAllSensorNames()
         Debug::error("No digitals found");
     }
 
+    std::sort(sensorNames.begin(), sensorNames.end());
     return sensorNames;
 }
 

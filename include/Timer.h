@@ -7,6 +7,7 @@
 
 #include <thread>
 #include <functional>
+#include <mutex>
 #include "common.h"
 
 class Timer
@@ -24,6 +25,7 @@ private:
 
 
     std::thread* timerThread;
+    std::mutex syncMtx;
     std::function<void(int64)> tickCallback;
     std::function<void()> stopCallback;
 
