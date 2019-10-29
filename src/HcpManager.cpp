@@ -76,7 +76,7 @@ bool HcpManager::CheckPort(uint8 port, Device_Type type)
     }
     else if (type == Device_Type::ANALOG)
     {
-        if (port < ANALOG_COUNT)
+        if (port < ANALOG_COUNT || port == HCP_ANALOG_SUPPLY_PORT)
         {
             return true;
         }
@@ -716,15 +716,15 @@ int32 *HcpManager::GetLoadCells()
         if (rep->optcode == HCP_ST_THRUST_REP)
         {
             uint8 signByte1 = 0, signByte2 = 0, signByte3 = 0;
-            if (rep->payload[0] > 0x80)
+            if (rep->payload[0] >= 0x80)
             {
                 signByte1 = 0xFF;
             }
-            if (rep->payload[3] > 0x80)
+            if (rep->payload[3] >= 0x80)
             {
                 signByte2 = 0xFF;
             }
-            if (rep->payload[6] > 0x80)
+            if (rep->payload[6] >= 0x80)
             {
                 signByte3 = 0xFF;
             }
