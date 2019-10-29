@@ -25,7 +25,7 @@ std::mutex SequenceManager::syncMtx;
 Timer* SequenceManager::timer;
 Timer* SequenceManager::sensorTimer;
 
-
+int32 threadCounter = 0;
 //std::shared_ptr<spdlog::logger> SequenceManager::async_file;
 
 json SequenceManager::jsonSequence = json::object();
@@ -254,6 +254,8 @@ void SequenceManager::GetSensors(int64 microTime)
 
 void SequenceManager::Tick(int64 microTime)
 {
+    threadCounter++;
+    cout << "Threads: " << threadCounter << endl;
     if (microTime % 500000 == 0)
     {
         Debug::print("Micro Seconds: %d", microTime);
@@ -384,7 +386,7 @@ void SequenceManager::Tick(int64 microTime)
         }
         //syncMtx.unlock();
     }
-
+    threadCounter--;
 }
 
 void SequenceManager::StopAbortSequence()
