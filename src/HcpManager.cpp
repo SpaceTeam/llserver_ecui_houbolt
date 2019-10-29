@@ -145,9 +145,9 @@ std::vector<std::string> HcpManager::GetAllSensorNames()
     return sensorNames;
 }
 
-std::map<std::string, int32> HcpManager::GetAllSensors()
+std::map<std::string, double> HcpManager::GetAllSensors()
 {
-    map<std::string, int32> sensors;
+    map<std::string, double> sensors;
 
     json analogs = mapping->GetDevices(Device_Type::ANALOG);
     json digitals = mapping->GetDevices(Device_Type::DIGITAL);
@@ -752,9 +752,9 @@ int32 *HcpManager::GetLoadCells()
     return value;
 }
 
-int32 HcpManager::GetAnalog(std::string name)
+double HcpManager::GetAnalog(std::string name)
 {
-    int32 value = -1;
+    double value = -1;
 
     json device = mapping->GetDeviceByName(name, Device_Type::ANALOG);
 
@@ -773,7 +773,7 @@ int32 HcpManager::GetAnalog(std::string name)
             vector<uint16> servoEndpoints = servo["endpoints"];
             vector<uint16> fbckEndpoints = servo["feedbackEndpoints"];
 
-            float norm = (((value-fbckEndpoints[0])*1.0) / (fbckEndpoints[1] - fbckEndpoints[0]));
+            double norm = (((value-fbckEndpoints[0])*1.0) / (fbckEndpoints[1] - fbckEndpoints[0]));
 
             //convert to us
             //value = ((servoEndpoints[1] - servoEndpoints[0])*norm) + servoEndpoints[0];
@@ -787,7 +787,7 @@ int32 HcpManager::GetAnalog(std::string name)
 
             json map = device["map"];
 
-            int32 before = value;
+            double before = value;
             value = ((double)value - (double)map["d"]) * (double)map["k"];
 
             Debug::info("from %d to %d", before, value);

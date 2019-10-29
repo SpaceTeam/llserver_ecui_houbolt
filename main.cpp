@@ -2,12 +2,12 @@
 #include "LLController.h"
 
 #include <string>
+#include <iomanip>      // std::setprecision
 
 bool running = true;
 
 int main(int argc, char const *argv[])
 {
-
     LLController::Init();
 
     std::string inputStr;
