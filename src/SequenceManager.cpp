@@ -255,7 +255,11 @@ void SequenceManager::GetSensors(int64 microTime)
 void SequenceManager::Tick(int64 microTime)
 {
     threadCounter++;
-    cout << "Threads: " << threadCounter << endl;
+    if (threadCounter > 1)
+    {
+        cout << "Threads: " << threadCounter << endl;
+    }
+
     if (microTime % 500000 == 0)
     {
         Debug::print("Micro Seconds: %d", microTime);
