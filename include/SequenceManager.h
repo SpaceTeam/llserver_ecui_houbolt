@@ -34,6 +34,7 @@ private:
     static bool isAbortRunning;
     static Timer* timer;
     static Timer* sensorTimer;
+    static std::mutex syncMtx;
 
     static json jsonSequence;
     static json jsonAbortSequence;

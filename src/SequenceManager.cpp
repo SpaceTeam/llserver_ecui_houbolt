@@ -21,6 +21,7 @@ using namespace std;
 bool SequenceManager::isRunning = false;
 bool SequenceManager::isAbort = false;
 bool SequenceManager::isAbortRunning = false;
+std::mutex SequenceManager::syncMtx;
 Timer* SequenceManager::timer;
 Timer* SequenceManager::sensorTimer;
 
@@ -356,25 +357,31 @@ void SequenceManager::Tick(int64 microTime)
     }
     else
     {
-        for (const auto& seqItem : sequenceIntervalMap)
+        if (isRunning)
+        syncMtx.lock();
+        if (isRunning)
         {
-            Point prev = sequenceIntervalMap[seqItem.first][0];
-            Point next = sequenceIntervalMap[seqItem.first][1];
-
-            uint8 nextValue;
-            if (prev.x == microTime)
+            for (const auto &seqItem : sequenceIntervalMap)
             {
-                nextValue = (uint8)prev.y;
-            }
-            else
-            {
-                double scale = ((next.y - prev.y)*1.0) / (next.x - prev.x);
-                nextValue = (scale * (microTime-prev.x)) + prev.y;
-            }
-            Debug::info("writing " + seqItem.first + " with value %d", nextValue);
+                Point prev = sequenceIntervalMap[seqItem.first][0];
+                Point next = sequenceIntervalMap[seqItem.first][1];
 
-            LLInterface::ExecCommand(seqItem.first, nextValue);
+                uint8 nextValue;
+                if (prev.x == microTime)
+                {
+                    nextValue = (uint8) prev.y;
+                }
+                else
+                {
+                    double scale = ((next.y - prev.y) * 1.0) / (next.x - prev.x);
+                    nextValue = (scale * (microTime - prev.x)) + prev.y;
+                }
+                Debug::info("writing " + seqItem.first + " with value %d", nextValue);
+
+                LLInterface::ExecCommand(seqItem.first, nextValue);
+            }
         }
+        syncMtx.unlock();
     }
 
 }
@@ -401,7 +408,7 @@ void SequenceManager::StartAbortSequence()
     {
         isAbortRunning = true;
         usleep(50000);
-
+        syncMtx.lock();
         for (auto it = jsonAbortSequence["actions"].begin(); it != jsonAbortSequence["actions"].end(); ++it)
         {
             if (it.key().compare("timestamp") != 0)
@@ -410,6 +417,7 @@ void SequenceManager::StartAbortSequence()
                 LLInterface::ExecCommand(it.key(), it.value());
             }
         }
+        syncMtx.unlock();
         Debug::print("--------------");
         StopAbortSequence();
     }
