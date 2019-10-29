@@ -23,10 +23,6 @@ void LLInterface::Init()
     HcpManager::init();
     warnLight = new WarnLight(0);
     sensorTimer = new Timer();
-    i2cDevice = new I2C(I2C_DEVICE_ADDRESS, "thrust");
-
-    //set to one shot mode channel 1
-    i2cDevice->Write8(0x00);
 }
 
 void LLInterface::Destroy()
@@ -49,9 +45,6 @@ std::vector<std::string> LLInterface::GetAllSensorNames()
 {
     std::vector<std::string> sensorNames;
     sensorNames = HcpManager::GetAllSensorNames();
-    sensorNames.push_back(i2cDevice->GetName() + "1");
-    sensorNames.push_back(i2cDevice->GetName() + "2");
-    sensorNames.push_back(i2cDevice->GetName() + "3");
     return sensorNames;
 }
 
@@ -60,32 +53,6 @@ std::map<std::string, int32> LLInterface::GetAllSensors()
     std::map<std::string, int32> sensors;
     sensors = HcpManager::GetAllSensors();
 
-    i2cDevice->Write8(0x00);
-    uint16 val = i2cDevice->Read16();
-    int raw_adc = (val & 0x0FFF);
-    if(raw_adc > 2047)
-    {
-        raw_adc -= 4095;
-    }
-    sensors[i2cDevice->GetName() + "1"] = raw_adc;
-
-    i2cDevice->Write8(0x20);
-    val = i2cDevice->Read16();
-    raw_adc = (val & 0x0FFF);
-    if(raw_adc > 2047)
-    {
-        raw_adc -= 4095;
-    }
-    sensors[i2cDevice->GetName() + "2"] = raw_adc;
-
-    i2cDevice->Write8(0x40);
-    val = i2cDevice->Read16();
-    raw_adc = (val & 0x0FFF);
-    if(raw_adc > 2047)
-    {
-        raw_adc -= 4095;
-    }
-    sensors[i2cDevice->GetName() + "3"] = raw_adc;
     return sensors;
 }
 
