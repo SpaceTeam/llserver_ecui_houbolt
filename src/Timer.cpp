@@ -103,7 +103,7 @@ void Timer::stop()
 
 void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
 {
-    std::lock_guard<std::mutex> lock(self->syncMtx);
+    std::unique_lock<std::mutex> lock(self->syncMtx);
     while(self->isRunning) {
 
         std::thread callbackThread(self->tickCallback, microTime);
@@ -121,6 +121,7 @@ void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
 
         if (microTime >= endTime)
         {
+            lock.unlock();
             self->stop();
         }
     }
@@ -128,7 +129,7 @@ void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
 
 void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime, int64 microTime)
 {
-    std::lock_guard<std::mutex> lock(self->syncMtx);
+    std::unique_lock<std::mutex> lock(self->syncMtx);
     auto lastTime = Clock::now();
     auto currTime = lastTime;
 
@@ -153,6 +154,7 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
 
             if (microTime >= endTime)
             {
+                lock.unlock();
                 self->stop();
             }
         }
@@ -163,7 +165,7 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
 
 void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval)
 {
-    std::lock_guard<std::mutex> lock(self->syncMtx);
+    std::unique_lock<std::mutex> lock(self->syncMtx);
     auto lastTime = Clock::now();
     auto currTime = lastTime;
     int64 microTime = 0;
