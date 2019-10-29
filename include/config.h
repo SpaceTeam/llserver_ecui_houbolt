@@ -5,7 +5,7 @@
 #ifndef TXV_ECUI_LLSERVER_CONFIG_H
 #define TXV_ECUI_LLSERVER_CONFIG_H
 
-//#define LLSERVER_DEBUG
+#define LLSERVER_DEBUG
 
 #define SEQUENCE_FILE_PATH "../TXV_ECUI_WEB/sequence/Sequence.json"
 #define ABORT_EQUENCE_FILE_PATH "../TXV_ECUI_WEB/sequence/AbortSequence.json"
@@ -27,7 +27,7 @@
 #define HCP_MAPPING_FILE_PATH "mapping/hcpMapping.json"
 
 #define HCP_DEVICE "/dev/serial0"
-#define HCP_BAUD_RATE 115200
+#define HCP_BAUD_RATE 230400
 
 #define I2C_DEVICE_ADDRESS 0x68
 

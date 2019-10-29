@@ -34,8 +34,7 @@
         },
         "thrust": {
 
-            "loadCells" : true,
-            "port": -1
+            "loadCells" : true
         }
 
     },
