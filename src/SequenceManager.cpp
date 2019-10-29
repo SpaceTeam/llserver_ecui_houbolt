@@ -197,16 +197,16 @@ void SequenceManager::UpdateIntervalMap(std::string name, int64 microTime, uint8
     }
 }
 
-void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
+void SequenceManager::LogSensors(int64 microTime, vector<int32> sensors)
 {
     string msg;
-    double secs = microTime/1000000.0;
+    //double secs = microTime/1000000.0;
     for (int i = 0; i < sensors.size(); i++)
     {
         msg += to_string(sensors[i]) + ";";
     }
     //async_file->info(to_string(microTime) + ";" + msg);
-    logging::INFO(to_string(secs) + ";" + msg);
+    logging::INFO(to_string(microTime) + ";" + msg);
 }
 
 void SequenceManager::StopGetSensors()
@@ -216,9 +216,9 @@ void SequenceManager::StopGetSensors()
 
 void SequenceManager::GetSensors(int64 microTime)
 {
-    map<string, double> sensors = LLInterface::GetAllSensors();
+    map<string, int32> sensors = LLInterface::GetAllSensors();
 
-    vector<double> vals;
+    vector<int32> vals;
     for (const auto& sensor : sensors)
     {
         if (sensorsNominalRangeMap.find(sensor.first) != sensorsNominalRangeMap.end())

@@ -48,9 +48,9 @@ std::vector<std::string> LLInterface::GetAllSensorNames()
     return sensorNames;
 }
 
-std::map<std::string, double> LLInterface::GetAllSensors()
+std::map<std::string, int32> LLInterface::GetAllSensors()
 {
-    std::map<std::string, double> sensors;
+    std::map<std::string, int32> sensors;
     sensors = HcpManager::GetAllSensors();
 
     return sensors;
@@ -96,7 +96,7 @@ void LLInterface::StopGetSensors()
 
 void LLInterface::GetSensors(int64 microTime)
 {
-    std::map<std::string, double> sensors = GetAllSensors();
+    std::map<std::string, int32> sensors = GetAllSensors();
 
     TransmitSensors(microTime, sensors);
 
@@ -124,7 +124,7 @@ void LLInterface::GetSensors(int64 microTime)
 
 }
 
-void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double> sensors)
+void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, int32> sensors)
 {
     json content = json::array();
     json sen;

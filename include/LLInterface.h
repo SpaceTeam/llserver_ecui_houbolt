@@ -41,10 +41,10 @@ public:
     static void EnableAllOutputDevices();
     static void DisableAllOutputDevices();
 
-    static void TransmitSensors(int64 microTime, std::map<std::string, double> sensors);
+    static void TransmitSensors(int64 microTime, std::map<std::string, int32> sensors);
 
     static std::vector<std::string> GetAllSensorNames();
-    static std::map<std::string, double> GetAllSensors();
+    static std::map<std::string, int32> GetAllSensors();
 
     static void StartSensorTransmission();
     static void StopSensorTransmission();

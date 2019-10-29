@@ -53,7 +53,7 @@ private:
     static void UpdateIntervalMap(std::string name, int64 microTime, uint8 newValue);
 
 
-    static void LogSensors(int64 microTime, std::vector<double > sensors);
+    static void LogSensors(int64 microTime, std::vector<int32 > sensors);
     static void StopGetSensors();
     static void GetSensors(int64 microTime);
     static void Tick(int64 microTime);
