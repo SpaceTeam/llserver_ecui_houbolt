@@ -253,7 +253,7 @@ void SequenceManager::GetSensors(int64 microTime)
 	    LLInterface::TransmitSensors(microTime, sensors);
     }
     auto currTime = Clock::now();
-    cout << "Transmission Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << endl;
+    cerr << "Transmission Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << endl;
 
 }
 
@@ -264,7 +264,7 @@ void SequenceManager::Tick(int64 microTime)
 
     if (threadCounter > 1)
     {
-        cout << "Threads: " << threadCounter << endl;
+        cerr << "Threads: " << threadCounter << endl;
     }
 
     if (microTime % 500000 == 0)
@@ -363,6 +363,8 @@ void SequenceManager::Tick(int64 microTime)
             }
         }
     }
+    auto currTime = Clock::now();
+    cerr << "Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << endl;
 
     if (findNext)
     {
@@ -398,8 +400,6 @@ void SequenceManager::Tick(int64 microTime)
         //syncMtx.unlock();
     }
 
-    auto currTime = Clock::now();
-    cout << "Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << endl;
     threadCounter--;
 }
 

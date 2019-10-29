@@ -1,8 +1,5 @@
 {
     "analog": {
-        "batteryVoltage": {
-            "port": 128
-        },
         "chamberPressure": {
             "map": {
                 "d": 621,
