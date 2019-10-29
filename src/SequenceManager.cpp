@@ -358,8 +358,8 @@ void SequenceManager::Tick(int64 microTime)
     }
     else
     {
-        if (isRunning)
-        syncMtx.lock();
+        //if (isRunning)
+        //syncMtx.lock();
         if (isRunning)
         {
             for (const auto &seqItem : sequenceIntervalMap)
@@ -382,7 +382,7 @@ void SequenceManager::Tick(int64 microTime)
                 LLInterface::ExecCommand(seqItem.first, nextValue);
             }
         }
-        syncMtx.unlock();
+        //syncMtx.unlock();
     }
 
 }
