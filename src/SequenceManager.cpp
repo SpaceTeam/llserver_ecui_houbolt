@@ -400,6 +400,8 @@ void SequenceManager::StartAbortSequence()
     if (!isRunning && !isAbortRunning)
     {
         isAbortRunning = true;
+        usleep(50000);
+
         for (auto it = jsonAbortSequence["actions"].begin(); it != jsonAbortSequence["actions"].end(); ++it)
         {
             if (it.key().compare("timestamp") != 0)
