@@ -34,6 +34,8 @@ json SequenceManager::jsonAbortSequence = json::object();
 std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
 std::map<std::string, double[2]> SequenceManager::sensorsNominalRangeMap;
 
+typedef std::chrono::high_resolution_clock Clock;
+
 void SequenceManager::init()
 {
     timer = new Timer();
@@ -255,6 +257,8 @@ void SequenceManager::GetSensors(int64 microTime)
 void SequenceManager::Tick(int64 microTime)
 {
     threadCounter++;
+    auto startTime = Clock::now();
+
     if (threadCounter > 1)
     {
         cout << "Threads: " << threadCounter << endl;
@@ -390,6 +394,9 @@ void SequenceManager::Tick(int64 microTime)
         }
         //syncMtx.unlock();
     }
+
+    auto currTime = Clock::now();
+    cout << "Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << endl;
     threadCounter--;
 }
 

@@ -37,6 +37,8 @@ void EcuiSocket::AsyncListen(std::function<void(json)> onMsgCallback)
         json jsonMsg = json::parse(msg);
 
         onMsgCallback(jsonMsg);
+
+        usleep(1);
     }
 }
 

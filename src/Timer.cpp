@@ -159,7 +159,7 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
             }
         }
 
-
+        usleep(1);
     }
 }
 
@@ -184,6 +184,7 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval)
 	        //self->tickCallback(microTime);
             lastTime = currTime;
         }
+        usleep(1);
     }
 }
 
