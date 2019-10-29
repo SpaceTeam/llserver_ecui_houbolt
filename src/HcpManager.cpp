@@ -715,9 +715,22 @@ int32 *HcpManager::GetLoadCells()
     {
         if (rep->optcode == HCP_ST_THRUST_REP)
         {
-            value[0] = (rep->payload[0] << 16) | (rep->payload[1] << 8) | rep->payload[2];
-            value[1] = (rep->payload[3] << 16) | (rep->payload[4] << 8) | rep->payload[5];
-            value[2] = (rep->payload[6] << 16) | (rep->payload[7] << 8) | rep->payload[8];
+            uint8 signByte1 = 0, signByte2 = 0, signByte3 = 0;
+            if (rep->payload[0] > 0x80)
+            {
+                signByte1 = 0xFF;
+            }
+            if (rep->payload[3] > 0x80)
+            {
+                signByte2 = 0xFF;
+            }
+            if (rep->payload[6] > 0x80)
+            {
+                signByte3 = 0xFF;
+            }
+            value[0] = signByte1 << 24 | (rep->payload[0] << 16) | (rep->payload[1] << 8) | rep->payload[2];
+            value[1] = signByte2 << 24 | (rep->payload[3] << 16) | (rep->payload[4] << 8) | rep->payload[5];
+            value[2] = signByte3 << 24 | (rep->payload[6] << 16) | (rep->payload[7] << 8) | rep->payload[8];
 
             Debug::info("REP Cell 1: %d", value[0]);
             Debug::info("REP Cell 2: %d", value[1]);
