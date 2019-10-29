@@ -111,7 +111,17 @@ std::vector<std::string> HcpManager::GetAllSensorNames()
     {
         for (auto it = analogs.begin(); it != analogs.end(); ++it)
         {
-            sensorNames.push_back(it.key());
+            if (utils::keyExists(it.value(), "loadCells"))
+            {
+                sensorNames.push_back(it.key() + " 1");
+                sensorNames.push_back(it.key() + " 2");
+                sensorNames.push_back(it.key() + " 3");
+            }
+            else
+            {
+                sensorNames.push_back(it.key());
+            }
+
         }
     }
     else
@@ -145,7 +155,19 @@ std::map<std::string, int32> HcpManager::GetAllSensors()
     {
         for (auto it = analogs.begin(); it != analogs.end(); ++it)
         {
-            sensors[it.key()] = GetAnalog(it.key());
+            if (utils::keyExists(it.value(), "loadCells"))
+            {
+                int32* cells = GetLoadCells();
+
+                sensors[it.key() + " 1"] = cells[0];
+                sensors[it.key() + " 2"] = cells[1];
+                sensors[it.key() + " 3"] = cells[2];
+            }
+            else
+            {
+                sensors[it.key()] = GetAnalog(it.key());
+            }
+
         }
     }
     else
@@ -668,6 +690,52 @@ bool HcpManager::SetDigitalOutputs(uint8 port, bool enable)
     }
 
     return success;
+}
+
+int32 *HcpManager::GetLoadCells()
+{
+
+    int32 value = new int32[3](-1);
+
+
+    HCP_MSG msg;
+    msg.optcode = HCP_ST_THRUST_REQ;
+    msg.payloadSize = 0;
+    msg.payload = nullptr;
+
+    Debug::info("get load cells");
+
+    serialMtx.lock();
+    hcpSerial->Write(msg);
+    HCP_MSG* rep = hcpSerial->ReadSync();
+    serialMtx.unlock();
+
+    if (rep != nullptr)
+    {
+        if (rep->optcode == HCP_ST_THRUST_REP)
+        {
+            value[0] = (rep->payload[0] << 16) | (rep->payload[1] << 8) | rep->payload[2];
+            value[1] = (rep->payload[3] << 16) | (rep->payload[4] << 8) | rep->payload[5];
+            value[2] = (rep->payload[6] << 16) | (rep->payload[7] << 8) | rep->payload[8];
+
+            Debug::info("REP Cell 1: %d", value[0]);
+            Debug::info("REP Cell 2: %d", value[1]);
+            Debug::info("REP Cell 3: %d", value[2]);
+        }
+        else
+        {
+            Debug::info("Other REP opcode than expected: %x", rep->optcode);
+        }
+        delete rep->payload;
+        delete rep;
+    }
+    else
+    {
+        Debug::error("hcp response message is null");
+    }
+    delete[] msg.payload;
+
+    return value;
 }
 
 int32 HcpManager::GetAnalog(std::string name)

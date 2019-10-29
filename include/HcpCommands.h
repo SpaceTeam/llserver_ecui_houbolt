@@ -28,6 +28,7 @@
 #define HCP_SERVO           	0x50
 #define HCP_UART          		0x60
 #define HCP_SPEAKER				0x70
+#define HCP_ST_THRUST_REQ		0x93
 
 //replies to RPi
 #define HCP_VERS_REP			0x02
@@ -41,6 +42,7 @@
 #define HCP_INVALID_FLAGS   	0x86
 #define HCP_INVALID_VALUE   	0x87
 #define HCP_FAIL_EMERG_ACT      0x88
+#define HCP_ST_THRUST_REP		0x94
 #define HCP_ANALOG_REP      	0xA1
 #define HCP_IMU_RATE_REP      	0xA2
 #define HCP_IMU_ACCEL_REP      	0xA3

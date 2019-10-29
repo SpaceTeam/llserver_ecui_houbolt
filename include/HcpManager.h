@@ -76,6 +76,9 @@ public:
     static bool SetDigitalOutputs(uint8 port, bool enable);
     static bool SetDigitalOutputs(std::string name, bool enable);
 
+    //returns exactly 3 int32 values
+    static int32 *GetLoadCells();
+
     static int32 GetAnalog(std::string name);
     static int32 GetAnalog(uint8 port);
 
