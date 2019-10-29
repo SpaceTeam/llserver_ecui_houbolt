@@ -695,7 +695,8 @@ bool HcpManager::SetDigitalOutputs(uint8 port, bool enable)
 int32 *HcpManager::GetLoadCells()
 {
 
-    int32 value = new int32[3](-1);
+    int32 *value = new int32[3];
+    std::fill( value, value+3, -1 );
 
 
     HCP_MSG msg;
