@@ -128,6 +128,7 @@ void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
 
 void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime, int64 microTime)
 {
+    std::lock_guard<std::mutex> lock(self->syncMtx);
     auto lastTime = Clock::now();
     auto currTime = lastTime;
 
@@ -162,6 +163,7 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
 
 void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval)
 {
+    std::lock_guard<std::mutex> lock(self->syncMtx);
     auto lastTime = Clock::now();
     auto currTime = lastTime;
     int64 microTime = 0;
