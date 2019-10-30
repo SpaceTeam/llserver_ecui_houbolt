@@ -157,6 +157,7 @@ HCP_MSG* Serial::ReadSync()
             {
                 //No data waiting
 //                cout << "optcode: no data...waiting" << endl;
+                usleep(1);
             }
             else
             {
@@ -236,6 +237,7 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
             {
                 //No data waiting
 //                cout << "optcode: no data...waiting" << endl;
+                usleep(1);
             }
             else
             {

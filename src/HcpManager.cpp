@@ -21,6 +21,8 @@ bool HcpManager::servoEnabledArr[SERVO_COUNT] = {false};
 
 std::recursive_mutex HcpManager::serialMtx;
 
+typedef std::chrono::high_resolution_clock Clock;
+
 void HcpManager::init()
 {
     hcpSerial = new Serial(HCP_DEVICE, HCP_BAUD_RATE);
@@ -153,15 +155,20 @@ std::map<std::string, int32> HcpManager::GetAllSensors()
     json digitals = mapping->GetDevices(Device_Type::DIGITAL);
     if (analogs != nullptr)
     {
+
+
+
         for (auto it = analogs.begin(); it != analogs.end(); ++it)
         {
             if (it.key().compare("thrust") == 0)
             {
+
                 int32* cells = GetLoadCells();
 
                 sensors[it.key() + " 1"] = cells[0];
                 sensors[it.key() + " 2"] = cells[1];
                 sensors[it.key() + " 3"] = cells[2];
+
             }
             else
             {
@@ -169,6 +176,8 @@ std::map<std::string, int32> HcpManager::GetAllSensors()
             }
 
         }
+
+
     }
     else
     {
@@ -792,10 +801,15 @@ int32 HcpManager::GetAnalog(uint8 port)
 
         Debug::info("get analog %d", port);
 
+        auto startTime = Clock::now();
         serialMtx.lock();
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
         serialMtx.unlock();
+
+        auto currTime = Clock::now();
+    std::cerr << "Get analog Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;
+
 
         if (rep != nullptr)
         {
