@@ -1,11 +1,15 @@
 {
     "analog": {
         "battery": {
+            "map": {
+                "d": 0,
+                "k": 0.001
+            },
             "port": 128
         },
         "chamberPressure": {
             "map": {
-                "d": 621,
+                "d": -621,
                 "k": 0.0141
             },
             "port": 10
@@ -16,7 +20,7 @@
         },
         "fuelPressure": {
             "map": {
-                "d": 621,
+                "d": -621,
                 "k": 0.0141
             },
             "port": 8
@@ -27,7 +31,7 @@
         },
         "oxidizerPressure": {
             "map": {
-                "d": 621,
+                "d": -621,
                 "k": 0.0141
             },
             "port": 9

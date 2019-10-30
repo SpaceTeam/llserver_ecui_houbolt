@@ -773,7 +773,7 @@ double HcpManager::GetAnalog(std::string name)
             json map = device["map"];
 
             double before = value;
-            value = ((double)value - (double)map["d"]) * (double)map["k"];
+            value = ((double)value + (double)map["d"]) * (double)map["k"];
 
             Debug::info("from %d to %d", before, value);
         }
