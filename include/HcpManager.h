@@ -49,7 +49,7 @@ public:
     static void restart();
 
     static std::vector<std::string> GetAllSensorNames();
-    static std::map<std::string, int32> GetAllSensors();
+    static std::map<std::string, double> GetAllSensors();
 
     static nlohmann::json GetAllServoData();
 
@@ -79,7 +79,7 @@ public:
     //returns exactly 3 int32 values
     static int32 *GetLoadCells();
 
-    static int32 GetAnalog(std::string name);
+    static double GetAnalog(std::string name);
     static int32 GetAnalog(uint8 port);
 
     static uint8 GetDigital(std::string name);
