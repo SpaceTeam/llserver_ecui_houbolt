@@ -27,7 +27,7 @@
 #define HCP_MAPPING_FILE_PATH "mapping/hcpMapping.json"
 
 #define HCP_DEVICE "/dev/serial0"
-#define HCP_BAUD_RATE 230400
+#define HCP_BAUD_RATE 115200//230400
 
 #define I2C_DEVICE_ADDRESS 0x68
 
