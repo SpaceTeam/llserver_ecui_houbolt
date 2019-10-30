@@ -736,7 +736,7 @@ int32 *HcpManager::GetLoadCells()
     msg.payloadSize = 0;
     msg.payload = nullptr;
 
-    Debug::info("get load cells");
+    fprintf(stderr, "get load cells");
 
     serialMtx.lock();
     hcpSerial->Write(msg);
@@ -846,7 +846,7 @@ int32 HcpManager::GetAnalog(uint8 port)
 
         msg.payload[0] = port;
 
-        Debug::info("get analog %d", port);
+        fprintf(stderr, "get analog %d", port);
 
         auto startTime = Clock::now();
         serialMtx.lock();
