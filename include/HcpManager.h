@@ -51,6 +51,8 @@ public:
     static std::vector<std::string> GetAllSensorNames();
     static std::map<std::string, double> GetAllSensors();
 
+    static std::vector<std::string> GetAllOutputNames();
+
     static nlohmann::json GetAllServoData();
 
     static bool ExecCommand(std::string name, uint8 percent);

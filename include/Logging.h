@@ -150,7 +150,7 @@ namespace logging {
 //      output.append(timestamp());
 //      output.append(uncolored.find(level)->second);
       output.append(message);
-      output.push_back('\n');
+//      output.push_back('\n');
       log(output);
     }
     virtual void log(const std::string& message) {

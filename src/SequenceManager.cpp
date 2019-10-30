@@ -104,14 +104,20 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 
         //get sensor names
         vector<string> sensorNames = LLInterface::GetAllSensorNames();
+        vector<string> outputNames = LLInterface::GetAllOutputNames();
         string msg;
         for (int i = 0; i < sensorNames.size(); i++)
         {
             msg += sensorNames[i] + ";";
         }
+        msg += "SequenceTime;";
+        for (auto item : outputNames)
+        {
+            msg += item + ";";
+        }
 
         //async_file->info("Timestep;" + msg);
-        logging::INFO("Timestep;" + msg);
+        logging::INFO("Timestep;" + msg + "\n");
 
         isRunning = true;
         jsonSequence = jsonSeq;
@@ -208,7 +214,7 @@ void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
         msg += to_string(sensors[i]) + ";";
     }
     //async_file->info(to_string(microTime) + ";" + msg);
-    logging::INFO(to_string(secs) + ";" + msg);
+    logging::INFO("\n" + to_string(secs) + ";" + msg);
 }
 
 void SequenceManager::StopGetSensors()
@@ -373,6 +379,7 @@ void SequenceManager::Tick(int64 microTime)
     {
         //if (isRunning)
         //syncMtx.lock();
+        string msg = to_string(microTime/1000000.0) + ";";
         if (isRunning)
         {
             for (const auto &seqItem : sequenceIntervalMap)
@@ -391,9 +398,11 @@ void SequenceManager::Tick(int64 microTime)
                     nextValue = (scale * (microTime - prev.x)) + prev.y;
                 }
                 Debug::info("writing " + seqItem.first + " with value %d", nextValue);
+                msg += to_string(nextValue) + ";";
 
                 LLInterface::ExecCommand(seqItem.first, nextValue);
             }
+            logging::INFO(msg);
         }
         //syncMtx.unlock();
     }

@@ -62,6 +62,13 @@ std::map<std::string, double> LLInterface::GetAllSensors()
     return sensors;
 }
 
+std::vector<std::string> LLInterface::GetAllOutputNames()
+{
+    std::vector<std::string> outputNames;
+    outputNames = HcpManager::GetAllOutputNames();
+    return outputNames;
+}
+
 nlohmann::json LLInterface::GetAllServoData()
 {
     return HcpManager::GetAllServoData();

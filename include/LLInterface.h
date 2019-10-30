@@ -46,6 +46,8 @@ public:
     static std::vector<std::string> GetAllSensorNames();
     static std::map<std::string, double> GetAllSensors();
 
+    static std::vector<std::string> GetAllOutputNames();
+
     static void StartSensorTransmission();
     static void StopSensorTransmission();
 

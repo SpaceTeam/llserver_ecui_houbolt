@@ -121,6 +121,7 @@ Serial::Serial(string device, int baudRate)
     	default:
     		cerr << "no valid baudrate found --- falling back to 9600" << endl;
     		options.c_cflag |= B9600;
+    		//options.c_cflag |= baudRate;
     }
 
     options.c_iflag = IGNPAR;

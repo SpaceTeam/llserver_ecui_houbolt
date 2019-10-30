@@ -199,6 +199,53 @@ std::map<std::string, double> HcpManager::GetAllSensors()
     return sensors;
 }
 
+std::vector<std::string> HcpManager::GetAllOutputNames()
+{
+    vector<std::string> outputNames;
+
+    json servos = mapping->GetDevices(Device_Type::SERVO);
+    json motors = mapping->GetDevices(Device_Type::MOTOR);
+    json digitals = mapping->GetDevices(Device_Type::DIGITAL_OUT);
+    if (servos != nullptr)
+    {
+        for (auto it = servos.begin(); it != servos.end(); ++it)
+        {
+            outputNames.push_back(it.key());
+
+        }
+    }
+    else
+    {
+        Debug::error("No servos found");
+    }
+    if (motors != nullptr)
+    {
+        for (auto it = motors.begin(); it != motors.end(); ++it)
+        {
+            outputNames.push_back(it.key());
+
+        }
+    }
+    else
+    {
+        Debug::error("No motors found");
+    }
+    if (digitals != nullptr)
+    {
+        for (auto it = digitals.begin(); it != digitals.end(); ++it)
+        {
+            outputNames.push_back(it.key());
+        }
+    }
+    else
+    {
+        Debug::error("No digitals found");
+    }
+
+    std::sort(outputNames.begin(), outputNames.end());
+    return outputNames;
+}
+
 json HcpManager::GetAllServoData()
 {
     json data = json::array();
