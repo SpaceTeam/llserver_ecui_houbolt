@@ -25,7 +25,7 @@ typedef std::chrono::high_resolution_clock Clock;
 
 void HcpManager::init()
 {
-    hcpSerial = new Serial(HCP_DEVICE, HCP_BAUD_RATE);
+    hcpSerial = new Serial(HCP_DEVICE, 115200);
     mapping = new Mapping(HCP_MAPPING_FILE_PATH);
 }
 
@@ -808,7 +808,7 @@ int32 HcpManager::GetAnalog(uint8 port)
         serialMtx.unlock();
 
         auto currTime = Clock::now();
-    std::cerr << "Get analog Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;
+        //std::cerr << "Get analog Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;
 
 
         if (rep != nullptr)
