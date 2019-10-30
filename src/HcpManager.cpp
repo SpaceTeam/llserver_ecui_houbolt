@@ -155,7 +155,7 @@ std::map<std::string, int32> HcpManager::GetAllSensors()
     {
         for (auto it = analogs.begin(); it != analogs.end(); ++it)
         {
-            if (utils::keyExists(it.value(), "loadCells"))
+            if (it.key().compare("thrust") == 0)
             {
                 int32* cells = GetLoadCells();
 
