@@ -18,6 +18,8 @@ bool LLInterface::isTransmittingSensors = false;
 int32 LLInterface::warnlightStatus = true;
 Timer* LLInterface::sensorTimer;
 
+typedef std::chrono::high_resolution_clock Clock;
+
 void LLInterface::Init()
 {
     HcpManager::init();
@@ -50,8 +52,12 @@ std::vector<std::string> LLInterface::GetAllSensorNames()
 
 std::map<std::string, int32> LLInterface::GetAllSensors()
 {
+    auto startTime = Clock::now();
     std::map<std::string, int32> sensors;
     sensors = HcpManager::GetAllSensors();
+
+    auto currTime = Clock::now();
+    std::cerr << "Get Sensors Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;
 
     return sensors;
 }
