@@ -219,21 +219,21 @@ bool HcpManager::ExecCommand(std::string name, uint8 percent)
 {
     bool success = false;
 
-    string typeName;
-    json device = mapping->GetDeviceByName(name);
+    Device_Type type = mapping->GetTypeByName(name);
+    json device = mapping->GetDeviceByName(name, type);
 
     if (device != nullptr)
     {
-        if (typeName.compare("servo") == 0)
+        if (type == Device_Type::SERVO)
         {
             success = SetServo(device, percent);
         }
-        else if (typeName.compare("motor") == 0)
+        else if (type == Device_Type::MOTOR)
         {
             uint8 port = device["port"];
             success = SetMotor(port, (int8)percent);
         }
-        else if (typeName.compare("digitalOut") == 0)
+        else if (type == Device_Type::DIGITAL_OUT)
         {
 
             uint8 port = device["port"];

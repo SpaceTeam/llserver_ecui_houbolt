@@ -63,22 +63,20 @@ std::string Mapping::GetTypeName(Device_Type type)
     return this->typeMap[type];
 }
 
-
-json Mapping::GetDeviceByName(std::string name)
+//TODO: implement none for type
+Device_Type Mapping::GetTypeByName(std::string name)
 {
-    json device = nullptr;
+    Device_Type type;
 
     if (typeOfNameMap.find(name) != typeOfNameMap.end())
     {
-        string typeName = GetTypeName(typeOfNameMap[name]);
-
-        device = mapping[typeName][name];
+        type = typeOfNameMap[name];
     }
     else
     {
         Debug::error("Device not found");
     }
-    return device;
+    return type;
 }
 
 json Mapping::GetDeviceByName(std::string name, Device_Type type)

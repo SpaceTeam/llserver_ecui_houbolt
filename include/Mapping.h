@@ -46,7 +46,7 @@ public:
     ~Mapping();
 
     //WARNING: DO NOT USE typeOfNameMap unless each name is unique
-    nlohmann::json GetDeviceByName(std::string name);
+    Device_Type GetTypeByName(std::string name);
 
     nlohmann::json GetDeviceByName(std::string name, Device_Type type);
 
