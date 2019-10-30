@@ -26,6 +26,9 @@ private:
 
     static std::map<Device_Type, std::string> typeMap;
 
+    //WARNING: DO NOT USE typeOfNameMap unless each name is unique
+    std::map<std::string, Device_Type> typeOfNameMap;
+
     std::string mappingPath;
     nlohmann::json mapping = nullptr;
 
@@ -42,6 +45,8 @@ public:
 
     ~Mapping();
 
+    //WARNING: DO NOT USE typeOfNameMap unless each name is unique
+    nlohmann::json GetDeviceByName(std::string name);
 
     nlohmann::json GetDeviceByName(std::string name, Device_Type type);
 

@@ -220,59 +220,35 @@ bool HcpManager::ExecCommand(std::string name, uint8 percent)
     bool success = false;
 
     string typeName;
-    json device = nullptr;
+    json device = mapping->GetDeviceByName(name);
 
-    json jsonMapping = mapping->GetMapping();
-    if (jsonMapping != nullptr)
+    if (device != nullptr)
     {
-        for (auto typeIt = jsonMapping.begin(); typeIt != jsonMapping.end(); ++typeIt)
+        if (typeName.compare("servo") == 0)
         {
-            for (auto it = typeIt.value().begin(); it != typeIt.value().end(); ++it)
-            {
-                if (it.key().compare(name) == 0)
-                {
-                    typeName = typeIt.key();
-                    device = it.value();
-                    break;
-                }
-            }
-            if (device != nullptr)
-            {
-                break;
-            }
+            success = SetServo(device, percent);
         }
-
-        if (device != nullptr)
+        else if (typeName.compare("motor") == 0)
         {
-            if (typeName.compare("servo") == 0)
-            {
-                success = SetServo(device, percent);
-            }
-            else if (typeName.compare("motor") == 0)
-            {
-                uint8 port = device["port"];
-                success = SetMotor(port, (int8)percent);
-            }
-            else if (typeName.compare("digitalOut") == 0)
-            {
+            uint8 port = device["port"];
+            success = SetMotor(port, (int8)percent);
+        }
+        else if (typeName.compare("digitalOut") == 0)
+        {
 
-                uint8 port = device["port"];
-                success = SetDigitalOutputs(port, (bool)percent);
-            }
-            else
-            {
-                Debug::error("unknown type name");
-            }
+            uint8 port = device["port"];
+            success = SetDigitalOutputs(port, (bool)percent);
         }
         else
         {
-            Debug::error("no device with name '" + name + "' found");
+            Debug::error("unknown type name");
         }
     }
     else
     {
-        Debug::error("Mapping is null");
+        Debug::error("no device with name '" + name + "' found");
     }
+
 
     return success;
 }

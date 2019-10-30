@@ -21,6 +21,23 @@ Mapping::Mapping(std::string mappingPath)
 {
     this->mappingPath = mappingPath;
     LoadMapping();
+
+    //CAREFUL: if device type not in typemap it crashes!!!
+    Device_Type currType;
+    for (auto typeIt = this->mapping.begin(); typeIt != this->mapping.end(); ++typeIt)
+    {
+        for (const auto &devTypeItem : typeMap)
+        {
+            if (devTypeItem.second.compare(typeIt.key()) == 0)
+            {
+                currType = devTypeItem.first;
+            }
+        }
+        for (auto it = typeIt.value().begin(); it != typeIt.value().end(); ++it)
+        {
+            typeOfNameMap[it.key()] = currType;
+        }
+    }
 }
 
 Mapping::~Mapping()
@@ -44,6 +61,24 @@ void Mapping::SaveMapping()
 std::string Mapping::GetTypeName(Device_Type type)
 {
     return this->typeMap[type];
+}
+
+
+json Mapping::GetDeviceByName(std::string name)
+{
+    json device = nullptr;
+
+    if (typeOfNameMap.find(name) != typeOfNameMap.end())
+    {
+        string typeName = GetTypeName(typeOfNameMap[name]);
+
+        device = mapping[typeName][name];
+    }
+    else
+    {
+        Debug::error("Device not found");
+    }
+    return device;
 }
 
 json Mapping::GetDeviceByName(std::string name, Device_Type type)
