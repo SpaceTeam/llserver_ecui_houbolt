@@ -12,15 +12,16 @@ using namespace std;
 
 Socket* EcuiSocket::socket;
 
-bool EcuiSocket::connectionActive;
+bool EcuiSocket::connectionActive = false;
 bool EcuiSocket::shallClose = false;
 
 std::thread* EcuiSocket::asyncListenThread;
+std::function<void()> EcuiSocket::onCloseCallback;
 
-void EcuiSocket::Init(std::function<void(json)> onMsgCallback)
+void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<void()> onCloseCallback)
 {
-
-    socket = new Socket(ECUI_IP, ECUI_PORT);
+    EcuiSocket::onCloseCallback = onCloseCallback;
+    socket = new Socket(Close, ECUI_IP, ECUI_PORT);
     connectionActive = true;
     asyncListenThread = new thread(AsyncListen, onMsgCallback);
     asyncListenThread->detach();
@@ -98,11 +99,20 @@ void EcuiSocket::SendJson(std::string type, float content)
     }
 }
 
+void EcuiSocket::Close()
+{
+    Destroy();
+    onCloseCallback();
+}
+
 void EcuiSocket::Destroy()
 {
-    shallClose = true;
-    delete asyncListenThread;
-    delete socket;
-    connectionActive = false;
+    if (connectionActive)
+    {
+        shallClose = true;
+        delete asyncListenThread;
+        delete socket;
+        connectionActive = false;
+    }
 
 }

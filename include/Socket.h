@@ -18,18 +18,21 @@ private:
 
     bool connectionActive;
     bool shallClose;
+    std::function<void()> onCloseCallback;
 
     std::mutex socketMtx;
 
     void Connect(std::string address, uint16 port, int32 tries=-1);
+    void Close();
 public:
 
-    Socket(std::string address, uint16 port, int32 tries=-1);
+    Socket(std::function<void()> onCloseCallback, std::string address, uint16 port, int32 tries=-1);
 
     ~Socket();
 
     void Send(std::string msg);
     std::string Recv();
+
 };
 
 

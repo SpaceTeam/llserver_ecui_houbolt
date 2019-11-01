@@ -17,8 +17,9 @@
 
 using namespace std;
 
-Socket::Socket(std::string address, uint16 port, int32 tries)
+Socket::Socket(std::function<void()> onCloseCallback, std::string address, uint16 port, int32 tries)
 {
+    this->onCloseCallback = onCloseCallback;
     Connect(address, port, tries);
 }
 
@@ -77,7 +78,12 @@ void Socket::Send(std::string msg)
     std::lock_guard<std::mutex> lock(socketMtx);
     if (connectionActive)
     {
-        send(socketfd, msg.c_str(), msg.size(), 0);
+        int sentBytes = send(socketfd, msg.c_str(), msg.size(), 0);
+        if (sentBytes < 0)
+        {
+            Debug::error("error at send occured, closing socket...");
+            Close();
+        }
     }
     else
     {
@@ -97,7 +103,8 @@ std::string Socket::Recv()
 
         if (valread < 0)
         {
-            Debug::error("error at read occured");
+            Debug::error("error at recv occured, closing socket...");
+            Close();
         }
         cout << "recv" << endl;
         msg = string((char*)buffer);
@@ -110,6 +117,16 @@ std::string Socket::Recv()
         Debug::error("no connection active");
     }
     return msg;
+}
+
+void Socket::Close()
+{
+    std::lock_guard<std::mutex> lock(socketMtx);
+    this->shallClose = true;
+
+    close(socketfd);
+    this->connectionActive = false;
+    this->onCloseCallback();
 }
 
 //

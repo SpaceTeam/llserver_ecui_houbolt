@@ -19,7 +19,7 @@ private:
 
     uint16 id;
 
-
+    static void OnClose();
 public:
 
     WarnLight(uint16 id);

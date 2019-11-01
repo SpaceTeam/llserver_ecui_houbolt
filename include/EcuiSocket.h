@@ -19,15 +19,19 @@ private:
 
     static std::thread* asyncListenThread;
 
+    static std::function<void()> onCloseCallback;
+
     EcuiSocket();
 
     ~EcuiSocket();
+
+    static void Close();
 
     static void AsyncListen(std::function<void(nlohmann::json)> onMsgCallback);
 
 public:
 
-    static void Init(std::function<void(nlohmann::json)> onMsgCallback);
+    static void Init(std::function<void(nlohmann::json)> onMsgCallback, std::function<void()> onCloseCallback);
 
     static void SendJson(std::string type);
     static void SendJson(std::string type, nlohmann::json content);

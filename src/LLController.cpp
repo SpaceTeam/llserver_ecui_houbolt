@@ -15,7 +15,7 @@ using namespace std;
 
 void LLController::Init()
 {
-    EcuiSocket::Init(OnECUISocketRecv);
+    EcuiSocket::Init(OnECUISocketRecv, Abort);
 
     LLInterface::Init();
     SequenceManager::init();
@@ -23,7 +23,13 @@ void LLController::Init()
 
 void LLController::Destroy()
 {
+    SequenceManager::AbortSequence();
     EcuiSocket::Destroy();
+}
+
+void LLController::Abort()
+{
+    Destroy();
 }
 
 void LLController::OnECUISocketRecv(json msg)

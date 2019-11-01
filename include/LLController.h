@@ -28,6 +28,8 @@ public:
 
     static void Destroy();
 
+    static void Abort();
+
     static void OnECUISocketRecv(nlohmann::json msg);
 
 };

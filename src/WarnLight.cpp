@@ -7,7 +7,7 @@
 WarnLight::WarnLight(uint16 id)
 {
     this->id = id;
-    socket = new Socket(WARNLIGHT_IP, WARNLIGHT_PORT, 1);
+    socket = new Socket(OnClose, WARNLIGHT_IP, WARNLIGHT_PORT, 1);
 }
 
 WarnLight::~WarnLight()
@@ -48,4 +48,9 @@ void WarnLight::Testing()
 void WarnLight::Standby()
 {
     socket->Send("Standby\n");
+}
+
+void WarnLight::OnClose()
+{
+
 }
