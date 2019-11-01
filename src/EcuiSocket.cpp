@@ -50,48 +50,53 @@ void EcuiSocket::SendJson(std::string type)
 
 void EcuiSocket::SendJson(std::string type, json content)
 {
+
     if (connectionActive)
     {
+        std::thread sendThread([type, content]() {
+            json jsonMsg = json::object();
+            jsonMsg["type"] = type;
 
-        json jsonMsg = json::object();
-        jsonMsg["type"] = type;
+            if (content != nullptr)
+            {
+                jsonMsg["content"] = content;
+            }
+            else
+            {
+                jsonMsg["content"] = json::object();
+            }
+            //	cout << "Content: "<< content.dump() << endl;
+            //	cout << "Msg: "<< jsonMsg.dump() << endl;
+            string msg = jsonMsg.dump() + "\n";
 
-        if (content != nullptr)
-        {
-            jsonMsg["content"] = content;
-        }
-        else
-        {
-            jsonMsg["content"] = json::object();
-        }
-//	cout << "Content: "<< content.dump() << endl;
-//	cout << "Msg: "<< jsonMsg.dump() << endl;
-        string msg = jsonMsg.dump() + "\n";
-
-        socket->Send(msg);
-
+            EcuiSocket::socket->Send(msg);
+        });
+        sendThread.detach();
     }
     else
     {
         Debug::error("no connection active");
     }
+
 }
 
 void EcuiSocket::SendJson(std::string type, float content)
 {
     if (connectionActive)
     {
+        std::thread sendThread([type, content]() {
+            json jsonMsg = json::object();
+            jsonMsg["type"] = type;
 
-        json jsonMsg = json::object();
-        jsonMsg["type"] = type;
+            jsonMsg["content"] = content;
 
-        jsonMsg["content"] = content;
+            //	cout << "Content: "<< content.dump() << endl;
+            //	cout << "Msg: "<< jsonMsg.dump() << endl;
+            string msg = jsonMsg.dump() + "\n";
 
-//	cout << "Content from float: "<< content << " Type: " << type << endl;
-
-        string msg = jsonMsg.dump() + "\n";
-
-        socket->Send(msg);
+            EcuiSocket::socket->Send(msg);
+        });
+        sendThread.detach();
     }
     else
     {

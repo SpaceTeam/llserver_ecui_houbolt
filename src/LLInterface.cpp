@@ -153,7 +153,6 @@ void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double>
 
         content.push_back(sen);
     }
-    EcuiSocket::SendJson("sensors", content);
 }
 
 void LLInterface::TurnRed()
