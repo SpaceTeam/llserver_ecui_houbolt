@@ -33,21 +33,6 @@ int32 Debug::print(std::string fmt, ...)
     return printed;
 }
 
-int32 Debug::error(std::string fmt, ...)
-{
-    int printed;
-    va_list args;
-
-    fmt = "error: " + fmt;
-    fmt.append("\n");
-
-    va_start(args, fmt);
-    printed = vfprintf(stderr, fmt.c_str(), args);
-    va_end(args);
-
-    return printed;
-}
-
 int32 Debug::info(std::string fmt, ...)
 {
     int printed;
@@ -85,11 +70,6 @@ int32 Debug::print(std::string fmt, ...)
     return 0;
 }
 
-int32 Debug::error(std::string fmt, ...)
-{
-    return 0;
-}
-
 int32 Debug::info(std::string fmt, ...)
 {
     return 0;
@@ -101,3 +81,18 @@ int32 Debug::warning(std::string fmt, ...)
 }
 
 #endif
+
+int32 Debug::error(std::string fmt, ...)
+{
+    int printed;
+    va_list args;
+
+    fmt = "error: " + fmt;
+    fmt.append("\n");
+
+    va_start(args, fmt);
+    printed = vfprintf(stderr, fmt.c_str(), args);
+    va_end(args);
+
+    return printed;
+}

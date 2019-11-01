@@ -29,16 +29,16 @@
             "port": 1,
             "servo": "oxidizer"
         },
+        "mthrust": {
+
+            "loadCells" : true
+        },
         "oxidizerPressure": {
             "map": {
                 "d": -621,
                 "k": 0.0141
             },
             "port": 9
-        },
-        "thrust": {
-
-            "loadCells" : true
         }
 
     },

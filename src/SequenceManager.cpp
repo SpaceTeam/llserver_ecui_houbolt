@@ -237,14 +237,14 @@ void SequenceManager::GetSensors(int64 microTime)
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                //SequenceManager::AbortSequence(abortMsg);
+                SequenceManager::AbortSequence(abortMsg);
             }
             else if (sensor.second > sensorsNominalRangeMap[sensor.first][1])
             {
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                //SequenceManager::AbortSequence(abortMsg);
+                SequenceManager::AbortSequence(abortMsg);
             }
         }
         vals.push_back(sensor.second);
@@ -270,7 +270,7 @@ void SequenceManager::Tick(int64 microTime)
 
     if (threadCounter > 1)
     {
-        cerr << "Threads: " << threadCounter << endl;
+        cerr << "Threads: " << threadCounter << " micros: " << microTime << endl;
     }
 
     if (microTime % 500000 == 0)
@@ -373,6 +373,7 @@ void SequenceManager::Tick(int64 microTime)
     if (findNext)
     {
         //not all values found yet; microTimes > endTime;
+        Debug::error("findNext still true at micro time: %d", microTime);
 
     }
     else
@@ -397,10 +398,14 @@ void SequenceManager::Tick(int64 microTime)
                     double scale = ((next.y - prev.y) * 1.0) / (next.x - prev.x);
                     nextValue = (scale * (microTime - prev.x)) + prev.y;
                 }
-                Debug::info("writing " + seqItem.first + " with value %d", nextValue);
+
                 msg += to_string(nextValue) + ";";
 
                 LLInterface::ExecCommand(seqItem.first, nextValue);
+                if (threadCounter > 1)
+                {
+                    Debug::error("writing " + seqItem.first + " with value %d at micro time: %d", nextValue, microTime);
+                }
             }
             logging::INFO(msg);
         }

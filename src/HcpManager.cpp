@@ -160,7 +160,7 @@ std::map<std::string, double> HcpManager::GetAllSensors()
 
         for (auto it = analogs.begin(); it != analogs.end(); ++it)
         {
-            if (it.key().compare("thrust") == 0)
+            if (utils::keyExists(it.value(), "loadCells"))
             {
 
                 int32* cells = GetLoadCells();
@@ -497,10 +497,8 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
             msg.payload[1] = highOnTime;
             msg.payload[2] = lowOnTime;
 
-
-            Debug::info("set servo %d to %d", port, onTime);
-
             serialMtx.lock();
+            fprintf(stderr, "set servo %d to %d\n", port, onTime);
             hcpSerial->Write(msg);
             HCP_MSG* rep = hcpSerial->ReadSync();
             serialMtx.unlock();
@@ -511,10 +509,10 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
                 {
                     success = true;
                 }
-		else
-		{
-		    Debug::error("REP yields optcode %x", rep->optcode);
-		}
+                else
+                {
+                    Debug::error("REP yields optcode %x", rep->optcode);
+                }
                 delete rep->payload;
                 delete rep;
             }
@@ -647,9 +645,8 @@ bool HcpManager::SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount)
         msg.payload[2] = highAmount;
         msg.payload[3] = lowAmount;
 
-        Debug::print("set motor %d to %d", port, amount);
-
         serialMtx.lock();
+        fprintf(stderr, "set motor %d to %d\n", port, amount);
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
         serialMtx.unlock();
@@ -660,10 +657,10 @@ bool HcpManager::SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount)
             {
                 success = true;
             }
-	    else
-	    {
-	        printf("REP yields optcode %x", rep->optcode);
-	    }
+            else
+            {
+                printf("REP yields optcode %x", rep->optcode);
+            }
             delete rep->payload;
             delete rep;
         }
@@ -736,9 +733,10 @@ int32 *HcpManager::GetLoadCells()
     msg.payloadSize = 0;
     msg.payload = nullptr;
 
-    fprintf(stderr, "get load cells\n");
+
 
     serialMtx.lock();
+    //fprintf(stderr, "get load cells\n");
     hcpSerial->Write(msg);
     HCP_MSG* rep = hcpSerial->ReadSync();
     serialMtx.unlock();
@@ -846,10 +844,11 @@ int32 HcpManager::GetAnalog(uint8 port)
 
         msg.payload[0] = port;
 
-        fprintf(stderr, "get analog %d\n", port);
+
 
         auto startTime = Clock::now();
         serialMtx.lock();
+        //fprintf(stderr, "get analog %d\n", port);
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
         serialMtx.unlock();

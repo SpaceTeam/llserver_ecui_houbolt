@@ -98,13 +98,15 @@ void LLInterface::StopSensorTransmission()
 {
     if (isTransmittingSensors)
     {
+
         sensorTimer->stop();
+        isTransmittingSensors = false;
     }
 }
 
 void LLInterface::StopGetSensors()
 {
-    isTransmittingSensors = false;
+
 }
 
 void LLInterface::GetSensors(int64 microTime)
