@@ -43,6 +43,11 @@ void EcuiSocket::AsyncListen(std::function<void(json)> onMsgCallback)
     }
 }
 
+void EcuiSocket::SendAsync(std::string msg)
+{
+    socket->Send(msg);
+}
+
 void EcuiSocket::SendJson(std::string type)
 {
     SendJson(type, nullptr);
@@ -53,24 +58,24 @@ void EcuiSocket::SendJson(std::string type, json content)
 
     if (connectionActive)
     {
-        std::thread sendThread([type, content]() {
-            json jsonMsg = json::object();
-            jsonMsg["type"] = type;
 
-            if (content != nullptr)
-            {
-                jsonMsg["content"] = content;
-            }
-            else
-            {
-                jsonMsg["content"] = json::object();
-            }
-            //	cout << "Content: "<< content.dump() << endl;
-            //	cout << "Msg: "<< jsonMsg.dump() << endl;
-            string msg = jsonMsg.dump() + "\n";
+        json jsonMsg = json::object();
+        jsonMsg["type"] = type;
 
-            EcuiSocket::socket->Send(msg);
-        });
+        if (content != nullptr)
+        {
+            jsonMsg["content"] = content;
+        }
+        else
+        {
+            jsonMsg["content"] = json::object();
+        }
+        //    cout << "Content: "<< content.dump() << endl;
+        //    cout << "Msg: "<< jsonMsg.dump() << endl;
+        string msg = jsonMsg.dump() + "\n";
+
+        std::thread sendThread(SendAsync, msg);
+
         sendThread.detach();
     }
     else
@@ -84,18 +89,18 @@ void EcuiSocket::SendJson(std::string type, float content)
 {
     if (connectionActive)
     {
-        std::thread sendThread([type, content]() {
-            json jsonMsg = json::object();
-            jsonMsg["type"] = type;
 
-            jsonMsg["content"] = content;
+        json jsonMsg = json::object();
+        jsonMsg["type"] = type;
 
-            //	cout << "Content: "<< content.dump() << endl;
-            //	cout << "Msg: "<< jsonMsg.dump() << endl;
-            string msg = jsonMsg.dump() + "\n";
+        jsonMsg["content"] = content;
 
-            EcuiSocket::socket->Send(msg);
-        });
+        //	cout << "Content: "<< content.dump() << endl;
+        //	cout << "Msg: "<< jsonMsg.dump() << endl;
+        string msg = jsonMsg.dump() + "\n";
+
+
+        std::thread sendThread(SendAsync, msg);
         sendThread.detach();
     }
     else

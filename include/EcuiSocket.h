@@ -29,6 +29,8 @@ private:
 
     static void AsyncListen(std::function<void(nlohmann::json)> onMsgCallback);
 
+    static void SendAsync(std::string msg);
+
 public:
 
     static void Init(std::function<void(nlohmann::json)> onMsgCallback, std::function<void()> onCloseCallback);
