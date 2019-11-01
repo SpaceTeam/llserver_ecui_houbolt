@@ -74,9 +74,10 @@ void EcuiSocket::SendJson(std::string type, json content)
         //    cout << "Msg: "<< jsonMsg.dump() << endl;
         string msg = jsonMsg.dump() + "\n";
 
-        std::thread sendThread(SendAsync, msg);
-
-        sendThread.detach();
+//        std::thread sendThread(SendAsync, msg);
+//
+//        sendThread.detach();
+        socket->Send(msg);
     }
     else
     {
@@ -100,8 +101,9 @@ void EcuiSocket::SendJson(std::string type, float content)
         string msg = jsonMsg.dump() + "\n";
 
 
-        std::thread sendThread(SendAsync, msg);
-        sendThread.detach();
+//        std::thread sendThread(SendAsync, msg);
+//        sendThread.detach();
+        socket->Send(msg);
     }
     else
     {
