@@ -214,7 +214,7 @@ void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
         msg += to_string(sensors[i]) + ";";
     }
     //async_file->info(to_string(microTime) + ";" + msg);
-    logging::INFO("\n" + to_string(secs) + ";" + msg);
+    //logging::INFO("\n" + to_string(secs) + ";" + msg);
 }
 
 void SequenceManager::StopGetSensors()
@@ -407,7 +407,7 @@ void SequenceManager::Tick(int64 microTime)
                     Debug::error("writing " + seqItem.first + " with value %d at micro time: %d", nextValue, microTime);
                 }
             }
-            logging::INFO(msg);
+            //logging::INFO(msg);
         }
         //syncMtx.unlock();
     }
