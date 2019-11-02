@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <thread>
+#include <fstream>
 
 #include "config.h"
 #include "common.h"
@@ -20,11 +21,15 @@ class Debug {
 
 private:
     static std::recursive_mutex _outMutex;
-    static int32 _lockCount;
+    static std::mutex outFileMutex;
+    static std::ofstream logFile;
+    static bool isLogFileOpen;
 
 public:
     //TODO: implement, only log, no output
-    void log(std::string fmt, ...);
+    static void flush();
+    static void changeOutputFile(std::string outFilePath);
+    static void log(std::string msg);
 
     static int32 print(std::string fmt, ...);
     static int32 error(std::string fmt, ...);

@@ -25,7 +25,7 @@ typedef std::chrono::high_resolution_clock Clock;
 
 void HcpManager::init()
 {
-    hcpSerial = new Serial(HCP_DEVICE, 115200);
+    hcpSerial = new Serial(HCP_DEVICE, HCP_BAUD_RATE);
     mapping = new Mapping(HCP_MAPPING_FILE_PATH);
 }
 

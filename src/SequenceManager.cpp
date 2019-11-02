@@ -45,6 +45,7 @@ void SequenceManager::init()
 
 void SequenceManager::StopSequence()
 {
+    Debug::flush();
     Debug::info("sequence done");
     LLInterface::TurnYellow();
     isRunning = false;
@@ -90,8 +91,9 @@ void SequenceManager::ChangeLogFile()
     curr_tm = localtime(&curr_time);
 
     strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
-    logging::configure({ {"type", "file"}, {"file_name", "logs/" + string(dateTime_string) + ".csv"}, {"reopen_interval", "1"} });
-    logging::get_logger().setFilePath("logs/" + string(dateTime_string) + ".csv");
+//    logging::configure({ {"type", "file"}, {"file_name", "logs/" + string(dateTime_string) + ".csv"}, {"reopen_interval", "1"} });
+//    logging::get_logger().setFilePath("logs/" + string(dateTime_string) + ".csv");
+    Debug::changeOutputFile("logs/" + string(dateTime_string) + ".csv");
 }
 
 void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
@@ -117,7 +119,8 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         }
 
         //async_file->info("Timestep;" + msg);
-        logging::INFO("Timestep;" + msg + "\n");
+        //logging::INFO("Timestep;" + msg + "\n");
+        Debug::log("Timestep;" + msg + "\n");
 
         isRunning = true;
         jsonSequence = jsonSeq;
@@ -215,11 +218,13 @@ void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
     }
     //async_file->info(to_string(microTime) + ";" + msg);
     //logging::INFO("\n" + to_string(secs) + ";" + msg);
+    Debug::log("\n" + to_string(secs) + ";" + msg);
 }
 
 void SequenceManager::StopGetSensors()
 {
 //    async_file->flush();
+    Debug::flush();
 }
 
 void SequenceManager::GetSensors(int64 microTime)
@@ -380,10 +385,11 @@ void SequenceManager::Tick(int64 microTime)
     {
         if (isRunning)
         {
+            string msg = to_string(microTime / 1000000.0) + ";";
             syncMtx.lock();
             if (isRunning)
             {
-                string msg = to_string(microTime / 1000000.0) + ";";
+
                 for (const auto &seqItem : sequenceIntervalMap)
                 {
                     Point prev = sequenceIntervalMap[seqItem.first][0];
@@ -412,6 +418,7 @@ void SequenceManager::Tick(int64 microTime)
                 //logging::INFO(msg);
             }
             syncMtx.unlock();
+            Debug::log(msg);
         }
     }
     auto currTime = Clock::now();
@@ -424,6 +431,7 @@ void SequenceManager::StopAbortSequence()
 {
     if (isAbortRunning)
     {
+        Debug::flush();
         Debug::info("abort sequence done");
         isAbortRunning = false;
 
