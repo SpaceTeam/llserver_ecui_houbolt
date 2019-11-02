@@ -378,38 +378,41 @@ void SequenceManager::Tick(int64 microTime)
     }
     else
     {
-        //if (isRunning)
-        //syncMtx.lock();
-        string msg = to_string(microTime/1000000.0) + ";";
         if (isRunning)
         {
-            for (const auto &seqItem : sequenceIntervalMap)
+            syncMtx.lock();
+            if (isRunning)
             {
-                Point prev = sequenceIntervalMap[seqItem.first][0];
-                Point next = sequenceIntervalMap[seqItem.first][1];
-
-                uint8 nextValue;
-                if (prev.x == microTime)
+                string msg = to_string(microTime / 1000000.0) + ";";
+                for (const auto &seqItem : sequenceIntervalMap)
                 {
-                    nextValue = (uint8) prev.y;
-                }
-                else
-                {
-                    double scale = ((next.y - prev.y) * 1.0) / (next.x - prev.x);
-                    nextValue = (scale * (microTime - prev.x)) + prev.y;
-                }
+                    Point prev = sequenceIntervalMap[seqItem.first][0];
+                    Point next = sequenceIntervalMap[seqItem.first][1];
 
-                msg += to_string(nextValue) + ";";
+                    uint8 nextValue;
+                    if (prev.x == microTime)
+                    {
+                        nextValue = (uint8) prev.y;
+                    }
+                    else
+                    {
+                        double scale = ((next.y - prev.y) * 1.0) / (next.x - prev.x);
+                        nextValue = (scale * (microTime - prev.x)) + prev.y;
+                    }
 
-                LLInterface::ExecCommand(seqItem.first, nextValue);
-                if (threadCounter > 1)
-                {
-                    Debug::error("writing " + seqItem.first + " with value %d at micro time: %d", nextValue, microTime);
+                    msg += to_string(nextValue) + ";";
+
+                    LLInterface::ExecCommand(seqItem.first, nextValue);
+                    if (threadCounter > 1)
+                    {
+                        Debug::error("writing " + seqItem.first + " with value %d at micro time: %d", nextValue,
+                                     microTime);
+                    }
                 }
+                //logging::INFO(msg);
             }
-            //logging::INFO(msg);
+            syncMtx.unlock();
         }
-        //syncMtx.unlock();
     }
     auto currTime = Clock::now();
     //cerr << "Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << endl;
