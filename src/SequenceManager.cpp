@@ -449,7 +449,7 @@ void SequenceManager::StartAbortSequence()
     if (!isRunning && !isAbortRunning)
     {
         isAbortRunning = true;
-        //usleep(50000);
+        usleep(50000);
         syncMtx.lock();
         for (auto it = jsonAbortSequence["actions"].begin(); it != jsonAbortSequence["actions"].end(); ++it)
         {
