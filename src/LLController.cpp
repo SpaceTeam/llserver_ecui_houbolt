@@ -25,6 +25,7 @@ void LLController::Destroy()
 {
     SequenceManager::AbortSequence();
     EcuiSocket::Destroy();
+    Debug::close();
 }
 
 void LLController::Abort()

@@ -85,6 +85,16 @@ int32 Debug::warning(std::string fmt, ...)
 
 #endif
 
+void Debug::close()
+{
+    std::lock_guard<std::mutex> lock(outFileMutex);
+    if (isLogFileOpen)
+    {
+        logFile.flush();
+        logFile.close();
+    }
+}
+
 void Debug::flush()
 {
     std::lock_guard<std::mutex> lock(outFileMutex);

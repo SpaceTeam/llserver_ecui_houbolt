@@ -27,6 +27,7 @@ private:
 
 public:
     //TODO: implement, only log, no output
+    static void close();
     static void flush();
     static void changeOutputFile(std::string outFilePath);
     static void log(std::string msg);
