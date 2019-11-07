@@ -87,7 +87,7 @@ int32 Debug::warning(std::string fmt, ...)
 
 void Debug::close()
 {
-    std::lock_guard<std::mutex> lock(outFileMutex);
+    //std::lock_guard<std::mutex> lock(outFileMutex);
     if (isLogFileOpen)
     {
         logFile.flush();
@@ -97,7 +97,7 @@ void Debug::close()
 
 void Debug::flush()
 {
-    std::lock_guard<std::mutex> lock(outFileMutex);
+    //std::lock_guard<std::mutex> lock(outFileMutex);
     if (isLogFileOpen)
     {
         logFile.flush();
@@ -106,7 +106,7 @@ void Debug::flush()
 
 void Debug::changeOutputFile(std::string outFilePath)
 {
-    std::lock_guard<std::mutex> lock(outFileMutex);
+    //std::lock_guard<std::mutex> lock(outFileMutex);
     if (isLogFileOpen)
     {
         logFile.flush();
@@ -127,7 +127,7 @@ void Debug::changeOutputFile(std::string outFilePath)
 
 void Debug::log(std::string msg)
 {
-    std::lock_guard<std::mutex> lock(outFileMutex);
+    //std::lock_guard<std::mutex> lock(outFileMutex);
     if (isLogFileOpen)
     {
         logFile << msg;
