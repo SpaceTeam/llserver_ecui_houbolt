@@ -472,7 +472,7 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
 {
     bool success = false;
 
-    if (CheckPort(port, Device_Type::SERVO))
+    if (CheckPort(port, Device_Type::SERVO) && onTime >= 800 && onTime <= 2200)
     {
         //TODO: check if this is okay or if it belongs inside HCP_OK block
         lastServoPosArr[port] = onTime;
