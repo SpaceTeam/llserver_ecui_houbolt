@@ -498,7 +498,7 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
             msg.payload[2] = lowOnTime;
 
             serialMtx.lock();
-            fprintf(stderr, "set servo %d to %d\n", port, onTime);
+            //fprintf(stderr, "set servo %d to %d\n", port, onTime);
             hcpSerial->Write(msg);
             HCP_MSG* rep = hcpSerial->ReadSync();
             serialMtx.unlock();
@@ -646,7 +646,7 @@ bool HcpManager::SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount)
         msg.payload[3] = lowAmount;
 
         serialMtx.lock();
-        fprintf(stderr, "set motor %d to %d\n", port, amount);
+        //fprintf(stderr, "set motor %d to %d\n", port, amount);
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
         serialMtx.unlock();
