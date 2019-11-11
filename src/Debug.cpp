@@ -84,60 +84,68 @@ int32 Debug::warning(std::string fmt, ...)
 
 #endif
 
-//#if defined(__linux__) //this is probably actually compiler specific not os based
-//
-//void Debug::close()
-//{
-//    if (isLogFileOpen)
-//    {
-//        logFile.flush();
-//        logFile.close();
-//    }
-//}
-//
-//void Debug::flush()
-//{
-//    if (isLogFileOpen)
-//    {
-//        logFile.flush();
-//    }
-//}
-//
-//void Debug::changeOutputFile(std::string outFilePath)
-//{
-//    if (isLogFileOpen)
-//    {
-//        logFile.flush();
-//        logFile.close();
-//        isLogFileOpen = false;
-//    }
-//
-//    logFile.open(outFilePath);
-//    if (logFile.is_open())
-//    {
-//        isLogFileOpen = true;
-//    }
-//    else
-//    {
-//        error("log output file failed to open");
-//    }
-//}
-//
-//void Debug::log(std::string msg)
-//{
-//    if (isLogFileOpen)
-//    {
-//        logFile << msg;
-//    }
-//    else
-//    {
-//        error("log output file is not open yet, try Debug::changeOutputFile");
-//    }
-//
-//
-//}
-//
-//#else
+#if defined(__linux__) //this is probably actually compiler specific not os based
+
+void Debug::close()
+{
+    //std::lock_guard<std::mutex> lock(outFileMutex);
+    if (logFile.is_open())
+    {
+        logFile.flush();
+        logFile.close();
+    }
+}
+
+void Debug::flush()
+{
+    //std::lock_guard<std::mutex> lock(outFileMutex);
+    if (logFile.is_open())
+    {
+        logFile.flush();
+    }
+}
+
+void Debug::changeOutputFile(std::string outFilePath)
+{
+    //std::lock_guard<std::mutex> lock(outFileMutex);
+    if (logFile.is_open())
+    {
+        logFile.flush();
+        logFile.close();
+        isLogFileOpen = false;
+    }
+
+    logFile.open(outFilePath);
+    if (logFile.is_open())
+    {
+        isLogFileOpen = true;
+    }
+    else
+    {
+        error("log output file failed to open");
+    }
+}
+
+void Debug::log(std::string msg)
+{
+    //std::lock_guard<std::mutex> lock(outFileMutex);
+    if (logFile.is_open())
+    {
+        logFile << msg;
+        if ((logFile.rdstate() & std::ios::failbit & std::ios::badbit & std::ios::eofbit) != 0)
+        {
+            error("write failed!!!!!!");
+        }
+    }
+    else
+    {
+        error("in log: log output file is not open yet, try Debug::changeOutputFile");
+    }
+
+
+}
+
+#else
 
 void Debug::close()
 {
@@ -198,7 +206,7 @@ void Debug::log(std::string msg)
 
 }
 
-//#endif
+#endif
 
 int32 Debug::error(std::string fmt, ...)
 {
