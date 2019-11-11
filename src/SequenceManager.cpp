@@ -277,6 +277,12 @@ void SequenceManager::Tick(int64 microTime)
     {
         cerr << "Threads: " << threadCounter << " micros: " << microTime << endl;
     }
+    if (threadCounter > 90)
+    {
+	cerr << "too many threads, pausing" << endl;
+	threadCounter--;
+	return;
+    }
 
     if (microTime % 500000 == 0)
     {
@@ -374,7 +380,7 @@ void SequenceManager::Tick(int64 microTime)
             }
         }
     }
-
+    std::chrono::time_point<std::chrono::system_clock> beforeLogging;
     if (findNext)
     {
         //not all values found yet; microTimes > endTime;
@@ -418,12 +424,17 @@ void SequenceManager::Tick(int64 microTime)
                 //logging::INFO(msg);
             }
             syncMtx.unlock();
+		beforeLogging = Clock::now();
             Debug::log(msg);
         }
     }
     auto currTime = Clock::now();
-    //cerr << "Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << endl;
-
+    if (threadCounter > 80)
+{
+	cerr << "Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() <<  endl;
+	cerr << "Time elapsed until logging" << std::chrono::duration_cast<std::chrono::microseconds>(beforeLogging-startTime).count() << endl;
+	cerr << "Time elapsed during logging" << std::chrono::duration_cast<std::chrono::microseconds>(currTime-beforeLogging).count() << endl;
+}
     threadCounter--;
 }
 

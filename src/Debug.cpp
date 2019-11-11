@@ -88,7 +88,7 @@ int32 Debug::warning(std::string fmt, ...)
 
 void Debug::close()
 {
-    //std::lock_guard<std::mutex> lock(outFileMutex);
+    std::lock_guard<std::mutex> lock(outFileMutex);
     if (logFile.is_open())
     {
         logFile.flush();
@@ -98,7 +98,7 @@ void Debug::close()
 
 void Debug::flush()
 {
-    //std::lock_guard<std::mutex> lock(outFileMutex);
+    std::lock_guard<std::mutex> lock(outFileMutex);
     if (logFile.is_open())
     {
         logFile.flush();
@@ -107,7 +107,7 @@ void Debug::flush()
 
 void Debug::changeOutputFile(std::string outFilePath)
 {
-    //std::lock_guard<std::mutex> lock(outFileMutex);
+    std::lock_guard<std::mutex> lock(outFileMutex);
     if (logFile.is_open())
     {
         logFile.flush();
@@ -128,10 +128,9 @@ void Debug::changeOutputFile(std::string outFilePath)
 
 void Debug::log(std::string msg)
 {
-    //std::lock_guard<std::mutex> lock(outFileMutex);
+    std::lock_guard<std::mutex> lock(outFileMutex);
     if (logFile.is_open())
     {
-        logFile << msg;
         if (logFile.bad())
         {
             error("write before: bad!!!!!!");
@@ -144,7 +143,8 @@ void Debug::log(std::string msg)
         {
             error("write before: eof!!!!!!");
         }
-        logFile << msg;
+//        logFile << msg;
+	logFile.write(msg.c_str(), msg.size());
         if (logFile.bad())
         {
             error("write bad!!!!!!");
