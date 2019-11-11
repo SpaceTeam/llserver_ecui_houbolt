@@ -132,9 +132,30 @@ void Debug::log(std::string msg)
     if (logFile.is_open())
     {
         logFile << msg;
-        if ((logFile.rdstate() & std::ios::failbit & std::ios::badbit & std::ios::eofbit) != 0)
+        if (logFile.bad())
+        {
+            error("write before: bad!!!!!!");
+        }
+        if (logFile.fail())
+        {
+            error("write before: failed!!!!!!");
+        }
+        if (logFile.eof())
+        {
+            error("write before: eof!!!!!!");
+        }
+        logFile << msg;
+        if (logFile.bad())
+        {
+            error("write bad!!!!!!");
+        }
+        if (logFile.fail())
         {
             error("write failed!!!!!!");
+        }
+        if (logFile.eof())
+        {
+            error("write eof!!!!!!");
         }
     }
     else
@@ -192,10 +213,30 @@ void Debug::log(std::string msg)
     std::lock_guard<std::mutex> lock(outFileMutex);
     if (logFile.is_open())
     {
+        if (logFile.bad())
+        {
+            error("write before: bad!!!!!!");
+        }
+        if (logFile.fail())
+        {
+            error("write before: failed!!!!!!");
+        }
+        if (logFile.eof())
+        {
+            error("write before: eof!!!!!!");
+        }
         logFile << msg;
-        if ((logFile.rdstate() & std::ios::failbit & std::ios::badbit & std::ios::eofbit) != 0)
+        if (logFile.bad())
+        {
+            error("write bad!!!!!!");
+        }
+        if (logFile.fail())
         {
             error("write failed!!!!!!");
+        }
+        if (logFile.eof())
+        {
+            error("write eof!!!!!!");
         }
     }
     else
