@@ -4,7 +4,7 @@ project(TXV_ECUI_LLSERVER)
 find_package(Threads REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -w")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall")
 
 #if(NOT TARGET spdlog)
 #    # Stand-alone build

@@ -25,11 +25,12 @@ void LLInterface::Init()
     HcpManager::init();
     warnLight = new WarnLight(0);
     sensorTimer = new Timer();
+    //i2cDevice = new I2C(0, "someDev"); //not in use right now
 }
 
 void LLInterface::Destroy()
 {
-    delete i2cDevice;
+    //delete i2cDevice;
     delete warnLight;
 }
 

@@ -242,14 +242,14 @@ void SequenceManager::GetSensors(int64 microTime)
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                SequenceManager::AbortSequence(abortMsg);
+                //SequenceManager::AbortSequence(abortMsg);
             }
             else if (sensor.second > sensorsNominalRangeMap[sensor.first][1])
             {
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                SequenceManager::AbortSequence(abortMsg);
+                //SequenceManager::AbortSequence(abortMsg);
             }
         }
         vals.push_back(sensor.second);
@@ -301,7 +301,7 @@ void SequenceManager::Tick(int64 microTime)
         for (auto actionItem : dataItem["actions"])
         {
 
-            float time;
+            float time = 0.0;
             if (actionItem["timestamp"].type() == json::value_t::string)
             {
                 string timeStr = actionItem["timestamp"];
