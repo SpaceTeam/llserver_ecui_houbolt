@@ -128,6 +128,9 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 
         LoadIntervalMap();
 
+        threadCounter = 0;
+
+
         int64 startTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
         int64 endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
         int64 interval = utils::toMicros(jsonSeq["globals"]["interval"]);
