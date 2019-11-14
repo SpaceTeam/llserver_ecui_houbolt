@@ -10,9 +10,12 @@
 
 I2C* LLInterface::i2cDevice;
 WarnLight* LLInterface::warnLight;
-    //GPIO[] LLInterface::gpioDevices;
 
-    //SPI* LLInterface::spiDevice;
+//GPIO[] LLInterface::gpioDevices;
+
+//SPI* LLInterface::spiDevice;
+
+bool LLInterface::isInitialized = false;
 
 bool LLInterface::isTransmittingSensors = false;
 int32 LLInterface::warnlightStatus = true;
@@ -22,16 +25,23 @@ typedef std::chrono::high_resolution_clock Clock;
 
 void LLInterface::Init()
 {
-    HcpManager::init();
-    warnLight = new WarnLight(0);
-    sensorTimer = new Timer();
-    //i2cDevice = new I2C(0, "someDev"); //not in use right now
+    if (!isInitialized)
+    {
+        HcpManager::init();
+        sensorTimer = new Timer();
+        warnLight = new WarnLight(0);
+        isInitialized = true;
+        //i2cDevice = new I2C(0, "someDev"); //not in use right now
+    }
 }
 
 void LLInterface::Destroy()
 {
-    //delete i2cDevice;
-    delete warnLight;
+    if (isInitialized)
+    {
+        //delete i2cDevice;
+        delete warnLight;
+    }
 }
 
 void LLInterface::EnableAllOutputDevices()

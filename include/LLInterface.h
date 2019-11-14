@@ -23,6 +23,8 @@ private:
 
     //static SPI* spiDevice;
 
+    static bool isInitialized;
+
     static bool isTransmittingSensors;
     static int32 warnlightStatus;
     static Timer* sensorTimer;

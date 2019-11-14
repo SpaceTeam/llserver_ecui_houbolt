@@ -16,8 +16,8 @@ private:
     int32 socketfd;
     int8 buffer[SOCKET_MSG_SIZE];
 
-    bool connectionActive;
-    bool shallClose;
+    bool connectionActive = false;
+    bool shallClose = false;
     std::function<void()> onCloseCallback;
 
     std::mutex socketMtx;

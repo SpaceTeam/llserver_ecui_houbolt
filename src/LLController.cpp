@@ -15,9 +15,11 @@ using namespace std;
 
 void LLController::Init()
 {
-    EcuiSocket::Init(OnECUISocketRecv, Abort);
-
+    //LLInterface needs to be initialized first to ensure proper initialization before receiving
+    //aynchronous commands from the web server
     LLInterface::Init();
+
+    EcuiSocket::Init(OnECUISocketRecv, Abort);
     SequenceManager::init();
 }
 

@@ -29,7 +29,7 @@
             "port": 1,
             "servo": "oxidizer"
         },
-        "mthrust": {
+        "thrust": {
 
             "loadCells" : true
         },
