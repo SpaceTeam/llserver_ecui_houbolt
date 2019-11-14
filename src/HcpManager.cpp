@@ -463,7 +463,7 @@ bool HcpManager::SetServoRaw(std::string name, uint16 onTime)
     }
     else
     {
-        Debug::error("name not found");
+        Debug::error("name in SetServoRaw not found");
     }
     return success;
 }
@@ -547,7 +547,7 @@ bool HcpManager::SetServo(string name, uint8 percent)
     }
     else
     {
-        Debug::error("name not found");
+        Debug::error("name in SetServo not found");
     }
     return success;
 }
@@ -564,7 +564,7 @@ bool HcpManager::SetServo(uint8 port, uint8 percent)
     }
     else
     {
-        Debug::error("port not found");
+        Debug::error("port in SetServo not found");
     }
     return success;
 }
@@ -595,7 +595,7 @@ bool HcpManager::SetServo(json device, uint8 percent)
     }
     else
     {
-        Debug::error("device not found");
+        Debug::error("device in SetServo not found");
     }
     return success;
 }
@@ -618,7 +618,7 @@ bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16 amount)
     }
     else
     {
-        Debug::error("port not found");
+        Debug::error("port in SetMotor not found");
     }
     return success;
 }
@@ -825,7 +825,7 @@ double HcpManager::GetAnalog(std::string name)
     }
     else
     {
-        Debug::error("name not found");
+        Debug::error("name in GetAnalog not found");
     }
 
     return value;
@@ -906,7 +906,7 @@ uint8 HcpManager::GetDigital(std::string name)
     }
     else
     {
-        Debug::error("name not found");
+        Debug::error("name in GetDigital not found");
     }
 
     return state;

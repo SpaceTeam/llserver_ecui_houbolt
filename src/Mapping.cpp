@@ -74,7 +74,7 @@ Device_Type Mapping::GetTypeByName(std::string name)
     }
     else
     {
-        Debug::error("Device not found");
+        Debug::error("Device %s not found", name.c_str());
     }
     return type;
 }

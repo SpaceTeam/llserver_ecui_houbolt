@@ -119,7 +119,7 @@ Serial::Serial(string device, int baudRate)
     		break;
 
     	default:
-    		cerr << "no valid baudrate found --- falling back to 9600" << endl;
+    		Debug::error("no valid baudrate found --- falling back to 9600");
     		options.c_cflag |= B9600;
     		//options.c_cflag |= baudRate;
     }

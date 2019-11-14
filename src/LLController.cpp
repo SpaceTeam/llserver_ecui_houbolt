@@ -131,7 +131,7 @@ void LLController::OnECUISocketRecv(json msg)
         }
         else
         {
-            cerr << "message not supported" << endl;
+            Debug::error("ECUISocket: message not supported");
         }
     }
 }

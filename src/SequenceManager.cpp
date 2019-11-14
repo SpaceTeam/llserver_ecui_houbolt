@@ -279,9 +279,9 @@ void SequenceManager::Tick(int64 microTime)
     }
     if (threadCounter > 90)
     {
-	cerr << "too many threads, pausing" << endl;
-	threadCounter--;
-	return;
+        cerr << "too many threads, pausing" << endl;
+        threadCounter--;
+        return;
     }
 
     if (microTime % 500000 == 0)
@@ -380,11 +380,11 @@ void SequenceManager::Tick(int64 microTime)
             }
         }
     }
-    std::chrono::time_point<std::chrono::system_clock> beforeLogging;
+    std::chrono::time_point<std::chrono::high_resolution_clock> beforeLogging;
     if (findNext)
     {
         //not all values found yet; microTimes > endTime;
-        Debug::error("findNext still true at micro time: %d", microTime);
+        Debug::warning("findNext still true at micro time: %d", microTime);
 
     }
     else
@@ -417,24 +417,23 @@ void SequenceManager::Tick(int64 microTime)
                     LLInterface::ExecCommand(seqItem.first, nextValue);
                     if (threadCounter > 1)
                     {
-                        Debug::error("writing " + seqItem.first + " with value %d at micro time: %d", nextValue,
+                        Debug::warning("writing " + seqItem.first + " with value %d at micro time: %d", nextValue,
                                      microTime);
                     }
                 }
-                //logging::INFO(msg);
             }
             syncMtx.unlock();
-		beforeLogging = Clock::now();
+		    beforeLogging = Clock::now();
             Debug::log(msg);
         }
     }
     auto currTime = Clock::now();
     if (threadCounter > 80)
-{
-	cerr << "Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() <<  endl;
-	cerr << "Time elapsed until logging" << std::chrono::duration_cast<std::chrono::microseconds>(beforeLogging-startTime).count() << endl;
-	cerr << "Time elapsed during logging" << std::chrono::duration_cast<std::chrono::microseconds>(currTime-beforeLogging).count() << endl;
-}
+    {
+        cerr << "Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() <<  endl;
+        cerr << "Time elapsed until logging" << std::chrono::duration_cast<std::chrono::microseconds>(beforeLogging-startTime).count() << endl;
+        cerr << "Time elapsed during logging" << std::chrono::duration_cast<std::chrono::microseconds>(currTime-beforeLogging).count() << endl;
+    }
     threadCounter--;
 }
 
