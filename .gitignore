@@ -36,3 +36,4 @@ CMakeCache.txt
 Makefile
 logs/
 .idea/
+cmake-build-debug/

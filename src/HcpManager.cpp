@@ -9,6 +9,9 @@
 
 #include "HcpManager.h"
 
+#define HCP_THRUST_SENSORS_COUNT 3
+
+
 using json = nlohmann::json;
 
 using namespace std;
@@ -165,9 +168,48 @@ std::map<std::string, double> HcpManager::GetAllSensors()
 
                 int32* cells = GetLoadCells();
 
-                sensors[it.key() + " 1"] = cells[0];
-                sensors[it.key() + " 2"] = cells[1];
-                sensors[it.key() + " 3"] = cells[2];
+                if (utils::keyExists(it.value(), "maps"))
+                {
+                    Debug::info("mapping thrust values");
+
+                    json maps = it.value()["maps"];
+
+                    if (maps.type() == json::value_t::array)
+                    {
+                        double mappedValues[HCP_THRUST_SENSORS_COUNT] = {-1.0};
+                        for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                        {
+                            mappedValues[i] = cells[i];
+                        }
+
+                        for (int i = 0; i < maps.size(); i++)
+                        {
+                            double before = mappedValues[i];
+                            mappedValues[i] = ((double) cells[i] * (double) maps[i]["k"]) + (double) maps[i]["d"];
+
+                            Debug::info(it.key() + " %d from %d to %d", i+1, before, mappedValues[i]);
+                        }
+
+                        for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                        {
+                            sensors[it.key() + " " + to_string(i+1)] = mappedValues[i];
+                        }
+                    }
+                    else
+                    {
+                        Debug::error("maps field in mapping is not an array");
+                    }
+
+                }
+                else
+                {
+                    for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                    {
+                        sensors[it.key() + " " + to_string(i+1)] = cells[i];
+                    }
+                }
+
+                delete cells;
 
             }
             else
@@ -724,8 +766,8 @@ bool HcpManager::SetDigitalOutputs(uint8 port, bool enable)
 int32 *HcpManager::GetLoadCells()
 {
 
-    int32 *value = new int32[3];
-    std::fill( value, value+3, -1 );
+    int32 *value = new int32[HCP_THRUST_SENSORS_COUNT];
+    std::fill( value, value+HCP_THRUST_SENSORS_COUNT, -1 );
 
 
     HCP_MSG msg;
@@ -745,26 +787,39 @@ int32 *HcpManager::GetLoadCells()
     {
         if (rep->optcode == HCP_ST_THRUST_REP)
         {
-            uint8 signByte1 = 0, signByte2 = 0, signByte3 = 0;
-            if (rep->payload[0] >= 0x80)
+            uint8 signBytes[HCP_THRUST_SENSORS_COUNT] = {0};
+            for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
             {
-                signByte1 = 0xFF;
-            }
-            if (rep->payload[3] >= 0x80)
-            {
-                signByte2 = 0xFF;
-            }
-            if (rep->payload[6] >= 0x80)
-            {
-                signByte3 = 0xFF;
-            }
-            value[0] = signByte1 << 24 | (rep->payload[0] << 16) | (rep->payload[1] << 8) | rep->payload[2];
-            value[1] = signByte2 << 24 | (rep->payload[3] << 16) | (rep->payload[4] << 8) | rep->payload[5];
-            value[2] = signByte3 << 24 | (rep->payload[6] << 16) | (rep->payload[7] << 8) | rep->payload[8];
+                if (rep->payload[i*3] >= 0x80)
+                {
+                    signBytes[i] = 0xFF;
+                }
 
-            Debug::info("REP Cell 1: %d", value[0]);
-            Debug::info("REP Cell 2: %d", value[1]);
-            Debug::info("REP Cell 3: %d", value[2]);
+                value[i] = signBytes[i] << 24 | (rep->payload[i*3] << 16) | (rep->payload[(i*3)+1] << 8) | rep->payload[(i*3)+2];
+
+                Debug::info("REP Cell %d: %d", i, value[i]);
+            }
+
+//            uint8 signByte1 = 0, signByte2 = 0, signByte3 = 0;
+//            if (rep->payload[0] >= 0x80)
+//            {
+//                signByte1 = 0xFF;
+//            }
+//            if (rep->payload[3] >= 0x80)
+//            {
+//                signByte2 = 0xFF;
+//            }
+//            if (rep->payload[6] >= 0x80)
+//            {
+//                signByte3 = 0xFF;
+//            }
+//            value[0] = signByte1 << 24 | (rep->payload[0] << 16) | (rep->payload[1] << 8) | rep->payload[2];
+//            value[1] = signByte2 << 24 | (rep->payload[3] << 16) | (rep->payload[4] << 8) | rep->payload[5];
+//            value[2] = signByte3 << 24 | (rep->payload[6] << 16) | (rep->payload[7] << 8) | rep->payload[8];
+//
+//            Debug::info("REP Cell 1: %d", value[0]);
+//            Debug::info("REP Cell 2: %d", value[1]);
+//            Debug::info("REP Cell 3: %d", value[2]);
         }
         else
         {
@@ -818,7 +873,7 @@ double HcpManager::GetAnalog(std::string name)
             json map = device["map"];
 
             double before = value;
-            value = ((double)value + (double)map["d"]) * (double)map["k"];
+            value = ((double)value * (double)map["k"]) + (double)map["d"];
 
             Debug::info("from %d to %d", before, value);
         }
