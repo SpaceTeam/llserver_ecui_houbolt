@@ -256,7 +256,7 @@ void SequenceManager::GetSensors(int64 microTime)
                 string abortMsg = stream.str();
                 if (isRunning)
                 {
-                    //SequenceManager::AbortSequence(abortMsg);
+                    SequenceManager::AbortSequence(abortMsg);
                 }
             }
             else if (sensor.second > sensorsNominalRangeMap[sensor.first][1])
@@ -266,7 +266,7 @@ void SequenceManager::GetSensors(int64 microTime)
                 string abortMsg = stream.str();
                 if (isRunning)
                 {
-                    //SequenceManager::AbortSequence(abortMsg);
+                    SequenceManager::AbortSequence(abortMsg);
                 }
             }
         }
@@ -472,7 +472,8 @@ void SequenceManager::StopAbortSequence()
             printf("After Seq %lld \n", afterSeqLogTime);
 
             std::thread afterSeqLogThread([afterSeqLogTime](){
-                usleep(afterSeqLogTime);
+                //subtracted number used from sleep in start abort sequence
+                usleep(afterSeqLogTime-50000);
                 sensorTimer->stop();
             });
             afterSeqLogThread.detach();
