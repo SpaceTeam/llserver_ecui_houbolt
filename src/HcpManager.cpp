@@ -560,7 +560,7 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
             }
             else
             {
-                Debug::error("hcp response message is null");
+                Debug::warning("hcp response message is null");
             }
         }
         else
@@ -708,7 +708,7 @@ bool HcpManager::SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount)
         }
         else
         {
-            Debug::error("hcp response message is null");
+            Debug::warning("hcp response message is null");
         }
         delete[] msg.payload;
     }
@@ -830,7 +830,7 @@ int32 *HcpManager::GetLoadCells()
     }
     else
     {
-        Debug::error("hcp response message is null");
+        Debug::warning("hcp response message is null");
     }
     delete[] msg.payload;
 
@@ -938,7 +938,7 @@ int32 HcpManager::GetAnalog(uint8 port)
         }
         else
         {
-            Debug::error("hcp response message is null");
+            Debug::warning("hcp response message is null");
         }
         delete[] msg.payload;
     }
@@ -1014,7 +1014,7 @@ uint8 HcpManager::GetDigital(uint8 port)
         }
         else
         {
-            Debug::error("hcp response message is null");
+            Debug::warning("hcp response message is null");
         }
         delete[] msg.payload;
     }

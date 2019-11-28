@@ -210,7 +210,7 @@ HCP_MSG* Serial::ReadSync()
     }
     else
     {
-        Debug::error("Device " + _uartDevice + " disconnected!");
+        //Debug::error("Device " + _uartDevice + " disconnected!");
     }
     return nullptr;
 }
@@ -288,7 +288,7 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
     }
     else
     {
-        Debug::error("Device " + _uartDevice + " disconnected!");
+        //Debug::error("Device " + _uartDevice + " disconnected!");
     }
 }
 
@@ -315,7 +315,7 @@ void Serial::Write(HCP_MSG message)
     }
     else
     {
-        Debug::error("Device " + _uartDevice + " disconnected!");
+        //Debug::error("Device " + _uartDevice + " disconnected!");
     }
 }
 

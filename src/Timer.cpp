@@ -65,12 +65,12 @@ void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMic
     }
 }
 
-void Timer::startContinous(uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback)
+void Timer::startContinous(int64 startTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback)
 {
     if (!this->isRunning)
     {
 
-        this->startTime = 0;
+        this->startTime = startTimeMicros;
         this->endTime = 0;
         this->interval = intervalMicros;
         this->tickCallback = tickCallback;
@@ -79,7 +79,7 @@ void Timer::startContinous(uint64 intervalMicros, std::function<void(int64)> tic
         this->microTime = 0;
 
         this->isRunning = true;
-        this->timerThread = new std::thread(Timer::highPerformanceContinousTimerLoop, this, intervalMicros);
+        this->timerThread = new std::thread(Timer::highPerformanceContinousTimerLoop, this, intervalMicros, startTimeMicros);
         this->timerThread->detach();
     }
     else
@@ -163,12 +163,11 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
     }
 }
 
-void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval)
+void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int64 microTime)
 {
     std::unique_lock<std::mutex> lock(self->syncMtx);
     auto lastTime = Clock::now();
     auto currTime = lastTime;
-    int64 microTime = 0;
 
     std::thread callbackThread(self->tickCallback, microTime);
     callbackThread.detach();

@@ -101,7 +101,7 @@ void LLInterface::StartSensorTransmission()
     if (!isTransmittingSensors)
     {
         isTransmittingSensors = true;
-        sensorTimer->startContinous(100000, LLInterface::GetSensors, LLInterface::StopGetSensors);
+        sensorTimer->startContinous(0,100000, LLInterface::GetSensors, LLInterface::StopGetSensors);
     }
 }
 

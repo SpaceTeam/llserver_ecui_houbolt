@@ -51,6 +51,7 @@ void SequenceManager::StopSequence()
     isRunning = false;
     if (!isAbort)
     {
+        sensorTimer->stop();
         LLInterface::DisableAllOutputDevices();
         EcuiSocket::SendJson("timer-done");
     }
@@ -61,7 +62,6 @@ void SequenceManager::AbortSequence(std::string abortMsg)
     if (isRunning)
     {
         isAbort = true;
-        sensorTimer->stop();
         timer->stop();
 
 
@@ -112,6 +112,7 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         {
             msg += sensorNames[i] + ";";
         }
+        msg += "Status;";
         msg += "SequenceTime;";
         for (auto item : outputNames)
         {
@@ -139,7 +140,7 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         EcuiSocket::SendJson("timer-start");
 
         LLInterface::EnableAllOutputDevices();
-        sensorTimer->start(startTime, endTime+3, 1000000/SENSOR_SAMPLE_RATE, SequenceManager::GetSensors, SequenceManager::StopGetSensors);
+        sensorTimer->startContinous(startTime, 1000000/SENSOR_SAMPLE_RATE, SequenceManager::GetSensors, SequenceManager::StopGetSensors);
         timer->start(startTime, endTime, interval, SequenceManager::Tick, SequenceManager::StopSequence);
         //TODO: discuss if we need that feature
 //        if (HcpManager::EnableAllServos())
@@ -219,6 +220,14 @@ void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
     {
         msg += to_string(sensors[i]) + ";";
     }
+    if (!isRunning)
+    {
+        msg += "Auto Abort;";
+    }
+    else
+    {
+        msg += ";";
+    }
     //async_file->info(to_string(microTime) + ";" + msg);
     //logging::INFO("\n" + to_string(secs) + ";" + msg);
     Debug::log("\n" + to_string(secs) + ";" + msg);
@@ -245,14 +254,20 @@ void SequenceManager::GetSensors(int64 microTime)
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                SequenceManager::AbortSequence(abortMsg);
+                if (isRunning)
+                {
+                    //SequenceManager::AbortSequence(abortMsg);
+                }
             }
             else if (sensor.second > sensorsNominalRangeMap[sensor.first][1])
             {
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                SequenceManager::AbortSequence(abortMsg);
+                if (isRunning)
+                {
+                    //SequenceManager::AbortSequence(abortMsg);
+                }
             }
         }
         vals.push_back(sensor.second);
@@ -447,6 +462,25 @@ void SequenceManager::StopAbortSequence()
         Debug::flush();
         Debug::info("abort sequence done");
         isAbortRunning = false;
+
+        if (utils::keyExists(jsonAbortSequence["globals"], "endTime") &&
+            (jsonAbortSequence["globals"]["endTime"].type() == json::value_t::number_float))
+        {
+            int64 afterSeqLogTime = ((double)jsonAbortSequence["globals"]["endTime"]) * 1000000.0;
+            afterSeqLogTime = abs(afterSeqLogTime);
+
+            printf("After Seq %lld \n", afterSeqLogTime);
+
+            std::thread afterSeqLogThread([afterSeqLogTime](){
+                usleep(afterSeqLogTime);
+                sensorTimer->stop();
+            });
+            afterSeqLogThread.detach();
+        }
+        else
+        {
+            sensorTimer->stop();
+        }
 
         //wait some time so servos can move
         std::thread disableThread([](){
