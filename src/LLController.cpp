@@ -13,10 +13,24 @@
 
 using namespace std;
 
+void LLController::PrintLogo()
+{
+    std::ifstream f("txvLogoSquashed.txt");
+
+    if (f.is_open())
+        std::cout << f.rdbuf();
+
+    std::cout << std::endl << std::endl;
+    f.close();
+}
+
 void LLController::Init()
 {
     //LLInterface needs to be initialized first to ensure proper initialization before receiving
     //aynchronous commands from the web server
+    system("clear");
+    PrintLogo();
+
     LLInterface::Init();
 
     EcuiSocket::Init(OnECUISocketRecv, Abort);

@@ -20,7 +20,7 @@ private:
 
     ~LLController();
 
-
+    static void PrintLogo();
 
 public:
 
