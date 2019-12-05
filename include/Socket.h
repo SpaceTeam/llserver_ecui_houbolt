@@ -14,7 +14,7 @@ class Socket
 private:
 
     int32 socketfd;
-    int8 buffer[SOCKET_MSG_SIZE];
+    uint8 buffer[SOCKET_MSG_SIZE];
 
     bool connectionActive = false;
     bool shallClose = false;
@@ -32,6 +32,8 @@ public:
 
     void Send(std::string msg);
     std::string Recv();
+    std::vector<uint8> RecvBytes();
+    bool isConnectionActive();
 
 };
 

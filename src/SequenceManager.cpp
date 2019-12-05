@@ -256,7 +256,7 @@ void SequenceManager::GetSensors(int64 microTime)
                 string abortMsg = stream.str();
                 if (isRunning)
                 {
-                    SequenceManager::AbortSequence(abortMsg);
+                    //SequenceManager::AbortSequence(abortMsg);
                 }
             }
             else if (sensor.second > sensorsNominalRangeMap[sensor.first][1])
@@ -266,7 +266,7 @@ void SequenceManager::GetSensors(int64 microTime)
                 string abortMsg = stream.str();
                 if (isRunning)
                 {
-                    SequenceManager::AbortSequence(abortMsg);
+                    //SequenceManager::AbortSequence(abortMsg);
                 }
             }
         }

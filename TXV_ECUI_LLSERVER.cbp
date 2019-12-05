@@ -109,6 +109,9 @@
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/Timer.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/TmPoE.h">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/WarnLight.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
@@ -161,6 +164,9 @@
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Timer.cpp">
+			<Option target="TXV_ECUI_LLSERVER"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/TmPoE.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/WarnLight.cpp">

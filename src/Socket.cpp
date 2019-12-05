@@ -36,6 +36,7 @@ void Socket::Connect(std::string address, uint16 port, int32 tries)
 {
 
     struct sockaddr_in serv_addr;
+    int32 totalTries = tries;
 
     while (!connectionActive && !shallClose && tries != 0)
     {
@@ -58,7 +59,10 @@ void Socket::Connect(std::string address, uint16 port, int32 tries)
         if (connect(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
         {
             printf("\nWaiting for connection...\n");
-            sleep(3);
+            if (totalTries > 1)
+            {
+                sleep(3);
+            }
             tries -= 1;
             continue;
 
@@ -117,6 +121,39 @@ std::string Socket::Recv()
         Debug::error("no connection active");
     }
     return msg;
+}
+
+std::vector<uint8> Socket::RecvBytes()
+{
+    std::vector<uint8> msg;
+    if (connectionActive)
+    {
+        int32 valread;
+
+        valread = recv(socketfd, buffer, SOCKET_MSG_SIZE, 0);
+
+        if (valread < 0)
+        {
+            Debug::error("error at recv occured, closing socket...");
+            Close();
+        }
+
+        msg.resize(valread);
+        std::copy (buffer, buffer+valread, msg.begin());
+
+
+        std::fill(std::begin(buffer), std::end(buffer), 0);
+    }
+    else
+    {
+        Debug::error("no connection active");
+    }
+    return msg;
+}
+
+bool Socket::isConnectionActive()
+{
+    return this->connectionActive;
 }
 
 void Socket::Close()

@@ -11,6 +11,7 @@
 #include "json.hpp"
 
 #include "WarnLight.h"
+#include "TmPoE.h"
 
 class LLInterface
 {
@@ -19,6 +20,7 @@ private:
 
     static I2C* i2cDevice;
     static WarnLight* warnLight;
+    static TMPoE *tmPoE;
     //static GPIO[] gpioDevices;
 
     //static SPI* spiDevice;

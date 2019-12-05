@@ -10,6 +10,7 @@
 
 I2C* LLInterface::i2cDevice;
 WarnLight* LLInterface::warnLight;
+TMPoE *LLInterface::tmPoE;
 
 //GPIO[] LLInterface::gpioDevices;
 
@@ -30,8 +31,10 @@ void LLInterface::Init()
         HcpManager::init();
         sensorTimer = new Timer();
         warnLight = new WarnLight(0);
-        isInitialized = true;
+        tmPoE = new TMPoE(0, 50);
         //i2cDevice = new I2C(0, "someDev"); //not in use right now
+
+        isInitialized = true;
     }
 }
 
@@ -41,6 +44,7 @@ void LLInterface::Destroy()
     {
         //delete i2cDevice;
         delete warnLight;
+        delete tmPoE;
     }
 }
 
@@ -58,6 +62,15 @@ std::vector<std::string> LLInterface::GetAllSensorNames()
 {
     std::vector<std::string> sensorNames;
     sensorNames = HcpManager::GetAllSensorNames();
+
+#ifdef USE_TMPoE
+    for (int i = 0; i < 8; i++)
+    {
+        sensorNames.push_back("Temp" + std::to_string(i+1));
+    }
+#endif
+
+    std::sort(sensorNames.begin(), sensorNames.end());
     return sensorNames;
 }
 
@@ -66,6 +79,14 @@ std::map<std::string, double> LLInterface::GetAllSensors()
     auto startTime = Clock::now();
     std::map<std::string, double> sensors;
     sensors = HcpManager::GetAllSensors();
+
+#ifdef USE_TMPoE
+    std::vector<uint16> tmpValues = tmPoE->Read();
+    for (int i = 0; i < tmpValues.size(); i++)
+    {
+        sensors["Temp" + std::to_string(i+1)] = tmpValues[i];
+    }
+#endif
 
     auto currTime = Clock::now();
     //std::cerr << "Get Sensors Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;

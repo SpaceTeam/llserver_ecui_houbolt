@@ -15,6 +15,9 @@
 //#define SOCKET_IP "192.168.0.16"
 #define ECUI_IP "127.0.0.1"
 #define WARNLIGHT_IP "127.0.0.1"
+#define TMPoE_IP "127.0.0.1"
+
+#define USE_TMPoE
 
 #define SOCKET_MSG_SIZE 65536
 #define ECUI_PORT 5555
