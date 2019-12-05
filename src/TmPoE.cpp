@@ -29,7 +29,7 @@ void TMPoE::AsyncListen(TMPoE *self, uint32 sweepFrequency)
     uint32 sleepDuration = 1.0/sweepFrequency*1000000.0;
     while(!self->shallClose)
     {
-        self->socket->Send("temp");
+        self->socket->Send("temp\n");
         vector<uint8> msg = self->socket->RecvBytes();
         if (msg.size() < 16)
         {

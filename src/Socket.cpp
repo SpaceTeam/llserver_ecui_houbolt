@@ -139,13 +139,7 @@ std::vector<uint8> Socket::RecvBytes()
         }
 
         msg.resize(valread);
-        std::copy (buffer, buffer+valread, msg.begin());
-        cout << valread << endl;
-        for (auto item : msg)
-        {
-            cout << item << ", ";
-        }
-        cout << endl;
+        std::copy(buffer, buffer+valread, msg.begin());
 
         std::fill(std::begin(buffer), std::end(buffer), 0);
     }
