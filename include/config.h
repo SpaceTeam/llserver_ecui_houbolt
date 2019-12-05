@@ -17,7 +17,7 @@
 #define WARNLIGHT_IP "127.0.0.1"
 #define TMPoE_IP "127.0.0.1"
 
-#define USE_TMPoE
+//#define USE_TMPoE
 
 #define SOCKET_MSG_SIZE 65536
 #define ECUI_PORT 5555

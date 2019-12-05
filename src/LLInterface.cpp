@@ -31,7 +31,9 @@ void LLInterface::Init()
         HcpManager::init();
         sensorTimer = new Timer();
         warnLight = new WarnLight(0);
+#ifdef USE_TMPoE
         tmPoE = new TMPoE(0, 50);
+#endif
         //i2cDevice = new I2C(0, "someDev"); //not in use right now
 
         isInitialized = true;
@@ -44,7 +46,9 @@ void LLInterface::Destroy()
     {
         //delete i2cDevice;
         delete warnLight;
+#ifdef USE_TMPoE
         delete tmPoE;
+#endif
     }
 }
 
