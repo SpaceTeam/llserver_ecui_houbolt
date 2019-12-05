@@ -66,7 +66,7 @@ std::vector<std::string> LLInterface::GetAllSensorNames()
 #ifdef USE_TMPoE
     for (int i = 0; i < 8; i++)
     {
-        sensorNames.push_back("Temp" + std::to_string(i+1));
+        sensorNames.push_back("temp " + std::to_string(i+1));
     }
 #endif
 
@@ -84,7 +84,7 @@ std::map<std::string, double> LLInterface::GetAllSensors()
     std::vector<uint16> tmpValues = tmPoE->Read();
     for (int i = 0; i < tmpValues.size(); i++)
     {
-        sensors["Temp" + std::to_string(i+1)] = tmpValues[i];
+        sensors["temp " + std::to_string(i+1)] = tmpValues[i];
     }
 #endif
 

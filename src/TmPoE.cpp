@@ -31,7 +31,6 @@ void TMPoE::AsyncListen(TMPoE *self, uint32 sweepFrequency)
     {
         self->socket->Send("temp");
         vector<uint8> msg = self->socket->RecvBytes();
-        cout << msg.size() << endl;
         if (msg.size() < 16)
         {
             Debug::error("TMPoE response message is too small");
