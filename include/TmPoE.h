@@ -20,7 +20,7 @@ private:
 
     uint16 id;
 
-    std::vector<uint16> currValues;
+    std::vector<uint32> currValues;
 
     std::thread* asyncListenThread;
 
@@ -34,7 +34,7 @@ public:
 
     ~TMPoE();
 
-    std::vector<uint16> Read();
+    std::vector<uint32> Read();
 
 
 };

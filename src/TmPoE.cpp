@@ -31,7 +31,7 @@ void TMPoE::AsyncListen(TMPoE *self, uint32 sweepFrequency)
     {
         self->socket->Send("temp\n");
         vector<uint8> msg = self->socket->RecvBytes();
-        if (msg.size() < 16)
+        if (msg.size() < 24)
         {
             Debug::error("TMPoE response message is too small");
             continue;
@@ -40,7 +40,7 @@ void TMPoE::AsyncListen(TMPoE *self, uint32 sweepFrequency)
         self->readMtx.lock();
         for (int i = 0; i < self->currValues.size(); i++)
         {
-            self->currValues[i] = msg[i*2] << 8 | msg[i*2+1];
+            self->currValues[i] = (msg[i*3] << 16) | (msg[i*3+1] << 8) | msg[i*3+2];
         }
         self->readMtx.unlock();
 
@@ -48,7 +48,7 @@ void TMPoE::AsyncListen(TMPoE *self, uint32 sweepFrequency)
     }
 }
 
-std::vector<uint16> TMPoE::Read()
+std::vector<uint32> TMPoE::Read()
 {
     std::lock_guard<std::mutex> lock(readMtx);
     return this->currValues;
