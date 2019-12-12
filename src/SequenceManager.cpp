@@ -93,7 +93,7 @@ void SequenceManager::ChangeLogFile()
     strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
 //    logging::configure({ {"type", "file"}, {"file_name", "logs/" + string(dateTime_string) + ".csv"}, {"reopen_interval", "1"} });
 //    logging::get_logger().setFilePath("logs/" + string(dateTime_string) + ".csv");
-    Debug::changeOutputFile("../tmpLogs/" + string(dateTime_string) + ".csv");
+    Debug::changeOutputFile("logs/" + string(dateTime_string) + ".csv");
 }
 
 void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)

@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <thread>
 #include <fstream>
+#include <sstream>
 
 #include "config.h"
 #include "common.h"
@@ -22,8 +23,12 @@ class Debug {
 private:
     static std::recursive_mutex _outMutex;
     static std::mutex outFileMutex;
+    static std::stringstream logStream;
     static std::ofstream logFile;
     static bool isLogFileOpen;
+
+    //NOTE: NOT THREAD SAFE
+    static void writeToFile();
 
 public:
     //TODO: implement, only log, no output

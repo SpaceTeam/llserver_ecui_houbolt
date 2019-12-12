@@ -14,6 +14,7 @@
 
 std::recursive_mutex Debug::_outMutex;
 std::mutex Debug::outFileMutex;
+std::stringstream Debug::logStream;
 std::ofstream Debug::logFile;
 bool Debug::isLogFileOpen = false;
 
@@ -173,8 +174,13 @@ void Debug::close()
     std::lock_guard<std::mutex> lock(outFileMutex);
     if (logFile.is_open())
     {
+        logFile << logStream.str();
         logFile.flush();
         logFile.close();
+    }
+    else
+    {
+        error("in Debug close: log output file is not open yet, try Debug::changeOutputFile");
     }
 }
 
@@ -183,7 +189,12 @@ void Debug::flush()
     std::lock_guard<std::mutex> lock(outFileMutex);
     if (logFile.is_open())
     {
+        writeToFile();
         logFile.flush();
+    }
+    else
+    {
+        error("in Debug flush: log output file is not open yet, try Debug::changeOutputFile");
     }
 }
 
@@ -192,6 +203,7 @@ void Debug::changeOutputFile(std::string outFilePath)
     std::lock_guard<std::mutex> lock(outFileMutex);
     if (logFile.is_open())
     {
+        writeToFile();
         logFile.flush();
         logFile.close();
         isLogFileOpen = false;
@@ -211,6 +223,12 @@ void Debug::changeOutputFile(std::string outFilePath)
 void Debug::log(std::string msg)
 {
     std::lock_guard<std::mutex> lock(outFileMutex);
+    logStream << msg;
+
+}
+
+void Debug::writeToFile()
+{
     if (logFile.is_open())
     {
         if (logFile.bad())
@@ -225,7 +243,8 @@ void Debug::log(std::string msg)
         {
             error("write before: eof!!!!!!");
         }
-        logFile << msg;
+        logFile << logStream.str();
+        logStream.str("");
         if (logFile.bad())
         {
             error("write bad!!!!!!");
@@ -243,8 +262,6 @@ void Debug::log(std::string msg)
     {
         error("in log: log output file is not open yet, try Debug::changeOutputFile");
     }
-
-
 }
 
 #endif
