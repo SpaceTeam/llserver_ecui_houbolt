@@ -30,6 +30,7 @@
 *.exe
 *.out
 *.app
+TXV_ECUI_LLSERVER
 
 CMakeFiles/
 CMakeCache.txt
@@ -37,3 +38,4 @@ Makefile
 logs/
 .idea/
 cmake-build-debug/
+*.cmake
