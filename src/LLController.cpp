@@ -2,6 +2,7 @@
 // Created by Markus on 2019-10-15.
 //
 
+#include "Config_new.h"
 #include "utils.h"
 #include "Socket.h"
 #include "HcpManager.h"
@@ -35,6 +36,17 @@ void LLController::Init()
 
     EcuiSocket::Init(OnECUISocketRecv, Abort);
     SequenceManager::init();
+
+    Config config;
+    config.print();
+    std::cout << "getData" << std::endl;
+    json obj = config.getData(std::vector<std::string>{"ECUI", "hcp"});
+    std::cout << obj << std::endl;
+    std::cout << "end of getData" << std::endl;
+    std::cout << "getData" << std::endl;
+    obj = config.getData("ECUI/hcp/bla");
+    std::cout << obj << std::endl;
+    std::cout << "end of getData" << std::endl;
 }
 
 void LLController::Destroy()

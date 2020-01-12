@@ -15,7 +15,7 @@ include_directories(include)
 
 file(GLOB sources ./*.cpp src/*.cpp include/*.h)
 
-add_executable(${PROJECT_NAME} ${sources})
+add_executable(${PROJECT_NAME} ${sources} src/Config_new.cpp include/Config_new.h)
 #spdlog_enable_warnings(${PROJECT_NAME})
 
 

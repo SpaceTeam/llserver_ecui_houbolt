@@ -8,6 +8,7 @@
 #include "common.h"
 
 #include "json.hpp"
+#include "Config_new.h"
 
 class LLController
 {
