@@ -26,19 +26,14 @@ json Config::getData(std::vector<std::string> keyChain) {
 
 json Config::getData(std::string keyChain) {
     std::vector<std::string> keyVector;
-    int endPos;
-    for (int pos = 0; pos != std::string::npos; pos = endPos) {
+    long unsigned int endPos;
+    for (long unsigned int pos = 0; pos != std::string::npos; pos = endPos) {
         endPos = keyChain.find('/', pos + 1);
-        keyVector.push_back(keyChain.substr(pos, endPos));
-        if (endPos == std::string::npos) {
+        keyVector.push_back(keyChain.substr(pos, endPos - pos));
+        if (endPos != std::string::npos) {
             endPos++;
         }
     }
-    std::cout << "key vector: ";
-    for (std::string key : keyVector) {
-        std::cout << key << " ";
-    }
-    std::cout << std::endl;
     return getData(keyVector);
 }
 

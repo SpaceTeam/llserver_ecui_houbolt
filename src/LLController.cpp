@@ -40,11 +40,7 @@ void LLController::Init()
     Config config;
     config.print();
     std::cout << "getData" << std::endl;
-    json obj = config.getData(std::vector<std::string>{"ECUI", "hcp"});
-    std::cout << obj << std::endl;
-    std::cout << "end of getData" << std::endl;
-    std::cout << "getData" << std::endl;
-    obj = config.getData("ECUI/hcp/bla");
+    json obj = config.getData("ECUI/hcp/baudrate");
     std::cout << obj << std::endl;
     std::cout << "end of getData" << std::endl;
 }
