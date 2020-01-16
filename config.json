@@ -1,0 +1,36 @@
+{
+  "ECUI": {
+    "ip": "127.0.0.1",
+    "port": 5555,
+    "msg_size": 65536,
+    "sensor_sample_rate": 100,
+    "sensor_transmission_interval": 100000,
+    "timer_sync_interval": 100000,
+    "i2c_address": "0x68",
+    "hcp": {
+      "mapping_path": "mapping/hcpMapping.json",
+      "device": "/dev/serial0",
+      "baudrate": 115200
+    },
+    "servos": {
+      "count": 6,
+      "max_ontime": 40000,
+      "motor_count": 4,
+      "motor_max_power": 1000,
+      "digital_count": 16,
+      "analog_count": 16
+    }
+  },
+  "WARNLIGHT": {
+    "ip": "127.0.0.1"
+  },
+  "TMPoE": {
+    "ip": "127.0.0.1"
+  },
+  "Battery": {
+    "full": 12600,
+    "empty_threshold": 9100,
+    "low_threshold": 9900,
+    "voltage_hysterisis": 100
+  }
+}

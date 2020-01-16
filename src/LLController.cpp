@@ -2,6 +2,7 @@
 // Created by Markus on 2019-10-15.
 //
 
+#include "Config_new.h"
 #include "utils.h"
 #include "Socket.h"
 #include "HcpManager.h"
@@ -35,6 +36,14 @@ void LLController::Init()
 
     EcuiSocket::Init(OnECUISocketRecv, Abort);
     SequenceManager::init();
+
+    Config config;
+    config.print();
+    std::cout << "getData" << std::endl;
+    int baudRate = std::get<0>(config.getData("ECUI/hcp/baudrate"));
+    std::cout << baudRate << std::endl;
+    std::cout << typeid(baudRate).name() << std::endl;
+    std::cout << "end of getData" << std::endl;
 }
 
 void LLController::Destroy()

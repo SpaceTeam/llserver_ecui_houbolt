@@ -50,4 +50,4 @@
 #define BATTERY_LOW_THRESHOLD 9900 //battery voltage below which low battery indication occurs
 #define BATTERY_VOLTAGE_HYSTERESIS 100
 
-#endif //TXV_ECUI_LLSERVER_CONFIG_H
+#endif //TXV_ECUI_LLSERVER_CONFIG_NEW_H
