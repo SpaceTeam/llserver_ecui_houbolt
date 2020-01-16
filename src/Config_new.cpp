@@ -15,16 +15,16 @@ Config::Config(std::string fileName) {
     data = json::parse(rawJSON);
 }
 
-json Config::getData(std::vector<std::string> keyChain) {
+std::variant<int, double, std::string, json> Config::getData(std::vector<std::string> keyChain) {
     json obj = data;
     while (keyChain.size() > 0) {
         obj = obj[keyChain[0]];
         keyChain.erase(keyChain.begin());
     }
-    return obj;
+    return convertJSONtoType(obj);
 }
 
-json Config::getData(std::string keyChain) {
+std::variant<int, double, std::string, json> Config::getData(std::string keyChain) {
     std::vector<std::string> keyVector;
     long unsigned int endPos;
     for (long unsigned int pos = 0; pos != std::string::npos; pos = endPos) {
@@ -39,4 +39,23 @@ json Config::getData(std::string keyChain) {
 
 void Config::print() {
     std::cout << std::setw(4) << data << std::endl;
+}
+
+std::variant<int, double, std::string, json> Config::convertJSONtoType(json object) {
+    switch (object.type()) {
+        case json::value_t::string:
+            return object.get<std::string>();
+            break;
+        case json::value_t::number_integer:
+            return object.get<int>();
+            break;
+        case json::value_t::number_unsigned:
+            return object.get<int>();
+            break;
+        case json::value_t::number_float:
+            return object.get<double>();
+            break;
+        default:
+            return object;
+    }
 }

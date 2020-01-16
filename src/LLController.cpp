@@ -40,8 +40,9 @@ void LLController::Init()
     Config config;
     config.print();
     std::cout << "getData" << std::endl;
-    json obj = config.getData("ECUI/hcp/baudrate");
-    std::cout << obj << std::endl;
+    int baudRate = std::get<0>(config.getData("ECUI/hcp/baudrate"));
+    std::cout << baudRate << std::endl;
+    std::cout << typeid(baudRate).name() << std::endl;
     std::cout << "end of getData" << std::endl;
 }
 
