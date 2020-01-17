@@ -70,7 +70,7 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/Config_new.h">
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/Config.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/Debug.h">
@@ -121,7 +121,7 @@
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/common.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
-		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/config.h">
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/config_old.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/utils.h">
@@ -133,7 +133,7 @@
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/serialTest.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
-		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Config_new.cpp">
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Config.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Debug.cpp">

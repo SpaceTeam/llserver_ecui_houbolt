@@ -1,5 +1,5 @@
 {
-  "autoabort": true,
+  "autoabort": false,
   "debug": false,
   "useTMPoE": false,
   "socket_msg_size": 65536,

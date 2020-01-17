@@ -24,6 +24,12 @@ typedef struct point_s
     int64 y;
 } Point;
 
+typedef enum class interpolation_e
+{
+    NONE,
+    LINEAR
+} Interpolation;
+
 class SequenceManager
 {
 
@@ -46,6 +52,7 @@ private:
     static json jsonSequence;
     static json jsonAbortSequence;
 
+    static std::map<std::string, Interpolation> interpolationMap;
     static std::map<std::string, Point[2]> sequenceIntervalMap;
     static std::map<std::string, double[2]> sensorsNominalRangeMap;
 
@@ -54,6 +61,7 @@ private:
 //    static std::shared_ptr<spdlog::logger> async_file;
 
     static void LoadIntervalMap();
+    static void LoadInterpolationMap();
     static void UpdateIntervalMap(std::string name, int64 microTime, uint8 newValue);
 
 

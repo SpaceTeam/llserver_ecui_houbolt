@@ -38,6 +38,7 @@ int32 threadCounter = 0;
 json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
 
+std::map<std::string, Interpolation> SequenceManager::interpolationMap;
 std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
 std::map<std::string, double[2]> SequenceManager::sensorsNominalRangeMap;
 
@@ -140,6 +141,7 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         jsonSequence = jsonSeq;
         jsonAbortSequence = jsonAbortSeq;
 
+        LoadInterpolationMap();
         LoadIntervalMap();
 
         threadCounter = 0;
@@ -167,6 +169,28 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 //        }
 
     }
+}
+
+void SequenceManager::LoadInterpolationMap()
+{
+    for (auto it = jsonSequence["globals"]["interpolation"].begin(); it != jsonSequence["globals"]["interpolation"].end(); ++it)
+    {
+        string mode = it.value();
+        if (mode.compare("none") == 0)
+        {
+            interpolationMap[it.key()] = Interpolation::NONE;
+        }
+        else if (mode.compare("linear") == 0)
+        {
+            interpolationMap[it.key()] = Interpolation::LINEAR;
+        }
+        else
+        {
+            interpolationMap[it.key()] = Interpolation::NONE;
+        }
+        Debug::error("interpolation created for %s: mode %s", it.key().c_str(), mode.c_str());
+    }
+
 }
 
 void SequenceManager::LoadIntervalMap()
@@ -260,14 +284,14 @@ void SequenceManager::GetSensors(int64 microTime)
     vector<double> vals;
     for (const auto& sensor : sensors)
     {
-        if (sensorsNominalRangeMap.find(sensor.first) != sensorsNominalRangeMap.end())
+        if (isAutoAbort && (sensorsNominalRangeMap.find(sensor.first) != sensorsNominalRangeMap.end()))
         {
             if (sensorsNominalRangeMap[sensor.first][0] > sensor.second)
             {
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                if (isRunning && isAutoAbort)
+                if (isRunning)
                 {
                     SequenceManager::AbortSequence(abortMsg);
                 }
@@ -277,7 +301,7 @@ void SequenceManager::GetSensors(int64 microTime)
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                if (isRunning && isAutoAbort)
+                if (isRunning)
                 {
                     SequenceManager::AbortSequence(abortMsg);
                 }
@@ -335,6 +359,42 @@ void SequenceManager::Tick(int64 microTime)
     //TODO: this is very inefficient right now; make it so actions can be accessed by timestamp as key
     for (auto dataItem : jsonSequence["data"])
     {
+//        float currGroupTimestamp = 0.0;
+//        if (utils::keyExists(dataItem, "timestamp"))
+//        {
+//            currGroupTimestamp = dataItem["timestamp"];
+//            if (dataItem["timestamp"].type() == json::value_t::string)
+//            {
+//                string timeStr = dataItem["timestamp"];
+//                if (timeStr.compare("START") == 0)
+//                {
+//                    currGroupTimestamp = jsonSequence["globals"]["startTime"];
+//                }
+//                else if (timeStr.compare("END") == 0)
+//                {
+//                    currGroupTimestamp = jsonSequence["globals"]["endTime"];
+//                }
+//            }
+//            else
+//            {
+//                currGroupTimestamp = dataItem["timestamp"];
+//            }
+//        }
+//        else
+//        {
+//            Debug::error("No timestamp key in group found");
+//            break;
+//        }
+//
+//        for (auto actionItem : dataItem["actions"])
+//        {
+//
+//            float time = 0.0;
+//            if (actionItem["timestamp"].type() != json::value_t::number_float)
+//            {
+//                Debug::error("timestamp of action must be float");
+//                break;
+//            }
         for (auto actionItem : dataItem["actions"])
         {
 
@@ -439,8 +499,27 @@ void SequenceManager::Tick(int64 microTime)
                     }
                     else
                     {
-                        double scale = ((next.y - prev.y) * 1.0) / (next.x - prev.x);
-                        nextValue = (scale * (microTime - prev.x)) + prev.y;
+                        Interpolation inter = Interpolation::NONE;
+                        if (interpolationMap.find(seqItem.first) == interpolationMap.end())
+                        {
+                            Debug::error("%s not found in interpolation map, falling back to no interpolation", seqItem.first.c_str());
+                        }
+                        else
+                        {
+                            inter = interpolationMap[seqItem.first];
+                        }
+                        switch (inter)
+                        {
+                            case Interpolation::LINEAR:
+                            {
+                                double scale = ((next.y - prev.y) * 1.0) / (next.x - prev.x);
+                                nextValue = (scale * (microTime - prev.x)) + prev.y;
+                                break;
+                            }
+                            case Interpolation::NONE:
+                            default:
+                                continue;
+                        }
                     }
 
                     msg += to_string(nextValue) + ";";

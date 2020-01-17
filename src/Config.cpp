@@ -10,9 +10,7 @@ json Config::data;
 
 void Config::Init(std::string filePath) {
 
-    std::cerr << "hello5" << std::endl;
     data = json::parse(utils::loadFile(filePath));
-    std::cerr << "hello2" << std::endl;
 }
 
 std::variant<int, double, std::string, bool, json> Config::getData(std::vector<std::string> keyChain) {

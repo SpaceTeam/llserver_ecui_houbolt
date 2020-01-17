@@ -19,7 +19,6 @@ namespace utils
         std::ifstream ifs(filePath);
         std::string content((std::istreambuf_iterator<char>(ifs)),
                             (std::istreambuf_iterator<char>()));
-        std::cerr << "hello" << std::endl;
         ifs.close();
         return content;
     }
