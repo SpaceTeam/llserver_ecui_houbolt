@@ -19,7 +19,8 @@ namespace utils
         std::ifstream ifs(filePath);
         std::string content((std::istreambuf_iterator<char>(ifs)),
                             (std::istreambuf_iterator<char>()));
-
+        std::cerr << "hello" << std::endl;
+        ifs.close();
         return content;
     }
 
@@ -30,7 +31,7 @@ namespace utils
         ostr.close();
     }
 
-    bool keyExists(const json& j, const std::string& key)
+    bool keyExists(const nlohmann::json& j, const std::string& key)
     {
         return j.find(key) != j.end();
     }

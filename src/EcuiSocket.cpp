@@ -8,6 +8,8 @@
 
 #include "EcuiSocket.h"
 
+#include "Config.h"
+
 using namespace std;
 
 Socket* EcuiSocket::socket;
@@ -21,7 +23,11 @@ std::function<void()> EcuiSocket::onCloseCallback;
 void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<void()> onCloseCallback)
 {
     EcuiSocket::onCloseCallback = onCloseCallback;
-    socket = new Socket(Close, ECUI_IP, ECUI_PORT);
+
+    string ip = std::get<std::string>(Config::getData("WEBSERVER/ip"));
+    int32 port = std::get<int>(Config::getData("WEBSERVER/port"));
+
+    socket = new Socket(Close, ip, port);
     connectionActive = true;
     asyncListenThread = new thread(AsyncListen, onMsgCallback);
     asyncListenThread->detach();

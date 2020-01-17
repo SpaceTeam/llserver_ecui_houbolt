@@ -18,6 +18,8 @@ TMPoE *LLInterface::tmPoE;
 
 bool LLInterface::isInitialized = false;
 
+bool LLInterface::useTMPoE = false;
+
 bool LLInterface::isTransmittingSensors = false;
 int32 LLInterface::warnlightStatus = true;
 Timer* LLInterface::sensorTimer;
@@ -31,9 +33,12 @@ void LLInterface::Init()
         HcpManager::init();
         sensorTimer = new Timer();
         warnLight = new WarnLight(0);
-#ifdef USE_TMPoE
-        tmPoE = new TMPoE(0, 50);
-#endif
+
+        useTMPoE = std::get<bool>(Config::getData("useTMPoE"));
+        if (useTMPoE)
+        {
+            tmPoE = new TMPoE(0, 50);
+        }
         //i2cDevice = new I2C(0, "someDev"); //not in use right now
 
         isInitialized = true;
@@ -46,9 +51,10 @@ void LLInterface::Destroy()
     {
         //delete i2cDevice;
         delete warnLight;
-#ifdef USE_TMPoE
-        delete tmPoE;
-#endif
+        if (useTMPoE)
+        {
+            delete tmPoE;
+        }
     }
 }
 
@@ -67,12 +73,13 @@ std::vector<std::string> LLInterface::GetAllSensorNames()
     std::vector<std::string> sensorNames;
     sensorNames = HcpManager::GetAllSensorNames();
 
-#ifdef USE_TMPoE
-    for (int i = 0; i < 8; i++)
+    if (useTMPoE)
     {
-        sensorNames.push_back("temp " + std::to_string(i+1));
+        for (int i = 0; i < 8; i++)
+        {
+            sensorNames.push_back("temp " + std::to_string(i+1));
+        }
     }
-#endif
 
     std::sort(sensorNames.begin(), sensorNames.end());
     return sensorNames;
@@ -84,13 +91,14 @@ std::map<std::string, double> LLInterface::GetAllSensors()
     std::map<std::string, double> sensors;
     sensors = HcpManager::GetAllSensors();
 
-#ifdef USE_TMPoE
-    std::vector<uint32> tmpValues = tmPoE->Read();
-    for (int i = 0; i < tmpValues.size(); i++)
+    if (useTMPoE)
     {
-        sensors["temp " + std::to_string(i+1)] = tmpValues[i];
+        std::vector<uint32> tmpValues = tmPoE->Read();
+        for (int i = 0; i < tmpValues.size(); i++)
+        {
+            sensors["temp " + std::to_string(i+1)] = tmpValues[i];
+        }
     }
-#endif
 
     auto currTime = Clock::now();
     //std::cerr << "Get Sensors Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;

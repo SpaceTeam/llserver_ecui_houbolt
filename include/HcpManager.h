@@ -5,8 +5,6 @@
 #ifndef TXV_ECUI_LLSERVER_HCPMANAGER_H
 #define TXV_ECUI_LLSERVER_HCPMANAGER_H
 
-#include "config.h"
-
 #include "HcpCommands.h"
 #include "Serial.h"
 #include "Mapping.h"
@@ -38,7 +36,7 @@ private:
 
     static bool CheckPort(uint8 port, Device_Type type);
 
-    static bool SetServo(json device, uint8 percent);
+    static bool SetServo(nlohmann::json device, uint8 percent);
 
     HcpManager();
 

@@ -7,6 +7,8 @@
 
 using namespace std;
 
+using nlohmann::json;
+
 std::map<Device_Type, std::string> Mapping::typeMap = {
 
         {Device_Type::SERVO, "servo"},

@@ -2,29 +2,38 @@
 // Created by luis on 1/12/20.
 //
 
-#include "Config_new.h"
+#include "Config.h"
+#include "utils.h"
+#include "common.h"
 
 json Config::data;
 
-Config::Config(std::string fileName) {
-    std::ifstream file(fileName);
-    std::string rawJSON, line;
-    while (getline(file, line)) {
-        rawJSON += line;
-    }
-    data = json::parse(rawJSON);
+void Config::Init(std::string filePath) {
+
+    std::cerr << "hello5" << std::endl;
+    data = json::parse(utils::loadFile(filePath));
+    std::cerr << "hello2" << std::endl;
 }
 
-std::variant<int, double, std::string, json> Config::getData(std::vector<std::string> keyChain) {
+std::variant<int, double, std::string, bool, json> Config::getData(std::vector<std::string> keyChain) {
     json obj = data;
     while (keyChain.size() > 0) {
-        obj = obj[keyChain[0]];
-        keyChain.erase(keyChain.begin());
+        if (utils::keyExists(obj, keyChain[0]))
+        {
+            obj = obj[keyChain[0]];
+            keyChain.erase(keyChain.begin());
+        }
+        else
+        {
+            Debug::error("in Config::getData, no object named %s found", keyChain[0].c_str());
+            obj = nullptr;
+            break;
+        }
     }
     return convertJSONtoType(obj);
 }
 
-std::variant<int, double, std::string, json> Config::getData(std::string keyChain) {
+std::variant<int, double, std::string, bool, json> Config::getData(std::string keyChain) {
     std::vector<std::string> keyVector;
     long unsigned int endPos;
     for (long unsigned int pos = 0; pos != std::string::npos; pos = endPos) {
@@ -38,10 +47,12 @@ std::variant<int, double, std::string, json> Config::getData(std::string keyChai
 }
 
 void Config::print() {
-    std::cout << std::setw(4) << data << std::endl;
+    std::cerr << std::setw(4) << data << std::endl;
 }
 
-std::variant<int, double, std::string, json> Config::convertJSONtoType(json object) {
+std::variant<int, double, std::string, bool, json> Config::convertJSONtoType(json object) {
+    if (object == nullptr)
+        return object;
     switch (object.type()) {
         case json::value_t::string:
             return object.get<std::string>();
@@ -54,6 +65,9 @@ std::variant<int, double, std::string, json> Config::convertJSONtoType(json obje
             break;
         case json::value_t::number_float:
             return object.get<double>();
+            break;
+        case json::value_t::boolean:
+            return object.get<bool>();
             break;
         default:
             return object;

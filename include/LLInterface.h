@@ -27,6 +27,8 @@ private:
 
     static bool isInitialized;
 
+    static bool useTMPoE;
+
     static bool isTransmittingSensors;
     static int32 warnlightStatus;
     static Timer* sensorTimer;

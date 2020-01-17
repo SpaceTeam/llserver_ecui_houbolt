@@ -12,78 +12,78 @@
 
 #include "Debug.h"
 
+#include "Config.h"
+
 std::recursive_mutex Debug::_outMutex;
 std::mutex Debug::outFileMutex;
 std::stringstream Debug::logStream;
 std::ofstream Debug::logFile;
 bool Debug::isLogFileOpen = false;
+bool Debug::debug = false;
 
-#ifdef LLSERVER_DEBUG
+void Debug::Init()
+{
+    debug = std::get<bool>(Config::getData("debug"));
+}
 
 int32 Debug::print(std::string fmt, ...)
 {
-    std::lock_guard<std::recursive_mutex> lock(_outMutex);
+    if (debug)
+    {
+        std::lock_guard<std::recursive_mutex> lock(_outMutex);
 
-    int printed;
-    va_list args;
+        int printed;
+        va_list args;
 
-    fmt.append("\n");
+        fmt.append("\n");
 
-    va_start(args, fmt);
-    printed = vprintf(fmt.c_str(), args);
-    va_end(args);
+        va_start(args, fmt);
+        printed = vprintf(fmt.c_str(), args);
+        va_end(args);
 
-    return printed;
-}
+        return printed;
+    }
 
-int32 Debug::info(std::string fmt, ...)
-{
-    int printed;
-    va_list args;
-
-    fmt = "info: " + fmt;
-    fmt.append("\n");
-
-    va_start(args, fmt);
-    printed = vprintf(fmt.c_str(), args);
-    va_end(args);
-
-    return printed;
-}
-
-int32 Debug::warning(std::string fmt, ...)
-{
-    int printed;
-    va_list args;
-
-    fmt = "warning: " + fmt;
-    fmt.append("\n");
-
-    va_start(args, fmt);
-    printed = vfprintf(stderr, fmt.c_str(), args);
-    va_end(args);
-
-    return printed;
-}
-
-#else
-
-int32 Debug::print(std::string fmt, ...)
-{
     return 0;
 }
 
 int32 Debug::info(std::string fmt, ...)
 {
-    return 0;
+    if (debug)
+    {
+        int printed;
+        va_list args;
+
+        fmt = "info: " + fmt;
+        fmt.append("\n");
+
+        va_start(args, fmt);
+        printed = vprintf(fmt.c_str(), args);
+        va_end(args);
+
+        return printed;
+    }
 }
 
 int32 Debug::warning(std::string fmt, ...)
 {
+    if (debug)
+    {
+        int printed;
+        va_list args;
+
+        fmt = "warning: " + fmt;
+        fmt.append("\n");
+
+        va_start(args, fmt);
+        printed = vfprintf(stderr, fmt.c_str(), args);
+        va_end(args);
+
+        return printed;
+    }
+
     return 0;
 }
-
-#endif
 
 void Debug::close()
 {

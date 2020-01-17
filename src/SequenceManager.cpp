@@ -10,6 +10,7 @@
 
 #include "utils.h"
 #include "LLInterface.h"
+#include "Config.h"
 
 //#include "spdlog/async.h"
 //#include "spdlog/sinks/basic_file_sink.h"
@@ -19,8 +20,14 @@ using json = nlohmann::json;
 using namespace std;
 
 bool SequenceManager::isRunning = false;
+bool SequenceManager::isAutoAbort = true;
 bool SequenceManager::isAbort = false;
 bool SequenceManager::isAbortRunning = false;
+
+int32 SequenceManager::sensorTransmissionInterval = 0;
+int32 SequenceManager::sensorSampleRate = 0;
+int32 SequenceManager::timerSyncInterval = 0;
+
 std::mutex SequenceManager::syncMtx;
 Timer* SequenceManager::timer;
 Timer* SequenceManager::sensorTimer;
@@ -40,6 +47,12 @@ void SequenceManager::init()
 {
     timer = new Timer();
     sensorTimer = new Timer();
+
+    isAutoAbort = std::get<bool>(Config::getData("autoabort"));
+
+    sensorTransmissionInterval = std::get<int>(Config::getData("WEBSERVER/sensor_transmission_interval"));
+    sensorSampleRate = std::get<int>(Config::getData("HCP/sensor_sample_rate"));
+    timerSyncInterval = std::get<int>(Config::getData("WEBSERVER/timer_sync_interval"));
 }
 
 
@@ -140,7 +153,7 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         EcuiSocket::SendJson("timer-start");
 
         LLInterface::EnableAllOutputDevices();
-        sensorTimer->startContinous(startTime, 1000000/SENSOR_SAMPLE_RATE, SequenceManager::GetSensors, SequenceManager::StopGetSensors);
+        sensorTimer->startContinous(startTime, 1000000/sensorSampleRate, SequenceManager::GetSensors, SequenceManager::StopGetSensors);
         timer->start(startTime, endTime, interval, SequenceManager::Tick, SequenceManager::StopSequence);
         //TODO: discuss if we need that feature
 //        if (HcpManager::EnableAllServos())
@@ -254,7 +267,7 @@ void SequenceManager::GetSensors(int64 microTime)
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                if (isRunning)
+                if (isRunning && isAutoAbort)
                 {
                     SequenceManager::AbortSequence(abortMsg);
                 }
@@ -264,7 +277,7 @@ void SequenceManager::GetSensors(int64 microTime)
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 string abortMsg = stream.str();
-                if (isRunning)
+                if (isRunning && isAutoAbort)
                 {
                     SequenceManager::AbortSequence(abortMsg);
                 }
@@ -275,7 +288,7 @@ void SequenceManager::GetSensors(int64 microTime)
 
     LogSensors(microTime, vals);
 
-    if (microTime % SENSOR_TRANSMISSION_INTERVAL == 0)
+    if (microTime % sensorTransmissionInterval == 0)
     {
 //        std::thread callbackThread(SequenceManager::TransmitSensors, microTime, sensors);
 //        callbackThread.detach();
@@ -306,7 +319,7 @@ void SequenceManager::Tick(int64 microTime)
     {
         Debug::print("Micro Seconds: %d", microTime);
     }
-    if (microTime % TIMER_SYNC_INTERVAL == 0)
+    if (microTime % timerSyncInterval == 0)
     {
         EcuiSocket::SendJson("timer-sync", ((microTime/1000) / 1000.0));
     }

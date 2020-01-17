@@ -8,8 +8,6 @@
 #include "common.h"
 #include "Socket.h"
 
-#define TMPoE_PORT 25557
-
 class TMPoE
 {
 

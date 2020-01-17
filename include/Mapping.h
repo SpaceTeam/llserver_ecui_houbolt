@@ -5,7 +5,6 @@
 #ifndef TXV_ECUI_LLSERVER_MAPPING_H
 #define TXV_ECUI_LLSERVER_MAPPING_H
 
-#include "config.h"
 #include "common.h"
 
 #include "json.hpp"

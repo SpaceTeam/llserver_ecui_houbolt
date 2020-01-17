@@ -30,11 +30,18 @@ class SequenceManager
 private:
 
     static bool isRunning;
+    static bool isAutoAbort;
     static bool isAbort;
     static bool isAbortRunning;
     static Timer* timer;
     static Timer* sensorTimer;
     static std::mutex syncMtx;
+
+    //config variables
+    static int32 sensorTransmissionInterval;
+    static int32 sensorSampleRate;
+    static int32 timerSyncInterval;
+    //----
 
     static json jsonSequence;
     static json jsonAbortSequence;

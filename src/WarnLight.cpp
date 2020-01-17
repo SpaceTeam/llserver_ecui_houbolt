@@ -3,11 +3,14 @@
 //
 
 #include "WarnLight.h"
+#include "Config.h"
 
 WarnLight::WarnLight(uint16 id)
 {
     this->id = id;
-    socket = new Socket(OnClose, WARNLIGHT_IP, WARNLIGHT_PORT, 1);
+    std::string ip = std::get<std::string>(Config::getData("WARNLIGHT/ip"));
+    int32 port = std::get<int>(Config::getData("WARNLIGHT/port"));
+    socket = new Socket(OnClose, ip, port, 1);
 }
 
 WarnLight::~WarnLight()

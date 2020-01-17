@@ -19,6 +19,7 @@ using namespace std;
 
 Socket::Socket(std::function<void()> onCloseCallback, std::string address, uint16 port, int32 tries)
 {
+    buffer = new uint8[size];
     this->onCloseCallback = onCloseCallback;
     Connect(address, port, tries);
 }
@@ -30,6 +31,7 @@ Socket::~Socket()
 
     close(socketfd);
     this->connectionActive = false;
+    delete buffer;
 }
 
 void Socket::Connect(std::string address, uint16 port, int32 tries)
@@ -103,7 +105,7 @@ std::string Socket::Recv()
     {
         int32 valread;
 
-        valread = recv(socketfd, buffer, SOCKET_MSG_SIZE, 0);
+        valread = recv(socketfd, buffer, size, 0);
 
         if (valread < 0)
         {
@@ -114,7 +116,7 @@ std::string Socket::Recv()
         msg = string((char*)buffer);
         cout << msg << endl;
 
-        std::fill(std::begin(buffer), std::end(buffer), 0);
+        std::fill(buffer, buffer+size-1, 0);
     }
     else
     {
@@ -130,7 +132,7 @@ std::vector<uint8> Socket::RecvBytes()
     {
         int32 valread;
 
-        valread = recv(socketfd, buffer, SOCKET_MSG_SIZE, 0);
+        valread = recv(socketfd, buffer, size, 0);
 
         if (valread < 0)
         {
@@ -141,7 +143,7 @@ std::vector<uint8> Socket::RecvBytes()
         msg.resize(valread);
         std::copy(buffer, buffer+valread, msg.begin());
 
-        std::fill(std::begin(buffer), std::end(buffer), 0);
+        std::fill(buffer, buffer+size-1, 0);
     }
     else
     {

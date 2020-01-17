@@ -2,8 +2,8 @@
 // Created by Markus on 2019-09-27.
 //
 
-#ifndef TXV_ECUI_LLSERVER_CONFIG_H
-#define TXV_ECUI_LLSERVER_CONFIG_H
+#ifndef TXV_ECUI_LLSERVER_CONFIG_OLD_H
+#define TXV_ECUI_LLSERVER_CONFIG_OLD_H
 
 //#define LLSERVER_DEBUG
 
@@ -50,4 +50,4 @@
 #define BATTERY_LOW_THRESHOLD 9900 //battery voltage below which low battery indication occurs
 #define BATTERY_VOLTAGE_HYSTERESIS 100
 
-#endif //TXV_ECUI_LLSERVER_CONFIG_NEW_H
+#endif //TXV_ECUI_LLSERVER_CONFIG_OLD_H

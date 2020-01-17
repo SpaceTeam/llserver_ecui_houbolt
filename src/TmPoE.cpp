@@ -3,13 +3,16 @@
 //
 
 #include "TmPoE.h"
+#include "Config.h"
 
 using namespace std;
 
 TMPoE::TMPoE(uint16 id, uint32 sweepFrequency)
 {
     this->id = id;
-    socket = new Socket(OnClose, TMPoE_IP, TMPoE_PORT, 1);
+    std::string ip = std::get<std::string>(Config::getData("TMPoE/ip"));
+    int32 port = std::get<int>(Config::getData("TMPoE/port"));
+    socket = new Socket(OnClose, ip, port, 1);
     if (socket->isConnectionActive())
     {
         currValues.resize(8, -1);

@@ -6,7 +6,7 @@
 #define TXV_ECUI_LLSERVER_SOCKET_H
 
 #include "common.h"
-#include "config.h"
+#include "Config.h"
 
 class Socket
 {
@@ -14,7 +14,8 @@ class Socket
 private:
 
     int32 socketfd;
-    uint8 buffer[SOCKET_MSG_SIZE];
+    int size = std::get<int>(Config::getData("socket_msg_size"));
+    uint8 *buffer;
 
     bool connectionActive = false;
     bool shallClose = false;

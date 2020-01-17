@@ -3,7 +3,8 @@
 //
 
 #include "utils.h"
-#include "config.h"
+#include "config_old.h"
+#include "Config.h"
 #include "HcpCommands.h"
 
 
@@ -28,15 +29,20 @@ typedef std::chrono::high_resolution_clock Clock;
 
 void HcpManager::init()
 {
-    hcpSerial = new Serial(HCP_DEVICE, HCP_BAUD_RATE);
-    mapping = new Mapping(HCP_MAPPING_FILE_PATH);
+    string hcpDevice = std::get<std::string>(Config::getData("HCP/device"));
+    int32 baudrate = std::get<int>(Config::getData("HCP/baudrate"));
+    string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
+    hcpSerial = new Serial(hcpDevice, baudrate);
+    mapping = new Mapping(mappingPath);
 }
 
 //TODO: check if connected
 void HcpManager::restart()
 {
     delete hcpSerial;
-    hcpSerial = new Serial(HCP_DEVICE, HCP_BAUD_RATE);
+    string hcpDevice = std::get<std::string>(Config::getData("HCP/device"));
+    int32 baudrate = std::get<int>(Config::getData("HCP/baudrate"));
+    hcpSerial = new Serial(hcpDevice, baudrate);
 }
 
 bool HcpManager::CheckPort(uint8 port, Device_Type type)

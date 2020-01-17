@@ -15,7 +15,6 @@
 #include <fstream>
 #include <sstream>
 
-#include "config.h"
 #include "common.h"
 
 class Debug {
@@ -27,11 +26,14 @@ private:
     static std::ofstream logFile;
     static bool isLogFileOpen;
 
+    static bool debug;
+
     //NOTE: NOT THREAD SAFE
     static void writeToFile();
 
 public:
-    //TODO: implement, only log, no output
+    static void Init();
+
     static void close();
     static void flush();
     static void changeOutputFile(std::string outFilePath);
