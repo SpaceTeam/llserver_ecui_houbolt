@@ -24,7 +24,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(LINUX)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)#spdlog::spdlog)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs)#spdlog::spdlog)
 else()
     target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)#spdlog::spdlog)
 endif()
