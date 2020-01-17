@@ -56,7 +56,7 @@ private:
     static std::map<std::string, Point[2]> sequenceIntervalMap;
     static std::map<std::string, double[2]> sensorsNominalRangeMap;
 
-    static void ChangeLogFile();
+    static void SetupLogging();
 
 //    static std::shared_ptr<spdlog::logger> async_file;
 

@@ -3,6 +3,7 @@
 //
 #include <iomanip>
 #include <sstream>
+#include <filesystem>
 
 #include "SequenceManager.h"
 #include "json.hpp"
@@ -95,7 +96,7 @@ void SequenceManager::AbortSequence(std::string abortMsg)
 
 }
 
-void SequenceManager::ChangeLogFile()
+void SequenceManager::SetupLogging()
 {
     time_t curr_time;
     tm * curr_tm;
@@ -105,16 +106,26 @@ void SequenceManager::ChangeLogFile()
     curr_tm = localtime(&curr_time);
 
     strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
-//    logging::configure({ {"type", "file"}, {"file_name", "logs/" + string(dateTime_string) + ".csv"}, {"reopen_interval", "1"} });
-//    logging::get_logger().setFilePath("logs/" + string(dateTime_string) + ".csv");
-    Debug::changeOutputFile("logs/" + string(dateTime_string) + ".csv");
+
+    string dirPath = "logs/" + string(dateTime_string);
+    filesystem::create_directory(dirPath);
+    Debug::changeOutputFile(dirPath + "/" + string(dateTime_string) + ".csv");
+
+    //save Sequence files
+    utils::saveFile(dirPath + "/Sequence.json", jsonSequence.dump(4));
+    utils::saveFile(dirPath + "/AbortSequence.json", jsonAbortSequence.dump(4));
+
+    filesystem::copy("config.json", dirPath + "/");
 }
 
 void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
 {
     if (!isRunning && !isAbortRunning)
     {
-        ChangeLogFile();
+        jsonSequence = jsonSeq;
+        jsonAbortSequence = jsonAbortSeq;
+
+        SetupLogging();
 
         LLInterface::BeepRed();
 
@@ -152,8 +163,6 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         Debug::log("Timestep;" + msg + "\n");
 
         isRunning = true;
-        jsonSequence = jsonSeq;
-        jsonAbortSequence = jsonAbortSeq;
 
         LoadInterpolationMap();
         LoadIntervalMap();
