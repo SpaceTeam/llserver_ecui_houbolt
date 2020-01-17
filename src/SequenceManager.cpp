@@ -128,6 +128,20 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
         }
         msg += "Status;";
         msg += "SequenceTime;";
+        for (auto rangeName : jsonSeq["globals"]["ranges"])
+        {
+            cerr << rangeName << endl;
+            if (rangeName.type() == json::value_t::string)
+            {
+                msg += (string)rangeName + "Min;";
+                msg += (string)rangeName + "Max;";
+            }
+            else
+            {
+                Debug::error("range name in sequence globals not a string");
+            }
+
+        }
         for (auto item : outputNames)
         {
             msg += item + ";";
@@ -486,9 +500,18 @@ void SequenceManager::Tick(int64 microTime)
             syncMtx.lock();
             if (isRunning)
             {
+                //log nominal ranges
+                for (const auto sensor : sensorsNominalRangeMap)
+                {
+                    msg += to_string(sensor.second[0]) + ";";
+                    msg += to_string(sensor.second[1]) + ";";
+                }
 
+                bool shallExec;
                 for (const auto &seqItem : sequenceIntervalMap)
                 {
+                    shallExec = true;
+
                     Point prev = sequenceIntervalMap[seqItem.first][0];
                     Point next = sequenceIntervalMap[seqItem.first][1];
 
@@ -518,18 +541,23 @@ void SequenceManager::Tick(int64 microTime)
                             }
                             case Interpolation::NONE:
                             default:
-                                continue;
+                                nextValue = (uint8) prev.y;
+                                shallExec = false;
                         }
                     }
 
                     msg += to_string(nextValue) + ";";
 
-                    LLInterface::ExecCommand(seqItem.first, nextValue);
+                    if (shallExec)
+                    {
+                        LLInterface::ExecCommand(seqItem.first, nextValue);
+                    }
                     if (threadCounter > 1)
                     {
                         Debug::warning("writing " + seqItem.first + " with value %d at micro time: %d", nextValue,
                                      microTime);
                     }
+
                 }
             }
             syncMtx.unlock();

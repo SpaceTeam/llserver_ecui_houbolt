@@ -61,7 +61,7 @@ void Socket::Connect(std::string address, uint16 port, int32 tries)
         if (connect(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
         {
             printf("\nWaiting for connection...\n");
-            if (totalTries > 1)
+            if (totalTries > 1 || totalTries < 0)
             {
                 sleep(3);
             }
