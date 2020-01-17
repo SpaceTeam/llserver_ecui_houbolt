@@ -63,6 +63,8 @@ int32 Debug::info(std::string fmt, ...)
 
         return printed;
     }
+
+	return 0;
 }
 
 int32 Debug::warning(std::string fmt, ...)
