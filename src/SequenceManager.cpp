@@ -229,7 +229,7 @@ void SequenceManager::LoadIntervalMap()
                 string timeStr = actionItem["timestamp"];
                 if (timeStr.compare("START") == 0)
                 {
-                    time = utils::toMicros(jsonSequence["globals"]["startTime"]);
+                    time = jsonSequence["globals"]["startTime"];
 
                     int64 timestampMicros = utils::toMicros(time);
                     for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
@@ -241,11 +241,12 @@ void SequenceManager::LoadIntervalMap()
                             sequenceIntervalMap[it.key()][1].x = timestampMicros;
                             sequenceIntervalMap[it.key()][1].y = (uint8)it.value();
 
-                            Debug::print("Interval created for " + it.key());
-                            Debug::print("prev: x: %d, y: %d", sequenceIntervalMap[it.key()][0].x, sequenceIntervalMap[it.key()][0].y);
-                            Debug::print("next: x: %d, y: %d", sequenceIntervalMap[it.key()][1].x, sequenceIntervalMap[it.key()][1].y);
+                            Debug::info("Interval created for " + it.key());
+//                            cerr << "prev: x: " << sequenceIntervalMap[it.key()][0].x << ", y: " << sequenceIntervalMap[it.key()][0].y << endl;
+//                            cerr << "next: x: " << sequenceIntervalMap[it.key()][1].x << ", y: " << sequenceIntervalMap[it.key()][1].y << endl;
                         }
                     }
+                    return;
                 }
             }
 
@@ -283,6 +284,18 @@ void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
     if (!isRunning)
     {
         msg += "Auto Abort;";
+
+        //TODO: think about a better solution to log on abort
+        msg += to_string(secs) + ";";
+        for (const auto sensor : sensorsNominalRangeMap)
+        {
+            msg += to_string(sensor.second[0]) + ";";
+            msg += to_string(sensor.second[1]) + ";";
+        }
+        for (auto it = jsonAbortSequence["actions"].begin(); it != jsonAbortSequence["actions"].end(); ++it)
+        {
+            msg += to_string(it.value()) + ";";
+        }
     }
     else
     {
@@ -291,6 +304,8 @@ void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
     //async_file->info(to_string(microTime) + ";" + msg);
     //logging::INFO("\n" + to_string(secs) + ";" + msg);
     Debug::log("\n" + to_string(secs) + ";" + msg);
+
+
 }
 
 void SequenceManager::StopGetSensors()
@@ -495,14 +510,19 @@ void SequenceManager::Tick(int64 microTime)
         }
     }
     std::chrono::time_point<std::chrono::high_resolution_clock> beforeLogging;
+    //findNext = false;
     if (findNext)
     {
         //not all values found yet; microTimes > endTime;
-        Debug::warning("findNext still true at micro time: %d", microTime);
+        Debug::error("findNext still true at micro time: %ld", microTime);
+        for (auto item : namesUpdated)
+        {
+            UpdateIntervalMap(item.first, microTime, (uint8)item.second);
+        }
 
     }
-    else
-    {
+    //else
+    //{
         if (isRunning)
         {
             string msg = to_string(microTime / 1000000.0) + ";";
@@ -525,6 +545,7 @@ void SequenceManager::Tick(int64 microTime)
                     Point next = sequenceIntervalMap[seqItem.first][1];
 
                     uint8 nextValue;
+
                     if (prev.x == microTime)
                     {
                         nextValue = (uint8) prev.y;
@@ -551,7 +572,7 @@ void SequenceManager::Tick(int64 microTime)
                             case Interpolation::NONE:
                             default:
                                 nextValue = (uint8) prev.y;
-                                shallExec = true;
+                                shallExec = false;
                         }
                     }
 
@@ -563,7 +584,7 @@ void SequenceManager::Tick(int64 microTime)
                     }
                     if (threadCounter > 1)
                     {
-                        Debug::warning("writing " + seqItem.first + " with value %d at micro time: %d", nextValue,
+                        Debug::warning("writing " + seqItem.first + " with value %d at micro time: %ld", nextValue,
                                      microTime);
                     }
 
@@ -573,7 +594,7 @@ void SequenceManager::Tick(int64 microTime)
 		    beforeLogging = Clock::now();
             Debug::log(msg);
         }
-    }
+    //}
     auto currTime = Clock::now();
     if (threadCounter > 80)
     {
@@ -628,6 +649,7 @@ void SequenceManager::StartAbortSequence()
         isAbortRunning = true;
         usleep(50000);
         syncMtx.lock();
+
         for (auto it = jsonAbortSequence["actions"].begin(); it != jsonAbortSequence["actions"].end(); ++it)
         {
             if (it.key().compare("timestamp") != 0)
