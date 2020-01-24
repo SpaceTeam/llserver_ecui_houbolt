@@ -551,7 +551,7 @@ void SequenceManager::Tick(int64 microTime)
                             case Interpolation::NONE:
                             default:
                                 nextValue = (uint8) prev.y;
-                                shallExec = false;
+                                shallExec = true;
                         }
                     }
 
