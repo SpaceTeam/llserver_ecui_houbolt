@@ -20,7 +20,7 @@ using namespace std;
 Serial* HcpManager::hcpSerial;
 Mapping* HcpManager::mapping;
 //TODO: set default position at the beginning instead
-uint16 HcpManager::lastServoPosArr[SERVO_COUNT] = {1000};
+uint16 HcpManager::lastServoPosArr[SERVO_COUNT] = {0};
 bool HcpManager::servoEnabledArr[SERVO_COUNT] = {false};
 
 std::recursive_mutex HcpManager::serialMtx;
@@ -34,6 +34,23 @@ void HcpManager::init()
     string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
     hcpSerial = new Serial(hcpDevice, baudrate);
     mapping = new Mapping(mappingPath);
+
+    for (uint8 i = 0; i < SERVO_COUNT; i++)
+    {
+        json device = mapping->GetDeviceByPort(i, Device_Type::SERVO);
+        if (device != nullptr)
+        {
+            int16 closedPos;
+
+            closedPos = device["endpoints"][0];
+
+            SetServoRaw(i, closedPos);
+        }
+        else
+        {
+            Debug::error("Servo Port %d not valid in mapping", i);
+        }
+    }
 }
 
 //TODO: check if connected
