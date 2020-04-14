@@ -105,7 +105,7 @@ std::map<std::string, double> LLInterface::GetAllSensors()
     }
 
     auto currTime = Clock::now();
-    //std::cerr << "Get Sensors Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;
+    std::cerr << "Get Sensors Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;
 
     return sensors;
 }
