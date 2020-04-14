@@ -23,17 +23,25 @@ Mapping* HcpManager::mapping;
 uint16 HcpManager::lastServoPosArr[SERVO_COUNT] = {0};
 bool HcpManager::servoEnabledArr[SERVO_COUNT] = {false};
 
+std::mutex HcpManager::sensorMtx;
+Timer *HcpManager::sensorTimer;
+std::map<std::string, double> HcpManager::sensorBuffer;
+
 std::recursive_mutex HcpManager::serialMtx;
 
 typedef std::chrono::high_resolution_clock Clock;
 
-void HcpManager::init()
+void HcpManager::Init()
 {
     string hcpDevice = std::get<std::string>(Config::getData("HCP/device"));
     int32 baudrate = std::get<int>(Config::getData("HCP/baudrate"));
     string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
     hcpSerial = new Serial(hcpDevice, baudrate);
     mapping = new Mapping(mappingPath);
+
+    sensorTimer = new Timer();
+    //TODO: this is only valid for the hedgehog llserver, change for other platforms (analog count doesn't have to
+    //be the same as digital count) and + 1 for battery value
 
     for (uint8 i = 0; i < SERVO_COUNT; i++)
     {
@@ -54,12 +62,19 @@ void HcpManager::init()
 }
 
 //TODO: check if connected
-void HcpManager::restart()
+void HcpManager::Restart()
 {
     delete hcpSerial;
     string hcpDevice = std::get<std::string>(Config::getData("HCP/device"));
     int32 baudrate = std::get<int>(Config::getData("HCP/baudrate"));
     hcpSerial = new Serial(hcpDevice, baudrate);
+}
+
+void HcpManager::Destroy()
+{
+    delete hcpSerial;
+    delete mapping;
+    delete sensorTimer;
 }
 
 bool HcpManager::CheckPort(uint8 port, Device_Type type)
@@ -129,6 +144,110 @@ bool HcpManager::CheckPort(uint8 port, Device_Type type)
     return false;
 }
 
+void HcpManager::StartSensorFetch(uint32 sampleRate)
+{
+    sensorTimer->startContinous(0, 1000000/sampleRate, FetchSensors);
+}
+
+//NOTE: at this point, writing the sensor buffer doesn't occur in one lock segment, meaning that it can be the case
+//that some sensor values of the controller get logged before the other ones, although they are read in the same timer tick
+void HcpManager::FetchSensors(uint64 microTime)
+{
+
+    json analogs = mapping->GetDevices(Device_Type::ANALOG);
+    json digitals = mapping->GetDevices(Device_Type::DIGITAL);
+    if (analogs != nullptr)
+    {
+        for (auto it = analogs.begin(); it != analogs.end(); ++it)
+        {
+            if (utils::keyExists(it.value(), "loadCells"))
+            {
+                int32* cells = GetLoadCells();
+
+                if (utils::keyExists(it.value(), "maps"))
+                {
+                    Debug::info("mapping thrust values");
+
+                    json maps = it.value()["maps"];
+
+                    if (maps.type() == json::value_t::array)
+                    {
+                        double mappedValues[HCP_THRUST_SENSORS_COUNT] = {-1.0};
+                        for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                        {
+                            mappedValues[i] = cells[i];
+                        }
+
+                        for (int i = 0; i < maps.size(); i++)
+                        {
+                            double before = mappedValues[i];
+                            mappedValues[i] = ((double) cells[i] * (double) maps[i]["k"]) + (double) maps[i]["d"];
+
+                            Debug::info(it.key() + " %d from %d to %d", i+1, before, mappedValues[i]);
+                        }
+
+                        sensorMtx.lock();
+                        for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                        {
+                            sensorBuffer[it.key() + " " + to_string(i+1)] = mappedValues[i];
+                        }
+                        sensorMtx.unlock();
+                    }
+                    else
+                    {
+                        Debug::error("maps field in mapping is not an array");
+                    }
+
+                }
+                else
+                {
+                    sensorMtx.lock();
+                    for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                    {
+                        sensorBuffer[it.key() + " " + to_string(i+1)] = cells[i];
+                    }
+                    sensorMtx.unlock();
+                }
+
+                delete cells;
+
+            }
+            else
+            {
+                sensorMtx.lock();
+                    sensorBuffer[it.key()] = GetAnalog(it.key());
+                sensorMtx.unlock();
+            }
+
+        }
+
+
+    }
+    else
+    {
+        Debug::error("No analogs found");
+    }
+
+    if (digitals != nullptr)
+    {
+        for (auto it = digitals.begin(); it != digitals.end(); ++it)
+        {
+            sensorMtx.lock();
+                sensorBuffer[it.key()] = GetDigital(it.key());
+            sensorMtx.unlock();
+        }
+    }
+    else
+    {
+        Debug::error("No digitals found");
+    }
+}
+
+void HcpManager::StopSensorFetch()
+{
+    sensorTimer->stop();
+}
+
 std::vector<std::string> HcpManager::GetAllSensorNames()
 {
     vector<std::string> sensorNames;
@@ -177,89 +296,9 @@ std::map<std::string, double> HcpManager::GetAllSensors()
 {
     map<std::string, double> sensors;
 
-    json analogs = mapping->GetDevices(Device_Type::ANALOG);
-    json digitals = mapping->GetDevices(Device_Type::DIGITAL);
-    if (analogs != nullptr)
-    {
+    std::lock_guard<std::mutex> lock(sensorMtx);
 
-
-
-        for (auto it = analogs.begin(); it != analogs.end(); ++it)
-        {
-            if (utils::keyExists(it.value(), "loadCells"))
-            {
-
-                int32* cells = GetLoadCells();
-
-                if (utils::keyExists(it.value(), "maps"))
-                {
-                    Debug::info("mapping thrust values");
-
-                    json maps = it.value()["maps"];
-
-                    if (maps.type() == json::value_t::array)
-                    {
-                        double mappedValues[HCP_THRUST_SENSORS_COUNT] = {-1.0};
-                        for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
-                        {
-                            mappedValues[i] = cells[i];
-                        }
-
-                        for (int i = 0; i < maps.size(); i++)
-                        {
-                            double before = mappedValues[i];
-                            mappedValues[i] = ((double) cells[i] * (double) maps[i]["k"]) + (double) maps[i]["d"];
-
-                            Debug::info(it.key() + " %d from %d to %d", i+1, before, mappedValues[i]);
-                        }
-
-                        for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
-                        {
-                            sensors[it.key() + " " + to_string(i+1)] = mappedValues[i];
-                        }
-                    }
-                    else
-                    {
-                        Debug::error("maps field in mapping is not an array");
-                    }
-
-                }
-                else
-                {
-                    for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
-                    {
-                        sensors[it.key() + " " + to_string(i+1)] = cells[i];
-                    }
-                }
-
-                delete cells;
-
-            }
-            else
-            {
-                sensors[it.key()] = GetAnalog(it.key());
-            }
-
-        }
-
-
-    }
-    else
-    {
-        Debug::error("No analogs found");
-    }
-
-    if (digitals != nullptr)
-    {
-        for (auto it = digitals.begin(); it != digitals.end(); ++it)
-        {
-            sensors[it.key()] = GetDigital(it.key());
-        }
-    }
-    else
-    {
-        Debug::error("No digitals found");
-    }
+    sensors.insert(sensorBuffer.begin(), sensorBuffer.end());
 
     return sensors;
 }
@@ -822,27 +861,6 @@ int32 *HcpManager::GetLoadCells()
 
                 Debug::info("REP Cell %d: %d", i, value[i]);
             }
-
-//            uint8 signByte1 = 0, signByte2 = 0, signByte3 = 0;
-//            if (rep->payload[0] >= 0x80)
-//            {
-//                signByte1 = 0xFF;
-//            }
-//            if (rep->payload[3] >= 0x80)
-//            {
-//                signByte2 = 0xFF;
-//            }
-//            if (rep->payload[6] >= 0x80)
-//            {
-//                signByte3 = 0xFF;
-//            }
-//            value[0] = signByte1 << 24 | (rep->payload[0] << 16) | (rep->payload[1] << 8) | rep->payload[2];
-//            value[1] = signByte2 << 24 | (rep->payload[3] << 16) | (rep->payload[4] << 8) | rep->payload[5];
-//            value[2] = signByte3 << 24 | (rep->payload[6] << 16) | (rep->payload[7] << 8) | rep->payload[8];
-//
-//            Debug::info("REP Cell 1: %d", value[0]);
-//            Debug::info("REP Cell 2: %d", value[1]);
-//            Debug::info("REP Cell 3: %d", value[2]);
         }
         else
         {

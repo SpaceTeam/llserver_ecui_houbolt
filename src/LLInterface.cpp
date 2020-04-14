@@ -5,6 +5,7 @@
 #include "HcpManager.h"
 #include "EcuiSocket.h"
 #include "Timer.h"
+#include "Config.h"
 
 #include "LLInterface.h"
 
@@ -30,7 +31,8 @@ void LLInterface::Init()
 {
     if (!isInitialized)
     {
-        HcpManager::init();
+        HcpManager::Init();
+        HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
         sensorTimer = new Timer();
         warnLight = new WarnLight(0);
 
@@ -55,6 +57,8 @@ void LLInterface::Destroy()
         {
             delete tmPoE;
         }
+        HcpManager::StopSensorFetch();
+        HcpManager::Destroy();
     }
 }
 

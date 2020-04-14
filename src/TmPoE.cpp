@@ -7,7 +7,7 @@
 
 using namespace std;
 
-TMPoE::TMPoE(uint16 id, uint32 sweepFrequency)
+TMPoE::TMPoE(uint16 id, uint32 sampleRate)
 {
     this->id = id;
     std::string ip = std::get<std::string>(Config::getData("TMPoE/ip"));
@@ -16,7 +16,7 @@ TMPoE::TMPoE(uint16 id, uint32 sweepFrequency)
     if (socket->isConnectionActive())
     {
         currValues.resize(8, -1);
-        asyncListenThread = new thread(AsyncListen, this, sweepFrequency);
+        asyncListenThread = new thread(AsyncListen, this, sampleRate);
         asyncListenThread->detach();
     }
 }
@@ -27,9 +27,9 @@ TMPoE::~TMPoE()
     delete socket;
 }
 
-void TMPoE::AsyncListen(TMPoE *self, uint32 sweepFrequency)
+void TMPoE::AsyncListen(TMPoE *self, uint32 sampleRate)
 {
-    uint32 sleepDuration = 1.0/sweepFrequency*1000000.0;
+    uint32 sleepDuration = 1.0/sampleRate*1000000.0;
     while(!self->shallClose)
     {
         self->socket->Send("temp\n");

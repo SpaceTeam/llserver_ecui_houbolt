@@ -13,7 +13,7 @@
 namespace utils
 {
 
-int64 toMicros(float val);
+int64 toMicros(double val);
 
 std::string loadFile(std::string filePath);
 void saveFile(std::string filePath, std::string content);

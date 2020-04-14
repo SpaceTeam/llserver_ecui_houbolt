@@ -8,6 +8,7 @@
 #include "HcpCommands.h"
 #include "Serial.h"
 #include "Mapping.h"
+#include "Timer.h"
 #include "json.hpp"
 
 typedef enum class battery_status_e
@@ -34,8 +35,12 @@ private:
     static bool servoEnabledArr[];
     static std::recursive_mutex serialMtx;
 
-    static bool CheckPort(uint8 port, Device_Type type);
+    static std::mutex sensorMtx;
+    static Timer *sensorTimer;
+    static std::map<std::string, double> sensorBuffer;
 
+    static bool CheckPort(uint8 port, Device_Type type);
+    static void FetchSensors(uint64 microTime);
     static bool SetServo(nlohmann::json device, uint8 percent);
 
     HcpManager();
@@ -43,8 +48,12 @@ private:
     ~HcpManager();
 public:
 
-    static void init();
-    static void restart();
+    static void Init();
+    static void Restart();
+    static void Destroy();
+
+    static void StartSensorFetch(uint32 sampleRate);
+    static void StopSensorFetch();
 
     static std::vector<std::string> GetAllSensorNames();
     static std::map<std::string, double> GetAllSensors();

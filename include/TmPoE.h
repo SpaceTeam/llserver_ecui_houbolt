@@ -25,10 +25,10 @@ private:
     bool shallClose = false;
 
     static void OnClose();
-    static void AsyncListen(TMPoE *self, uint32 sweepFrequency);
+    static void AsyncListen(TMPoE *self, uint32 sampleRate);
 public:
 
-    TMPoE(uint16 id, uint32 sweepFrequency);
+    TMPoE(uint16 id, uint32 sampleRate);
 
     ~TMPoE();
 

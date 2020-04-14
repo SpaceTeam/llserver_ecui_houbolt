@@ -9,7 +9,7 @@ namespace utils
 {
 
 
-    int64 toMicros(float val)
+    int64 toMicros(double val)
     {
         return (int64) (val * 1000000);
     }

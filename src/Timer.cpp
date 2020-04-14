@@ -42,6 +42,16 @@ Timer::Timer()
 
 }
 
+Timer::~Timer()
+{
+
+    if (this->isRunning)
+    {
+        stop();
+    }
+
+}
+
 void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback)
 {
     if (!this->isRunning)

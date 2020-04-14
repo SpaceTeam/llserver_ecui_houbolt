@@ -44,6 +44,7 @@ void LLController::Destroy()
     SequenceManager::AbortSequence();
     EcuiSocket::Destroy();
     Debug::close();
+    LLInterface::Destroy();
 }
 
 void LLController::Abort()

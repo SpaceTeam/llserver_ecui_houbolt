@@ -32,13 +32,14 @@ private:
     static void tick(Timer* self, uint64 interval, int64 endTime, int64 microTime);
     static void highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime, int64 microTime);
     static void highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int64 microTime);
+    static void nullStopCallback() {};
 
 public:
 
     Timer();
 
-    void start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback);
-    void startContinous(int64 startTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback);
+    void start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback = nullStopCallback);
+    void startContinous(int64 startTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback = nullStopCallback);
     void stop();
 
 
