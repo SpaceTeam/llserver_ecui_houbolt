@@ -230,12 +230,12 @@ void HcpManager::FetchSensors(uint64 microTime)
 
     if (digitals != nullptr)
     {
+        sensorMtx.lock();
         for (auto it = digitals.begin(); it != digitals.end(); ++it)
         {
-            sensorMtx.lock();
-                sensorBuffer[it.key()] = GetDigital(it.key());
-            sensorMtx.unlock();
+            sensorBuffer[it.key()] = GetDigital(it.key());
         }
+        sensorMtx.unlock();
     }
     else
     {
