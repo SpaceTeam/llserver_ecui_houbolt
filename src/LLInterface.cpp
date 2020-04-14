@@ -91,7 +91,7 @@ std::vector<std::string> LLInterface::GetAllSensorNames()
 
 std::map<std::string, double> LLInterface::GetAllSensors()
 {
-    auto startTime = Clock::now();
+    //auto startTime = Clock::now();
     std::map<std::string, double> sensors;
     sensors = HcpManager::GetAllSensors();
 
@@ -104,8 +104,8 @@ std::map<std::string, double> LLInterface::GetAllSensors()
         }
     }
 
-    auto currTime = Clock::now();
-    std::cerr << "Get Sensors Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;
+    //auto currTime = Clock::now();
+    //std::cerr << "Get Sensors Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;
 
     return sensors;
 }

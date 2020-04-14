@@ -5,7 +5,7 @@
   "socket_msg_size": 65536,
   "mapping_path": "mapping/hcpMapping.json",
   "LOGGING": {
-    "sensor_log_rate": 1000
+    "sensor_log_rate": 100
   },
   "HCP": {
     "device": "/dev/serial0",
