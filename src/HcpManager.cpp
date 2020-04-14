@@ -296,7 +296,7 @@ std::map<std::string, double> HcpManager::GetAllSensors()
 {
     map<std::string, double> sensors;
 
-    std::lock_guard<std::mutex> lock(sensorMtx);
+    //std::lock_guard<std::mutex> lock(sensorMtx);
 
     sensors.insert(sensorBuffer.begin(), sensorBuffer.end());
 
