@@ -4,6 +4,9 @@
   "useTMPoE": false,
   "socket_msg_size": 65536,
   "mapping_path": "mapping/hcpMapping.json",
+  "LOGGING": {
+    "sensor_log_rate": 1000
+  },
   "HCP": {
     "device": "/dev/serial0",
     "baudrate": 115200,

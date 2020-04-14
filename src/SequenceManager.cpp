@@ -53,7 +53,7 @@ void SequenceManager::init()
     isAutoAbort = std::get<bool>(Config::getData("autoabort"));
 
     sensorTransmissionInterval = std::get<int>(Config::getData("WEBSERVER/sensor_transmission_interval"));
-    sensorSampleRate = std::get<int>(Config::getData("HCP/sensor_sample_rate"));
+    sensorSampleRate = std::get<int>(Config::getData("LOGGING/sensor_log_rate"));
     timerSyncInterval = std::get<int>(Config::getData("WEBSERVER/timer_sync_interval"));
 }
 
