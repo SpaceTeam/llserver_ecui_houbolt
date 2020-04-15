@@ -220,36 +220,35 @@ void SequenceManager::LoadIntervalMap()
 {
     for (auto dataItem : jsonSequence["data"])
     {
-        for (auto actionItem : dataItem["actions"])
+
+        if (dataItem["timestamp"].type() == json::value_t::string)
         {
-
-            float time;
-            if (actionItem["timestamp"].type() == json::value_t::string)
+            double timeCmd = 0.0;
+            string timeStr = dataItem["timestamp"];
+            if (timeStr.compare("START") == 0)
             {
-                string timeStr = actionItem["timestamp"];
-                if (timeStr.compare("START") == 0)
+                timeCmd = jsonSequence["globals"]["startTime"];
+                json actionItem = dataItem["actions"][0];
+                double time = actionItem["timestamp"];
+                time += timeCmd;
+
+                int64 timestampMicros = utils::toMicros(time);
+                for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
                 {
-                    time = jsonSequence["globals"]["startTime"];
-
-                    int64 timestampMicros = utils::toMicros(time);
-                    for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
+                    if (it.key().compare("timestamp") != 0 && it.key().compare("sensorsNominalRange") != 0)
                     {
-                        if (it.key().compare("timestamp") != 0 && it.key().compare("sensorsNominalRange") != 0)
-                        {
-                            sequenceIntervalMap[it.key()][0].x = timestampMicros;
-                            sequenceIntervalMap[it.key()][0].y = (uint8)it.value();
-                            sequenceIntervalMap[it.key()][1].x = timestampMicros;
-                            sequenceIntervalMap[it.key()][1].y = (uint8)it.value();
+                        sequenceIntervalMap[it.key()][0].x = timestampMicros;
+                        sequenceIntervalMap[it.key()][0].y = (uint8) it.value();
+                        sequenceIntervalMap[it.key()][1].x = timestampMicros;
+                        sequenceIntervalMap[it.key()][1].y = (uint8) it.value();
 
-                            Debug::info("Interval created for " + it.key());
-//                            cerr << "prev: x: " << sequenceIntervalMap[it.key()][0].x << ", y: " << sequenceIntervalMap[it.key()][0].y << endl;
-//                            cerr << "next: x: " << sequenceIntervalMap[it.key()][1].x << ", y: " << sequenceIntervalMap[it.key()][1].y << endl;
-                        }
+                        Debug::info("Interval created for " + it.key());
+    //                            cerr << "prev: x: " << sequenceIntervalMap[it.key()][0].x << ", y: " << sequenceIntervalMap[it.key()][0].y << endl;
+    //                            cerr << "next: x: " << sequenceIntervalMap[it.key()][1].x << ", y: " << sequenceIntervalMap[it.key()][1].y << endl;
                     }
-                    return;
                 }
+                return;
             }
-
 
         }
     }
