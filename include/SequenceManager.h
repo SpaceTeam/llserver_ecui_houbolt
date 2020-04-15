@@ -68,6 +68,8 @@ private:
     static void LogSensors(int64 microTime, std::vector<double > sensors);
     static void StopGetSensors();
     static void GetSensors(int64 microTime);
+
+    static double GetTimestamp(json obj);
     static void Tick(int64 microTime);
 
     static void StopAbortSequence();

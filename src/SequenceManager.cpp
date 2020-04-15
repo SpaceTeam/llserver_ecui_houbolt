@@ -361,6 +361,37 @@ void SequenceManager::GetSensors(int64 microTime)
 
 }
 
+double SequenceManager::GetTimestamp(json obj)
+{
+    //convert timestamp of action
+    double time = 0.0;
+    if (utils::keyExists(obj, "timestamp"))
+    {
+        if (obj["timestamp"].type() == json::value_t::string)
+        {
+            string timeStr = obj["timestamp"];
+            if (timeStr.compare("START") == 0)
+            {
+                time = jsonSequence["globals"]["startTime"];
+            }
+            else if (timeStr.compare("END") == 0)
+            {
+                time = jsonSequence["globals"]["endTime"];
+            }
+        }
+        else
+        {
+            time = obj["timestamp"];
+        }
+    }
+    else
+    {
+        Debug::error("in GetTimestamp: timestamp key of object does not exist");
+    }
+
+    return time;
+}
+
 void SequenceManager::Tick(int64 microTime)
 {
     threadCounter++;
@@ -397,64 +428,29 @@ void SequenceManager::Tick(int64 microTime)
     //TODO: this is very inefficient right now; make it so actions can be accessed by timestamp as key
     for (auto dataItem : jsonSequence["data"])
     {
-//        float currGroupTimestamp = 0.0;
-//        if (utils::keyExists(dataItem, "timestamp"))
-//        {
-//            currGroupTimestamp = dataItem["timestamp"];
-//            if (dataItem["timestamp"].type() == json::value_t::string)
-//            {
-//                string timeStr = dataItem["timestamp"];
-//                if (timeStr.compare("START") == 0)
-//                {
-//                    currGroupTimestamp = jsonSequence["globals"]["startTime"];
-//                }
-//                else if (timeStr.compare("END") == 0)
-//                {
-//                    currGroupTimestamp = jsonSequence["globals"]["endTime"];
-//                }
-//            }
-//            else
-//            {
-//                currGroupTimestamp = dataItem["timestamp"];
-//            }
-//        }
-//        else
-//        {
-//            Debug::error("No timestamp key in group found");
-//            break;
-//        }
-//
-//        for (auto actionItem : dataItem["actions"])
-//        {
-//
-//            float time = 0.0;
-//            if (actionItem["timestamp"].type() != json::value_t::number_float)
-//            {
-//                Debug::error("timestamp of action must be float");
-//                break;
-//            }
+        double timeCmd = GetTimestamp(dataItem);
+        int64 timestampCmdMicros = utils::toMicros(timeCmd);
+
         for (auto actionItem : dataItem["actions"])
         {
-
-            float time = 0.0;
+            //convert timestamp of action
             if (actionItem["timestamp"].type() == json::value_t::string)
             {
-                string timeStr = actionItem["timestamp"];
-                if (timeStr.compare("START") == 0)
-                {
-                    time = jsonSequence["globals"]["startTime"];
-                }
-                else if (timeStr.compare("END") == 0)
-                {
-                    time = jsonSequence["globals"]["endTime"];
-                }
+                Debug::error("no strings in actionitems allowed");
+                SequenceManager::AbortSequence("no strings as timestamp in action items allowed");
+                return;
             }
-            else
+            double time = GetTimestamp(actionItem);
+            int64 timestampMicros = utils::toMicros(time);
+            if (timestampMicros < 0)
             {
-                time = actionItem["timestamp"];
+                Debug::error("timestamp in action must be positive");
+                SequenceManager::AbortSequence("timestamp in action must be positive");
+                return;
             }
 
-            int64 timestampMicros = utils::toMicros(time);
+            //convert to absolute time
+            timestampMicros += timestampCmdMicros;
             if (timestampMicros == microTime)
             {
                 Debug::print("timestamp | %d", time);
