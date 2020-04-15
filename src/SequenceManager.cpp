@@ -38,6 +38,7 @@ int32 threadCounter = 0;
 
 json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
+string SequenceManager::comments = "";
 
 std::map<std::string, Interpolation> SequenceManager::interpolationMap;
 std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
@@ -114,16 +115,18 @@ void SequenceManager::SetupLogging()
     //save Sequence files
     utils::saveFile(dirPath + "/Sequence.json", jsonSequence.dump(4));
     utils::saveFile(dirPath + "/AbortSequence.json", jsonAbortSequence.dump(4));
+    utils::saveFile(dirPath + "/comments.txt", comments);
 
     filesystem::copy("config.json", dirPath + "/");
 }
 
-void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq)
+void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string comments)
 {
     if (!isRunning && !isAbortRunning)
     {
         jsonSequence = jsonSeq;
         jsonAbortSequence = jsonAbortSeq;
+        SequenceManager::comments = comments;
 
         SetupLogging();
 

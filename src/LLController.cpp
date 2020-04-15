@@ -66,7 +66,7 @@ void LLController::OnECUISocketRecv(json msg)
             //send(sock, strmsg.c_str(), strmsg.size(), 0);
             json seq = msg["content"][0];
             json abortSeq = msg["content"][1];
-            SequenceManager::StartSequence(msg["content"][0], msg["content"][1]);
+            SequenceManager::StartSequence(msg["content"][0], msg["content"][1], msg["content"][2]);
         }
         else if (type.compare("abort") == 0)
         {

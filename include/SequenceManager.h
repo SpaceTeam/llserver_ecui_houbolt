@@ -51,6 +51,7 @@ private:
 
     static json jsonSequence;
     static json jsonAbortSequence;
+    static std::string comments;
 
     static std::map<std::string, Interpolation> interpolationMap;
     static std::map<std::string, Point[2]> sequenceIntervalMap;
@@ -85,7 +86,7 @@ public:
 
     static void AbortSequence(std::string abortMsg="abort");
     static void StopSequence();
-    static void StartSequence(json jsonSeq, json jsonAbortSeq);
+    static void StartSequence(json jsonSeq, json jsonAbortSeq, std::string comments);
 
 
 
