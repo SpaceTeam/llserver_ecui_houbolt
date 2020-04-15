@@ -14,7 +14,8 @@ int main(int argc, char const *argv[])
     LLController::Init();
 
     std::string inputStr;
-    while (getline (std::cin, inputStr)){
+    while (true){
+	usleep(100);
     }
     std::cout << "quit" << std::endl;
 
