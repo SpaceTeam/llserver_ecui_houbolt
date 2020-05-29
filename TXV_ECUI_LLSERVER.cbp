@@ -100,9 +100,6 @@
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/Mapping.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
-		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/RefillSystem.h">
-			<Option target="TXV_ECUI_LLSERVER"/>
-		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/SequenceManager.h">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
@@ -164,9 +161,6 @@
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Mapping.cpp">
-			<Option target="TXV_ECUI_LLSERVER"/>
-		</Unit>
-		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/RefillSystem.cpp">
 			<Option target="TXV_ECUI_LLSERVER"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/SequenceManager.cpp">
