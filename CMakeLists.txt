@@ -15,16 +15,23 @@ include_directories(include)
 
 file(GLOB sources ./*.cpp src/*.cpp include/*.h)
 
-add_executable(${PROJECT_NAME} ${sources})
-#spdlog_enable_warnings(${PROJECT_NAME})
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.45.0 COMPONENTS system)
+
+if(Boost_FOUND)
+    add_executable(${PROJECT_NAME} ${sources})
+    #spdlog_enable_warnings(${PROJECT_NAME})
 
 
-if(UNIX AND NOT APPLE)
-    set(LINUX TRUE)
-endif()
+    if(UNIX AND NOT APPLE)
+        set(LINUX TRUE)
+    endif()
 
-if(LINUX)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs)#spdlog::spdlog)
-else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)#spdlog::spdlog)
+    if(LINUX)
+        target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs Boost::system)#spdlog::spdlog)
+    else()
+        target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads Boost::system)#spdlog::spdlog)
+    endif()
 endif()
