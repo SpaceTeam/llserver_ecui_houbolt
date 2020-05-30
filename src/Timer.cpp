@@ -192,39 +192,38 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
 
     while(self->isRunning) {
 
-//        currTime = Clock::now();
-//        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
-//        //Debug::error("%ld", currCheckTime);
-//        if (currCheckTime >= interval)
-//        {
-//            microTime += interval;
-//
-//            std::thread callbackThread(self->tickCallback, microTime);
-//            callbackThread.detach();
-//            //self->tickCallback(microTime);
-//            lastTime = currTime;
-//        }
-//
-//        //std::this_thread::sleep_for(std::chrono::microseconds(interval));
-//        //usleep(100);
-
-        lastTime = Clock::now();
-        // Set an expiry time relative to now.
-        timer.expires_from_now(boost::posix_time::microseconds(interval));
-
-        // Wait for the timer to expire.
-        timer.wait();
-
         currTime = Clock::now();
         currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
-        Debug::error("%d", currTime-lastTime);
+        //Debug::error("%ld", currCheckTime);
+        if (currCheckTime >= interval)
+        {
+            microTime += interval;
 
-        microTime += interval;
+            std::thread callbackThread(self->tickCallback, microTime);
+            callbackThread.detach();
+            //self->tickCallback(microTime);
+            lastTime = currTime;
+        }
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
+        //usleep(100);
 
-        std::thread callbackThread(self->tickCallback, microTime);
-        callbackThread.detach();
-        //self->tickCallback(microTime);
-        lastTime = currTime;
+//        lastTime = Clock::now();
+//        // Set an expiry time relative to now.
+//        timer.expires_from_now(boost::posix_time::microseconds(interval));
+//
+//        // Wait for the timer to expire.
+//        timer.wait();
+//
+//        currTime = Clock::now();
+//        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
+//        Debug::error("%d", currTime-lastTime);
+//
+//        microTime += interval;
+//
+//        std::thread callbackThread(self->tickCallback, microTime);
+//        callbackThread.detach();
+//        //self->tickCallback(microTime);
+//        lastTime = currTime;
     }
 }
 
