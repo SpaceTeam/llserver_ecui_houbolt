@@ -194,7 +194,7 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
 
         currTime = Clock::now();
         currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
-        Debug::error("%d", currCheckTime);
+        //Debug::error("%d", currCheckTime);
         if (currCheckTime >= interval)
         {
             microTime += interval;
