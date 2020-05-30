@@ -153,7 +153,6 @@ void HcpManager::StartSensorFetch(uint32 sampleRate)
 //that some sensor values of the controller get logged before the other ones, although they are read in the same timer tick
 void HcpManager::FetchSensors(uint64 microTime)
 {
-
     json analogs = mapping->GetDevices(Device_Type::ANALOG);
     json digitals = mapping->GetDevices(Device_Type::DIGITAL);
     if (analogs != nullptr)

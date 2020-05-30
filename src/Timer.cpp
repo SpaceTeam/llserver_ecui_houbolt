@@ -193,6 +193,7 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
 	        //self->tickCallback(microTime);
             lastTime = currTime;
         }
+
         usleep(1);
     }
 }

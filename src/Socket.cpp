@@ -66,6 +66,7 @@ void Socket::Connect(std::string address, uint16 port, int32 tries)
                 sleep(3);
             }
             tries -= 1;
+            this_thread::yield();
             continue;
 
         }
