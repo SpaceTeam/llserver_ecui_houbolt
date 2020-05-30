@@ -145,9 +145,14 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
     std::unique_lock<std::mutex> lock(self->syncMtx);
     auto lastTime = Clock::now();
     auto currTime = lastTime;
+    uint64 currCheckTime = 0;
 
     std::thread callbackThread(self->tickCallback, microTime);
     callbackThread.detach();
+
+    boost::asio::io_service io;
+    // Construct a timer without setting an expiry time.
+    boost::asio::deadline_timer timer(io);
     while(self->isRunning) {
 
         currTime = Clock::now();
@@ -172,7 +177,34 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
             }
         }
 
-        usleep(1);
+        usleep(100);
+
+//        // Set an expiry time relative to now.
+//        timer.expires_from_now(boost::posix_time::microseconds(interval));
+//
+//        // Wait for the timer to expire.
+//        timer.wait();
+//
+//        currTime = Clock::now();
+//        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
+//        //Debug::error("%d", currTime-lastTime);
+//        if (currCheckTime > interval + 1000)
+//        {
+//            std::cout << currCheckTime << std::endl;
+//        }
+//
+//        microTime += interval;
+//
+//        std::thread callbackThread(self->tickCallback, microTime);
+//        callbackThread.detach();
+//        //self->tickCallback(microTime);
+//        lastTime = currTime;
+//
+//        if (microTime >= endTime)
+//        {
+//            lock.unlock();
+//            self->stop();
+//        }
     }
 }
 
@@ -209,10 +241,9 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
             //self->tickCallback(microTime);
             lastTime = currTime;
         }
-        std::this_thread::sleep_for(std::chrono::microseconds(100));
-        //usleep(100);
+        //std::this_thread::sleep_for(std::chrono::microseconds(100));
+        usleep(100);
 
-//        lastTime = Clock::now();
 //        // Set an expiry time relative to now.
 //        timer.expires_from_now(boost::posix_time::microseconds(interval));
 //
@@ -222,7 +253,10 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
 //        currTime = Clock::now();
 //        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
 //        //Debug::error("%d", currTime-lastTime);
-//        std::cout << currCheckTime << std::endl;
+//        if (currCheckTime > interval + 1000)
+//        {
+//            std::cout << currCheckTime << std::endl;
+//        }
 //
 //        microTime += interval;
 //
