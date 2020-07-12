@@ -13,7 +13,7 @@
     "sensor_sample_rate": 100,
     "servo_count": 6,
     "servo_max_ontime": 40000,
-    "motor_count": 4,
+    "motor_count": 8,
     "motor_max_power": 1000,
     "digital_count": 16,
     "analog_count": 16
