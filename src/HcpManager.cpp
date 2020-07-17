@@ -182,7 +182,7 @@ void HcpManager::FetchSensors(uint64 microTime)
                             double before = mappedValues[i];
                             mappedValues[i] = ((double) cells[i] * (double) maps[i]["k"]) + (double) maps[i]["d"];
 
-                            Debug::info(it.key() + " %d from %d to %d", i+1, before, mappedValues[i]);
+                            Debug::error(it.key() + " %d from %d to %d", i+1, before, mappedValues[i]);
                         }
 
                         sensorMtx.lock();
