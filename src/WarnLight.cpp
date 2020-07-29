@@ -5,12 +5,15 @@
 #include "WarnLight.h"
 #include "Config.h"
 
+using json = nlohmann::json;
+
 WarnLight::WarnLight(uint16 id)
 {
     this->id = id;
     std::string ip = std::get<std::string>(Config::getData("WARNLIGHT/ip"));
     int32 port = std::get<int>(Config::getData("WARNLIGHT/port"));
     socket = new Socket(OnClose, ip, port, 1);
+    Reset();
 }
 
 WarnLight::~WarnLight()
@@ -18,39 +21,64 @@ WarnLight::~WarnLight()
     delete socket;
 }
 
-void WarnLight::Error()
+void WarnLight::SendJson(json message)
 {
-    socket->Send("Error\n");
+    socket->Send(message.dump() + "\n");
 }
 
-void WarnLight::ServoCal()
+void WarnLight::Reset()
 {
-    socket->Send("SerCal\n");
+    json message;
+    message["type"] = "reset";
+    SendJson(message);
 }
 
-void WarnLight::NoConnection()
+void WarnLight::SetColor(uint8 red, uint8 green, uint8 blue)
 {
-    socket->Send("NoConn\n");
+    json message = {
+        {"type", "set-color"},
+        {"content", {
+            {"red", red},
+            {"green", green},
+            {"blue", blue},
+        }}
+    };
+    SendJson(message);
 }
 
-void WarnLight::SafeOn()
-{
-    socket->Send("SafeOn\n");
+void WarnLight::SetMode(std::string mode) {
+    json message = {
+        {"type", "set-mode"},
+        {"content", {
+            {"mode", mode}
+        }}
+    };
+    SendJson(message);
 }
 
-void WarnLight::SafeOff()
+void WarnLight::StopBuzzer()
 {
-    socket->Send("SafeOff\n");
+    json message;
+    message["type"] = "stop-buzzer";
+    SendJson(message);
 }
 
-void WarnLight::Testing()
+void WarnLight::StartBuzzerBeep(uint16 time)
 {
-    socket->Send("Testing\n");
+    json message = {
+        {"type", "start-buzzer-beep"},
+        {"content", {
+            {"period", time}
+        }}
+    };
+    SendJson(message);
 }
 
-void WarnLight::Standby()
+void WarnLight::StartBuzzerContinuous()
 {
-    socket->Send("Standby\n");
+    json message;
+    message["type"] = "start-buzzer-continuous";
+    SendJson(message);
 }
 
 void WarnLight::OnClose()
