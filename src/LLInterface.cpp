@@ -206,20 +206,28 @@ void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double>
 
 void LLInterface::TurnRed()
 {
-    warnLight->Error();
+    warnLight->SetColor(255, 0, 0);
+    warnLight->SetMode("default");
+    warnLight->StopBuzzer();
 }
 
 void LLInterface::TurnGreen()
 {
-    warnLight->SafeOn();
+    warnLight->SetColor(0, 255, 0);
+    warnLight->SetMode("default");
+    warnLight->StopBuzzer();
 }
 
 void LLInterface::TurnYellow()
 {
-    warnLight->NoConnection();
+    warnLight->SetColor(0, 255, 255);
+    warnLight->SetMode("spin");
+    warnLight->StopBuzzer();
 }
 
 void LLInterface::BeepRed()
 {
-    warnLight->Testing();
+    warnLight->SetColor(255, 0, 0);
+    warnLight->SetMode("blink");
+    warnLight->StartBuzzerBeep(500);
 }
