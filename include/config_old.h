@@ -37,7 +37,7 @@
 #define SERVO_COUNT 6
 #define SERVO_MAX_ONTIME 40000
 
-#define MOTOR_COUNT 4
+#define MOTOR_COUNT 8
 #define MOTOR_MAX_POWER 1000
 
 #define DIGITAL_COUNT 16
