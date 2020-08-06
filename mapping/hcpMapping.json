@@ -1,0 +1,82 @@
+{
+    "analog": {
+        "loadingTankFeedback": {
+            "port": 12,
+            "servo": "loadingTankValve"
+        },
+        "loadingTankPressure": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 0
+        },
+        "loadingTankVentFeedback": {
+            "port": 13,
+            "servo": "loadingTankVentValve"
+        },
+        "tempCold": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 8
+        },
+        "tempWarm": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 9
+        },
+        "voltage": {
+            "map": {
+                "d": 0,
+                "k": 0.001
+            },
+            "port": 128
+        }
+    },
+    "digital": {},
+    "digitalOut": {
+        "coolingNotHeatingValve": {
+            "port": 7
+        },
+        "coolingPump": {
+            "port": 4
+        },
+        "heatingPump": {
+            "port": 5
+        },
+        "retractMotor": {
+            "port": 6
+        }
+    },
+    "motor": {},
+    "servo": {
+        "loadingTankValve": {
+            "endpoints": [
+                1025,
+                2050
+            ],
+            "feedbackAnalog": "loadingTankFeedback",
+            "feedbackEndpoints": [
+                1443,
+                575
+            ],
+            "port": 0
+        },
+        "loadingTankVentValve": {
+            "endpoints": [
+                1000,
+                1900
+            ],
+            "feedbackAnalog": "loadingTankVentFeedback",
+            "feedbackEndpoints": [
+                1421,
+                679
+            ],
+            "port": 1
+        }
+    }
+}
