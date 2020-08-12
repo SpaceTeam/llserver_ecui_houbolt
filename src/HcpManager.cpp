@@ -172,17 +172,27 @@ void HcpManager::FetchSensors(uint64 microTime)
                     if (maps.type() == json::value_t::array)
                     {
                         double mappedValues[HCP_THRUST_SENSORS_COUNT] = {-1.0};
-                        for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                        double mappedSum = 0.0;
+
+                        if (maps.size() > 0)
                         {
-                            mappedValues[i] = cells[i];
+                            for (int i = 0; i < maps.size(); i++)
+                            {
+                                double before = mappedValues[i];
+                                mappedValues[i] = ((double) cells[i] * (double) maps[i]["k"]) + (double) maps[i]["d"];
+
+                                Debug::info(it.key() + " %d from %d to %d", i+1, before, mappedValues[i]);
+
+                                mappedSum += mappedValues[i];
+                            }
                         }
-
-                        for (int i = 0; i < maps.size(); i++)
+                        else
                         {
-                            double before = mappedValues[i];
-                            mappedValues[i] = ((double) cells[i] * (double) maps[i]["k"]) + (double) maps[i]["d"];
-
-                            Debug::error(it.key() + " %d from %d to %d", i+1, before, mappedValues[i]);
+                            for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                            {
+                                mappedValues[i] = cells[i];
+                                mappedSum += mappedValues[i];
+                            }
                         }
 
                         sensorMtx.lock();
@@ -190,6 +200,7 @@ void HcpManager::FetchSensors(uint64 microTime)
                         {
                             sensorBuffer[it.key() + " " + to_string(i+1)] = mappedValues[i];
                         }
+                        sensorBuffer[it.key() + " Sum"] = mappedSum;
                         sensorMtx.unlock();
                     }
                     else
@@ -200,11 +211,14 @@ void HcpManager::FetchSensors(uint64 microTime)
                 }
                 else
                 {
+                    double thrustSum = 0.0;
                     sensorMtx.lock();
                     for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
                     {
                         sensorBuffer[it.key() + " " + to_string(i+1)] = cells[i];
+                        thrustSum += cells[i];
                     }
+                    sensorBuffer[it.key() + " Sum"] = thrustSum;
                     sensorMtx.unlock();
                 }
 
@@ -262,6 +276,7 @@ std::vector<std::string> HcpManager::GetAllSensorNames()
                 sensorNames.push_back(it.key() + " 1");
                 sensorNames.push_back(it.key() + " 2");
                 sensorNames.push_back(it.key() + " 3");
+                sensorNames.push_back(it.key() + " Sum");
             }
             else
             {
