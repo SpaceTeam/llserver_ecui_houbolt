@@ -156,6 +156,11 @@ void HcpManager::StartSensorFetch(uint32 sampleRate)
 void HcpManager::FetchSensors(uint64 microTime)
 {
     threadCount++;
+    if (threadCount > 1)
+    {
+        Debug::error("Sampling Threads running: %d", threadCount);
+    }
+
     json analogs = mapping->GetDevices(Device_Type::ANALOG);
     json digitals = mapping->GetDevices(Device_Type::DIGITAL);
     if (analogs != nullptr)
@@ -243,10 +248,7 @@ void HcpManager::FetchSensors(uint64 microTime)
     {
         Debug::error("No digitals found");
     }
-    if (threadCount > 1)
-    {
-        Debug::error("Sampling Threads running: %d", threadCount);
-    }
+
     threadCount--;
 }
 
