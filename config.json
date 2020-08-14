@@ -9,8 +9,8 @@
   },
   "HCP": {
     "device": "/dev/serial0",
-    "baudrate": 115200,
-    "sensor_sample_rate": 50,
+    "baudrate": 460800,
+    "sensor_sample_rate": 100,
     "servo_count": 6,
     "servo_max_ontime": 40000,
     "motor_count": 8,

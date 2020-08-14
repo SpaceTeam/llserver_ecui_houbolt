@@ -31,6 +31,8 @@ std::recursive_mutex HcpManager::serialMtx;
 
 typedef std::chrono::high_resolution_clock Clock;
 
+uint32 threadCount = 0;
+
 void HcpManager::Init()
 {
     string hcpDevice = std::get<std::string>(Config::getData("HCP/device"));
@@ -153,6 +155,12 @@ void HcpManager::StartSensorFetch(uint32 sampleRate)
 //that some sensor values of the controller get logged before the other ones, although they are read in the same timer tick
 void HcpManager::FetchSensors(uint64 microTime)
 {
+    threadCount++;
+    if (threadCount > 1)
+    {
+        Debug::error("Sampling Threads running: %d", threadCount);
+    }
+
     json analogs = mapping->GetDevices(Device_Type::ANALOG);
     json digitals = mapping->GetDevices(Device_Type::DIGITAL);
     if (analogs != nullptr)
@@ -227,9 +235,9 @@ void HcpManager::FetchSensors(uint64 microTime)
             }
             else
             {
-                sensorMtx.lock();
+//                sensorMtx.lock();
                     sensorBuffer[it.key()] = GetAnalog(it.key());
-                sensorMtx.unlock();
+//                sensorMtx.unlock();
             }
 
         }
@@ -254,6 +262,8 @@ void HcpManager::FetchSensors(uint64 microTime)
     {
         Debug::error("No digitals found");
     }
+
+    threadCount--;
 }
 
 void HcpManager::StopSensorFetch()

@@ -27,6 +27,8 @@ Timer* LLInterface::sensorTimer;
 
 typedef std::chrono::high_resolution_clock Clock;
 
+uint32 threadCount2 = 0;
+
 void LLInterface::Init()
 {
     if (!isInitialized)
@@ -159,6 +161,12 @@ void LLInterface::StopGetSensors()
 
 void LLInterface::GetSensors(int64 microTime)
 {
+    threadCount2++;
+    if (threadCount2 > 1)
+    {
+        Debug::error("Transmitting Sensor Threads running: %d", threadCount2);
+    }
+
     std::map<std::string, double> sensors = GetAllSensors();
 
     TransmitSensors(microTime, sensors);
@@ -184,6 +192,8 @@ void LLInterface::GetSensors(int64 microTime)
             warnlightStatus = 0;
         }
     }
+
+    threadCount2--;
 
 }
 
