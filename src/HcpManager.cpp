@@ -171,11 +171,11 @@ void HcpManager::FetchSensors(uint64 microTime)
             {
                 int32* cells = GetLoadCells();
 
-                if (utils::keyExists(it.value(), "maps"))
+                if (utils::keyExists(it.value(), "map"))
                 {
                     Debug::info("mapping thrust values");
 
-                    json maps = it.value()["maps"];
+                    json maps = it.value()["map"];
 
                     if (maps.type() == json::value_t::array)
                     {
