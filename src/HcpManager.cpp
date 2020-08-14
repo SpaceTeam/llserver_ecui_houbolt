@@ -213,9 +213,9 @@ void HcpManager::FetchSensors(uint64 microTime)
             }
             else
             {
-                sensorMtx.lock();
+//                sensorMtx.lock();
                     sensorBuffer[it.key()] = GetAnalog(it.key());
-                sensorMtx.unlock();
+//                sensorMtx.unlock();
             }
 
         }
