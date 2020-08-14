@@ -31,6 +31,8 @@ std::recursive_mutex HcpManager::serialMtx;
 
 typedef std::chrono::high_resolution_clock Clock;
 
+uint32 threadCount = 0;
+
 void HcpManager::Init()
 {
     string hcpDevice = std::get<std::string>(Config::getData("HCP/device"));
@@ -153,6 +155,12 @@ void HcpManager::StartSensorFetch(uint32 sampleRate)
 //that some sensor values of the controller get logged before the other ones, although they are read in the same timer tick
 void HcpManager::FetchSensors(uint64 microTime)
 {
+    threadCount++;
+    if (threadCount > 1)
+    {
+        Debug::error("Sampling Threads running: %d", threadCount);
+    }
+
     json analogs = mapping->GetDevices(Device_Type::ANALOG);
     json digitals = mapping->GetDevices(Device_Type::DIGITAL);
     if (analogs != nullptr)
@@ -163,26 +171,36 @@ void HcpManager::FetchSensors(uint64 microTime)
             {
                 int32* cells = GetLoadCells();
 
-                if (utils::keyExists(it.value(), "maps"))
+                if (utils::keyExists(it.value(), "map"))
                 {
                     Debug::info("mapping thrust values");
 
-                    json maps = it.value()["maps"];
+                    json maps = it.value()["map"];
 
                     if (maps.type() == json::value_t::array)
                     {
                         double mappedValues[HCP_THRUST_SENSORS_COUNT] = {-1.0};
-                        for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                        double mappedSum = 0.0;
+
+                        if (maps.size() > 0)
                         {
-                            mappedValues[i] = cells[i];
+                            for (int i = 0; i < maps.size(); i++)
+                            {
+                                double before = mappedValues[i];
+                                mappedValues[i] = ((double) cells[i] * (double) maps[i]["k"]) + (double) maps[i]["d"];
+
+                                Debug::info(it.key() + " %d from %d to %d", i+1, before, mappedValues[i]);
+
+                                mappedSum += mappedValues[i];
+                            }
                         }
-
-                        for (int i = 0; i < maps.size(); i++)
+                        else
                         {
-                            double before = mappedValues[i];
-                            mappedValues[i] = ((double) cells[i] * (double) maps[i]["k"]) + (double) maps[i]["d"];
-
-                            Debug::info(it.key() + " %d from %d to %d", i+1, before, mappedValues[i]);
+                            for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                            {
+                                mappedValues[i] = cells[i];
+                                mappedSum += mappedValues[i];
+                            }
                         }
 
                         sensorMtx.lock();
@@ -190,6 +208,7 @@ void HcpManager::FetchSensors(uint64 microTime)
                         {
                             sensorBuffer[it.key() + " " + to_string(i+1)] = mappedValues[i];
                         }
+                        sensorBuffer[it.key() + " Sum"] = mappedSum;
                         sensorMtx.unlock();
                     }
                     else
@@ -200,11 +219,14 @@ void HcpManager::FetchSensors(uint64 microTime)
                 }
                 else
                 {
+                    double thrustSum = 0.0;
                     sensorMtx.lock();
                     for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
                     {
                         sensorBuffer[it.key() + " " + to_string(i+1)] = cells[i];
+                        thrustSum += cells[i];
                     }
+                    sensorBuffer[it.key() + " Sum"] = thrustSum;
                     sensorMtx.unlock();
                 }
 
@@ -213,9 +235,9 @@ void HcpManager::FetchSensors(uint64 microTime)
             }
             else
             {
-                sensorMtx.lock();
+//                sensorMtx.lock();
                     sensorBuffer[it.key()] = GetAnalog(it.key());
-                sensorMtx.unlock();
+//                sensorMtx.unlock();
             }
 
         }
@@ -240,6 +262,8 @@ void HcpManager::FetchSensors(uint64 microTime)
     {
         Debug::error("No digitals found");
     }
+
+    threadCount--;
 }
 
 void HcpManager::StopSensorFetch()
@@ -262,6 +286,7 @@ std::vector<std::string> HcpManager::GetAllSensorNames()
                 sensorNames.push_back(it.key() + " 1");
                 sensorNames.push_back(it.key() + " 2");
                 sensorNames.push_back(it.key() + " 3");
+                sensorNames.push_back(it.key() + " Sum");
             }
             else
             {

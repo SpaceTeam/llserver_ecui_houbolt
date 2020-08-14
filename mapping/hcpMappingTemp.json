@@ -9,88 +9,152 @@
         },
         "chamberPressure": {
             "map": {
-                "d": -8.7561,
-                "k": 0.0141
+                "d": -8.74088,
+                "k": 0.023497
             },
-            "port": 10
+            "port": 4
         },
-        "fuel feedback": {
-            "port": 0,
-            "servo": "fuel"
+        "fuelMainValveFb": {
+            "port": 12,
+            "servo": "fuelMainValve"
         },
-        "fuelPressure": {
+        "fuelTankPressure": {
             "map": {
-                "d": -8.7561,
-                "k": 0.0141
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 0
+        },
+        "fuelVenturiPressure": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 1
+        },
+        "oxMainValveFb": {
+            "port": 13,
+            "servo": "oxMainValve"
+        },
+        "oxSuperchargeValveFb": {
+            "port": 14,
+            "servo": "oxSuperchargeValve"
+        },
+        "oxTankPressure": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 2
+        },
+        "oxTankTempBottom": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
             },
             "port": 8
         },
-        "oxidizer feedback": {
-            "port": 1,
-            "servo": "oxidizer"
-        },
-        "thrust": {
-
-            "loadCells" : true,
-            "maps": [
-                {
-                    "k": -22764.050692436,
-                    "d": -184145.046811447
-                },
-                {
-                    "k": -22674.9169296921,
-                    "d": -179771.029692456
-                },
-                {
-                    "k": -22454.3016435281,
-                    "d": -158621.016047663
-                }
-            ]
-        },
-        "oxidizerPressure": {
+        "oxTankTempMiddleBottom": {
             "map": {
-                "d": -8.7561,
-                "k": 0.0141
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 10
+        },
+        "oxTankTempMiddleTop": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 11
+        },
+        "oxTankTempTop": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
             },
             "port": 9
+        },
+        "oxVenturiPressure": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 3
+        },
+        "thrust": {
+            "loadCells": true,
+            "map": [
+                {
+                    "d": 0,
+                    "k": 8.252e-05
+                },
+                {
+                    "d": 0,
+                    "k": 8.252e-05
+                },
+                {
+                    "d": 0,
+                    "k": 8.252e-05
+                }
+            ]
         }
-
     },
-    "digital": {
-        "igniter feedback": {
-            "port": 2
-        }
-    },
+    "digital": {},
     "digitalOut": {
+        "fuelDepressSolenoid": {
+            "port": 5
+        },
+        "fuelPressSolenoid": {
+            "port": 4
+        },
         "igniter": {
-            "port": 1
+            "port": 0
+        },
+        "oxDepressSolenoid": {
+            "port": 7
+        },
+        "oxPressSolenoid": {
+            "port": 6
         }
     },
     "motor": {},
     "servo": {
-        "fuel": {
+        "fuelMainValve": {
             "endpoints": [
-                1025,
-                2050
+                950,
+                1950
             ],
-            "feedbackAnalog": "fuel feedback",
+            "feedbackAnalog": "fuelMainValveFb",
             "feedbackEndpoints": [
-                1098,
-                2449
+                1490,
+                666
             ],
             "port": 0
         },
-        "oxidizer": {
+        "oxMainValve": {
             "endpoints": [
-                1000,
+                950,
                 1900
             ],
-            "feedbackAnalog": "oxidizer feedback",
+            "feedbackAnalog": "oxMainValveFb",
             "feedbackEndpoints": [
-                2092,
-                939
+                1036,
+                485
             ],
             "port": 1
+        },
+        "oxSuperchargeValve": {
+            "endpoints": [
+                950,
+                2000
+            ],
+            "feedbackAnalog": "oxSuperchargeValveFb",
+            "feedbackEndpoints": [
+                1620,
+                657
+            ],
+            "port": 2
         }
     }
 }

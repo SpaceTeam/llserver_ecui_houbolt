@@ -7,8 +7,8 @@
 
 #include <chrono>
 #include <iostream>
-#include <boost/asio.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+// #include <boost/asio.hpp>
+// #include <boost/date_time/posix_time/posix_time.hpp>
 
 //void tickFunc(std::function<void()> stopCallback, std::function<void()> stopCallback, uint64 interval, int64 endTime, int64 microTime)
 //{
@@ -150,9 +150,9 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
     std::thread callbackThread(self->tickCallback, microTime);
     callbackThread.detach();
 
-    boost::asio::io_service io;
-    // Construct a timer without setting an expiry time.
-    boost::asio::deadline_timer timer(io);
+    // boost::asio::io_service io;
+    // // Construct a timer without setting an expiry time.
+    // boost::asio::deadline_timer timer(io);
     while(self->isRunning) {
 
         currTime = Clock::now();
@@ -218,9 +218,9 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
     std::thread callbackThread(self->tickCallback, microTime);
     callbackThread.detach();
 
-    boost::asio::io_service io;
-    // Construct a timer without setting an expiry time.
-    boost::asio::deadline_timer timer(io);
+    // boost::asio::io_service io;
+    // // Construct a timer without setting an expiry time.
+    // boost::asio::deadline_timer timer(io);
 
     while(self->isRunning) {
 

@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "Socket.h"
+#include "json.hpp"
 
 class WarnLight
 {
@@ -18,22 +19,19 @@ private:
     uint16 id;
 
     static void OnClose();
+    void SendJson(json message);
 public:
 
     WarnLight(uint16 id);
 
     ~WarnLight();
 
-    void Error();
-    void ServoCal();
-    void NoConnection();
-    void SafeOn();
-    void SafeOff();
-    void Testing();
-    void Standby();
-
-    //RGB(uint8 r, uint8 g, uint8 b);
-
+    void Reset();
+    void SetColor(uint8 red, uint8 green, uint8 blue);
+    void SetMode(std::string mode);
+    void StopBuzzer();
+    void StartBuzzerBeep(uint16 time);
+    void StartBuzzerContinuous();
 };
 
 

@@ -40,35 +40,6 @@ Serial::Serial(string device, int baudRate)
 
     switch(baudRate)
     {
-    	//NOTE: cases commented out are not supported on arduino
-    	/*case 0:
-    		options.c_cflag |= B0;
-    		break;
-
-    	case 50:
-    		options.c_cflag |= B50;
-    		break;
-
-    	case 75:
-    		options.c_cflag |= B75;
-    		break;
-
-    	case 110:
-    		options.c_cflag |= B110;
-    		break;
-
-    	case 134:
-    		options.c_cflag |= B134;
-    		break;
-
-    	case 150:
-    		options.c_cflag |= B150;
-    		break;
-
-    	case 200:
-    		options.c_cflag |= B200;
-    		break;
-		*/
     	case 300:
     		options.c_cflag |= B300;
     		break;
@@ -96,12 +67,19 @@ Serial::Serial(string device, int baudRate)
     	case 9600:
     		options.c_cflag |= B9600;
     		break;
-
-    	//NOTE: 14400 not supported by termios
+#ifdef B14400
+        case 14400:
+            options.c_cflag |= B14400;
+            break;
+#endif
     	case 19200:
     		options.c_cflag |= B19200;
     		break;
-    	//NOTE: 28800 not supported by termios
+#ifdef B28800
+        case 28800:
+            options.c_cflag |= B28800;
+            break;
+#endif
     	case 38400:
     		options.c_cflag |= B38400;
     		break;
@@ -117,9 +95,18 @@ Serial::Serial(string device, int baudRate)
     	case 230400:
     		options.c_cflag |= B230400;
     		break;
-
+#ifdef B460800
+        case 460800:
+            options.c_cflag |= B460800;
+            break;
+#endif
+#ifdef B921600
+        case 921600:
+            options.c_cflag |= B921600;
+            break;
+#endif
     	default:
-    		Debug::error("no valid baudrate found --- falling back to 9600");
+		    Debug::error("no valid baudrate found --- falling back to 9600");
     		options.c_cflag |= B9600;
     		//options.c_cflag |= baudRate;
     }
@@ -152,12 +139,12 @@ HCP_MSG* Serial::ReadSync()
             if (rxLength < 0)
             {
                 //NOTE: if this occurs settings of serial com is broken --> non blocking
-                cout << "optcode: no bytes recieved" << endl;
+//                cout << "optcode: no bytes recieved" << endl;
             }
             else if (rxLength == 0)
             {
                 //No data waiting
-//                cout << "optcode: no data...waiting" << endl;
+                cout << "optcode: no opcode...waiting" << endl;
                 usleep(1);
             }
             else
@@ -178,16 +165,16 @@ HCP_MSG* Serial::ReadSync()
                 while (remainingBytes > 0)
                 {
                     rxLength = read(_uartFilestream, (void *) rxBuffer, remainingBytes);
-  //                  cout << rxLength << " bytes recieved" << endl;
+//                    cout << rxLength << " bytes recieved" << endl;
                     if (rxLength < 0)
                     {
                         //NOTE: if this occurs settings of serial com is broken --> non blocking
-                        cout << "payload: no bytes recieved" << endl;
+//                        cout << "payload: no bytes recieved" << endl;
                     }
                     else if (rxLength == 0)
                     {
                         //No data waiting
-//                        cout << "payload: no data...waiting" << endl;
+                        cout << "payload: no data...waiting" << endl;
                     }
                     else
                     {
@@ -201,6 +188,13 @@ HCP_MSG* Serial::ReadSync()
 
                 finished = true;
                 //printf("First Byte in Buffer: %x and in msg: %x\n", rxBuffer[0], msg->payload[0]);
+		//printf("---------------\n");
+		//printf("0 Byte in msg: %x\n", msg->optcode);
+//for (int i = 0; i < msg->payloadSize; i++)
+//{
+//printf("%d Byte in msg: %x\n", i+1, msg->payload[i]);
+//}
+
                 return msg;
 
             }
@@ -237,7 +231,7 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
             else if (rxLength == 0)
             {
                 //No data waiting
-//                cout << "optcode: no data...waiting" << endl;
+                cout << "optcode: no data...waiting" << endl;
                 usleep(1);
             }
             else
@@ -267,7 +261,7 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
                     else if (rxLength == 0)
                     {
                         //No data waiting
-//                        cout << "payload: no data...waiting" << endl;
+                        cout << "payload: no data...waiting" << endl;
                     }
                     else
                     {

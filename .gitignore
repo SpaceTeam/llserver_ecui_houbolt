@@ -41,3 +41,5 @@ logs/
 .idea/
 cmake-build-debug/
 *.cmake
+
+*.cpb

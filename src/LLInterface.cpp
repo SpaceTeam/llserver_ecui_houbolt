@@ -27,6 +27,8 @@ Timer* LLInterface::sensorTimer;
 
 typedef std::chrono::high_resolution_clock Clock;
 
+uint32 threadCount2 = 0;
+
 void LLInterface::Init()
 {
     if (!isInitialized)
@@ -159,6 +161,12 @@ void LLInterface::StopGetSensors()
 
 void LLInterface::GetSensors(int64 microTime)
 {
+    threadCount2++;
+    if (threadCount2 > 1)
+    {
+        Debug::error("Transmitting Sensor Threads running: %d", threadCount2);
+    }
+
     std::map<std::string, double> sensors = GetAllSensors();
 
     TransmitSensors(microTime, sensors);
@@ -185,6 +193,8 @@ void LLInterface::GetSensors(int64 microTime)
         }
     }
 
+    threadCount2--;
+
 }
 
 void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double> sensors)
@@ -206,20 +216,28 @@ void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double>
 
 void LLInterface::TurnRed()
 {
-    warnLight->Error();
+    warnLight->SetColor(255, 0, 0);
+    warnLight->SetMode("default");
+    warnLight->StopBuzzer();
 }
 
 void LLInterface::TurnGreen()
 {
-    warnLight->SafeOn();
+    warnLight->SetColor(0, 255, 0);
+    warnLight->SetMode("default");
+    warnLight->StopBuzzer();
 }
 
 void LLInterface::TurnYellow()
 {
-    warnLight->NoConnection();
+    warnLight->SetColor(0, 255, 255);
+    warnLight->SetMode("spin");
+    warnLight->StopBuzzer();
 }
 
 void LLInterface::BeepRed()
 {
-    warnLight->Testing();
+    warnLight->SetColor(255, 0, 0);
+    warnLight->SetMode("blink");
+    warnLight->StartBuzzerBeep(500);
 }
