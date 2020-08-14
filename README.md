@@ -10,7 +10,7 @@ Temperature Sensors over Ethernet with Siliconsystems TMP01
 
 ### [TXV_ECUI_TMPoE](https://github.com/SpaceTeam/TXV_ECUI_TMPoE/tree/master)
 
-![LLServer Diagram](llserver.png)
+![LLServer Diagram](img/llserver.png)
 
 # Notes:
 

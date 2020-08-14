@@ -16,7 +16,7 @@ using namespace std;
 
 void LLController::PrintLogo()
 {
-    std::ifstream f("txvLogoSquashed.txt");
+    std::ifstream f("img/txvLogoSquashed.txt");
 
     if (f.is_open())
         std::cout << f.rdbuf();

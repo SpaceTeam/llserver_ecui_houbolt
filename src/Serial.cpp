@@ -40,35 +40,6 @@ Serial::Serial(string device, int baudRate)
 
     switch(baudRate)
     {
-    	//NOTE: cases commented out are not supported on arduino
-    	/*case 0:
-    		options.c_cflag |= B0;
-    		break;
-
-    	case 50:
-    		options.c_cflag |= B50;
-    		break;
-
-    	case 75:
-    		options.c_cflag |= B75;
-    		break;
-
-    	case 110:
-    		options.c_cflag |= B110;
-    		break;
-
-    	case 134:
-    		options.c_cflag |= B134;
-    		break;
-
-    	case 150:
-    		options.c_cflag |= B150;
-    		break;
-
-    	case 200:
-    		options.c_cflag |= B200;
-    		break;
-		*/
     	case 300:
     		options.c_cflag |= B300;
     		break;
@@ -96,12 +67,19 @@ Serial::Serial(string device, int baudRate)
     	case 9600:
     		options.c_cflag |= B9600;
     		break;
-
-    	//NOTE: 14400 not supported by termios
+#ifdef B14400
+        case 14400:
+            options.c_cflag |= B14400;
+            break;
+#endif
     	case 19200:
     		options.c_cflag |= B19200;
     		break;
-    	//NOTE: 28800 not supported by termios
+#ifdef B28800
+        case 28800:
+            options.c_cflag |= B28800;
+            break;
+#endif
     	case 38400:
     		options.c_cflag |= B38400;
     		break;
@@ -117,14 +95,18 @@ Serial::Serial(string device, int baudRate)
     	case 230400:
     		options.c_cflag |= B230400;
     		break;
-	case 460800:
-		options.c_cflag |= B460800;
-		break;
-	case 921600:
-		options.c_cflag |= B921600;
-		break;
+#ifdef B460800
+        case 460800:
+            options.c_cflag |= B460800;
+            break;
+#endif
+#ifdef B921600
+        case 921600:
+            options.c_cflag |= B921600;
+            break;
+#endif
     	default:
-		Debug::error("no valid baudrate found --- falling back to 9600");
+		    Debug::error("no valid baudrate found --- falling back to 9600");
     		options.c_cflag |= B9600;
     		//options.c_cflag |= baudRate;
     }
