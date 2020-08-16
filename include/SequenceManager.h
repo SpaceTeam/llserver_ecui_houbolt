@@ -34,7 +34,6 @@ class SequenceManager
 {
 
 private:
-
     static bool isRunning;
     static bool isAutoAbort;
     static bool isAbort;
@@ -52,6 +51,7 @@ private:
     static json jsonSequence;
     static json jsonAbortSequence;
     static std::string comments;
+    static std::string currentDirPath;
 
     static std::map<std::string, Interpolation> interpolationMap;
     static std::map<std::string, Point[2]> sequenceIntervalMap;

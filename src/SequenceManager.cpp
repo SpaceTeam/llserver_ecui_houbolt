@@ -39,6 +39,7 @@ int32 threadCounter = 0;
 json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
 string SequenceManager::comments = "";
+string SequenceManager::currentDirPath = "";
 
 std::map<std::string, Interpolation> SequenceManager::interpolationMap;
 std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
@@ -108,16 +109,16 @@ void SequenceManager::SetupLogging()
 
     strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
 
-    string dirPath = "logs/" + string(dateTime_string);
-    filesystem::create_directory(dirPath);
-    Debug::changeOutputFile(dirPath + "/" + string(dateTime_string) + ".csv");
+    currentDirPath = "logs/" + string(dateTime_string);
+    filesystem::create_directory(currentDirPath);
+    Debug::changeOutputFile(currentDirPath + "/" + string(dateTime_string) + ".csv");
 
     //save Sequence files
-    utils::saveFile(dirPath + "/Sequence.json", jsonSequence.dump(4));
-    utils::saveFile(dirPath + "/AbortSequence.json", jsonAbortSequence.dump(4));
-    utils::saveFile(dirPath + "/comments.txt", comments);
+    utils::saveFile(currentDirPath + "/Sequence.json", jsonSequence.dump(4));
+    utils::saveFile(currentDirPath + "/AbortSequence.json", jsonAbortSequence.dump(4));
+    utils::saveFile(currentDirPath + "/comments.txt", comments);
 
-    filesystem::copy("config.json", dirPath + "/");
+    filesystem::copy("config.json", currentDirPath + "/");
 }
 
 void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string comments)
@@ -303,8 +304,6 @@ void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
     {
         msg += ";";
     }
-    //async_file->info(to_string(microTime) + ";" + msg);
-    //logging::INFO("\n" + to_string(secs) + ";" + msg);
     Debug::log("\n" + to_string(secs) + ";" + msg);
 
 
@@ -312,8 +311,10 @@ void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
 
 void SequenceManager::StopGetSensors()
 {
-//    async_file->flush();
     Debug::flush();
+    // execute gnuplot script
+    std::string scriptPath = std::get<std::string>(Config::getData("LOGGING/post_sequence_script"));
+    system((scriptPath + " " + currentDirPath).c_str());
 }
 
 void SequenceManager::GetSensors(int64 microTime)
