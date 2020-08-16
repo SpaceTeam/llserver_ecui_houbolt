@@ -319,7 +319,6 @@ void SequenceManager::StopGetSensors()
 
 void SequenceManager::GetSensors(int64 microTime)
 {
-    auto startTime = Clock::now();
     map<string, double> sensors = LLInterface::GetAllSensors();
 
     vector<double> vals;
@@ -359,8 +358,6 @@ void SequenceManager::GetSensors(int64 microTime)
 //        callbackThread.detach();
 	    LLInterface::TransmitSensors(microTime, sensors);
     }
-    auto currTime = Clock::now();
-    //cerr << "Transmission Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << endl;
 
 }
 
