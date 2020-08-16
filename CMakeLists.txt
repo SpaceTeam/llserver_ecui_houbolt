@@ -6,18 +6,12 @@ find_package(Threads REQUIRED)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall")
 
-#if(NOT TARGET spdlog)
-#    # Stand-alone build
-#    find_package(spdlog REQUIRED)
-#endif()
-
 include_directories(include)
 
 file(GLOB sources ./*.cpp src/*.cpp include/*.h)
 
 
 add_executable(${PROJECT_NAME} ${sources})
-#spdlog_enable_warnings(${PROJECT_NAME})
 
 
 if(UNIX AND NOT APPLE)
@@ -25,9 +19,9 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(LINUX)
-   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs)#spdlog::spdlog)
+   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs)
 else()
-   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)#spdlog::spdlog)
+   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 endif()
 
 

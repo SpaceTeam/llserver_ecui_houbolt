@@ -7,34 +7,6 @@
 
 #include <chrono>
 #include <iostream>
-// #include <boost/asio.hpp>
-// #include <boost/date_time/posix_time/posix_time.hpp>
-
-//void tickFunc(std::function<void()> stopCallback, std::function<void()> stopCallback, uint64 interval, int64 endTime, int64 microTime)
-//{
-//    std::cout << interval << std::endl;
-//    bool running = true;
-//    while(running) {
-//
-//        usleep(interval);
-//
-//        std::thread callbackThread(self->tickCallback, self->microTime);
-//        callbackThread.detach();
-//        if (self->microTime % 500000 == 0)
-//        {
-//            Debug::print("Micro Seconds: %d", self->microTime);
-//            std::cout << self->microTime << std::endl;
-//        }
-//        microTime += interval;
-//
-//        if (microTime >= endTime)
-//        {
-//            std::cout << "sequence done" << std::endl;
-//            self->stop();
-//            running = false;
-//        }
-//    }
-//}
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -151,9 +123,6 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
     std::thread callbackThread(self->tickCallback, microTime);
     callbackThread.detach();
 
-    // boost::asio::io_service io;
-    // // Construct a timer without setting an expiry time.
-    // boost::asio::deadline_timer timer(io);
     while(self->isRunning) {
 
         currTime = Clock::now();
@@ -163,13 +132,8 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
 
             std::thread callbackThread(self->tickCallback, microTime);
             callbackThread.detach();
-	    //self->tickCallback(microTime);
+	        //self->tickCallback(microTime);
             lastTime = lastTime + stepTime;
-
-//            if (microTime % 500000 == 0)
-//            {
-//                std::cout << "Curr Interval: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count() << std::endl;
-//            }
 
             if (microTime >= endTime)
             {
@@ -179,33 +143,6 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
         }
 
         usleep(100);
-
-//        // Set an expiry time relative to now.
-//        timer.expires_from_now(boost::posix_time::microseconds(interval));
-//
-//        // Wait for the timer to expire.
-//        timer.wait();
-//
-//        currTime = Clock::now();
-//        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
-//        //Debug::error("%d", currTime-lastTime);
-//        if (currCheckTime > interval + 1000)
-//        {
-//            std::cout << currCheckTime << std::endl;
-//        }
-//
-//        microTime += interval;
-//
-//        std::thread callbackThread(self->tickCallback, microTime);
-//        callbackThread.detach();
-//        //self->tickCallback(microTime);
-//        lastTime = currTime;
-//
-//        if (microTime >= endTime)
-//        {
-//            lock.unlock();
-//            self->stop();
-//        }
     }
 }
 
@@ -219,10 +156,6 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
 
     std::thread callbackThread(self->tickCallback, microTime);
     callbackThread.detach();
-
-    // boost::asio::io_service io;
-    // // Construct a timer without setting an expiry time.
-    // boost::asio::deadline_timer timer(io);
 
     while(self->isRunning) {
 
@@ -240,27 +173,6 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
         }
         //std::this_thread::sleep_for(std::chrono::microseconds(100));
         usleep(100);
-
-//        // Set an expiry time relative to now.
-//        timer.expires_from_now(boost::posix_time::microseconds(interval));
-//
-//        // Wait for the timer to expire.
-//        timer.wait();
-//
-//        currTime = Clock::now();
-//        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
-//        //Debug::error("%d", currTime-lastTime);
-//        if (currCheckTime > interval + 1000)
-//        {
-//            std::cout << currCheckTime << std::endl;
-//        }
-//
-//        microTime += interval;
-//
-//        std::thread callbackThread(self->tickCallback, microTime);
-//        callbackThread.detach();
-//        //self->tickCallback(microTime);
-//        lastTime = currTime;
     }
 }
 
