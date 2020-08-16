@@ -930,7 +930,7 @@ void HcpManager::TareLoadCells()
                                 if (utils::keyExists(maps[i], "d"))
                                 {
                                     std::cout << cells[i] << std::endl;
-                                    maps[i]["d"] = -cells[i];
+                                    maps[i]["d"] = -((double)maps[i]["k"] * (double)cells[i]);
                                 }
                                 else
                                 {
