@@ -126,7 +126,9 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
     while(self->isRunning) {
 
         currTime = Clock::now();
-        if (std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count() >= interval)
+        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
+
+        if (currCheckTime >= interval)
         {
             microTime += interval;
 

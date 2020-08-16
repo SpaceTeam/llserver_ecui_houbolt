@@ -87,6 +87,7 @@ public:
 
     //returns exactly 3 int32 values
     static int32 *GetLoadCells();
+    static void TareLoadCells();
 
     static double GetAnalog(std::string name);
     static int32 GetAnalog(uint8 port);

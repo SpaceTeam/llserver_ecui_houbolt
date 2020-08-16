@@ -59,8 +59,6 @@ private:
 
     static void SetupLogging();
 
-//    static std::shared_ptr<spdlog::logger> async_file;
-
     static void LoadIntervalMap();
     static void LoadInterpolationMap();
     static void UpdateIntervalMap(std::string name, int64 microTime, uint8 newValue);

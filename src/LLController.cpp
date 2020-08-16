@@ -148,6 +148,10 @@ void LLController::OnECUISocketRecv(json msg)
         {
             LLInterface::StopSensorTransmission();
         }
+        else if (type.compare("tare") == 0)
+        {
+            HcpManager::TareLoadCells();
+        }
         else
         {
             Debug::error("ECUISocket: message not supported");

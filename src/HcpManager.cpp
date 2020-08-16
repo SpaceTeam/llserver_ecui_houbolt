@@ -902,6 +902,78 @@ int32 *HcpManager::GetLoadCells()
     return value;
 }
 
+void HcpManager::TareLoadCells()
+{
+    json analogs = mapping->GetDevices(Device_Type::ANALOG);
+    if (analogs != nullptr)
+    {
+        for (auto it = analogs.begin(); it != analogs.end(); ++it)
+        {
+            if (utils::keyExists(it.value(), "loadCells"))
+            {
+                if (utils::keyExists(it.value(), "map"))
+                {
+                    Debug::info("mapping thrust values");
+
+                    json loadCells = it.value();
+                    json maps = loadCells["map"];
+
+                    if (maps.type() == json::value_t::array)
+                    {
+
+                        if (maps.size() > 0)
+                        {
+                            int32* cells = GetLoadCells();
+
+                            for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                            {
+                                if (utils::keyExists(maps[i], "d"))
+                                {
+                                    std::cout << cells[i] << std::endl;
+                                    maps[i]["d"] = -cells[i];
+                                }
+                                else
+                                {
+                                    Debug::error("no d key in load cells map");
+                                }
+                            }
+
+                            loadCells["map"] = maps;
+                            std::cout << it.key() << loadCells.dump() << std::endl;
+                            mapping->SetDevice(it.key(), loadCells, Device_Type::ANALOG);
+                        }
+                        else
+                        {
+                            Debug::error("map field for load cells is empty");
+                        }
+                    }
+                    else
+                    {
+                        Debug::error("map field in mapping is not an array");
+                    }
+
+                }
+                else
+                {
+                    Debug::error("map field for load cells don't exist");
+                }
+
+            }
+            else
+            {
+//                Debug::error("No load cells found");
+            }
+
+        }
+
+
+    }
+    else
+    {
+        Debug::error("No analogs found");
+    }
+}
+
 double HcpManager::GetAnalog(std::string name)
 {
     double value = -1;
