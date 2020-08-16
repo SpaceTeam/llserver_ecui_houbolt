@@ -145,6 +145,7 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
     std::unique_lock<std::mutex> lock(self->syncMtx);
     auto lastTime = Clock::now();
     auto currTime = lastTime;
+    std::chrono::microseconds stepTime(interval);
     uint64 currCheckTime = 0;
 
     std::thread callbackThread(self->tickCallback, microTime);
@@ -163,7 +164,7 @@ void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime
             std::thread callbackThread(self->tickCallback, microTime);
             callbackThread.detach();
 	    //self->tickCallback(microTime);
-            lastTime = currTime;
+            lastTime = lastTime + stepTime;
 
 //            if (microTime % 500000 == 0)
 //            {
@@ -213,6 +214,7 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
     std::unique_lock<std::mutex> lock(self->syncMtx);
     auto lastTime = Clock::now();
     auto currTime = lastTime;
+    std::chrono::microseconds stepTime(interval);
     int64 currCheckTime = 0;
 
     std::thread callbackThread(self->tickCallback, microTime);
@@ -227,11 +229,6 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
         currTime = Clock::now();
         currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
 
-        if (currCheckTime > interval + 1000)
-        {
-            std::cout << currCheckTime << std::endl;
-        }
-
         if (currCheckTime >= interval)
         {
             microTime += interval;
@@ -239,7 +236,7 @@ void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int6
             std::thread callbackThread(self->tickCallback, microTime);
             callbackThread.detach();
             //self->tickCallback(microTime);
-            lastTime = currTime;
+            lastTime = lastTime + stepTime;
         }
         //std::this_thread::sleep_for(std::chrono::microseconds(100));
         usleep(100);
