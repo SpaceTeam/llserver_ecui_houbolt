@@ -927,19 +927,18 @@ void HcpManager::TareLoadCells()
 
                             for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
                             {
-                                if (utils::keyExists(maps[i], "d"))
+                                if (utils::keyExists(maps[i], "d") && utils::keyExists(maps[i], "k"))
                                 {
                                     std::cout << cells[i] << std::endl;
                                     maps[i]["d"] = -((double)maps[i]["k"] * (double)cells[i]);
                                 }
                                 else
                                 {
-                                    Debug::error("no d key in load cells map");
+                                    Debug::error("no k or d key in load cells map");
                                 }
                             }
 
                             loadCells["map"] = maps;
-                            std::cout << it.key() << loadCells.dump() << std::endl;
                             mapping->SetDevice(it.key(), loadCells, Device_Type::ANALOG);
                         }
                         else
