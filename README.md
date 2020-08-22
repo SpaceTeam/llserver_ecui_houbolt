@@ -15,3 +15,5 @@ Temperature Sensors over Ethernet with Siliconsystems TMP01
 # Notes:
 
 - Every Sequence needs to define each device at the "START" timestamp
+- **Make sure every "sensorsNominalRange" object in the sequence contains ALL sensors, with a range
+specified**

@@ -1,10 +1,8 @@
 #!/bin/bash
 
-echo "hello world!\n";
 echo $1;
+echo $2;
 
-pushd $1;
-
-ls -la;
-
-popd;
+gnuplot -e "data_path='$1/$2'; img_path='$1/thrust.png'" scripts/thrust_v1.8.plt
+gnuplot -e "data_path='$1/$2'; img_path='$1/pressure.png'" scripts/pressure_v1.8.plt
+gnuplot -e "data_path='$1/$2'; img_path='$1/temp.png'" scripts/temp_v1.8.plt

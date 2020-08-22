@@ -40,12 +40,74 @@ json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
 string SequenceManager::comments = "";
 string SequenceManager::currentDirPath = "";
+string SequenceManager::logFileName = "";
 
 std::map<std::string, Interpolation> SequenceManager::interpolationMap;
 std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
-std::map<std::string, double[2]> SequenceManager::sensorsNominalRangeMap;
+std::map<int64, std::map<std::string, double[2]>> SequenceManager::sensorsNominalRangeTimeMap;
+std::map<std::string, std::map<int64, double[2]>> SequenceManager::sensorsNominalRangeMap;
+std::map<int64, std::map<std::string, double>> SequenceManager::deviceTimeMap;
+std::map<std::string, std::map<int64, double>> SequenceManager::deviceMap;
 
 typedef std::chrono::high_resolution_clock Clock;
+
+void SequenceManager::plotMaps()
+{
+    system("clear");
+
+    Debug::error("\n\nSENSOR RANGES PER NAME");
+    for (const auto& item : sensorsNominalRangeMap)
+    {
+        Debug::error("================");
+        Debug::error("Sensor:" + item.first);
+        Debug::error("\tTime: [ValueMin, ValueMax]");
+        Debug::error("----------------");
+        for (const auto &itemTimestamp : item.second)
+        {
+            Debug::error("\t%d: [%.2f, %.2f]", itemTimestamp.first, itemTimestamp.second[0], itemTimestamp.second[1]);
+        }
+
+    }
+    Debug::error("\n\nSENSOR RANGES PER TIME");
+    for (const auto& item : sensorsNominalRangeTimeMap)
+    {
+        Debug::error("================");
+        Debug::error("Time %d:", item.first);
+        Debug::error("\tSensor: [ValueMin, ValueMax]");
+        Debug::error("----------------");
+        for (const auto &itemTimestamp : item.second)
+        {
+            Debug::error("\t" + itemTimestamp.first + ": [%.2f, %.2f]", itemTimestamp.second[0], itemTimestamp.second[1]);
+        }
+
+    }
+    Debug::error("\n\nDEVICE MAP PER NAME");
+    for (const auto& item : deviceMap)
+    {
+        Debug::error("================");
+        Debug::error("Output Device:" + item.first);
+        Debug::error("\tTime: Value");
+        Debug::error("----------------");
+        for (const auto &itemTimestamp : item.second)
+        {
+            Debug::error("\t%d: %.2f", itemTimestamp.first, itemTimestamp.second);
+        }
+
+    }
+    Debug::error("\n\nDEVICE MAP PER TIME");
+    for (const auto& item : deviceTimeMap)
+    {
+        Debug::error("================");
+        Debug::error("Time %d:", item.first);
+        Debug::error("\tOuput Device: Value");
+        Debug::error("----------------");
+        for (const auto &itemTimestamp : item.second)
+        {
+            Debug::error("\t" + itemTimestamp.first + ": %.2f", itemTimestamp.second);
+        }
+
+    }
+}
 
 void SequenceManager::init()
 {
@@ -110,6 +172,7 @@ void SequenceManager::SetupLogging()
     strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
 
     currentDirPath = "logs/" + string(dateTime_string);
+    logFileName = string(dateTime_string) + ".csv";
     filesystem::create_directory(currentDirPath);
     Debug::changeOutputFile(currentDirPath + "/" + string(dateTime_string) + ".csv");
 
@@ -121,6 +184,73 @@ void SequenceManager::SetupLogging()
     filesystem::copy("config.json", currentDirPath + "/");
 }
 
+bool SequenceManager::LoadSequence(json jsonSeq)
+{
+    deviceMap.clear();
+    deviceTimeMap.clear();
+    sensorsNominalRangeMap.clear();
+    sensorsNominalRangeTimeMap.clear();
+    for (auto dataItem : jsonSeq["data"])
+    {
+        double timeCmd = GetTimestamp(dataItem);
+        int64 timestampCmdMicros = utils::toMicros(timeCmd);
+
+        for (auto actionItem : dataItem["actions"])
+        {
+            //convert timestamp of action
+            if (actionItem["timestamp"].type() == json::value_t::string)
+            {
+                Debug::error("no strings in actionitems allowed");
+                SequenceManager::AbortSequence("no strings as timestamp in action items allowed");
+                return false;
+            }
+
+            double time = GetTimestamp(actionItem);
+            int64 timestampMicros = utils::toMicros(time);
+            if (timestampMicros < 0)
+            {
+                Debug::error("timestamp in action must be positive");
+                SequenceManager::AbortSequence("timestamp in action must be positive");
+                return false;
+            }
+
+            timestampMicros += timestampCmdMicros;
+
+            actionItem.erase("timestamp");
+            for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
+            {
+                if (it.key().compare("sensorsNominalRange") == 0)
+                {
+                    json sensorsRanges = it.value();
+                    for (auto sensorsIt = sensorsRanges.begin(); sensorsIt != sensorsRanges.end(); ++sensorsIt)
+                    {
+                        if (sensorsIt.value().type() == json::value_t::array && sensorsIt.value().size() == 2)
+                        {
+                            sensorsNominalRangeMap[sensorsIt.key()][timestampMicros][0] = sensorsIt.value()[0];
+                            sensorsNominalRangeMap[sensorsIt.key()][timestampMicros][1] = sensorsIt.value()[1];
+                            sensorsNominalRangeTimeMap[timestampMicros][sensorsIt.key()][0] = sensorsIt.value()[0];
+                            sensorsNominalRangeTimeMap[timestampMicros][sensorsIt.key()][1] = sensorsIt.value()[1];
+                        }
+                        else
+                        {
+                            Debug::error("Range of " + sensorsIt.key() + " not valid");
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    deviceMap[it.key()][timestampMicros] = it.value();
+                    deviceTimeMap[timestampMicros][it.key()] = it.value();
+                }
+            }
+
+        }
+    }
+    plotMaps();
+    return true;
+}
+
 void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string comments)
 {
     if (!isRunning && !isAbortRunning)
@@ -129,62 +259,63 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
         jsonAbortSequence = jsonAbortSeq;
         SequenceManager::comments = comments;
 
-        SetupLogging();
-
-        LLInterface::BeepRed();
-
-        //get sensor names
-        vector<string> sensorNames = LLInterface::GetAllSensorNames();
-        vector<string> outputNames = LLInterface::GetAllOutputNames();
-        string msg;
-        for (int i = 0; i < sensorNames.size(); i++)
+        if (LoadSequence(jsonSeq))
         {
-            msg += sensorNames[i] + ";";
-        }
-        msg += "Status;";
-        msg += "SequenceTime;";
-        for (auto rangeName : jsonSeq["globals"]["ranges"])
-        {
-            cerr << rangeName << endl;
-            if (rangeName.type() == json::value_t::string)
+            SetupLogging();
+
+            LLInterface::BeepRed();
+
+            //get sensor names
+            vector<string> sensorNames = LLInterface::GetAllSensorNames();
+            vector<string> outputNames = LLInterface::GetAllOutputNames();
+            string msg;
+            for (int i = 0; i < sensorNames.size(); i++)
             {
-                msg += (string)rangeName + "Min;";
-                msg += (string)rangeName + "Max;";
+                msg += sensorNames[i] + ";";
             }
-            else
+            msg += "Status;";
+            msg += "SequenceTime;";
+            for (auto rangeName : jsonSeq["globals"]["ranges"])
             {
-                Debug::error("range name in sequence globals not a string");
+                cerr << rangeName << endl;
+                if (rangeName.type() == json::value_t::string)
+                {
+                    msg += (string) rangeName + "Min;";
+                    msg += (string) rangeName + "Max;";
+                }
+                else
+                {
+                    Debug::error("range name in sequence globals not a string");
+                }
+
+            }
+            for (auto item : outputNames)
+            {
+                msg += item + ";";
             }
 
-        }
-        for (auto item : outputNames)
-        {
-            msg += item + ";";
-        }
+            Debug::log("Timestep;" + msg + "\n");
 
-        //async_file->info("Timestep;" + msg);
-        //logging::INFO("Timestep;" + msg + "\n");
-        Debug::log("Timestep;" + msg + "\n");
+            isRunning = true;
 
-        isRunning = true;
+            LoadInterpolationMap();
+            //LoadIntervalMap();
 
-        LoadInterpolationMap();
-        LoadIntervalMap();
-
-        threadCounter = 0;
+            threadCounter = 0;
 
 
-        int64 startTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
-        int64 endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
-        int64 interval = utils::toMicros(jsonSeq["globals"]["interval"]);
-        Debug::info("%d %d %d", startTime, endTime, interval);
+            int64 startTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
+            int64 endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
+            int64 interval = utils::toMicros(jsonSeq["globals"]["interval"]);
+            Debug::info("%d %d %d", startTime, endTime, interval);
 
-        EcuiSocket::SendJson("timer-start");
+            EcuiSocket::SendJson("timer-start");
 
-        LLInterface::EnableAllOutputDevices();
-        sensorTimer->startContinous(startTime, 1000000/sensorSampleRate, SequenceManager::GetSensors, SequenceManager::StopGetSensors);
-        timer->start(startTime, endTime, interval, SequenceManager::Tick, SequenceManager::StopSequence);
-        //TODO: discuss if we need that feature
+            LLInterface::EnableAllOutputDevices();
+            sensorTimer->startContinous(startTime, 1000000 / sensorSampleRate, SequenceManager::GetSensors,
+                                        SequenceManager::StopGetSensors);
+            timer->start(startTime, endTime, interval, SequenceManager::Tick, SequenceManager::StopSequence);
+            //TODO: discuss if we need that feature
 //        if (HcpManager::EnableAllServos())
 //        {
 //            timer->start(startTime, endTime, interval, Tick, StopSequence);
@@ -194,6 +325,7 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
 //            Debug::error("couldn't enable all servos, aborting...");
 //            AbortSequence();
 //        }
+        }
 
     }
 }
@@ -215,7 +347,7 @@ void SequenceManager::LoadInterpolationMap()
         {
             interpolationMap[it.key()] = Interpolation::NONE;
         }
-        Debug::error("interpolation created for %s: mode %s", it.key().c_str(), mode.c_str());
+        Debug::info("interpolation created for %s: mode %s", it.key().c_str(), mode.c_str());
     }
 
 }
@@ -290,10 +422,10 @@ void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
 
         //TODO: think about a better solution to log on abort
         msg += to_string(secs) + ";";
-        for (const auto sensor : sensorsNominalRangeMap)
+        for (const auto& sensor : sensorsNominalRangeMap)
         {
-            msg += to_string(sensor.second[0]) + ";";
-            msg += to_string(sensor.second[1]) + ";";
+            msg += to_string(sensor.second.begin()->second[0]) + ";";
+            msg += to_string(sensor.second.begin()->second[1]) + ";";
         }
         for (auto it = jsonAbortSequence["actions"].begin(); it != jsonAbortSequence["actions"].end(); ++it)
         {
@@ -314,7 +446,7 @@ void SequenceManager::StopGetSensors()
     Debug::flush();
     // execute gnuplot script
     std::string scriptPath = std::get<std::string>(Config::getData("LOGGING/post_sequence_script"));
-    system((scriptPath + " " + currentDirPath).c_str());
+    system((scriptPath + " " + currentDirPath + " " + logFileName).c_str());
 }
 
 void SequenceManager::GetSensors(int64 microTime)
@@ -326,7 +458,8 @@ void SequenceManager::GetSensors(int64 microTime)
     {
         if (isAutoAbort && (sensorsNominalRangeMap.find(sensor.first) != sensorsNominalRangeMap.end()))
         {
-            if (sensorsNominalRangeMap[sensor.first][0] > sensor.second)
+            auto currInterval = sensorsNominalRangeMap[sensor.first].begin();
+            if (currInterval->second[0] > sensor.second)
             {
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
@@ -336,7 +469,7 @@ void SequenceManager::GetSensors(int64 microTime)
                     SequenceManager::AbortSequence(abortMsg);
                 }
             }
-            else if (sensor.second > sensorsNominalRangeMap[sensor.first][1])
+            else if (sensor.second > currInterval->second[1])
             {
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(sensor.second) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
@@ -421,176 +554,134 @@ void SequenceManager::Tick(int64 microTime)
         LLInterface::TurnRed();
     }
 
-    bool findNext = false;
-    map<string, uint8> namesUpdated;
-
-
-    //TODO: this is very inefficient right now; make it so actions can be accessed by timestamp as key
-    for (auto dataItem : jsonSequence["data"])
-    {
-        double timeCmd = GetTimestamp(dataItem);
-        int64 timestampCmdMicros = utils::toMicros(timeCmd);
-
-        for (auto actionItem : dataItem["actions"])
-        {
-            //convert timestamp of action
-            if (actionItem["timestamp"].type() == json::value_t::string)
-            {
-                Debug::error("no strings in actionitems allowed");
-                SequenceManager::AbortSequence("no strings as timestamp in action items allowed");
-                return;
-            }
-            double time = GetTimestamp(actionItem);
-            int64 timestampMicros = utils::toMicros(time);
-            if (timestampMicros < 0)
-            {
-                Debug::error("timestamp in action must be positive");
-                SequenceManager::AbortSequence("timestamp in action must be positive");
-                return;
-            }
-
-            //convert to absolute time
-            timestampMicros += timestampCmdMicros;
-            if (timestampMicros == microTime)
-            {
-                Debug::print("timestamp | %d", time);
-                for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
-                {
-                    if (it.key().compare("sensorsNominalRange") == 0)
-                    {
-                        json sensorsRanges = it.value();
-                        for (auto sensorsIt = sensorsRanges.begin(); sensorsIt != sensorsRanges.end(); ++sensorsIt)
-                        {
-                            if (sensorsIt.value().type() == json::value_t::array && sensorsIt.value().size() == 2)
-                            {
-                                sensorsNominalRangeMap[sensorsIt.key()][0] = sensorsIt.value()[0];
-                                sensorsNominalRangeMap[sensorsIt.key()][1] = sensorsIt.value()[1];
-                            }
-                            else
-                            {
-                                cout << "Range of " << sensorsIt.key() << " not valid" << endl;
-                            }
-                        }
-                    }
-                    else if (it.key().compare("timestamp") != 0)
-                    {
-                        findNext = true;
-                        Debug::print(it.key() + " | %d", (uint8)it.value());
-                        namesUpdated[it.key()] = (uint8)it.value();
-                    }
-                }
-                Debug::print("--------------");
-            }
-            else if (timestampMicros > microTime)
-            {
-                if (findNext)
-                {
-                    for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
-                    {
-                        if (namesUpdated.find(it.key()) != namesUpdated.end())
-                        {
-                            UpdateIntervalMap(it.key(), timestampMicros, (uint8)it.value());
-
-                            namesUpdated.erase(it.key());
-                        }
-                    }
-                    if (namesUpdated.empty())
-                    {
-                        //all values updated
-                        findNext = false;
-                        break;
-                    }
-
-                }
-            }
-        }
-    }
     std::chrono::time_point<std::chrono::high_resolution_clock> beforeLogging;
-    //findNext = false;
-    if (findNext)
+    if (isRunning)
     {
-        //not all values found yet; microTimes > endTime;
-        Debug::error("findNext still true at micro time: %ld", microTime);
-        for (auto item : namesUpdated)
-        {
-            UpdateIntervalMap(item.first, microTime, (uint8)item.second);
-        }
-
-    }
-    //else
-    //{
+        string msg = to_string(microTime / 1000000.0) + ";";
+        syncMtx.lock();
         if (isRunning)
         {
-            string msg = to_string(microTime / 1000000.0) + ";";
-            syncMtx.lock();
-            if (isRunning)
+            //log nominal ranges
+            for (const auto sensor : sensorsNominalRangeMap)
             {
-                //log nominal ranges
-                for (const auto sensor : sensorsNominalRangeMap)
+                msg += to_string(sensor.second.begin()->second[0]) + ";";
+                msg += to_string(sensor.second.begin()->second[1]) + ";";
+            }
+
+            bool shallExec;
+            uint8 nextValue = 0;
+
+            for (const auto &devItem : deviceMap)
+            {
+                shallExec = true;
+
+                auto prevIt = devItem.second.begin();
+                if (prevIt != devItem.second.end())
                 {
-                    msg += to_string(sensor.second[0]) + ";";
-                    msg += to_string(sensor.second[1]) + ";";
-                }
+                    auto nextIt = std::next(devItem.second.begin());
 
-                bool shallExec;
-                for (const auto &seqItem : sequenceIntervalMap)
-                {
-                    shallExec = true;
-
-                    Point prev = sequenceIntervalMap[seqItem.first][0];
-                    Point next = sequenceIntervalMap[seqItem.first][1];
-
-                    uint8 nextValue;
-
-                    if (prev.x == microTime)
+                    if (devItem.first.compare("fuelMainValve") == 0)
                     {
-                        nextValue = (uint8) prev.y;
+                        Debug::error("%s", devItem.first.c_str());
+                        Debug::error("prev time: %d -- prev value: %f", prevIt->first, prevIt->second);
+                        Debug::error("next time: %d -- next value: %f", nextIt->first, nextIt->second);
+                    }
+
+                    if (microTime >= nextIt->first)
+                    {
+                        nextValue = (uint8) nextIt->second;
+                        deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
                     }
                     else
                     {
                         Interpolation inter = Interpolation::NONE;
-                        if (interpolationMap.find(seqItem.first) == interpolationMap.end())
+                        if (interpolationMap.find(devItem.first) == interpolationMap.end())
                         {
-                            Debug::error("%s not found in interpolation map, falling back to no interpolation", seqItem.first.c_str());
+                            Debug::error("%s not found in interpolation map, falling back to no interpolation", devItem.first.c_str());
                         }
                         else
                         {
-                            inter = interpolationMap[seqItem.first];
+                            inter = interpolationMap[devItem.first];
                         }
                         switch (inter)
                         {
                             case Interpolation::LINEAR:
                             {
-                                double scale = ((next.y - prev.y) * 1.0) / (next.x - prev.x);
-                                nextValue = (scale * (microTime - prev.x)) + prev.y;
+                                double scale = ((nextIt->second - prevIt->second) * 1.0) / (nextIt->first - prevIt->first);
+                                nextValue = (scale * (microTime - prevIt->first)) + prevIt->second;
                                 break;
                             }
                             case Interpolation::NONE:
                             default:
-                                nextValue = (uint8) prev.y;
+                                nextValue = (uint8) prevIt->second;
                                 shallExec = false;
                         }
                     }
 
-                    msg += to_string(nextValue) + ";";
+                    if (devItem.first.compare("fuelMainValve") == 0)
+                    {
+                        Debug::error("curr time: %d -- curr value: %d", microTime, nextValue);
+                    }
 
                     if (shallExec)
                     {
-                        LLInterface::ExecCommand(seqItem.first, nextValue);
+                        LLInterface::ExecCommand(devItem.first, nextValue);
                     }
                     if (threadCounter > 1)
                     {
-                        Debug::warning("writing " + seqItem.first + " with value %d at micro time: %ld", nextValue,
+                        Debug::warning("writing " + devItem.first + " with value %d at micro time: %ld", nextValue,
                                      microTime);
                     }
-
                 }
+                else
+                {
+                    Debug::info("no interval found, keeping the same value");
+                }
+
+                msg += to_string(nextValue) + ";";
             }
-            syncMtx.unlock();
-		    beforeLogging = Clock::now();
-            Debug::log(msg);
         }
-    //}
+        syncMtx.unlock();
+        beforeLogging = Clock::now();
+        Debug::log(msg);
+    }
+
+    //delete depricated timestamp and update sensorsNominalRangeMap as well
+    auto beginRangeIt = sensorsNominalRangeTimeMap.begin();
+    //is not last element in map
+    if (beginRangeIt != sensorsNominalRangeTimeMap.end())
+    {
+        int64 nextRangeChange = std::next(beginRangeIt)->first;
+        if (microTime >= nextRangeChange)
+        {
+            for (const auto& sensor : beginRangeIt->second)
+            {
+                sensorsNominalRangeMap[sensor.first].erase(sensorsNominalRangeMap[sensor.first].begin());
+            }
+            sensorsNominalRangeTimeMap.erase(beginRangeIt);
+            //plotMaps();
+            Debug::error("updated sensor ranges at time: %d in ms", microTime/1000);
+        }
+    }
+
+    //delete depricated timestamp and update sensorsNominalRangeMap as well
+//    auto beginDeviceIt = deviceTimeMap.begin();
+//    //is not last element in map
+//    if (beginDeviceIt != deviceTimeMap.end())
+//    {
+//        int64 nextIntervalChange = std::next(beginDeviceIt)->first;
+//        if (microTime >= nextIntervalChange)
+//        {
+//            for (const auto& device : beginDeviceIt->second)
+//            {
+//                deviceMap[device.first].erase(deviceMap[device.first].begin());
+//            }
+//            deviceTimeMap.erase(beginDeviceIt);
+//            //plotMaps();
+//            Debug::error("updated device map at time: %d in ms", microTime/1000);
+//        }
+//    }
+
     auto currTime = Clock::now();
     if (threadCounter > 80)
     {
