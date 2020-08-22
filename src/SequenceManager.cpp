@@ -579,14 +579,7 @@ void SequenceManager::Tick(int64 microTime)
                 if (prevIt != devItem.second.end())
                 {
                     auto nextIt = std::next(devItem.second.begin());
-
-                    if (devItem.first.compare("fuelMainValve") == 0)
-                    {
-                        Debug::error("%s", devItem.first.c_str());
-                        Debug::error("prev time: %d -- prev value: %f", prevIt->first, prevIt->second);
-                        Debug::error("next time: %d -- next value: %f", nextIt->first, nextIt->second);
-                    }
-
+                    
                     if (microTime >= nextIt->first)
                     {
                         nextValue = (uint8) nextIt->second;
@@ -618,11 +611,6 @@ void SequenceManager::Tick(int64 microTime)
                         }
                     }
 
-                    if (devItem.first.compare("fuelMainValve") == 0)
-                    {
-                        Debug::error("curr time: %d -- curr value: %d", microTime, nextValue);
-                    }
-
                     if (shallExec)
                     {
                         LLInterface::ExecCommand(devItem.first, nextValue);
@@ -641,27 +629,27 @@ void SequenceManager::Tick(int64 microTime)
                 msg += to_string(nextValue) + ";";
             }
         }
+        //delete depricated timestamp and update sensorsNominalRangeMap as well
+        auto beginRangeIt = sensorsNominalRangeTimeMap.begin();
+        //is not last element in map
+        if (beginRangeIt != sensorsNominalRangeTimeMap.end())
+        {
+            int64 nextRangeChange = std::next(beginRangeIt)->first;
+            if (microTime >= nextRangeChange)
+            {
+                for (const auto& sensor : beginRangeIt->second)
+                {
+                    sensorsNominalRangeMap[sensor.first].erase(sensorsNominalRangeMap[sensor.first].begin());
+                }
+                sensorsNominalRangeTimeMap.erase(beginRangeIt);
+                //plotMaps();
+                Debug::error("updated sensor ranges at time: %d in ms", microTime/1000);
+            }
+        }
+
         syncMtx.unlock();
         beforeLogging = Clock::now();
         Debug::log(msg);
-    }
-
-    //delete depricated timestamp and update sensorsNominalRangeMap as well
-    auto beginRangeIt = sensorsNominalRangeTimeMap.begin();
-    //is not last element in map
-    if (beginRangeIt != sensorsNominalRangeTimeMap.end())
-    {
-        int64 nextRangeChange = std::next(beginRangeIt)->first;
-        if (microTime >= nextRangeChange)
-        {
-            for (const auto& sensor : beginRangeIt->second)
-            {
-                sensorsNominalRangeMap[sensor.first].erase(sensorsNominalRangeMap[sensor.first].begin());
-            }
-            sensorsNominalRangeTimeMap.erase(beginRangeIt);
-            //plotMaps();
-            Debug::error("updated sensor ranges at time: %d in ms", microTime/1000);
-        }
     }
 
     //delete depricated timestamp and update sensorsNominalRangeMap as well
