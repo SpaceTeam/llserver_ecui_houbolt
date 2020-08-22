@@ -34,7 +34,6 @@ Timer* SequenceManager::timer;
 Timer* SequenceManager::sensorTimer;
 
 int32 threadCounter = 0;
-//std::shared_ptr<spdlog::logger> SequenceManager::async_file;
 
 json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
@@ -43,70 +42,60 @@ string SequenceManager::currentDirPath = "";
 string SequenceManager::logFileName = "";
 
 std::map<std::string, Interpolation> SequenceManager::interpolationMap;
-std::map<std::string, Point[2]> SequenceManager::sequenceIntervalMap;
 std::map<int64, std::map<std::string, double[2]>> SequenceManager::sensorsNominalRangeTimeMap;
 std::map<std::string, std::map<int64, double[2]>> SequenceManager::sensorsNominalRangeMap;
-std::map<int64, std::map<std::string, double>> SequenceManager::deviceTimeMap;
 std::map<std::string, std::map<int64, double>> SequenceManager::deviceMap;
 
 typedef std::chrono::high_resolution_clock Clock;
 
-void SequenceManager::plotMaps()
+void SequenceManager::plotMaps(uint8 option=2)
 {
-    system("clear");
-
-    Debug::error("\n\nSENSOR RANGES PER NAME");
-    for (const auto& item : sensorsNominalRangeMap)
+    if (option != 1)
     {
-        Debug::error("================");
-        Debug::error("Sensor:" + item.first);
-        Debug::error("\tTime: [ValueMin, ValueMax]");
-        Debug::error("----------------");
-        for (const auto &itemTimestamp : item.second)
+        Debug::info("\n\nSENSOR RANGES PER NAME");
+        for (const auto& item : sensorsNominalRangeMap)
         {
-            Debug::error("\t%d: [%.2f, %.2f]", itemTimestamp.first, itemTimestamp.second[0], itemTimestamp.second[1]);
-        }
+            Debug::info("================");
+            Debug::info("Sensor:" + item.first);
+            Debug::info("\tTime: [ValueMin, ValueMax]");
+            Debug::info("----------------");
+            for (const auto &itemTimestamp : item.second)
+            {
+                Debug::info("\t%d: [%.2f, %.2f]", itemTimestamp.first, itemTimestamp.second[0], itemTimestamp.second[1]);
+            }
 
+        }
+        Debug::info("\n\nSENSOR RANGES PER TIME");
+        for (const auto& item : sensorsNominalRangeTimeMap)
+        {
+            Debug::info("================");
+            Debug::info("Time %d:", item.first);
+            Debug::info("\tSensor: [ValueMin, ValueMax]");
+            Debug::info("----------------");
+            for (const auto &itemTimestamp : item.second)
+            {
+                Debug::info("\t" + itemTimestamp.first + ": [%.2f, %.2f]", itemTimestamp.second[0], itemTimestamp.second[1]);
+            }
+        }
     }
-    Debug::error("\n\nSENSOR RANGES PER TIME");
-    for (const auto& item : sensorsNominalRangeTimeMap)
+
+    if (option != 0)
     {
-        Debug::error("================");
-        Debug::error("Time %d:", item.first);
-        Debug::error("\tSensor: [ValueMin, ValueMax]");
-        Debug::error("----------------");
-        for (const auto &itemTimestamp : item.second)
+        Debug::info("\n\nDEVICE MAP PER NAME");
+        for (const auto& item : deviceMap)
         {
-            Debug::error("\t" + itemTimestamp.first + ": [%.2f, %.2f]", itemTimestamp.second[0], itemTimestamp.second[1]);
-        }
+            Debug::info("================");
+            Debug::info("Output Device:" + item.first);
+            Debug::info("\tTime: Value");
+            Debug::info("----------------");
+            for (const auto &itemTimestamp : item.second)
+            {
+                Debug::info("\t%d: %.2f", itemTimestamp.first, itemTimestamp.second);
+            }
 
-    }
-    Debug::error("\n\nDEVICE MAP PER NAME");
-    for (const auto& item : deviceMap)
-    {
-        Debug::error("================");
-        Debug::error("Output Device:" + item.first);
-        Debug::error("\tTime: Value");
-        Debug::error("----------------");
-        for (const auto &itemTimestamp : item.second)
-        {
-            Debug::error("\t%d: %.2f", itemTimestamp.first, itemTimestamp.second);
         }
-
     }
-    Debug::error("\n\nDEVICE MAP PER TIME");
-    for (const auto& item : deviceTimeMap)
-    {
-        Debug::error("================");
-        Debug::error("Time %d:", item.first);
-        Debug::error("\tOuput Device: Value");
-        Debug::error("----------------");
-        for (const auto &itemTimestamp : item.second)
-        {
-            Debug::error("\t" + itemTimestamp.first + ": %.2f", itemTimestamp.second);
-        }
 
-    }
 }
 
 void SequenceManager::init()
@@ -143,13 +132,11 @@ void SequenceManager::AbortSequence(std::string abortMsg)
         isAbort = true;
         timer->stop();
 
-
         EcuiSocket::SendJson("abort", abortMsg);
         Debug::print("aborting... " + abortMsg);
         isRunning = false;
 
         StartAbortSequence();
-
 
         isAbort = false;
     }
@@ -187,7 +174,6 @@ void SequenceManager::SetupLogging()
 bool SequenceManager::LoadSequence(json jsonSeq)
 {
     deviceMap.clear();
-    deviceTimeMap.clear();
     sensorsNominalRangeMap.clear();
     sensorsNominalRangeTimeMap.clear();
     for (auto dataItem : jsonSeq["data"])
@@ -241,7 +227,6 @@ bool SequenceManager::LoadSequence(json jsonSeq)
                 else
                 {
                     deviceMap[it.key()][timestampMicros] = it.value();
-                    deviceTimeMap[timestampMicros][it.key()] = it.value();
                 }
             }
 
@@ -299,7 +284,6 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
             isRunning = true;
 
             LoadInterpolationMap();
-            //LoadIntervalMap();
 
             threadCounter = 0;
 
@@ -315,16 +299,6 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
             sensorTimer->startContinous(startTime, 1000000 / sensorSampleRate, SequenceManager::GetSensors,
                                         SequenceManager::StopGetSensors);
             timer->start(startTime, endTime, interval, SequenceManager::Tick, SequenceManager::StopSequence);
-            //TODO: discuss if we need that feature
-//        if (HcpManager::EnableAllServos())
-//        {
-//            timer->start(startTime, endTime, interval, Tick, StopSequence);
-//        }
-//        else
-//        {
-//            Debug::error("couldn't enable all servos, aborting...");
-//            AbortSequence();
-//        }
         }
 
     }
@@ -350,62 +324,6 @@ void SequenceManager::LoadInterpolationMap()
         Debug::info("interpolation created for %s: mode %s", it.key().c_str(), mode.c_str());
     }
 
-}
-
-void SequenceManager::LoadIntervalMap()
-{
-    for (auto dataItem : jsonSequence["data"])
-    {
-
-        if (dataItem["timestamp"].type() == json::value_t::string)
-        {
-            double timeCmd = 0.0;
-            string timeStr = dataItem["timestamp"];
-            if (timeStr.compare("START") == 0)
-            {
-                timeCmd = jsonSequence["globals"]["startTime"];
-                json actionItem = dataItem["actions"][0];
-                double time = actionItem["timestamp"];
-                time += timeCmd;
-
-                int64 timestampMicros = utils::toMicros(time);
-                for (auto it = actionItem.begin(); it != actionItem.end(); ++it)
-                {
-                    if (it.key().compare("timestamp") != 0 && it.key().compare("sensorsNominalRange") != 0)
-                    {
-                        sequenceIntervalMap[it.key()][0].x = timestampMicros;
-                        sequenceIntervalMap[it.key()][0].y = (uint8) it.value();
-                        sequenceIntervalMap[it.key()][1].x = timestampMicros;
-                        sequenceIntervalMap[it.key()][1].y = (uint8) it.value();
-
-                        Debug::info("Interval created for " + it.key());
-    //                            cerr << "prev: x: " << sequenceIntervalMap[it.key()][0].x << ", y: " << sequenceIntervalMap[it.key()][0].y << endl;
-    //                            cerr << "next: x: " << sequenceIntervalMap[it.key()][1].x << ", y: " << sequenceIntervalMap[it.key()][1].y << endl;
-                    }
-                }
-                return;
-            }
-
-        }
-    }
-}
-
-void SequenceManager::UpdateIntervalMap(std::string name, int64 microTime, uint8 newValue)
-{
-    if (sequenceIntervalMap.find(name) != sequenceIntervalMap.end())
-    {
-        sequenceIntervalMap[name][0] = sequenceIntervalMap[name][1];
-
-        Point newPt = {};
-        newPt.x = microTime;
-        newPt.y = newValue;
-
-        sequenceIntervalMap[name][1] = newPt;
-    }
-    else
-    {
-        Debug::error("Cannot find name in sequenceIntervalMap, please define every device at the START timestamp");
-    }
 }
 
 void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
@@ -575,11 +493,11 @@ void SequenceManager::Tick(int64 microTime)
             {
                 shallExec = true;
 
-                auto prevIt = devItem.second.begin();
-                if (prevIt != devItem.second.end())
+                if (devItem.second.size() > 1)
                 {
+                    auto prevIt = devItem.second.begin();
                     auto nextIt = std::next(devItem.second.begin());
-                    
+
                     if (microTime >= nextIt->first)
                     {
                         nextValue = (uint8) nextIt->second;
@@ -630,11 +548,10 @@ void SequenceManager::Tick(int64 microTime)
             }
         }
         //delete depricated timestamp and update sensorsNominalRangeMap as well
-        auto beginRangeIt = sensorsNominalRangeTimeMap.begin();
-        //is not last element in map
-        if (beginRangeIt != sensorsNominalRangeTimeMap.end())
+        if (sensorsNominalRangeTimeMap.size() > 1)
         {
-            int64 nextRangeChange = std::next(beginRangeIt)->first;
+            auto beginRangeIt = sensorsNominalRangeTimeMap.begin();
+            int64 nextRangeChange = beginRangeIt->first;
             if (microTime >= nextRangeChange)
             {
                 for (const auto& sensor : beginRangeIt->second)
@@ -651,24 +568,6 @@ void SequenceManager::Tick(int64 microTime)
         beforeLogging = Clock::now();
         Debug::log(msg);
     }
-
-    //delete depricated timestamp and update sensorsNominalRangeMap as well
-//    auto beginDeviceIt = deviceTimeMap.begin();
-//    //is not last element in map
-//    if (beginDeviceIt != deviceTimeMap.end())
-//    {
-//        int64 nextIntervalChange = std::next(beginDeviceIt)->first;
-//        if (microTime >= nextIntervalChange)
-//        {
-//            for (const auto& device : beginDeviceIt->second)
-//            {
-//                deviceMap[device.first].erase(deviceMap[device.first].begin());
-//            }
-//            deviceTimeMap.erase(beginDeviceIt);
-//            //plotMaps();
-//            Debug::error("updated device map at time: %d in ms", microTime/1000);
-//        }
-//    }
 
     auto currTime = Clock::now();
     if (threadCounter > 80)

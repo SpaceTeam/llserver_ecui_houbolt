@@ -55,18 +55,14 @@ private:
     static std::string logFileName;
 
     static std::map<std::string, Interpolation> interpolationMap;
-    static std::map<std::string, Point[2]> sequenceIntervalMap;
     static std::map<int64, std::map<std::string, double[2]>> sensorsNominalRangeTimeMap;
     static std::map<std::string, std::map<int64, double[2]>> sensorsNominalRangeMap;
-    static std::map<int64, std::map<std::string, double>> deviceTimeMap;
     static std::map<std::string, std::map<int64, double>> deviceMap;
 
     static void SetupLogging();
 
-    static void LoadIntervalMap();
     static void LoadInterpolationMap();
-    static void UpdateIntervalMap(std::string name, int64 microTime, uint8 newValue);
-
+    static bool LoadSequence(json jsonSeq);
 
     static void LogSensors(int64 microTime, std::vector<double > sensors);
     static void StopGetSensors();
@@ -79,7 +75,7 @@ private:
     static void StartAbortSequence();
 
 
-    static void plotMaps();
+    static void plotMaps(uint8 option);
 
     SequenceManager();
 
@@ -92,10 +88,6 @@ public:
     static void AbortSequence(std::string abortMsg="abort");
     static void StopSequence();
     static void StartSequence(json jsonSeq, json jsonAbortSeq, std::string comments);
-    static bool LoadSequence(json jsonSeq);
-
-
-
 };
 
 
