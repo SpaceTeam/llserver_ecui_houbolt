@@ -12,6 +12,7 @@
 #include "utils.h"
 #include "LLInterface.h"
 #include "Config.h"
+#include "InfluxInterface.h"
 
 //#include "spdlog/async.h"
 //#include "spdlog/sinks/basic_file_sink.h"
@@ -398,6 +399,7 @@ void SequenceManager::GetSensors(int64 microTime)
                 }
             }
         }
+        InfluxInterface::Log(sensor.first + ";" + sensor.first + ";" + to_string(sensor.second) + "\n");
         vals.push_back(sensor.second);
     }
 
