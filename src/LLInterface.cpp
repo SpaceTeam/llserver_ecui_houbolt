@@ -213,7 +213,7 @@ void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double>
 
         content.push_back(sen);
 
-        InfluxInterface::Log(sensor.first + ";" + sensor.first + ";" + std::to_string(sensor.second) + "\n");
+        InfluxInterface::Log(sensor.first + ";" + sensor.first + ";" + std::to_string(sensor.second) + ";" + std::to_string(-1) + "\n");
     }
     EcuiSocket::SendJson("sensors", content);
 }

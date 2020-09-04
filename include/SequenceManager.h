@@ -15,6 +15,7 @@
 
 #include "Timer.h"
 #include "I2C.h"
+#include <time.h>
 
 using json = nlohmann::json;
 
@@ -53,6 +54,7 @@ private:
     static std::string comments;
     static std::string currentDirPath;
     static std::string logFileName;
+    static time_t currentUnixTime;
 
     static std::map<std::string, Interpolation> interpolationMap;
     static std::map<int64, std::map<std::string, double[2]>> sensorsNominalRangeTimeMap;

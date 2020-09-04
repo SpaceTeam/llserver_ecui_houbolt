@@ -41,6 +41,7 @@ json SequenceManager::jsonAbortSequence = json::object();
 string SequenceManager::comments = "";
 string SequenceManager::currentDirPath = "";
 string SequenceManager::logFileName = "";
+time_t SequenceManager::currentUnixTime;
 
 std::map<std::string, Interpolation> SequenceManager::interpolationMap;
 std::map<int64, std::map<std::string, double[2]>> SequenceManager::sensorsNominalRangeTimeMap;
@@ -150,12 +151,11 @@ void SequenceManager::AbortSequence(std::string abortMsg)
 
 void SequenceManager::SetupLogging()
 {
-    time_t curr_time;
     tm * curr_tm;
     char dateTime_string[100];
 
-    time(&curr_time);
-    curr_tm = localtime(&curr_time);
+    time(&currentUnixTime);
+    curr_tm = localtime(&currentUnixTime);
 
     strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
 
@@ -399,7 +399,7 @@ void SequenceManager::GetSensors(int64 microTime)
                 }
             }
         }
-        InfluxInterface::Log(sensor.first + ";" + sensor.first + ";" + to_string(sensor.second) + "\n");
+        InfluxInterface::Log(sensor.first + ";" + sensor.first + ";" + to_string(sensor.second) + ";" + to_string(currentUnixTime) + "\n");
         vals.push_back(sensor.second);
     }
 
