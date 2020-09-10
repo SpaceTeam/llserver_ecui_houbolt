@@ -36,14 +36,31 @@ void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<voi
 
 void EcuiSocket::AsyncListen(std::function<void(json)> onMsgCallback)
 {
-
+    string delimiter = "\n";
+    string msg = "";
     while(!shallClose)
     {
-        string msg = socket->Recv();
+        size_t pos = 0;
+        msg.append(socket->Recv());
+        while ((pos = msg.find(delimiter)) == std::string::npos)
+        {
+            msg.append(socket->Recv());
+        }
 
-        json jsonMsg = json::parse(msg);
+        string token;
+        while ((pos = msg.find(delimiter)) != std::string::npos)
+        {
+            token = msg.substr(0, pos);
+            std::cout << "-------&&&-----\n" << token << "\n----------&&&------" <<  std::endl;
+            json jsonMsg = json::parse(token);
+            onMsgCallback(jsonMsg);
+            msg.erase(0, pos + delimiter.length());
+        }
 
+        std::cout << "---------------\n" << token << "\n-------------------" <<  std::endl;
+        json jsonMsg = json::parse(token);
         onMsgCallback(jsonMsg);
+        msg.erase(0, pos + delimiter.length());
 
         this_thread::yield();
     }
