@@ -9,8 +9,6 @@
 #include <unistd.h>
 #include <mutex>
 #include <thread>
-#include <stdlib.h>
-#include <signal.h>
 
 #include "Debug.h"
 
@@ -143,7 +141,6 @@ void Debug::changeOutputFile(std::string outFilePath)
 void Debug::log(std::string msg)
 {
     std::lock_guard<std::mutex> lock(outFileMutex);
-
     logStream << msg;
 
 }

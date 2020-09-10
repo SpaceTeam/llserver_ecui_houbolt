@@ -6,7 +6,6 @@
 #include "EcuiSocket.h"
 #include "Timer.h"
 #include "Config.h"
-#include "InfluxInterface.h"
 
 #include "LLInterface.h"
 
@@ -38,7 +37,6 @@ void LLInterface::Init()
         HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
         sensorTimer = new Timer();
         warnLight = new WarnLight(0);
-        InfluxInterface::Init();
 
         useTMPoE = std::get<bool>(Config::getData("useTMPoE"));
         if (useTMPoE)
@@ -212,8 +210,6 @@ void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double>
         sen["time"] = (double)((microTime / 1000) / 1000.0);
 
         content.push_back(sen);
-
-        InfluxInterface::Log(sensor.first + ";" + sensor.first + ";" + std::to_string(sensor.second) + ";" + std::to_string(-1) + "\n");
     }
     EcuiSocket::SendJson("sensors", content);
 }

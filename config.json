@@ -6,9 +6,7 @@
   "mapping_path": "mapping/hcpMapping.json",
   "LOGGING": {
     "sensor_log_rate": 100,
-    "post_sequence_script": "scripts/plot.sh",
-    "ip": "127.0.0.1",
-    "port": 25558
+    "post_sequence_script": "scripts/plot.sh"
   },
   "HCP": {
     "device": "/dev/serial0",
