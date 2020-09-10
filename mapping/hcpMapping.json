@@ -75,6 +75,10 @@
             },
             "port": 9
         },
+        "oxVentValveFb": {
+            "port": 15,
+            "servo": "oxVentValve"
+        },
         "oxVenturiPressure": {
             "map": {
                 "d": -8.74088,
@@ -86,16 +90,16 @@
             "loadCells": true,
             "map": [
                 {
-                    "d": -0.0,
-                    "k": 8.252e-05
+                    "d": 129.26658976000002,
+                    "k": -8.252e-05
                 },
                 {
-                    "d": -0.0,
-                    "k": 8.252e-05
+                    "d": 33.8657954,
+                    "k": -8.252e-05
                 },
                 {
-                    "d": -346.11388356000003,
-                    "k": 8.252e-05
+                    "d": 82.00565284,
+                    "k": -8.252e-05
                 }
             ]
         }
@@ -155,6 +159,18 @@
                 657
             ],
             "port": 2
+        },
+        "oxVentValve": {
+            "endpoints": [
+                1000,
+                1900
+            ],
+            "feedbackAnalog": "oxVentValveFb",
+            "feedbackEndpoints": [
+                1421,
+                679
+            ],
+            "port": 3
         }
     }
 }
