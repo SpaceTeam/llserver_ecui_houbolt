@@ -37,7 +37,7 @@
             "servo": "oxMainValve"
         },
         "oxSuperchargeValveFb": {
-            "port": 14,
+            "port": 15,
             "servo": "oxSuperchargeValve"
         },
         "oxTankPressure": {
@@ -76,7 +76,7 @@
             "port": 9
         },
         "oxVentValveFb": {
-            "port": 15,
+            "port": 14,
             "servo": "oxVentValve"
         },
         "oxVenturiPressure": {
@@ -150,27 +150,27 @@
         },
         "oxSuperchargeValve": {
             "endpoints": [
-                950,
-                2000
+                1000,
+                1100
             ],
             "feedbackAnalog": "oxSuperchargeValveFb",
-            "feedbackEndpoints": [
-                1620,
-                657
-            ],
-            "port": 2
-        },
-        "oxVentValve": {
-            "endpoints": [
-                1000,
-                1900
-            ],
-            "feedbackAnalog": "oxVentValveFb",
             "feedbackEndpoints": [
                 1421,
                 679
             ],
             "port": 3
+        },
+        "oxVentValve": {
+            "endpoints": [
+                950,
+                2000
+            ],
+            "feedbackAnalog": "oxVentValveFb",
+            "feedbackEndpoints": [
+                1620,
+                657
+            ],
+            "port": 2
         }
     }
 }
