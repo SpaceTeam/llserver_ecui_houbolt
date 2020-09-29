@@ -53,6 +53,7 @@ private:
     static std::string comments;
     static std::string currentDirPath;
     static std::string logFileName;
+    static std::string lastDir;
 
     static std::map<std::string, Interpolation> interpolationMap;
     static std::map<int64, std::map<std::string, double[2]>> sensorsNominalRangeTimeMap;
@@ -88,6 +89,8 @@ public:
     static void AbortSequence(std::string abortMsg="abort");
     static void StopSequence();
     static void StartSequence(json jsonSeq, json jsonAbortSeq, std::string comments);
+    static void WritePostSeqComment(std::string msg);
+
 };
 
 
