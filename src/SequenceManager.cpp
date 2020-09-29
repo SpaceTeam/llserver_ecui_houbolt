@@ -174,7 +174,6 @@ void SequenceManager::SetupLogging()
 }
 
 void SequenceManager::WritePostSeqComment(std::string msg){
-    printf("test\n");
     utils::saveFile(lastDir + "/postseq-comments.txt", msg);
 }
 
