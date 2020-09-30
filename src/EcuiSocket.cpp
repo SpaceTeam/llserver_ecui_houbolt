@@ -4,7 +4,7 @@
 
 #include <thread>
 
-#include "Socket.h"
+#include "NewSocket.h"
 
 #include "EcuiSocket.h"
 
@@ -12,7 +12,7 @@
 
 using namespace std;
 
-Socket* EcuiSocket::socket;
+NewSocket* EcuiSocket::socket;
 
 bool EcuiSocket::connectionActive = false;
 bool EcuiSocket::shallClose = false;
@@ -27,7 +27,9 @@ void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<voi
     string ip = std::get<std::string>(Config::getData("WEBSERVER/ip"));
     int32 port = std::get<int>(Config::getData("WEBSERVER/port"));
 
-    socket = new Socket(Close, ip, port);
+    socket = new NewSocket("EcuiSocket", Close, ip, port);
+    while(socket->Connect()!=0);
+    
     connectionActive = true;
     asyncListenThread = new thread(AsyncListen, onMsgCallback);
     asyncListenThread->detach();
@@ -36,31 +38,14 @@ void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<voi
 
 void EcuiSocket::AsyncListen(std::function<void(json)> onMsgCallback)
 {
-    string delimiter = "\n";
-    string msg = "";
     while(!shallClose)
     {
-        size_t pos = 0;
-        msg.append(socket->Recv());
-        while ((pos = msg.find(delimiter)) == std::string::npos)
-        {
-            msg.append(socket->Recv());
-        }
-
-        string token;
-        while ((pos = msg.find(delimiter)) != std::string::npos)
-        {
-            token = msg.substr(0, pos);
-            std::cout << "-------&&&-----\n" << token << "\n----------&&&------" <<  std::endl;
-            json jsonMsg = json::parse(token);
+        try {
+            json jsonMsg = json::parse(socket->Recv());
             onMsgCallback(jsonMsg);
-            msg.erase(0, pos + delimiter.length());
+        } catch (const std::exception& e) {
+            socket->Connect();
         }
-
-        std::cout << "---------------\n" << token << "\n-------------------" <<  std::endl;
-        json jsonMsg = json::parse(token);
-        onMsgCallback(jsonMsg);
-        msg.erase(0, pos + delimiter.length());
 
         this_thread::yield();
     }
