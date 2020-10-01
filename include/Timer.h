@@ -20,14 +20,9 @@ private:
     bool isRunning = false;
 
     int64 microTime;
-
-    int64 startTime;
     int64 endTime;
-    uint64 interval;
 
     int64 reportedOffset;
-    struct timespec startAt;
-    struct timespec endAt;
     uint64 interval_ns;
 
 

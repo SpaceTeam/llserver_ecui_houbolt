@@ -91,13 +91,13 @@ void NewSocket::Send(std::string msg)
         int sentBytes = send(socketfd, msg.c_str(), msg.size(), 0);
         if (sentBytes < 0)
         {
-            Debug::error("error at send occured, closing socket...");
+            Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
             Close();
         }
     }
     else
     {
-        Debug::error("no connection active");
+        Debug::error("Socket - %s: no connection active", name.c_str());
     }
 }
 
@@ -115,7 +115,7 @@ std::string NewSocket::Recv()
         //Receive the header
         nBytes = recv(socketfd, header, HEADER_SIZE, MSG_WAITALL);
         if(nBytes < HEADER_SIZE){
-            Debug::error("error at recv occured (Could not read header), closing socket...");
+            Debug::error("Socket - %s: error at recv occured (Could not read header), closing socket...", name.c_str());
             Close();
             return std::string("");
         }
@@ -131,14 +131,14 @@ std::string NewSocket::Recv()
         //Receive the payload
         nBytes = recv(socketfd, newBuffer, msgLen, MSG_WAITALL);
         if(nBytes < msgLen){
-            Debug::error("error at recv occured (Could not read entire packet), closing socket...");
+            Debug::error("Socket - %s: error at recv occured (Could not read entire packet), closing socket...", name.c_str());
             Close();
             return std::string("");
         }
 
         return std::string((char *)newBuffer);
     }else{
-        Debug::error("no connection active");
+        Debug::error("Socket - %s: no connection active", name.c_str());
         Close();
         return std::string("");
     }

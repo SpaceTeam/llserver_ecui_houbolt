@@ -51,41 +51,13 @@ void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMic
     }
 }
 
-// void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback)
-// {
-//     if (!this->isRunning)
-//     {
-
-//         this->startTime = startTimeMicros;
-//         this->endTime = endTimeMicros;
-//         this->interval = intervalMicros;
-//         this->tickCallback = tickCallback;
-//         this->stopCallback = stopCallback;
-
-//         this->microTime = startTimeMicros;
-
-//         this->isRunning = true;
-//         this->timerThread = new std::thread(Timer::highPerformanceTimerLoop, this, intervalMicros, endTimeMicros, startTimeMicros);
-//         this->timerThread->detach();
-//     }
-//     else
-//     {
-//         Debug::error("timer already running");
-//     }
-// }
-
 void Timer::startContinous(int64 startTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback)
 {
     if (!this->isRunning)
     {
-        clock_gettime(CLOCK_MONOTONIC, &this->startAt);
-        // incrementTimeSpec(&this->startAt, startTimeMicros*1000);
         this->interval_ns = intervalMicros*1000;
         this->reportedOffset = startTimeMicros;
 
-        // this->startTime = startTimeMicros;
-        // this->endTime = 0;
-        // this->interval = intervalMicros;
         this->tickCallback = tickCallback;
         this->stopCallback = stopCallback;
 
@@ -103,40 +75,16 @@ void Timer::startContinous(int64 startTimeMicros, uint64 intervalMicros, std::fu
 
 void Timer::stop()
 {
-    if (this->isRunning)
+    //TODO: Fixup cleaning
+    if (isRunning)
     {
-        this->isRunning = false;
+        printf("Thread Stopping\n");
+        isRunning = false;
         syncMtx.lock();
-        std::thread callbackThread(this->stopCallback);
-        callbackThread.detach();
+        stopCallback();
         delete this->timerThread;
         syncMtx.unlock();
-    }
-}
-
-void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
-{
-    std::unique_lock<std::mutex> lock(self->syncMtx);
-    while(self->isRunning) {
-
-        std::thread callbackThread(self->tickCallback, microTime);
-        callbackThread.detach();
-
-        usleep(interval);
-
-        if (microTime % 500000 == 0)
-        {
-            Debug::print("Micro Seconds: %d", microTime);
-            std::cout << microTime << std::endl;
-        }
-        microTime += interval;
-
-
-        if (microTime >= endTime)
-        {
-            lock.unlock();
-            self->stop();
-        }
+        printf("Thread Finished\n");
     }
 }
 
@@ -169,95 +117,35 @@ void Timer::internalContinousLoop(void){
 
     struct timespec next_expiration;
     clock_gettime(CLOCK_MONOTONIC, &next_expiration);
+    reportedOffset = TS_TO_MILLI(next_expiration) - reportedOffset;
 
     while(isRunning){
-        tickCallback(TS_TO_MILLI(next_expiration)-reportedOffset);
+        /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
+        int64 sequence_time = TS_TO_MILLI(next_expiration)- reportedOffset;
+        tickCallback(sequence_time);
         incrementTimeSpec(&next_expiration, interval_ns);
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
     }
+
+    printf("Threat Return\n");
 }
 
 void Timer::internalLoop(void){
 
     struct timespec next_expiration;
     clock_gettime(CLOCK_MONOTONIC, &next_expiration);
-    memcpy(&startAt, &next_expiration, sizeof(struct timespec));
     reportedOffset = TS_TO_MILLI(next_expiration) - reportedOffset;
 
     while(isRunning){
-        int64 visual_time = TS_TO_MILLI(next_expiration)- reportedOffset;
-        tickCallback(visual_time);
+        /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
+        int64 sequence_time = TS_TO_MILLI(next_expiration)- reportedOffset;
+        tickCallback(sequence_time);
         incrementTimeSpec(&next_expiration, interval_ns);
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
-        if(visual_time >= endTime){
+        if(sequence_time >= endTime){
             stop();
         }
     }
+
+    printf("Threat Return\n");
 }
-
-void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime, int64 microTime)
-{
-    std::unique_lock<std::mutex> lock(self->syncMtx);
-    auto lastTime = Clock::now();
-    auto currTime = lastTime;
-    std::chrono::microseconds stepTime(interval);
-    uint64 currCheckTime = 0;
-
-    std::thread callbackThread(self->tickCallback, microTime);
-    callbackThread.detach();
-
-    while(self->isRunning) {
-
-        currTime = Clock::now();
-        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
-
-        if (currCheckTime >= interval)
-        {
-            microTime += interval;
-
-            std::thread callbackThread(self->tickCallback, microTime);
-            callbackThread.detach();
-	        //self->tickCallback(microTime);
-            lastTime = lastTime + stepTime;
-
-            if (microTime >= endTime)
-            {
-                lock.unlock();
-                self->stop();
-            }
-        }
-
-        usleep(100);
-    }
-}
-
-void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int64 microTime)
-{
-    std::unique_lock<std::mutex> lock(self->syncMtx);
-    auto lastTime = Clock::now();
-    auto currTime = lastTime;
-    std::chrono::microseconds stepTime(interval);
-    int64 currCheckTime = 0;
-
-    std::thread callbackThread(self->tickCallback, microTime);
-    callbackThread.detach();
-
-    while(self->isRunning) {
-
-        currTime = Clock::now();
-        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
-
-        if (currCheckTime >= interval)
-        {
-            microTime += interval;
-
-            std::thread callbackThread(self->tickCallback, microTime);
-            callbackThread.detach();
-            //self->tickCallback(microTime);
-            lastTime = lastTime + stepTime;
-        }
-        //std::this_thread::sleep_for(std::chrono::microseconds(100));
-        usleep(100);
-    }
-}
-
