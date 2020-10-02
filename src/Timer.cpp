@@ -120,10 +120,6 @@ void Timer::internalContinousLoop(void){
     reportedOffset = TS_TO_MILLI(next_expiration) - reportedOffset;
 
     while(isRunning){
-        struct timespec now;
-        clock_gettime(CLOCK_MONOTONIC, &now);
-        printf("TS: %ld, %09ld\n", now.tv_sec, now.tv_nsec);
-
         /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
         int64 sequence_time = TS_TO_MILLI(next_expiration)- reportedOffset;
         tickCallback(sequence_time);
