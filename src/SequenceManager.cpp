@@ -40,6 +40,7 @@ json SequenceManager::jsonAbortSequence = json::object();
 string SequenceManager::comments = "";
 string SequenceManager::currentDirPath = "";
 string SequenceManager::logFileName = "";
+string SequenceManager::lastDir = "";
 
 std::map<std::string, Interpolation> SequenceManager::interpolationMap;
 std::map<int64, std::map<std::string, double[2]>> SequenceManager::sensorsNominalRangeTimeMap;
@@ -159,6 +160,7 @@ void SequenceManager::SetupLogging()
     strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
 
     currentDirPath = "logs/" + string(dateTime_string);
+    SequenceManager::lastDir = currentDirPath;
     logFileName = string(dateTime_string) + ".csv";
     filesystem::create_directory(currentDirPath);
     Debug::changeOutputFile(currentDirPath + "/" + string(dateTime_string) + ".csv");
@@ -169,6 +171,10 @@ void SequenceManager::SetupLogging()
     utils::saveFile(currentDirPath + "/comments.txt", comments);
 
     filesystem::copy("config.json", currentDirPath + "/");
+}
+
+void SequenceManager::WritePostSeqComment(std::string msg){
+    utils::saveFile(lastDir + "/postseq-comments.txt", msg);
 }
 
 bool SequenceManager::LoadSequence(json jsonSeq)
