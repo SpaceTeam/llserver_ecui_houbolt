@@ -123,7 +123,6 @@ void Timer::internalContinousLoop(void){
     while(isRunning){
         struct timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);
-
         /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
         int64 sequence_time = TS_TO_MILLI(next_expiration)- reportedOffset;
 if (TS_TO_MILLI(now)-TS_TO_MILLI(next_expiration) > 30){
