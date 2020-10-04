@@ -11,7 +11,7 @@
 
 typedef std::chrono::high_resolution_clock Clock;
 
-#define TS_TO_MILLI(x) ((x.tv_nsec / 1000)+(x.tv_sec*1000000))
+#define TS_TO_MILLI(x) (int64)(((int64)(x.tv_nsec) / 1000)+((int64)(x.tv_sec)*1000000))
 
 Timer::Timer()
 {
@@ -118,15 +118,24 @@ void Timer::internalContinousLoop(void){
     struct timespec next_expiration;
     clock_gettime(CLOCK_MONOTONIC, &next_expiration);
     reportedOffset = TS_TO_MILLI(next_expiration) - reportedOffset;
-
+	int counts = 0;
+	int64 lastExceed = TS_TO_MILLI(next_expiration);
     while(isRunning){
         struct timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);
-        printf("TS: %ld, %09ld\n", now.tv_sec, now.tv_nsec);
 
         /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
         int64 sequence_time = TS_TO_MILLI(next_expiration)- reportedOffset;
-        tickCallback(sequence_time);
+if (TS_TO_MILLI(now)-TS_TO_MILLI(next_expiration) > 30){
+        printf("TS: %ld, %09ld, SEQTIME: %lld\n", now.tv_sec, now.tv_nsec, sequence_time);
+	printf("offset: %lld, ticks_since_last_exceed: %d, time_last_exc: %lld\n", TS_TO_MILLI(now)-TS_TO_MILLI(next_expiration), counts, TS_TO_MILLI(next_expiration) - lastExceed);
+//printf("trueTimeMircros: %lld, nextExp: %lld, repOffset: %lld\n", TS_TO_MILLI(now) - reportedOffset,  TS_TO_MILLI(next_expiration), reportedOffset);
+counts = 0;
+lastExceed = TS_TO_MILLI(next_expiration);
+}else{counts++;}
+//tickCallback(sequence_time);
+std::thread callbackThread(tickCallback, sequence_time);
+            callbackThread.detach();
         incrementTimeSpec(&next_expiration, interval_ns);
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
     }
@@ -143,6 +152,8 @@ void Timer::internalLoop(void){
     while(isRunning){
         /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
         int64 sequence_time = TS_TO_MILLI(next_expiration)- reportedOffset;
+//        printf("SEQTIME: %lld\n", sequence_time);
+
         tickCallback(sequence_time);
         incrementTimeSpec(&next_expiration, interval_ns);
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
