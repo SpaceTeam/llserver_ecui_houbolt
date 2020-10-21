@@ -35,7 +35,7 @@ void LLInterface::Init()
     {
         HcpManager::Init();
         HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
-        sensorTimer = new Timer();
+        sensorTimer = new Timer(40, "sensorTimer");
         warnLight = new WarnLight(0);
 
         useTMPoE = std::get<bool>(Config::getData("useTMPoE"));

@@ -29,7 +29,6 @@ void LLController::Init()
 {
     //LLInterface needs to be initialized first to ensure proper initialization before receiving
     //aynchronous commands from the web server
-    system("clear");
     PrintLogo();
 
     LLInterface::Init();

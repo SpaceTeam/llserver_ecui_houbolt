@@ -21,7 +21,7 @@
   },
   "WEBSERVER":
   {
-    "ip": "127.0.0.1",
+    "ip": "172.18.0.3",
     "port": 5555,
     "sensor_transmission_interval": 100000,
     "timer_sync_interval": 100000

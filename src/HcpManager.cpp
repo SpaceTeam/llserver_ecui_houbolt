@@ -41,7 +41,7 @@ void HcpManager::Init()
     hcpSerial = new Serial(hcpDevice, baudrate);
     mapping = new Mapping(mappingPath);
 
-    sensorTimer = new Timer();
+    sensorTimer = new Timer(41, "HcpTimer");
     //TODO: this is only valid for the hedgehog llserver, change for other platforms (analog count doesn't have to
     //be the same as digital count) and + 1 for battery value
 
