@@ -11,7 +11,7 @@
 #include "common.h"
 
 #define NSEC_PER_SEC 1000000000LL
-#define ENABLE_TIMER_DIAGNOSTICS
+// #define ENABLE_TIMER_DIAGNOSTICS
 
 class Timer
 {

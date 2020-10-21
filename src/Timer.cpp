@@ -67,8 +67,6 @@ void Timer::startContinous(int64 startTimeMicros, uint64 intervalMicros, std::fu
         this->microTime = 0;
 
         this->isRunning = true;
-        std::cout << "threadName: " << threadName << std::endl;
-        // printf("threadName %s\n", threadName.c_str());
         this->timerThread = new std::thread(&Timer::internalContinousLoop, this);
         this->timerThread->detach();
     }
@@ -83,13 +81,11 @@ void Timer::stop()
     //TODO: Fixup cleaning
     if (isRunning)
     {
-        printf("Thread Stopping\n");
         isRunning = false;
         syncMtx.lock();
         stopCallback();
         delete this->timerThread;
         syncMtx.unlock();
-        printf("Thread Finished\n");
     }
 }
 
@@ -132,8 +128,12 @@ void Timer::internalContinousLoop(void){
     struct timespec next_expiration;
     clock_gettime(CLOCK_MONOTONIC, &next_expiration);
     reportedOffset = TS_TO_MICRO(next_expiration) - reportedOffset;
+
+#ifdef ENABLE_TIMER_DIAGNOSTICS
     int counts = 0;
     int64 lastExceed = TS_TO_MICRO(next_expiration);
+#endif
+
     while(isRunning){
 
 #ifdef ENABLE_TIMER_DIAGNOSTICS
@@ -177,7 +177,9 @@ void Timer::internalContinousLoop(void){
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
     }
 
+#ifdef ENABLE_TIMER_DIAGNOSTICS
     printf("Threat Return\n");
+#endif
 }
 
 void Timer::internalLoop(void){
@@ -199,5 +201,7 @@ void Timer::internalLoop(void){
         }
     }
 
+#ifdef ENABLE_TIMER_DIAGNOSTICS
     printf("Threat Return\n");
+#endif
 }
