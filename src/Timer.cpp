@@ -78,7 +78,6 @@ void Timer::startContinous(int64 startTimeMicros, uint64 intervalMicros, std::fu
 
 void Timer::stop()
 {
-    //TODO: Fixup cleaning
     if (isRunning)
     {
         isRunning = false;
