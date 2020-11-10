@@ -161,6 +161,10 @@ void LLInterface::StopGetSensors()
 
 void LLInterface::GetSensors(int64 microTime)
 {
+    // struct timespec ts;
+    // clock_gettime(CLOCK_MONOTONIC, &ts);
+    // printf("ts: %d %09d\n",ts.tv_sec, ts.tv_nsec);
+
     threadCount2++;
     if (threadCount2 > 1)
     {

@@ -33,6 +33,7 @@ public:
 
     void Send(std::string msg);
     std::string Recv();
+    std::string newRecv();
     std::vector<uint8> RecvBytes();
     bool isConnectionActive();
 

@@ -17,6 +17,8 @@
 
 using namespace std;
 
+#define HEADER_SIZE 2
+
 Socket::Socket(std::function<void()> onCloseCallback, std::string address, uint16 port, int32 tries)
 {
     buffer = new uint8[size];
@@ -97,6 +99,56 @@ void Socket::Send(std::string msg)
         Debug::error("no connection active");
     }
 }
+
+/**
+    Receive a single packet via the TCP connection, packets are expected to havethe following format [HEADER][PAYLOAD]
+    The header contains the length of the packet, while the payload contains the json string
+*/
+std::string Socket::newRecv()
+{
+    uint8_t header[HEADER_SIZE];
+    uint32 nBytes;
+
+    if(connectionActive){
+        
+        //Receive the header
+        nBytes = recv(socketfd, header, HEADER_SIZE, MSG_WAITALL);
+        if(nBytes < HEADER_SIZE){
+            Debug::error("error at recv occured (Could not read header), closing socket...");
+            Close();
+        }
+
+        //Prepare to receive the payload
+        uint32 msgLen;
+        msgLen  = header[1];
+        msgLen += header[0] << 8;
+
+        printf("Expecting a message of length %u, (%u, %u)\n", msgLen, header[0], header[1]);
+        uint8_t newBuffer[msgLen+1];
+        newBuffer[msgLen] = 0; //Strings are stupid
+
+        //Receive the payload
+        nBytes = recv(socketfd, newBuffer, msgLen, MSG_WAITALL);
+        if(nBytes < msgLen){
+            Debug::error("error at recv occured (Could not read entire packet), closing socket...");
+            Close();
+        }
+
+        printf("=== MSG ===\n%s\n=======\n",(char *)newBuffer);
+
+        return std::string((char *)newBuffer);
+    }else{
+        Debug::error("no connection active");
+        return std::string("");
+    }
+}
+
+
+// std::vector<uint8> Socket::newRecvBytes()
+// {
+//     std::string msg = Recv();
+//     return std::vector<uint8>(msg.begin(), msg.end());
+// }
 
 std::string Socket::Recv()
 {
