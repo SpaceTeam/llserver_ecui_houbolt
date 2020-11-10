@@ -7,16 +7,19 @@
 
 #include <chrono>
 #include <iostream>
+#include <algorithm>
 #include <sys/time.h>
 
-typedef std::chrono::high_resolution_clock Clock;
+#define TS_TO_MICRO(x) (int64)(((int64)(x.tv_nsec) / 1000)+((int64)(x.tv_sec)*1000000))
 
-#define TS_TO_MILLI(x) ((x.tv_nsec / 1000)+(x.tv_sec*1000000))
+int Timer::nameIndex = 0;
 
-Timer::Timer()
+Timer::Timer(int prio, std::string name)
 {
-
-    this->microTime = 0;
+    
+    threadName = name;
+    microTime = 0;
+    threadPriority = prio;
 
 }
 
@@ -75,16 +78,13 @@ void Timer::startContinous(int64 startTimeMicros, uint64 intervalMicros, std::fu
 
 void Timer::stop()
 {
-    //TODO: Fixup cleaning
     if (isRunning)
     {
-        printf("Thread Stopping\n");
         isRunning = false;
         syncMtx.lock();
         stopCallback();
         delete this->timerThread;
         syncMtx.unlock();
-        printf("Thread Finished\n");
     }
 }
 
@@ -115,34 +115,83 @@ void Timer::normalizeTimestamp(struct timespec *ts){
 */
 void Timer::internalContinousLoop(void){
 
+    struct sched_param param;
+    param.sched_priority = threadPriority;;
+    sched_setscheduler(0, SCHED_FIFO, &param);
+
+//    cpu_set_t my_set;        /* Define your cpu_set bit mask. */
+//    CPU_ZERO(&my_set);       /* Initialize it all to 0, i.e. no CPUs selected. */
+//    CPU_SET(3, &my_set);     /* set the bit that represents core 7. */
+//    sched_setaffinity(0, sizeof(cpu_set_t), &my_set);
+
     struct timespec next_expiration;
     clock_gettime(CLOCK_MONOTONIC, &next_expiration);
-    reportedOffset = TS_TO_MILLI(next_expiration) - reportedOffset;
+    reportedOffset = TS_TO_MICRO(next_expiration) - reportedOffset;
+
+#ifdef ENABLE_TIMER_DIAGNOSTICS
+    int counts = 0;
+    int64 lastExceed = TS_TO_MICRO(next_expiration);
+#endif
 
     while(isRunning){
-        struct timespec now;
-        clock_gettime(CLOCK_MONOTONIC, &now);
-        printf("TS: %ld, %09ld\n", now.tv_sec, now.tv_nsec);
+
+#ifdef ENABLE_TIMER_DIAGNOSTICS
+        struct timespec start;
+        clock_gettime(CLOCK_MONOTONIC, &start);
+#endif
 
         /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
-        int64 sequence_time = TS_TO_MILLI(next_expiration)- reportedOffset;
+        int64 sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
         tickCallback(sequence_time);
+
+#ifdef ENABLE_TIMER_DIAGNOSTICS
+        struct timespec end;
+        clock_gettime(CLOCK_MONOTONIC, &end);
+
+        long curr_exec = TS_TO_MICRO(end) - TS_TO_MICRO(start);
+        long diff = TS_TO_MICRO(start)-TS_TO_MICRO(next_expiration);
+        printf("%s - exec_time: %ld\n", threadName.c_str(), curr_exec);
+        if(curr_exec > max_exec_time){
+            max_exec_time = curr_exec;
+        }
+        loops_cnt++;
+
+        if(loops_cnt > report_loops){
+            printf("%s - max_exec: %06ld\n", threadName.c_str(), max_exec_time);
+            loops_cnt=0;
+        }
+
+        if (diff > 30){
+            // printf("TS: %ld, %09ld, SEQTIME: %ld\n", start.tv_sec, start.tv_nsec, sequence_time);
+            printf("%s - offset: %04ld, ticks_ok: %d, exec_time: %ld\n", threadName.c_str(), diff, counts, curr_exec);
+            //printf("trueTimeMircros: %lld, nextExp: %lld, repOffset: %lld\n", TS_TO_MICRO(start) - reportedOffset,  TS_TO_MICRO(next_expiration), reportedOffset);
+            counts = 0;
+            lastExceed = TS_TO_MICRO(next_expiration);
+        }else{
+            counts++;
+        }
+#endif
+
         incrementTimeSpec(&next_expiration, interval_ns);
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
     }
 
+#ifdef ENABLE_TIMER_DIAGNOSTICS
     printf("Threat Return\n");
+#endif
 }
 
 void Timer::internalLoop(void){
 
     struct timespec next_expiration;
     clock_gettime(CLOCK_MONOTONIC, &next_expiration);
-    reportedOffset = TS_TO_MILLI(next_expiration) - reportedOffset;
+    reportedOffset = TS_TO_MICRO(next_expiration) - reportedOffset;
 
     while(isRunning){
         /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
-        int64 sequence_time = TS_TO_MILLI(next_expiration)- reportedOffset;
+        int64 sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
+//        printf("SEQTIME: %lld\n", sequence_time);
+
         tickCallback(sequence_time);
         incrementTimeSpec(&next_expiration, interval_ns);
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
@@ -151,5 +200,7 @@ void Timer::internalLoop(void){
         }
     }
 
+#ifdef ENABLE_TIMER_DIAGNOSTICS
     printf("Threat Return\n");
+#endif
 }
