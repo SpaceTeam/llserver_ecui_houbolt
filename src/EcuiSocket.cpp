@@ -40,10 +40,13 @@ void EcuiSocket::AsyncListen(std::function<void(json)> onMsgCallback)
 {
     while(!shallClose)
     {
+        string msg;
         try {
-            json jsonMsg = json::parse(socket->Recv());
+            msg = socket->Recv();
+            json jsonMsg = json::parse(msg);
             onMsgCallback(jsonMsg);
         } catch (const std::exception& e) {
+            Debug::error("json message of Webserver is invalid:\n" + msg);
             socket->Connect();
         }
 
