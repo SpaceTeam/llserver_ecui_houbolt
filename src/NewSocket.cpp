@@ -121,15 +121,17 @@ std::string NewSocket::Recv()
         }
 
         //Prepare to receive the payload
-        uint32 msgLen;
+        uint16 msgLen;
         msgLen  = header[1];
         msgLen += header[0] << 8;
+        Debug::error("MSB: %d, LSB: %d", header[0], header[1]);
 
         uint8_t newBuffer[msgLen+1];
         newBuffer[msgLen] = 0; //Strings are stupid
 
         //Receive the payload
         nBytes = recv(socketfd, newBuffer, msgLen, MSG_WAITALL);
+        Debug::error("First Message Byte: %d", newBuffer[0]);
         if(nBytes < msgLen){
             Debug::error("Socket - %s: error at recv occured (Could not read entire packet), closing socket...", name.c_str());
             Close();
