@@ -18,6 +18,7 @@
 using namespace std;
 
 #define HEADER_SIZE 2
+#define MAX_MSG_LENGTH 65536
 
 NewSocket::NewSocket(std::string name, std::function<void()> onCloseCallback, std::string address, uint16 port)
 {
@@ -88,11 +89,32 @@ void NewSocket::Send(std::string msg)
     std::lock_guard<std::mutex> lock(socketMtx);
     if (connectionActive)
     {
-        int sentBytes = send(socketfd, msg.c_str(), msg.size(), 0);
-        if (sentBytes < 0)
+        if (msg.size() > MAX_MSG_LENGTH)
         {
-            Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
+            Debug::error("Socket - %s: error message longer than supported, closing socket..."), name.c_str();
             Close();
+        }
+        else
+        {
+
+            uint16 msgLen = msg.size();
+            uint8 header[HEADER_SIZE];
+            header[0] = msgLen >> 8;
+            header[1] = msgLen & 0x00FF;
+            Debug::info("msb: 0x%02x, lsb: 0x%02x", header[0], header[1]);
+            int sentHeaderBytes = send(socketfd, header, HEADER_SIZE, 0);
+            if (sentHeaderBytes < 0)
+            {
+                Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
+                Close();
+                return;
+            }
+            int sentBytes = send(socketfd, msg.c_str(), msg.size(), 0);
+            if (sentBytes < 0)
+            {
+                Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
+                Close();
+            }
         }
     }
     else
@@ -124,14 +146,14 @@ std::string NewSocket::Recv()
         uint16 msgLen;
         msgLen  = header[1];
         msgLen += header[0] << 8;
-        Debug::error("MSB: %d, LSB: %d", header[0], header[1]);
+        Debug::info("MSB: %d, LSB: %d", header[0], header[1]);
 
         uint8_t newBuffer[msgLen+1];
         newBuffer[msgLen] = 0; //Strings are stupid
 
         //Receive the payload
         nBytes = recv(socketfd, newBuffer, msgLen, MSG_WAITALL);
-        Debug::error("First Message Byte: %d", newBuffer[0]);
+        Debug::info("First Message Byte: %d", newBuffer[0]);
         if(nBytes < msgLen){
             Debug::error("Socket - %s: error at recv occured (Could not read entire packet), closing socket...", name.c_str());
             Close();
