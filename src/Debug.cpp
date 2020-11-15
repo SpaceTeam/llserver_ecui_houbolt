@@ -28,23 +28,18 @@ void Debug::Init()
 
 int32 Debug::print(std::string fmt, ...)
 {
-    if (debug)
-    {
-        std::lock_guard<std::recursive_mutex> lock(_outMutex);
+    std::lock_guard<std::recursive_mutex> lock(_outMutex);
 
-        int printed;
-        va_list args;
+    int printed;
+    va_list args;
 
-        fmt.append("\n");
+    fmt.append("\n");
 
-        va_start(args, fmt);
-        printed = vprintf(fmt.c_str(), args);
-        va_end(args);
+    va_start(args, fmt);
+    printed = vprintf(fmt.c_str(), args);
+    va_end(args);
 
-        return printed;
-    }
-
-    return 0;
+    return printed;
 }
 
 int32 Debug::info(std::string fmt, ...)
