@@ -831,7 +831,7 @@ bool HcpManager::SetDigitalOutputs(uint8 port, bool enable)
 
     if (CheckPort(port, Device_Type::DIGITAL_OUT))
     {
-        Debug::error("set digital output %d to %d", port, enable);
+        Debug::info("set digital output %d to %d", port, enable);
         if (enable)
         {
             success = SetMotorRaw(port, Motor_Mode::POWER, 1000);
