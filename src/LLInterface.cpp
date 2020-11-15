@@ -35,7 +35,7 @@ void LLInterface::Init()
     {
         HcpManager::Init();
         HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
-        sensorTimer = new Timer();
+        sensorTimer = new Timer(40, "sensorTimer");
         warnLight = new WarnLight(0);
 
         useTMPoE = std::get<bool>(Config::getData("useTMPoE"));
@@ -161,6 +161,10 @@ void LLInterface::StopGetSensors()
 
 void LLInterface::GetSensors(int64 microTime)
 {
+    // struct timespec ts;
+    // clock_gettime(CLOCK_MONOTONIC, &ts);
+    // printf("ts: %d %09d\n",ts.tv_sec, ts.tv_nsec);
+
     threadCount2++;
     if (threadCount2 > 1)
     {

@@ -7,41 +7,19 @@
 
 #include <chrono>
 #include <iostream>
-// #include <boost/asio.hpp>
-// #include <boost/date_time/posix_time/posix_time.hpp>
+#include <algorithm>
+#include <sys/time.h>
 
-//void tickFunc(std::function<void()> stopCallback, std::function<void()> stopCallback, uint64 interval, int64 endTime, int64 microTime)
-//{
-//    std::cout << interval << std::endl;
-//    bool running = true;
-//    while(running) {
-//
-//        usleep(interval);
-//
-//        std::thread callbackThread(self->tickCallback, self->microTime);
-//        callbackThread.detach();
-//        if (self->microTime % 500000 == 0)
-//        {
-//            Debug::print("Micro Seconds: %d", self->microTime);
-//            std::cout << self->microTime << std::endl;
-//        }
-//        microTime += interval;
-//
-//        if (microTime >= endTime)
-//        {
-//            std::cout << "sequence done" << std::endl;
-//            self->stop();
-//            running = false;
-//        }
-//    }
-//}
+#define TS_TO_MICRO(x) (int64)(((int64)(x.tv_nsec) / 1000)+((int64)(x.tv_sec)*1000000))
 
-typedef std::chrono::high_resolution_clock Clock;
+int Timer::nameIndex = 0;
 
-Timer::Timer()
+Timer::Timer(int prio, std::string name)
 {
-
-    this->microTime = 0;
+    
+    threadName = name;
+    microTime = 0;
+    threadPriority = prio;
 
 }
 
@@ -59,17 +37,15 @@ void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMic
 {
     if (!this->isRunning)
     {
-
-        this->startTime = startTimeMicros;
+        this->interval_ns = intervalMicros*1000;
+        this->reportedOffset = startTimeMicros;
         this->endTime = endTimeMicros;
-        this->interval = intervalMicros;
+
         this->tickCallback = tickCallback;
         this->stopCallback = stopCallback;
 
-        this->microTime = startTimeMicros;
-
         this->isRunning = true;
-        this->timerThread = new std::thread(Timer::highPerformanceTimerLoop, this, intervalMicros, endTimeMicros, startTimeMicros);
+        this->timerThread = new std::thread(&Timer::internalLoop, this);
         this->timerThread->detach();
     }
     else
@@ -82,17 +58,16 @@ void Timer::startContinous(int64 startTimeMicros, uint64 intervalMicros, std::fu
 {
     if (!this->isRunning)
     {
+        this->interval_ns = intervalMicros*1000;
+        this->reportedOffset = startTimeMicros;
 
-        this->startTime = startTimeMicros;
-        this->endTime = 0;
-        this->interval = intervalMicros;
         this->tickCallback = tickCallback;
         this->stopCallback = stopCallback;
 
         this->microTime = 0;
 
         this->isRunning = true;
-        this->timerThread = new std::thread(Timer::highPerformanceContinousTimerLoop, this, intervalMicros, startTimeMicros);
+        this->timerThread = new std::thread(&Timer::internalContinousLoop, this);
         this->timerThread->detach();
     }
     else
@@ -103,167 +78,129 @@ void Timer::startContinous(int64 startTimeMicros, uint64 intervalMicros, std::fu
 
 void Timer::stop()
 {
-    if (this->isRunning)
+    if (isRunning)
     {
-        this->isRunning = false;
+        isRunning = false;
         syncMtx.lock();
-        std::thread callbackThread(this->stopCallback);
-        callbackThread.detach();
+        stopCallback();
         delete this->timerThread;
         syncMtx.unlock();
     }
 }
 
-void Timer::tick(Timer* self, uint64 interval, int64 endTime, int64 microTime)
-{
-    std::unique_lock<std::mutex> lock(self->syncMtx);
-    while(self->isRunning) {
-
-        std::thread callbackThread(self->tickCallback, microTime);
-        callbackThread.detach();
-
-        usleep(interval);
-
-        if (microTime % 500000 == 0)
-        {
-            Debug::print("Micro Seconds: %d", microTime);
-            std::cout << microTime << std::endl;
-        }
-        microTime += interval;
-
-
-        if (microTime >= endTime)
-        {
-            lock.unlock();
-            self->stop();
-        }
-    }
+/**
+    DO NOT INCREMENT MORE THAN 1SECOND AT TIME
+*/
+void Timer::incrementTimeSpec(struct timespec *ts, long nsec){
+    ts->tv_nsec += nsec;
+    normalizeTimestamp(ts);
 }
 
-void Timer::highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime, int64 microTime)
-{
-    std::unique_lock<std::mutex> lock(self->syncMtx);
-    auto lastTime = Clock::now();
-    auto currTime = lastTime;
-    uint64 currCheckTime = 0;
-
-    std::thread callbackThread(self->tickCallback, microTime);
-    callbackThread.detach();
-
-    // boost::asio::io_service io;
-    // // Construct a timer without setting an expiry time.
-    // boost::asio::deadline_timer timer(io);
-    while(self->isRunning) {
-
-        currTime = Clock::now();
-        if (std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count() >= interval)
-        {
-            microTime += interval;
-
-            std::thread callbackThread(self->tickCallback, microTime);
-            callbackThread.detach();
-	    //self->tickCallback(microTime);
-            lastTime = currTime;
-
-//            if (microTime % 500000 == 0)
-//            {
-//                std::cout << "Curr Interval: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count() << std::endl;
-//            }
-
-            if (microTime >= endTime)
-            {
-                lock.unlock();
-                self->stop();
-            }
-        }
-
-        usleep(100);
-
-//        // Set an expiry time relative to now.
-//        timer.expires_from_now(boost::posix_time::microseconds(interval));
-//
-//        // Wait for the timer to expire.
-//        timer.wait();
-//
-//        currTime = Clock::now();
-//        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
-//        //Debug::error("%d", currTime-lastTime);
-//        if (currCheckTime > interval + 1000)
-//        {
-//            std::cout << currCheckTime << std::endl;
-//        }
-//
-//        microTime += interval;
-//
-//        std::thread callbackThread(self->tickCallback, microTime);
-//        callbackThread.detach();
-//        //self->tickCallback(microTime);
-//        lastTime = currTime;
-//
-//        if (microTime >= endTime)
-//        {
-//            lock.unlock();
-//            self->stop();
-//        }
-    }
+/**
+    Only fixes timespec only when the nanoseconds exceed a second
+*/
+void Timer::normalizeTimestamp(struct timespec *ts){
+    long sec = ts->tv_nsec / NSEC_PER_SEC;
+    ts->tv_nsec = ts->tv_nsec % NSEC_PER_SEC;
+    ts->tv_sec += sec;
 }
 
-void Timer::highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int64 microTime)
-{
-    std::unique_lock<std::mutex> lock(self->syncMtx);
-    auto lastTime = Clock::now();
-    auto currTime = lastTime;
-    int64 currCheckTime = 0;
+/**
+ * High precision timer that uses the monotonic clock as source, interval should
+ * not be bigger than 1 second
+ *   DO NOT PROVIDE A TIMESPEC THAT IS SMALLER THAN CURRENT TIME
+ *
+ * @param interval_nsec   interval in nanoseconds (must not be more than 1 second)
+ * @param startAt         time to start the execution (must not be a time of the past)
+*/
+void Timer::internalContinousLoop(void){
 
-    std::thread callbackThread(self->tickCallback, microTime);
-    callbackThread.detach();
+    struct sched_param param;
+    param.sched_priority = threadPriority;;
+    sched_setscheduler(0, SCHED_FIFO, &param);
 
-    // boost::asio::io_service io;
-    // // Construct a timer without setting an expiry time.
-    // boost::asio::deadline_timer timer(io);
+//    cpu_set_t my_set;        /* Define your cpu_set bit mask. */
+//    CPU_ZERO(&my_set);       /* Initialize it all to 0, i.e. no CPUs selected. */
+//    CPU_SET(3, &my_set);     /* set the bit that represents core 7. */
+//    sched_setaffinity(0, sizeof(cpu_set_t), &my_set);
 
-    while(self->isRunning) {
+    struct timespec next_expiration;
+    clock_gettime(CLOCK_MONOTONIC, &next_expiration);
+    reportedOffset = TS_TO_MICRO(next_expiration) - reportedOffset;
 
-        currTime = Clock::now();
-        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
+#ifdef ENABLE_TIMER_DIAGNOSTICS
+    int counts = 0;
+    int64 lastExceed = TS_TO_MICRO(next_expiration);
+#endif
 
-        if (currCheckTime > interval + 1000)
-        {
-            std::cout << currCheckTime << std::endl;
+    while(isRunning){
+
+#ifdef ENABLE_TIMER_DIAGNOSTICS
+        struct timespec start;
+        clock_gettime(CLOCK_MONOTONIC, &start);
+#endif
+
+        /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
+        int64 sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
+        tickCallback(sequence_time);
+
+#ifdef ENABLE_TIMER_DIAGNOSTICS
+        struct timespec end;
+        clock_gettime(CLOCK_MONOTONIC, &end);
+
+        long curr_exec = TS_TO_MICRO(end) - TS_TO_MICRO(start);
+        long diff = TS_TO_MICRO(start)-TS_TO_MICRO(next_expiration);
+        printf("%s - exec_time: %ld\n", threadName.c_str(), curr_exec);
+        if(curr_exec > max_exec_time){
+            max_exec_time = curr_exec;
+        }
+        loops_cnt++;
+
+        if(loops_cnt > report_loops){
+            printf("%s - max_exec: %06ld\n", threadName.c_str(), max_exec_time);
+            loops_cnt=0;
         }
 
-        if (currCheckTime >= interval)
-        {
-            microTime += interval;
-
-            std::thread callbackThread(self->tickCallback, microTime);
-            callbackThread.detach();
-            //self->tickCallback(microTime);
-            lastTime = currTime;
+        if (diff > 30){
+            // printf("TS: %ld, %09ld, SEQTIME: %ld\n", start.tv_sec, start.tv_nsec, sequence_time);
+            printf("%s - offset: %04ld, ticks_ok: %d, exec_time: %ld\n", threadName.c_str(), diff, counts, curr_exec);
+            //printf("trueTimeMircros: %lld, nextExp: %lld, repOffset: %lld\n", TS_TO_MICRO(start) - reportedOffset,  TS_TO_MICRO(next_expiration), reportedOffset);
+            counts = 0;
+            lastExceed = TS_TO_MICRO(next_expiration);
+        }else{
+            counts++;
         }
-        //std::this_thread::sleep_for(std::chrono::microseconds(100));
-        usleep(100);
+#endif
 
-//        // Set an expiry time relative to now.
-//        timer.expires_from_now(boost::posix_time::microseconds(interval));
-//
-//        // Wait for the timer to expire.
-//        timer.wait();
-//
-//        currTime = Clock::now();
-//        currCheckTime = std::chrono::duration_cast<std::chrono::microseconds>(currTime-lastTime).count();
-//        //Debug::error("%d", currTime-lastTime);
-//        if (currCheckTime > interval + 1000)
-//        {
-//            std::cout << currCheckTime << std::endl;
-//        }
-//
-//        microTime += interval;
-//
-//        std::thread callbackThread(self->tickCallback, microTime);
-//        callbackThread.detach();
-//        //self->tickCallback(microTime);
-//        lastTime = currTime;
+        incrementTimeSpec(&next_expiration, interval_ns);
+        clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
     }
+
+#ifdef ENABLE_TIMER_DIAGNOSTICS
+    printf("Threat Return\n");
+#endif
 }
 
+void Timer::internalLoop(void){
+
+    struct timespec next_expiration;
+    clock_gettime(CLOCK_MONOTONIC, &next_expiration);
+    reportedOffset = TS_TO_MICRO(next_expiration) - reportedOffset;
+
+    while(isRunning){
+        /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
+        int64 sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
+//        printf("SEQTIME: %lld\n", sequence_time);
+
+        tickCallback(sequence_time);
+        incrementTimeSpec(&next_expiration, interval_ns);
+        clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
+        if(sequence_time >= endTime){
+            stop();
+        }
+    }
+
+#ifdef ENABLE_TIMER_DIAGNOSTICS
+    printf("Threat Return\n");
+#endif
+}

@@ -32,12 +32,19 @@
             },
             "port": 1
         },
+        "igniter": {
+            "map": {
+                "d": 0.0,
+                "k": 1
+            },
+            "port": 5
+        },
         "oxMainValveFb": {
             "port": 13,
             "servo": "oxMainValve"
         },
         "oxSuperchargeValveFb": {
-            "port": 14,
+            "port": 15,
             "servo": "oxSuperchargeValve"
         },
         "oxTankPressure": {
@@ -75,6 +82,10 @@
             },
             "port": 9
         },
+        "oxVentValveFb": {
+            "port": 14,
+            "servo": "oxVentValve"
+        },
         "oxVenturiPressure": {
             "map": {
                 "d": -8.74088,
@@ -86,15 +97,15 @@
             "loadCells": true,
             "map": [
                 {
-                    "d": 0,
+                    "d": 145.34808736,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 0,
+                    "d": 50.32135616,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 0,
+                    "d": 68.86805624,
                     "k": -8.252e-05
                 }
             ]
@@ -109,7 +120,7 @@
             "port": 4
         },
         "igniter": {
-            "port": 0
+            "port": 3
         },
         "oxDepressSolenoid": {
             "port": 7
@@ -146,10 +157,22 @@
         },
         "oxSuperchargeValve": {
             "endpoints": [
+                1000,
+                1100
+            ],
+            "feedbackAnalog": "oxSuperchargeValveFb",
+            "feedbackEndpoints": [
+                1421,
+                679
+            ],
+            "port": 3
+        },
+        "oxVentValve": {
+            "endpoints": [
                 950,
                 2000
             ],
-            "feedbackAnalog": "oxSuperchargeValveFb",
+            "feedbackAnalog": "oxVentValveFb",
             "feedbackEndpoints": [
                 1620,
                 657

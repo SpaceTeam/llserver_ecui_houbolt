@@ -29,7 +29,6 @@ void LLController::Init()
 {
     //LLInterface needs to be initialized first to ensure proper initialization before receiving
     //aynchronous commands from the web server
-    system("clear");
     PrintLogo();
 
     LLInterface::Init();
@@ -67,6 +66,10 @@ void LLController::OnECUISocketRecv(json msg)
             json seq = msg["content"][0];
             json abortSeq = msg["content"][1];
             SequenceManager::StartSequence(msg["content"][0], msg["content"][1], msg["content"][2]);
+        }
+        else if (type.compare("send-postseq-comment") == 0)
+        {
+            SequenceManager::WritePostSeqComment(msg["content"][0]);
         }
         else if (type.compare("abort") == 0)
         {
@@ -147,6 +150,10 @@ void LLController::OnECUISocketRecv(json msg)
         else if (type.compare("sensors-stop") == 0)
         {
             LLInterface::StopSensorTransmission();
+        }
+        else if (type.compare("tare") == 0)
+        {
+            HcpManager::TareLoadCells();
         }
         else
         {

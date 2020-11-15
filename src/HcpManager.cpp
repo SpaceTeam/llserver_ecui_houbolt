@@ -41,7 +41,7 @@ void HcpManager::Init()
     hcpSerial = new Serial(hcpDevice, baudrate);
     mapping = new Mapping(mappingPath);
 
-    sensorTimer = new Timer();
+    sensorTimer = new Timer(41, "HcpTimer");
     //TODO: this is only valid for the hedgehog llserver, change for other platforms (analog count doesn't have to
     //be the same as digital count) and + 1 for battery value
 
@@ -900,6 +900,77 @@ int32 *HcpManager::GetLoadCells()
     delete[] msg.payload;
 
     return value;
+}
+
+void HcpManager::TareLoadCells()
+{
+    json analogs = mapping->GetDevices(Device_Type::ANALOG);
+    if (analogs != nullptr)
+    {
+        for (auto it = analogs.begin(); it != analogs.end(); ++it)
+        {
+            if (utils::keyExists(it.value(), "loadCells"))
+            {
+                if (utils::keyExists(it.value(), "map"))
+                {
+                    Debug::info("mapping thrust values");
+
+                    json loadCells = it.value();
+                    json maps = loadCells["map"];
+
+                    if (maps.type() == json::value_t::array)
+                    {
+
+                        if (maps.size() > 0)
+                        {
+                            int32* cells = GetLoadCells();
+
+                            for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
+                            {
+                                if (utils::keyExists(maps[i], "d") && utils::keyExists(maps[i], "k"))
+                                {
+                                    std::cout << cells[i] << std::endl;
+                                    maps[i]["d"] = -((double)maps[i]["k"] * (double)cells[i]);
+                                }
+                                else
+                                {
+                                    Debug::error("no k or d key in load cells map");
+                                }
+                            }
+
+                            loadCells["map"] = maps;
+                            mapping->SetDevice(it.key(), loadCells, Device_Type::ANALOG);
+                        }
+                        else
+                        {
+                            Debug::error("map field for load cells is empty");
+                        }
+                    }
+                    else
+                    {
+                        Debug::error("map field in mapping is not an array");
+                    }
+
+                }
+                else
+                {
+                    Debug::error("map field for load cells don't exist");
+                }
+
+            }
+            else
+            {
+//                Debug::error("No load cells found");
+            }
+
+        }
+
+
+    }
+    else
+    {
+        Debug::error("No analogs found");
+    }
 }
 
 double HcpManager::GetAnalog(std::string name)
