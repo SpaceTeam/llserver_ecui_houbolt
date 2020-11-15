@@ -30,6 +30,9 @@ void LLController::Init()
     //LLInterface needs to be initialized first to ensure proper initialization before receiving
     //aynchronous commands from the web server
     PrintLogo();
+    string version = std::get<std::string>(Config::getData("version"));
+
+    Debug::print("Version: " + version);
 
     LLInterface::Init();
 
