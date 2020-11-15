@@ -4,7 +4,7 @@
 
 #include <thread>
 
-#include "Socket.h"
+#include "NewSocket.h"
 
 #include "EcuiSocket.h"
 
@@ -12,7 +12,7 @@
 
 using namespace std;
 
-Socket* EcuiSocket::socket;
+NewSocket* EcuiSocket::socket;
 
 bool EcuiSocket::connectionActive = false;
 bool EcuiSocket::shallClose = false;
@@ -27,7 +27,9 @@ void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<voi
     string ip = std::get<std::string>(Config::getData("WEBSERVER/ip"));
     int32 port = std::get<int>(Config::getData("WEBSERVER/port"));
 
-    socket = new Socket(Close, ip, port);
+    socket = new NewSocket("EcuiSocket", Close, ip, port);
+    while(socket->Connect()!=0);
+    
     connectionActive = true;
     asyncListenThread = new thread(AsyncListen, onMsgCallback);
     asyncListenThread->detach();
@@ -36,14 +38,17 @@ void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<voi
 
 void EcuiSocket::AsyncListen(std::function<void(json)> onMsgCallback)
 {
-
     while(!shallClose)
     {
-        string msg = socket->Recv();
-
-        json jsonMsg = json::parse(msg);
-
-        onMsgCallback(jsonMsg);
+        string msg;
+        try {
+            msg = socket->Recv();
+            json jsonMsg = json::parse(msg);
+            onMsgCallback(jsonMsg);
+        } catch (const std::exception& e) {
+            Debug::error("json message of Webserver is invalid:\n" + msg);
+            socket->Connect();
+        }
 
         this_thread::yield();
     }
