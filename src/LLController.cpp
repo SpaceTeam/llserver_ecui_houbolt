@@ -32,21 +32,22 @@ void LLController::Init()
     PrintLogo();
     string version = std::get<std::string>(Config::getData("version"));
 
-    cout << "Version: " << version << endl;
+    Debug::printNoTime("Version: " + version);
+    Debug::printNoTime("\n----------------------");
 
     Debug::print("Initializing LLInterface...");
     LLInterface::Init();
-    Debug::print("Initializing LLInterface done");
+    Debug::print("Initializing LLInterface done\n");
 
     Debug::print("Initializing Webserver Socket...");
     EcuiSocket::Init(OnECUISocketRecv, Abort);
-    Debug::print("Initializing Webserver Socket done");
+    Debug::print("Initializing Webserver Socket done\n");
 
     Debug::print("Initializing Sequence Manager...");
     SequenceManager::init();
-    Debug::print("Initializing Sequence Manager done");
+    Debug::print("Initializing Sequence Manager done\n");
 
-    Debug::printNoTime("\n----------------------\n");
+    Debug::printNoTime("----------------------");
     Debug::print("Low-Level Server started!\n");
 }
 

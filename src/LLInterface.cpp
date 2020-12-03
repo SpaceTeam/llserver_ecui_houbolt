@@ -35,11 +35,12 @@ void LLInterface::Init()
     {
         Debug::print("Initializing HcpManager...");
         HcpManager::Init();
-        Debug::print("Initializing HcpManager done");
+        Debug::print("Initializing HcpManager done\n");
         Debug::print("Starting periodic sensor fetching...");
         HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
-        Debug::print("Periodic sensor fetching started");
+        Debug::print("Periodic sensor fetching started\n");
         sensorTimer = new Timer(40, "sensorTimer");
+        Debug::print("Connecting to warning light...");
         warnLight = new WarnLight(0);
 
         useTMPoE = std::get<bool>(Config::getData("useTMPoE"));

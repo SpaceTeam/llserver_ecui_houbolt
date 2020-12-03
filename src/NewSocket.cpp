@@ -44,7 +44,7 @@ int NewSocket::Connect(int32 tries)
 
     if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        printf("\nSocket - %s: Socket creation error \n", name.c_str());
+        Debug::error("Socket - %s: Socket creation error", name.c_str());
         return -1;
     }
 
@@ -55,7 +55,7 @@ int NewSocket::Connect(int32 tries)
     if (inet_pton(AF_INET, address.c_str(), &serv_addr.sin_addr) <= 0)
     {
         close(socketfd);
-        printf("\nSocket - %s:Invalid address/ Address not supported \n", name.c_str());
+        Debug::error("Socket - %s:Invalid address/ Address not supported", name.c_str());
         return -2;
     }
 
