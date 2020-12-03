@@ -131,11 +131,6 @@ Serial::~Serial()
 void Serial::OnWatchdogExpire(WatchDog* self)
 {
     Debug::error("Serial communication Timed Out... PLEASE HELP!");
-    std::thread(&WatchDog::Stop, self);
-    std::thread([self](){
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        self->Start(true);
-        });
 }
 
 HCP_MSG* Serial::ReadSync()
