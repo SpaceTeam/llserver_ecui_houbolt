@@ -49,15 +49,15 @@ Mapping::~Mapping()
 
 void Mapping::LoadMapping()
 {
-    Debug::info("loading mapping...");
+    Debug::print("loading mapping...");
     this->mapping = json::parse(utils::loadFile(this->mappingPath));
-    Debug::info("mapping loaded");
+    Debug::print("mapping loaded");
 }
 
 void Mapping::SaveMapping()
 {
     utils::saveFile(this->mappingPath, mapping.dump(4));
-    Debug::info("mapping saved");
+    Debug::print("mapping saved");
 }
 
 std::string Mapping::GetTypeName(Device_Type type)

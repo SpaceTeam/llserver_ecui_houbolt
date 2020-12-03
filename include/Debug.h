@@ -31,6 +31,8 @@ private:
     //NOTE: NOT THREAD SAFE
     static void writeToFile();
 
+    static std::string getTimeString();
+
 public:
     static void Init();
 
@@ -40,6 +42,7 @@ public:
     static void log(std::string msg);
 
     static int32 print(std::string fmt, ...);
+    static int32 printNoTime(std::string fmt, ...);
     static int32 error(std::string fmt, ...);
     static int32 info(std::string fmt, ...);
     static int32 warning(std::string fmt, ...);

@@ -143,7 +143,7 @@ void SequenceManager::AbortSequence(std::string abortMsg)
     }
     else
     {
-        Debug::error("cannot abort sequence: no running sequence");
+        Debug::warning("cannot abort sequence: no running sequence");
     }
 
 }

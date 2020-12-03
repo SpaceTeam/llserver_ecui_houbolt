@@ -26,6 +26,37 @@ void Debug::Init()
     debug = std::get<bool>(Config::getData("debug"));
 }
 
+std::string Debug::getTimeString()
+{
+    tm * curr_tm;
+    char time_string[100];
+
+    struct timespec curr_time_struct;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &curr_time_struct);
+
+    curr_tm = localtime(&curr_time_struct.tv_sec);
+
+    strftime(time_string, 100, "%T.", curr_tm);
+
+    return "<" + std::string(time_string) + std::to_string(curr_time_struct.tv_nsec/1000000) + ">\t";
+}
+
+int32 Debug::printNoTime(std::string fmt, ...)
+{
+    std::lock_guard<std::recursive_mutex> lock(_outMutex);
+
+    int printed;
+    va_list args;
+
+    fmt.append("\n");
+
+    va_start(args, fmt);
+    printed = vprintf(fmt.c_str(), args);
+    va_end(args);
+
+    return printed;
+}
+
 int32 Debug::print(std::string fmt, ...)
 {
     std::lock_guard<std::recursive_mutex> lock(_outMutex);
@@ -33,6 +64,7 @@ int32 Debug::print(std::string fmt, ...)
     int printed;
     va_list args;
 
+    fmt = fmt.insert(0, getTimeString());
     fmt.append("\n");
 
     va_start(args, fmt);

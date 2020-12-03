@@ -33,14 +33,19 @@ void LLInterface::Init()
 {
     if (!isInitialized)
     {
+        Debug::print("Initializing HcpManager...");
         HcpManager::Init();
+        Debug::print("Initializing HcpManager done");
+        Debug::print("Starting periodic sensor fetching...");
         HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
+        Debug::print("Periodic sensor fetching started");
         sensorTimer = new Timer(40, "sensorTimer");
         warnLight = new WarnLight(0);
 
         useTMPoE = std::get<bool>(Config::getData("useTMPoE"));
         if (useTMPoE)
         {
+            Debug::print("Initializing TMPoE...");
             tmPoE = new TMPoE(0, 50);
         }
         //i2cDevice = new I2C(0, "someDev"); //not in use right now
