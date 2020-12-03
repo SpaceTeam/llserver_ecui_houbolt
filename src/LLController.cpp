@@ -46,6 +46,8 @@ void LLController::Init()
     SequenceManager::init();
     Debug::print("Initializing Sequence Manager done");
 
+    Debug::printNoTime("\n----------------------\n");
+    Debug::print("Low-Level Server started!\n");
 }
 
 void LLController::Destroy()

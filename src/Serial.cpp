@@ -20,6 +20,10 @@ Serial::Serial(string device, int baudRate)
 
 	_uartFilestream = -1;
 
+	//create watchdog
+    _serialWatchdog = new WatchDog(std::chrono::microseconds(500000), Serial::OnWatchdogExpire);
+    _serialWatchdog->Start(true);
+
 	Debug::print("Opening Serial Connection...");
 	_uartFilestream = open(device.c_str(), O_RDWR | O_NOCTTY);	
     close(_uartFilestream);
@@ -117,10 +121,6 @@ Serial::Serial(string device, int baudRate)
     options.c_lflag = 0;
     tcflush(_uartFilestream, TCIFLUSH);
     tcsetattr(_uartFilestream, TCSANOW, &options);
-
-    //create watchdog
-    _serialWatchdog = new WatchDog(std::chrono::microseconds(500000), Serial::OnWatchdogExpire);
-    _serialWatchdog->Start(true);
 }
 
 Serial::~Serial()

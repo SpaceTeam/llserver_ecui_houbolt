@@ -81,7 +81,7 @@ int32 Debug::info(std::string fmt, ...)
         int printed;
         va_list args;
 
-        fmt = "info: " + fmt;
+        fmt = getTimeString() + "info: " + fmt;
         fmt.append("\n");
 
         va_start(args, fmt);
@@ -101,7 +101,7 @@ int32 Debug::warning(std::string fmt, ...)
         int printed;
         va_list args;
 
-        fmt = "warning: " + fmt;
+        fmt = getTimeString() + "warning: " + fmt;
         fmt.append("\n");
 
         va_start(args, fmt);
@@ -214,7 +214,7 @@ int32 Debug::error(std::string fmt, ...)
     int printed;
     va_list args;
 
-    fmt = "error: " + fmt;
+    fmt = getTimeString() + "error: " + fmt;
     fmt.append("\n");
 
     va_start(args, fmt);
