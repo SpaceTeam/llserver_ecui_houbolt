@@ -22,7 +22,7 @@ private:
 
     std::mutex expireMtx;
 
-    bool watching = false;
+    bool watching = true;
     bool petted = true;
     bool paused = false;
 

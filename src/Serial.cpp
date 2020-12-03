@@ -133,7 +133,7 @@ void Serial::OnWatchdogExpire(WatchDog* self)
     Debug::error("Serial communication Timed Out... PLEASE HELP!");
     std::thread(&WatchDog::Stop, self);
     std::thread([self](){
-        std::this_thread::sleep_for(1s);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         self->Start(true);
         });
 }

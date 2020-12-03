@@ -36,12 +36,11 @@ void WatchDog::WatchLoop()
     Debug::print("Watchdog started\n");
     while (watching)
     {
-        Debug::print("Watchdog check\n");
         if (!paused)
         {
             if (!petted)
             {
-                Debug::print("Watchdog expired\n");
+                Debug::error("Watchdog expired\n");
                 Expired();
             }
             expireMtx.lock();
@@ -79,7 +78,6 @@ void WatchDog::Pause()
     {
         paused = true;
     }
-    Debug::print("Watchdog paused\n");
 }
 
 void WatchDog::Restart()
@@ -89,8 +87,8 @@ void WatchDog::Restart()
     {
         lastPetTime = std::chrono::high_resolution_clock::now();
         petted = true;
+        paused = false;
     }
-    Debug::print("Watchdog restarted\n");
 }
 
 void WatchDog::Pet()
