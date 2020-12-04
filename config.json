@@ -6,13 +6,13 @@
   "socket_msg_size": 65536,
   "mapping_path": "mapping/hcpMapping.json",
   "LOGGING": {
-    "sensor_log_rate": 100,
+    "sensor_log_rate": 50,
     "post_sequence_script": "scripts/plot.sh"
   },
   "HCP": {
     "device": "/dev/serial0",
-    "baudrate": 460800,
-    "sensor_sample_rate": 100,
+    "baudrate": 230400,
+    "sensor_sample_rate": 50,
     "servo_count": 6,
     "servo_max_ontime": 40000,
     "motor_count": 8,

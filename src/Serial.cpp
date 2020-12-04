@@ -139,7 +139,7 @@ HCP_MSG* Serial::ReadSync()
             if (rxLength < 0)
             {
                 //NOTE: if this occurs settings of serial com is broken --> non blocking
-//                cout << "optcode: no bytes recieved" << endl;
+                cout << "optcode: no bytes recieved" << endl;
             }
             else if (rxLength == 0)
             {
