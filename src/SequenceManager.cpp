@@ -2,7 +2,6 @@
 // Created by Markus on 2019-09-27.
 //
 #include <iomanip>
-#include <sstream>
 #include <filesystem>
 
 #include "SequenceManager.h"
@@ -12,9 +11,6 @@
 #include "utils.h"
 #include "LLInterface.h"
 #include "Config.h"
-
-//#include "spdlog/async.h"
-//#include "spdlog/sinks/basic_file_sink.h"
 
 using json = nlohmann::json;
 
@@ -33,8 +29,6 @@ std::mutex SequenceManager::syncMtx;
 Timer* SequenceManager::timer;
 Timer* SequenceManager::sensorTimer;
 
-int32 threadCounter = 0;
-
 json SequenceManager::jsonSequence = json::object();
 json SequenceManager::jsonAbortSequence = json::object();
 string SequenceManager::comments = "";
@@ -46,8 +40,6 @@ std::map<std::string, Interpolation> SequenceManager::interpolationMap;
 std::map<int64, std::map<std::string, double[2]>> SequenceManager::sensorsNominalRangeTimeMap;
 std::map<std::string, std::map<int64, double[2]>> SequenceManager::sensorsNominalRangeMap;
 std::map<std::string, std::map<int64, double>> SequenceManager::deviceMap;
-
-typedef std::chrono::high_resolution_clock Clock;
 
 void SequenceManager::plotMaps(uint8 option=2)
 {
@@ -101,8 +93,8 @@ void SequenceManager::plotMaps(uint8 option=2)
 
 void SequenceManager::init()
 {
-    timer = new Timer();
-    sensorTimer = new Timer();
+    timer = new Timer(40, "SequenceTimer");
+    sensorTimer = new Timer(40, "SequenceSensorTimer");
 
     isAutoAbort = std::get<bool>(Config::getData("autoabort"));
 
@@ -115,8 +107,8 @@ void SequenceManager::init()
 void SequenceManager::StopSequence()
 {
     Debug::flush();
-    Debug::info("sequence done");
-    LLInterface::TurnYellow();
+    Debug::print("Sequence Done");
+    LLInterface::UpdateWarningLight();
     isRunning = false;
     if (!isAbort)
     {
@@ -134,7 +126,7 @@ void SequenceManager::AbortSequence(std::string abortMsg)
         timer->stop();
 
         EcuiSocket::SendJson("abort", abortMsg);
-        Debug::print("aborting... " + abortMsg);
+        Debug::error("Aborting... " + abortMsg);
         isRunning = false;
 
         StartAbortSequence();
@@ -143,7 +135,7 @@ void SequenceManager::AbortSequence(std::string abortMsg)
     }
     else
     {
-        Debug::error("cannot abort sequence: no running sequence");
+        Debug::warning("cannot abort sequence: no running sequence");
     }
 
 }
@@ -268,7 +260,7 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
             msg += "SequenceTime;";
             for (auto rangeName : jsonSeq["globals"]["ranges"])
             {
-                cerr << rangeName << endl;
+                Debug::info("Sensor nominal range found: %s", ((string) rangeName).c_str());
                 if (rangeName.type() == json::value_t::string)
                 {
                     msg += (string) rangeName + "Min;";
@@ -291,9 +283,6 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
 
             LoadInterpolationMap();
 
-            threadCounter = 0;
-
-
             int64 startTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
             int64 endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
             int64 interval = utils::toMicros(jsonSeq["globals"]["interval"]);
@@ -305,6 +294,8 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
             sensorTimer->startContinous(startTime, 1000000 / sensorSampleRate, SequenceManager::GetSensors,
                                         SequenceManager::StopGetSensors);
             timer->start(startTime, endTime, interval, SequenceManager::Tick, SequenceManager::StopSequence);
+
+            Debug::print("Start Sequence");
         }
 
     }
@@ -451,23 +442,9 @@ double SequenceManager::GetTimestamp(json obj)
 
 void SequenceManager::Tick(int64 microTime)
 {
-    threadCounter++;
-    auto startTime = Clock::now();
-
-    if (threadCounter > 1)
-    {
-        cerr << "Threads: " << threadCounter << " micros: " << microTime << endl;
-    }
-    if (threadCounter > 90)
-    {
-        cerr << "too many threads, pausing" << endl;
-        threadCounter--;
-        return;
-    }
-
     if (microTime % 500000 == 0)
     {
-        Debug::print("Micro Seconds: %d", microTime);
+        Debug::info("Micro Seconds: %d", microTime);
     }
     if (microTime % timerSyncInterval == 0)
     {
@@ -539,11 +516,6 @@ void SequenceManager::Tick(int64 microTime)
                     {
                         LLInterface::ExecCommand(devItem.first, nextValue);
                     }
-                    if (threadCounter > 1)
-                    {
-                        Debug::warning("writing " + devItem.first + " with value %d at micro time: %ld", nextValue,
-                                     microTime);
-                    }
                 }
                 else
                 {
@@ -566,23 +538,13 @@ void SequenceManager::Tick(int64 microTime)
                 }
                 sensorsNominalRangeTimeMap.erase(beginRangeIt);
                 //plotMaps();
-                Debug::error("updated sensor ranges at time: %d in ms", microTime/1000);
+                Debug::info("updated sensor ranges at time: %d in ms", microTime/1000);
             }
         }
 
         syncMtx.unlock();
-        beforeLogging = Clock::now();
         Debug::log(msg);
     }
-
-    auto currTime = Clock::now();
-    if (threadCounter > 80)
-    {
-        cerr << "Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() <<  endl;
-        cerr << "Time elapsed until logging" << std::chrono::duration_cast<std::chrono::microseconds>(beforeLogging-startTime).count() << endl;
-        cerr << "Time elapsed during logging" << std::chrono::duration_cast<std::chrono::microseconds>(currTime-beforeLogging).count() << endl;
-    }
-    threadCounter--;
 }
 
 void SequenceManager::StopAbortSequence()
@@ -590,7 +552,7 @@ void SequenceManager::StopAbortSequence()
     if (isAbortRunning)
     {
         Debug::flush();
-        Debug::info("abort sequence done");
+        Debug::print("Abort Sequence Done");
         isAbortRunning = false;
 
         if (utils::keyExists(jsonAbortSequence["globals"], "endTime") &&
@@ -599,7 +561,7 @@ void SequenceManager::StopAbortSequence()
             int64 afterSeqLogTime = ((double)jsonAbortSequence["globals"]["endTime"]) * 1000000.0;
             afterSeqLogTime = abs(afterSeqLogTime);
 
-            printf("After Seq %lld \n", afterSeqLogTime);
+            Debug::info("After Seq %lld \n", afterSeqLogTime);
 
             std::thread afterSeqLogThread([afterSeqLogTime](){
                 //subtracted number used from sleep in start abort sequence
@@ -627,6 +589,7 @@ void SequenceManager::StartAbortSequence()
     if (!isRunning && !isAbortRunning)
     {
         isAbortRunning = true;
+        //this is so servos have time to adjust, may be obsolete by now...
         usleep(50000);
         syncMtx.lock();
 
@@ -634,12 +597,11 @@ void SequenceManager::StartAbortSequence()
         {
             if (it.key().compare("timestamp") != 0)
             {
-                Debug::print(it.key() + " | %d", (uint8)it.value());
+                Debug::info(it.key() + " | %d", (uint8)it.value());
                 LLInterface::ExecCommand(it.key(), it.value());
             }
         }
         syncMtx.unlock();
-        Debug::print("--------------");
         StopAbortSequence();
     }
 

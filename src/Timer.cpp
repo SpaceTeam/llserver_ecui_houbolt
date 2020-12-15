@@ -91,9 +91,18 @@ void Timer::stop()
 /**
     DO NOT INCREMENT MORE THAN 1SECOND AT TIME
 */
-void Timer::incrementTimeSpec(struct timespec *ts, long nsec){
+void Timer::incrementTimeSpec(struct timespec *ts, uint64 nsec, struct timespec *tsAfter){
+    struct timespec tsBefore = {ts->tv_sec, ts->tv_nsec};
     ts->tv_nsec += nsec;
     normalizeTimestamp(ts);
+    if ((ts->tv_sec < tsAfter->tv_sec) || (ts->tv_sec == tsAfter->tv_sec && ts->tv_nsec < tsAfter->tv_nsec))
+    {
+        struct timespec tsDiff;
+        diffTimeSpec(&tsBefore, tsAfter, &tsDiff);
+        Debug::warning("%s - Callback needed longer than expected: \n\t\t %ld.%09lds instead of %fs \n \
+            %ld.%09lds before %ld.%09lds after", threadName.c_str(), tsDiff.tv_sec, tsDiff.tv_nsec, nsec/1000000000.0,
+            tsBefore.tv_sec, tsBefore.tv_nsec, tsAfter->tv_sec, tsAfter->tv_nsec);
+    }
 }
 
 /**
@@ -103,6 +112,57 @@ void Timer::normalizeTimestamp(struct timespec *ts){
     long sec = ts->tv_nsec / NSEC_PER_SEC;
     ts->tv_nsec = ts->tv_nsec % NSEC_PER_SEC;
     ts->tv_sec += sec;
+}
+
+/**
+ * Returns absolute difference of 2 timespecs and writes it to result
+ * @param ts
+ * @param ts2
+ * @param result
+ */
+void Timer::diffTimeSpec(struct timespec *ts, struct timespec *ts2, struct timespec *result)
+{
+    if (ts->tv_sec > ts2->tv_sec)
+    {
+        result->tv_sec = ts->tv_sec-ts2->tv_sec;
+
+        if ((ts->tv_nsec - ts2->tv_nsec) < 0)
+        {
+            result->tv_nsec = NSEC_PER_SEC + (ts->tv_nsec - ts2->tv_nsec);
+            result->tv_sec--;
+        }
+        else
+        {
+            result->tv_nsec = ts->tv_nsec - ts2->tv_nsec;
+        }
+    }
+    else if (ts->tv_sec < ts2->tv_sec)
+    {
+        result->tv_sec = ts2->tv_sec-ts->tv_sec;
+        if ((ts2->tv_nsec - ts->tv_nsec) < 0)
+        {
+            result->tv_nsec = NSEC_PER_SEC + (ts2->tv_nsec - ts->tv_nsec);
+            result->tv_sec--;
+        }
+        else
+        {
+            result->tv_nsec = ts2->tv_nsec - ts->tv_nsec;
+        }
+    }
+    else
+    {
+        result->tv_sec = 0;
+        if (ts->tv_nsec >= ts2->tv_nsec)
+        {
+            result->tv_nsec = ts->tv_nsec - ts2->tv_nsec;
+        }
+        else
+        {
+            result->tv_nsec = ts2->tv_nsec - ts->tv_nsec;
+        }
+    }
+
+
 }
 
 /**
@@ -125,6 +185,7 @@ void Timer::internalContinousLoop(void){
 //    sched_setaffinity(0, sizeof(cpu_set_t), &my_set);
 
     struct timespec next_expiration;
+    struct timespec ts_after_callback;
     clock_gettime(CLOCK_MONOTONIC, &next_expiration);
     reportedOffset = TS_TO_MICRO(next_expiration) - reportedOffset;
 
@@ -171,8 +232,9 @@ void Timer::internalContinousLoop(void){
             counts++;
         }
 #endif
-
-        incrementTimeSpec(&next_expiration, interval_ns);
+        //get time after callback finished
+        clock_gettime(CLOCK_MONOTONIC, &ts_after_callback);
+        incrementTimeSpec(&next_expiration, interval_ns, &ts_after_callback);
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
     }
 
@@ -184,6 +246,8 @@ void Timer::internalContinousLoop(void){
 void Timer::internalLoop(void){
 
     struct timespec next_expiration;
+    struct timespec ts_after_callback;
+
     clock_gettime(CLOCK_MONOTONIC, &next_expiration);
     reportedOffset = TS_TO_MICRO(next_expiration) - reportedOffset;
 
@@ -193,7 +257,10 @@ void Timer::internalLoop(void){
 //        printf("SEQTIME: %lld\n", sequence_time);
 
         tickCallback(sequence_time);
-        incrementTimeSpec(&next_expiration, interval_ns);
+
+        //get time after callback finished
+        clock_gettime(CLOCK_MONOTONIC, &ts_after_callback);
+        incrementTimeSpec(&next_expiration, interval_ns, &ts_after_callback);
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
         if(sequence_time >= endTime){
             stop();

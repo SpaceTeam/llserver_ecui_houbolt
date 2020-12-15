@@ -9,6 +9,7 @@
 #include <functional>
 
 #include "common.h"
+#include "WatchDog.h"
 
 struct HCP_MSG
 {
@@ -23,12 +24,15 @@ private:
 	std::string _uartDevice;
 	int _baudRate;
 	int _uartFilestream;
+	WatchDog *_serialWatchdog;
 
 	std::mutex serialMtx;
     //unsigned int _msgLength = 0;
     //int _remainingBytes = 0;
     //char _buffer[255];
     //char* _currBufferPtr = &_buffer[0];
+
+    static void OnWatchdogExpire(WatchDog* self);
 
 public:
 

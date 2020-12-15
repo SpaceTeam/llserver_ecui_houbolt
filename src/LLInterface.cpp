@@ -22,25 +22,27 @@ bool LLInterface::isInitialized = false;
 bool LLInterface::useTMPoE = false;
 
 bool LLInterface::isTransmittingSensors = false;
-int32 LLInterface::warnlightStatus = true;
+int32 LLInterface::warnlightStatus = -1;
 Timer* LLInterface::sensorTimer;
-
-typedef std::chrono::high_resolution_clock Clock;
-
-uint32 threadCount2 = 0;
 
 void LLInterface::Init()
 {
     if (!isInitialized)
     {
+        Debug::print("Initializing HcpManager...");
         HcpManager::Init();
+        Debug::print("Initializing HcpManager done\n");
+        Debug::print("Starting periodic sensor fetching...");
         HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
-        sensorTimer = new Timer(40, "sensorTimer");
+        Debug::print("Periodic sensor fetching started\n");
+        sensorTimer = new Timer(40, "SensorTimer");
+        Debug::print("Connecting to warning light...");
         warnLight = new WarnLight(0);
 
         useTMPoE = std::get<bool>(Config::getData("useTMPoE"));
         if (useTMPoE)
         {
+            Debug::print("Initializing TMPoE...");
             tmPoE = new TMPoE(0, 50);
         }
         //i2cDevice = new I2C(0, "someDev"); //not in use right now
@@ -106,9 +108,6 @@ std::map<std::string, double> LLInterface::GetAllSensors()
         }
     }
 
-    //auto currTime = Clock::now();
-    //std::cerr << "Get Sensors Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;
-
     return sensors;
 }
 
@@ -161,43 +160,11 @@ void LLInterface::StopGetSensors()
 
 void LLInterface::GetSensors(int64 microTime)
 {
-    // struct timespec ts;
-    // clock_gettime(CLOCK_MONOTONIC, &ts);
-    // printf("ts: %d %09d\n",ts.tv_sec, ts.tv_nsec);
-
-    threadCount2++;
-    if (threadCount2 > 1)
-    {
-        Debug::error("Transmitting Sensor Threads running: %d", threadCount2);
-    }
-
     std::map<std::string, double> sensors = GetAllSensors();
 
     TransmitSensors(microTime, sensors);
 
-    if (sensors.find("igniter feedback") != sensors.end())
-    {
-        if (sensors["igniter feedback"] == 0 && warnlightStatus != 2)
-        {
-            TurnRed();
-            warnlightStatus = 2;
-        }
-    }
-    if (sensors.find("fuelPressure") != sensors.end())
-    {
-        if ((sensors["fuelPressure"] >= 5000 || sensors["oxidizerPressure"] >= 5000) && warnlightStatus==0)
-        {
-            TurnYellow();
-            warnlightStatus = 1;
-        }
-        else if ((sensors["fuelPressure"] < 5000 && sensors["oxidizerPressure"] < 5000) && warnlightStatus==1)
-        {
-            TurnGreen();
-            warnlightStatus = 0;
-        }
-    }
-
-    threadCount2--;
+    UpdateWarningLight(sensors);
 
 }
 
@@ -218,6 +185,45 @@ void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double>
     EcuiSocket::SendJson("sensors", content);
 }
 
+void LLInterface::UpdateWarningLight(std::map<std::string, double> sensors)
+{
+    if (sensors.size() < 1)
+    {
+        sensors = GetAllSensors();
+    }
+
+
+    if (sensors.find("igniter feedback") != sensors.end())
+    {
+        if (sensors["igniter feedback"] == 0)
+        {
+            TurnRed();
+            warnlightStatus = 2;
+        }
+        else
+        {
+            warnlightStatus = 0;
+        }
+    }
+    if (warnlightStatus != 2)
+    {
+        if (sensors.find("fuelTankPressure") != sensors.end() && sensors.find("oxTankPressure") != sensors.end())
+        {
+            if (sensors["fuelTankPressure"] >= 5.0 || sensors["oxTankPressure"] >= 5.0)
+            {
+                TurnYellow();
+                warnlightStatus = 1;
+            }
+            else if (sensors["fuelTankPressure"] < 5.0 && sensors["oxTankPressure"] < 5.0)
+            {
+                TurnGreen();
+                warnlightStatus = 0;
+            }
+        }
+    }
+
+}
+
 void LLInterface::TurnRed()
 {
     warnLight->SetColor(255, 0, 0);
@@ -228,13 +234,13 @@ void LLInterface::TurnRed()
 void LLInterface::TurnGreen()
 {
     warnLight->SetColor(0, 255, 0);
-    warnLight->SetMode("default");
+    warnLight->SetMode("spin");
     warnLight->StopBuzzer();
 }
 
 void LLInterface::TurnYellow()
 {
-    warnLight->SetColor(0, 255, 255);
+    warnLight->SetColor(255, 255, 0);
     warnLight->SetMode("spin");
     warnLight->StopBuzzer();
 }

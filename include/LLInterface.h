@@ -63,6 +63,7 @@ public:
     static void TurnGreen();
     static void TurnYellow();
     static void BeepRed();
+    static void UpdateWarningLight(std::map<std::string, double> sensors={});
 
 
     static bool ExecCommand(std::string name, json value);

@@ -20,6 +20,11 @@ Serial::Serial(string device, int baudRate)
 
 	_uartFilestream = -1;
 
+	//create watchdog
+    _serialWatchdog = new WatchDog(std::chrono::microseconds(500000), Serial::OnWatchdogExpire);
+    _serialWatchdog->Start(true);
+
+	Debug::print("Opening Serial Connection...");
 	_uartFilestream = open(device.c_str(), O_RDWR | O_NOCTTY);	
     close(_uartFilestream);
     _uartFilestream = open(device.c_str(), O_RDWR | O_NOCTTY);  
@@ -123,6 +128,11 @@ Serial::~Serial()
 	close(_uartFilestream);
 }
 
+void Serial::OnWatchdogExpire(WatchDog* self)
+{
+    Debug::error("Serial communication Timed Out... PLEASE HELP!");
+}
+
 HCP_MSG* Serial::ReadSync()
 {
     std::lock_guard<std::mutex> lock(serialMtx);
@@ -134,8 +144,11 @@ HCP_MSG* Serial::ReadSync()
     {
         while(!finished)
         {
+            _serialWatchdog->Restart();
             int rxLength = read(_uartFilestream, (void *) rxBuffer,
                                 1);        //Filestream, buffer to store in, number of bytes to read (MSG_SIZE)
+
+            _serialWatchdog->Pause();
             if (rxLength < 0)
             {
                 //NOTE: if this occurs settings of serial com is broken --> non blocking
@@ -164,7 +177,9 @@ HCP_MSG* Serial::ReadSync()
 
                 while (remainingBytes > 0)
                 {
+                    _serialWatchdog->Restart();
                     rxLength = read(_uartFilestream, (void *) rxBuffer, remainingBytes);
+                    _serialWatchdog->Pause();
 //                    cout << rxLength << " bytes recieved" << endl;
                     if (rxLength < 0)
                     {
@@ -221,8 +236,11 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
     {
         while(!finished)
         {
+            _serialWatchdog->Restart();
             int rxLength = read(_uartFilestream, (void *) rxBuffer,
                                 1);        //Filestream, buffer to store in, number of bytes to read (MSG_SIZE)
+
+            _serialWatchdog->Pause();
             if (rxLength < 0)
             {
                 //NOTE: if this occurs settings of serial com is broken --> non blocking
@@ -251,7 +269,9 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
 
                 while (remainingBytes > 0)
                 {
+                    _serialWatchdog->Restart();
                     rxLength = read(_uartFilestream, (void *) rxBuffer, remainingBytes);
+                    _serialWatchdog->Pause();
 //                    cout << rxLength << " bytes recieved" << endl;
                     if (rxLength < 0)
                     {
@@ -301,7 +321,10 @@ void Serial::Write(HCP_MSG message)
     }
     if (_uartFilestream != -1)
     {
-        int count = write(_uartFilestream, &buffer[0], message.payloadSize+1);        //Filestream, bytes to write, number of bytes to write
+        _serialWatchdog->Restart();
+        //Filestream, bytes to write, number of bytes to write
+        int count = write(_uartFilestream, &buffer[0], message.payloadSize+1);
+        _serialWatchdog->Pause();
         if (count < 0)
         {
             printf("UART Write error\n");

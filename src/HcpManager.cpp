@@ -29,10 +29,6 @@ std::map<std::string, double> HcpManager::sensorBuffer;
 
 std::recursive_mutex HcpManager::serialMtx;
 
-typedef std::chrono::high_resolution_clock Clock;
-
-uint32 threadCount = 0;
-
 void HcpManager::Init()
 {
     string hcpDevice = std::get<std::string>(Config::getData("HCP/device"));
@@ -55,10 +51,6 @@ void HcpManager::Init()
             closedPos = device["endpoints"][0];
 
             SetServoRaw(i, closedPos);
-        }
-        else
-        {
-            Debug::error("Servo Port %d not valid in mapping", i);
         }
     }
 }
@@ -155,11 +147,6 @@ void HcpManager::StartSensorFetch(uint32 sampleRate)
 //that some sensor values of the controller get logged before the other ones, although they are read in the same timer tick
 void HcpManager::FetchSensors(uint64 microTime)
 {
-    threadCount++;
-    if (threadCount > 1)
-    {
-        Debug::error("Sampling Threads running: %d", threadCount);
-    }
 
     json analogs = mapping->GetDevices(Device_Type::ANALOG);
     json digitals = mapping->GetDevices(Device_Type::DIGITAL);
@@ -262,8 +249,6 @@ void HcpManager::FetchSensors(uint64 microTime)
     {
         Debug::error("No digitals found");
     }
-
-    threadCount--;
 }
 
 void HcpManager::StopSensorFetch()
@@ -600,6 +585,10 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
 {
     bool success = false;
 
+    if (!hcpSerial->IsConnected())
+    {
+        return success;
+    }
     if (CheckPort(port, Device_Type::SERVO) && onTime >= 800 && onTime <= 2200)
     {
         //TODO: check if this is okay or if it belongs inside HCP_OK block
@@ -755,6 +744,10 @@ bool HcpManager::SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount)
 {
     bool success = false;
 
+    if (!hcpSerial->IsConnected())
+    {
+        return success;
+    }
     if (CheckPort(port, Device_Type::MOTOR))
     {
         amount = clamp((int)amount, -1000, 1000);
@@ -855,6 +848,10 @@ int32 *HcpManager::GetLoadCells()
     int32 *value = new int32[HCP_THRUST_SENSORS_COUNT];
     std::fill( value, value+HCP_THRUST_SENSORS_COUNT, -1 );
 
+    if (!hcpSerial->IsConnected())
+    {
+        return value;
+    }
 
     HCP_MSG msg;
     msg.optcode = HCP_ST_THRUST_REQ;
@@ -1026,6 +1023,10 @@ int32 HcpManager::GetAnalog(uint8 port)
 {
     int32 value = -1;
 
+    if (!hcpSerial->IsConnected())
+    {
+        return value;
+    }
     if (CheckPort(port, Device_Type::ANALOG))
     {
         HCP_MSG msg;
@@ -1035,18 +1036,11 @@ int32 HcpManager::GetAnalog(uint8 port)
 
         msg.payload[0] = port;
 
-
-
-        auto startTime = Clock::now();
         serialMtx.lock();
         //fprintf(stderr, "get analog %d\n", port);
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
         serialMtx.unlock();
-
-        auto currTime = Clock::now();
-        //std::cerr << "Get analog Timer elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(currTime-startTime).count() << std::endl;
-
 
         if (rep != nullptr)
         {
@@ -1065,10 +1059,10 @@ int32 HcpManager::GetAnalog(uint8 port)
                     Debug::error("Ports of Analog REQ and REP are not the same");
                 }
             }
-	    else
-	    {
-		Debug::info("Other REP opcode than expected: %x", rep->optcode); 
-	    }
+            else
+            {
+                Debug::info("Other REP opcode than expected: %x", rep->optcode);
+            }
             delete rep->payload;
             delete rep;
         }
@@ -1107,6 +1101,10 @@ uint8 HcpManager::GetDigital(uint8 port)
 {
     uint8 state = -1;
 
+    if (!hcpSerial->IsConnected())
+    {
+        return state;
+    }
     if (CheckPort(port, Device_Type::DIGITAL))
     {
         HCP_MSG msg;

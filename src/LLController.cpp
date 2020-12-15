@@ -32,13 +32,23 @@ void LLController::Init()
     PrintLogo();
     string version = std::get<std::string>(Config::getData("version"));
 
-    Debug::print("Version: " + version);
+    Debug::printNoTime("Version: " + version);
+    Debug::printNoTime("\n----------------------");
 
+    Debug::print("Initializing LLInterface...");
     LLInterface::Init();
+    Debug::print("Initializing LLInterface done\n");
 
+    Debug::print("Initializing Webserver Socket...");
     EcuiSocket::Init(OnECUISocketRecv, Abort);
-    SequenceManager::init();
+    Debug::print("Initializing Webserver Socket done\n");
 
+    Debug::print("Initializing Sequence Manager...");
+    SequenceManager::init();
+    Debug::print("Initializing Sequence Manager done\n");
+
+    Debug::printNoTime("----------------------");
+    Debug::print("Low-Level Server started!\n");
 }
 
 void LLController::Destroy()
@@ -76,7 +86,7 @@ void LLController::OnECUISocketRecv(json msg)
         }
         else if (type.compare("abort") == 0)
         {
-            SequenceManager::AbortSequence();
+            SequenceManager::AbortSequence("manual abort");
         }
         else if (type.compare("servos-load") == 0)
         {

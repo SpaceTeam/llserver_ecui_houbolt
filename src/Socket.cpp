@@ -46,7 +46,7 @@ void Socket::Connect(std::string address, uint16 port, int32 tries)
     {
         if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         {
-            printf("\n Socket creation error \n");
+            Debug::error("Socket creation error");
             continue;
         }
 
@@ -56,13 +56,13 @@ void Socket::Connect(std::string address, uint16 port, int32 tries)
         // Convert IPv4 and IPv6 addresses from text to binary form
         if (inet_pton(AF_INET, address.c_str(), &serv_addr.sin_addr) <= 0)
         {
-            printf("\nInvalid address/ Address not supported \n");
+            Debug::error("Socket - %s:Invalid address/ Address not supported");
             continue;
         }
 
         if (connect(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
         {
-            printf("\nWaiting for connection...\n");
+            Debug::print("Waiting for connection...");
             if (totalTries > 1 || totalTries < 0)
             {
                 sleep(3);
@@ -74,11 +74,11 @@ void Socket::Connect(std::string address, uint16 port, int32 tries)
         }
 
         connectionActive = true;
-        printf("Connected \n");
+        Debug::print("Connected");
     }
     if (tries == 0)
     {
-        printf("Couldn't connect to %s PORT: %d\n", address.c_str(), port);
+        Debug::error("Couldn't connect to %s PORT: %d\n", address.c_str(), port);
     }
 }
 
@@ -96,7 +96,7 @@ void Socket::Send(std::string msg)
     }
     else
     {
-        Debug::error("no connection active");
+        Debug::info("no connection active");
     }
 }
 
@@ -138,7 +138,7 @@ std::string Socket::newRecv()
 
         return std::string((char *)newBuffer);
     }else{
-        Debug::error("no connection active");
+        Debug::info("no connection active");
         return std::string("");
     }
 }
@@ -173,7 +173,7 @@ std::string Socket::Recv()
     }
     else
     {
-        Debug::error("no connection active");
+        Debug::info("no connection active");
     }
     return msg;
 }
@@ -200,7 +200,7 @@ std::vector<uint8> Socket::RecvBytes()
     }
     else
     {
-        Debug::error("no connection active");
+        Debug::info("no connection active");
     }
     return msg;
 }
