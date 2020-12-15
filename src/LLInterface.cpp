@@ -234,7 +234,7 @@ void LLInterface::TurnRed()
 void LLInterface::TurnGreen()
 {
     warnLight->SetColor(0, 255, 0);
-    warnLight->SetMode("default");
+    warnLight->SetMode("spin");
     warnLight->StopBuzzer();
 }
 
