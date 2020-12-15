@@ -48,6 +48,13 @@ void LLInterface::Init()
         //i2cDevice = new I2C(0, "someDev"); //not in use right now
 
         isInitialized = true;
+	//update warninglight after initialization but wait 1 sec to 
+	//guarantee all sensors have already been fetched
+	std::thread updateWarnlightThread([](){
+                usleep(1000000);
+		UpdateWarningLight();
+            });
+            updateWarnlightThread.detach();
     }
 }
 
