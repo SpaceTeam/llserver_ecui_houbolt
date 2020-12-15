@@ -92,7 +92,7 @@ void EcuiSocket::SendJson(std::string type, json content)
     }
     else
     {
-        Debug::error("no connection active");
+        Debug::error("no EcuiSocket connection active");
     }
 
 }
@@ -118,7 +118,7 @@ void EcuiSocket::SendJson(std::string type, float content)
     }
     else
     {
-        Debug::error("no connection active");
+        Debug::error("no EcuiSocket connection active");
     }
 }
 

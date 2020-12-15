@@ -86,7 +86,7 @@ void LLController::OnECUISocketRecv(json msg)
         }
         else if (type.compare("abort") == 0)
         {
-            SequenceManager::AbortSequence();
+            SequenceManager::AbortSequence("manual abort");
         }
         else if (type.compare("servos-load") == 0)
         {

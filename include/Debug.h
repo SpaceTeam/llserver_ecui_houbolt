@@ -26,7 +26,8 @@ private:
     static std::ofstream logFile;
     static bool isLogFileOpen;
 
-    static bool debug;
+    static bool printWarnings;
+    static bool printInfos;
 
     //NOTE: NOT THREAD SAFE
     static void writeToFile();

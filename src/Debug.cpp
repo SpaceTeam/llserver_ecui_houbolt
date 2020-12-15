@@ -19,11 +19,13 @@ std::mutex Debug::outFileMutex;
 std::stringstream Debug::logStream;
 std::ofstream Debug::logFile;
 bool Debug::isLogFileOpen = false;
-bool Debug::debug = false;
+bool Debug::printWarnings = false;
+bool Debug::printInfos = false;
 
 void Debug::Init()
 {
-    debug = std::get<bool>(Config::getData("debug"));
+    printWarnings = std::get<bool>(Config::getData("DEBUG/printWarnings"));
+    printInfos = std::get<bool>(Config::getData("DEBUG/printInfos"));
 }
 
 std::string Debug::getTimeString()
@@ -76,7 +78,7 @@ int32 Debug::print(std::string fmt, ...)
 
 int32 Debug::info(std::string fmt, ...)
 {
-    if (debug)
+    if (printInfos)
     {
         int printed;
         va_list args;
@@ -96,7 +98,7 @@ int32 Debug::info(std::string fmt, ...)
 
 int32 Debug::warning(std::string fmt, ...)
 {
-    if (debug)
+    if (printWarnings)
     {
         int printed;
         va_list args;

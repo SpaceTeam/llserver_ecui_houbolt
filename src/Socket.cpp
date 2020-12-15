@@ -96,7 +96,7 @@ void Socket::Send(std::string msg)
     }
     else
     {
-        Debug::error("no connection active");
+        Debug::info("no connection active");
     }
 }
 
@@ -138,7 +138,7 @@ std::string Socket::newRecv()
 
         return std::string((char *)newBuffer);
     }else{
-        Debug::error("no connection active");
+        Debug::info("no connection active");
         return std::string("");
     }
 }
@@ -173,7 +173,7 @@ std::string Socket::Recv()
     }
     else
     {
-        Debug::error("no connection active");
+        Debug::info("no connection active");
     }
     return msg;
 }
@@ -200,7 +200,7 @@ std::vector<uint8> Socket::RecvBytes()
     }
     else
     {
-        Debug::error("no connection active");
+        Debug::info("no connection active");
     }
     return msg;
 }

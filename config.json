@@ -1,7 +1,10 @@
 {
-  "version": "1.2.1@Dev",
+  "version": "1.2.2@Dev",
   "autoabort": false,
-  "debug": false,
+  "DEBUG": {
+      "printWarnings": true,
+      "printInfos": false
+  },
   "useTMPoE": false,
   "socket_msg_size": 65536,
   "mapping_path": "mapping/hcpMapping.json",

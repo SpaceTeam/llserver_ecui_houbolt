@@ -59,8 +59,9 @@ public:
     void stop();
 
     void startContinousNow(uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback);
-    static void incrementTimeSpec(struct timespec *ts, long nsec);
-    static void normalizeTimestamp(struct timespec *ts);
+    void incrementTimeSpec(struct timespec *ts, uint64 nsec, struct timespec *tsAfter);
+    void normalizeTimestamp(struct timespec *ts);
+    void diffTimeSpec(struct timespec *ts, struct timespec *ts2, struct timespec *result);
 
 
     ~Timer();
