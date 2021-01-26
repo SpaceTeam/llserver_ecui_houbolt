@@ -647,7 +647,7 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
     }
     else
     {
-        Debug::error("Servo Port %d not valid in mapping", port);
+        Debug::info("Servo Port %d not valid in mapping", port);
     }
     return success;
 }
@@ -707,7 +707,7 @@ bool HcpManager::SetServo(json device, uint8 percent)
         }
         else
         {
-            Debug::error("Servo Port %d not valid in mapping", port);
+            Debug::info("Servo Port %d not valid in mapping", port);
         }
     }
     else

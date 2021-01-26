@@ -37,7 +37,14 @@
                 "d": 0.0,
                 "k": 1
             },
-            "port": 5
+            "port": 7
+        },
+	"igniter1": {
+            "map": {
+                "d": 0.0,
+                "k": 1
+            },
+            "port": 6
         },
         "oxMainValveFb": {
             "port": 13,
@@ -66,14 +73,14 @@
                 "d": -21.625,
                 "k": 0.0228789
             },
-            "port": 10
+            "port": 11
         },
         "oxTankTempMiddleTop": {
             "map": {
                 "d": -21.625,
                 "k": 0.0228789
             },
-            "port": 11
+            "port": 10
         },
         "oxTankTempTop": {
             "map": {
@@ -97,15 +104,15 @@
             "loadCells": true,
             "map": [
                 {
-                    "d": 143.72648684,
+                    "d": 109.46599828000001,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 59.5489076,
+                    "d": 89.32971544,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 79.13808284,
+                    "d": 143.95424204,
                     "k": -8.252e-05
                 }
             ]
@@ -120,6 +127,9 @@
             "port": 4
         },
         "igniter": {
+            "port": 2
+        },
+	"igniter1": {
             "port": 3
         },
         "oxDepressSolenoid": {
@@ -127,6 +137,9 @@
         },
         "oxPressSolenoid": {
             "port": 6
+        },
+        "syncLed": {
+            "port": 1
         }
     },
     "motor": {},
@@ -145,13 +158,13 @@
         },
         "oxMainValve": {
             "endpoints": [
-                950,
-                1900
+                930,
+                1880
             ],
             "feedbackAnalog": "oxMainValveFb",
             "feedbackEndpoints": [
-                1036,
-                485
+                429,
+                1060
             ],
             "port": 1
         },
