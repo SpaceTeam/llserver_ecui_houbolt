@@ -39,7 +39,7 @@
             },
             "port": 7
         },
-	"igniter1": {
+        "igniter1": {
             "map": {
                 "d": 0.0,
                 "k": 1
@@ -104,15 +104,15 @@
             "loadCells": true,
             "map": [
                 {
-                    "d": 109.46599828000001,
+                    "d": 83.6294814,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 89.32971544,
+                    "d": 95.66131,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 143.95424204,
+                    "d": 118.75131372,
                     "k": -8.252e-05
                 }
             ]
@@ -129,7 +129,7 @@
         "igniter": {
             "port": 2
         },
-	"igniter1": {
+        "igniter1": {
             "port": 3
         },
         "oxDepressSolenoid": {
@@ -151,20 +151,20 @@
             ],
             "feedbackAnalog": "fuelMainValveFb",
             "feedbackEndpoints": [
-                1490,
-                666
+                1438,
+                595
             ],
             "port": 0
         },
         "oxMainValve": {
             "endpoints": [
-                930,
-                1880
+                1020,
+                1970
             ],
             "feedbackAnalog": "oxMainValveFb",
             "feedbackEndpoints": [
-                429,
-                1060
+                490,
+                1121
             ],
             "port": 1
         },
@@ -175,8 +175,8 @@
             ],
             "feedbackAnalog": "oxSuperchargeValveFb",
             "feedbackEndpoints": [
-                1421,
-                679
+                767,
+                1764
             ],
             "port": 3
         },
