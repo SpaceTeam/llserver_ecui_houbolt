@@ -1,118 +1,104 @@
 {
     "analog": {
-        "battery": {
+        "11_battery": {
             "map": {
                 "d": 0,
                 "k": 0.001
             },
             "port": 128
         },
-        "chamberPressure": {
-            "map": {
-                "d": -8.74088,
-                "k": 0.023497
-            },
-            "port": 4
-        },
-        "fuelMainValveFb": {
-            "port": 12,
-            "servo": "fuelMainValve"
-        },
-        "fuelTankPressure": {
+        "04_P_fuelTank": {
             "map": {
                 "d": -8.74088,
                 "k": 0.023497
             },
             "port": 0
         },
-        "fuelVenturiPressure": {
+        "07_P_fuelVenturi": {
             "map": {
                 "d": -8.74088,
                 "k": 0.023497
             },
             "port": 1
         },
-        "igniter": {
-            "map": {
-                "d": 0.0,
-                "k": 1
-            },
-            "port": 7
-        },
-        "igniter1": {
-            "map": {
-                "d": 0.0,
-                "k": 1
-            },
-            "port": 6
-        },
-        "oxMainValveFb": {
-            "port": 13,
-            "servo": "oxMainValve"
-        },
-        "oxSuperchargeValveFb": {
-            "port": 15,
-            "servo": "oxSuperchargeValve"
-        },
-        "oxTankPressure": {
+        "05_P_oxTank": {
             "map": {
                 "d": -8.74088,
                 "k": 0.023497
             },
             "port": 2
         },
-        "oxTankTempBottom": {
-            "map": {
-                "d": -21.625,
-                "k": 0.0228789
-            },
-            "port": 8
-        },
-        "oxTankTempMiddleBottom": {
-            "map": {
-                "d": -21.625,
-                "k": 0.0228789
-            },
-            "port": 11
-        },
-        "oxTankTempMiddleTop": {
-            "map": {
-                "d": -21.625,
-                "k": 0.0228789
-            },
-            "port": 10
-        },
-        "oxTankTempTop": {
-            "map": {
-                "d": -21.625,
-                "k": 0.0228789
-            },
-            "port": 9
-        },
-        "oxVentValveFb": {
-            "port": 14,
-            "servo": "oxVentValve"
-        },
-        "oxVenturiPressure": {
+        "08_P_oxVenturi": {
             "map": {
                 "d": -8.74088,
                 "k": 0.023497
             },
             "port": 3
         },
+        "10_P_chamber": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 4
+        },
+        "01_fuelMainValveFb": {
+            "port": 12,
+            "servo": "fuelMainValve"
+        },
+        "02_oxMainValveFb": {
+            "port": 13,
+            "servo": "oxMainValve"
+        },
+        "03_oxSuperchargeValveFb": {
+            "port": 15,
+            "servo": "oxSuperchargeValve"
+        },
+        "06_T_oxTop": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 9
+        },
+        "09_T_oxMidTop": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 11
+        },
+        "12_T_oxMidBot": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 10
+        },
+        "15_T_oxBot": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 8
+        },
+        "13_oxVentValveFb": {
+            "port": 14,
+            "servo": "oxVentValve"
+        },
         "thrust": {
             "loadCells": true,
             "map": [
                 {
-                    "d": 83.6294814,
+                    "d": 129.26658976000002,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 95.66131,
+                    "d": 33.8657954,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 118.75131372,
+                    "d": 82.00565284,
                     "k": -8.252e-05
                 }
             ]
