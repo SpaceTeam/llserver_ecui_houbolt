@@ -90,15 +90,15 @@
             "loadCells": true,
             "map": [
                 {
-                    "d": 129.26658976000002,
+                    "d": -8.252e-05,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 33.8657954,
+                    "d": -8.252e-05,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 82.00565284,
+                    "d": -8.252e-05,
                     "k": -8.252e-05
                 }
             ]
@@ -126,8 +126,8 @@
     "servo": {
         "fuelMainValve": {
             "endpoints": [
-                950,
-                1950
+                1494,
+                1500
             ],
             "feedbackAnalog": "fuelMainValveFb",
             "feedbackEndpoints": [
@@ -138,8 +138,8 @@
         },
         "oxMainValve": {
             "endpoints": [
-                950,
-                1900
+                1480,
+                1480
             ],
             "feedbackAnalog": "oxMainValveFb",
             "feedbackEndpoints": [
@@ -150,8 +150,8 @@
         },
         "oxSuperchargeValve": {
             "endpoints": [
-                1000,
-                1100
+                1496,
+                1496
             ],
             "feedbackAnalog": "oxSuperchargeValveFb",
             "feedbackEndpoints": [

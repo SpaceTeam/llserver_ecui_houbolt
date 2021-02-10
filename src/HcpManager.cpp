@@ -171,7 +171,7 @@ void HcpManager::FetchSensors(uint64 microTime)
 
                         if (maps.size() > 0)
                         {
-                            for (int i = 0; i < maps.size(); i++)
+                            for (size_t i = 0; i < maps.size(); i++)
                             {
                                 double before = mappedValues[i];
                                 mappedValues[i] = ((double) cells[i] * (double) maps[i]["k"]) + (double) maps[i]["d"];
@@ -689,7 +689,6 @@ bool HcpManager::SetServo(uint8 port, uint8 percent)
 bool HcpManager::SetServo(json device, uint8 percent)
 {
     bool success = false;
-
     if (device != nullptr)
     {
         uint8 port = device["port"];
@@ -714,6 +713,51 @@ bool HcpManager::SetServo(json device, uint8 percent)
     {
         Debug::error("device in SetServo not found");
     }
+    return success;
+}
+
+bool HcpManager::SetSupercharge(uint8 setpoint, uint8 hysteresis)
+{
+    bool success = false;
+	Debug::print("setpoint: %d, hysteresis: %d",setpoint,hysteresis);
+
+    if (!hcpSerial->IsConnected())
+    {
+        return success;
+    }
+
+    HCP_MSG msg;
+    msg.optcode = HCP_ST_SUPERCHARGE_SET;
+    msg.payloadSize = 2;
+    msg.payload = new uint8[msg.payloadSize];
+
+    msg.payload[0] = setpoint;
+    msg.payload[1] = hysteresis;
+
+    serialMtx.lock();
+    hcpSerial->Write(msg);
+    HCP_MSG* rep = hcpSerial->ReadSync();
+    serialMtx.unlock();
+
+    if (rep != nullptr)
+	{
+		if (rep->optcode == HCP_OK)
+		{
+			success = true;
+		}
+		else
+		{
+			printf("REP yields optcode %x", rep->optcode);
+		}
+		delete rep->payload;
+		delete rep;
+	}
+	else
+	{
+		Debug::warning("hcp response message is null");
+	}
+	delete[] msg.payload;
+
     return success;
 }
 

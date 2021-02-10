@@ -153,9 +153,9 @@ hcp_cmd_t hcp_cmds[256] = {
 	{HCP_UNUSED},																		// 144
 	{HCP_UNUSED},																		// 145
 	{HCP_UNUSED},																		// 146
-	{HCP_ST_THRUST_REQ, 0, 0},											// 147 0x93
-	{HCP_ST_THRUST_REP, 0, 9},													// 148 0x94
-	{HCP_UNUSED},																		// 149
+	{HCP_ST_THRUST_REQ, 0, 0},															// 147 0x93
+	{HCP_ST_THRUST_REP, 0, 9},															// 148 0x94
+	{HCP_ST_SUPERCHARGE_SET, 0, 2},														// 149 0x95
 	{HCP_UNUSED},																		// 150
 	{HCP_UNUSED},																		// 151
 	{HCP_UNUSED},																		// 152
@@ -167,10 +167,10 @@ hcp_cmd_t hcp_cmds[256] = {
 	{HCP_UNUSED},																		// 158
 	{HCP_UNUSED},																		// 159
 	{HCP_UNUSED},																		// 160
-	{HCP_ANALOG_REP, 0, 3},														// 161 0xA1
-	{HCP_IMU_RATE_REP, 0, 6},														// 162 0xA2
-	{HCP_IMU_ACCEL_REP, 0, 6},													// 163 0xA3
-	{HCP_IMU_POSE_REP, 0, 6},														// 164 0xA4
+	{HCP_ANALOG_REP, 0, 3},																// 161 0xA1
+	{HCP_IMU_RATE_REP, 0, 6},															// 162 0xA2
+	{HCP_IMU_ACCEL_REP, 0, 6},															// 163 0xA3
+	{HCP_IMU_POSE_REP, 0, 6},															// 164 0xA4
 	{HCP_UNUSED},																		// 165
 	{HCP_UNUSED},																		// 166
 	{HCP_UNUSED},																		// 167
@@ -183,7 +183,7 @@ hcp_cmd_t hcp_cmds[256] = {
 	{HCP_UNUSED},																		// 174
 	{HCP_UNUSED},																		// 175
 	{HCP_UNUSED},																		// 176
-	{HCP_DIGITAL_REP, 0, 2},														// 177 0xB1
+	{HCP_DIGITAL_REP, 0, 2},															// 177 0xB1
 	{HCP_UNUSED},																		// 178
 	{HCP_UNUSED},																		// 179
 	{HCP_UNUSED},																		// 180

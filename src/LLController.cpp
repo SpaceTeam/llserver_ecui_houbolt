@@ -145,6 +145,15 @@ void LLController::OnECUISocketRecv(json msg)
             EcuiSocket::SendJson("servos-load", servosData);
 
         }
+        else if (type.compare("supercharge-set") == 0)
+        {
+			uint8 setpoint;
+			uint8 hysteresis;
+			json supercharge = msg["content"][0];
+			setpoint = supercharge["setpoint"];
+			hysteresis = supercharge["hysteresis"];
+			HcpManager::SetSupercharge(setpoint,hysteresis);
+        }
         else if (type.compare("digital-outs-set") == 0)
         {
             string name;

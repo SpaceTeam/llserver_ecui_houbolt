@@ -79,6 +79,7 @@ public:
     static bool SetServo(uint8 port, uint8 percent);
     static bool SetServo(std::string name, uint8 percent);
 
+	static bool SetSupercharge(uint8 setpoint, uint8 hysteresis);
     static bool SetMotor(uint8 port, int8 percent);
     static bool SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount);
     static bool SetMotor(std::string name, Motor_Mode mode, int16 amount);
