@@ -1,47 +1,5 @@
 {
     "analog": {
-        "11_battery": {
-            "map": {
-                "d": 0,
-                "k": 0.001
-            },
-            "port": 128
-        },
-        "04_P_fuelTank": {
-            "map": {
-                "d": -8.74088,
-                "k": 0.023497
-            },
-            "port": 0
-        },
-        "07_P_fuelVenturi": {
-            "map": {
-                "d": -8.74088,
-                "k": 0.023497
-            },
-            "port": 1
-        },
-        "05_P_oxTank": {
-            "map": {
-                "d": -8.74088,
-                "k": 0.023497
-            },
-            "port": 2
-        },
-        "08_P_oxVenturi": {
-            "map": {
-                "d": -8.74088,
-                "k": 0.023497
-            },
-            "port": 3
-        },
-        "10_P_chamber": {
-            "map": {
-                "d": -8.74088,
-                "k": 0.023497
-            },
-            "port": 4
-        },
         "01_fuelMainValveFb": {
             "port": 12,
             "servo": "fuelMainValve"
@@ -51,8 +9,22 @@
             "servo": "oxMainValve"
         },
         "03_oxSuperchargeValveFb": {
-            "port": 15,
+            "port": 14,
             "servo": "oxSuperchargeValve"
+        },
+        "04_P_fuelTank": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 0
+        },
+        "05_P_oxTank": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 2
         },
         "06_T_oxTop": {
             "map": {
@@ -61,12 +33,40 @@
             },
             "port": 9
         },
+        "07_P_fuelVenturi": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 1
+        },
+        "08_P_oxVenturi": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 3
+        },
         "09_T_oxMidTop": {
             "map": {
                 "d": -21.625,
                 "k": 0.0228789
             },
             "port": 11
+        },
+        "10_P_chamber": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 4
+        },
+        "11_battery": {
+            "map": {
+                "d": 0,
+                "k": 0.001
+            },
+            "port": 128
         },
         "12_T_oxMidBot": {
             "map": {
@@ -75,6 +75,10 @@
             },
             "port": 10
         },
+        "13_oxVentValveFb": {
+            "port": 14,
+            "servo": "oxVentValve"
+        },
         "15_T_oxBot": {
             "map": {
                 "d": -21.625,
@@ -82,23 +86,19 @@
             },
             "port": 8
         },
-        "13_oxVentValveFb": {
-            "port": 14,
-            "servo": "oxVentValve"
-        },
         "thrust": {
             "loadCells": true,
             "map": [
                 {
-                    "d": 129.26658976000002,
+                    "d": 78.70774104,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 33.8657954,
+                    "d": 122.1473418,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 82.00565284,
+                    "d": 80.53192816,
                     "k": -8.252e-05
                 }
             ]
@@ -164,7 +164,7 @@
                 767,
                 1764
             ],
-            "port": 3
+            "port": 2
         },
         "oxVentValve": {
             "endpoints": [
@@ -176,7 +176,7 @@
                 1620,
                 657
             ],
-            "port": 2
+            "port": 3
         }
     }
 }
