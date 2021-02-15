@@ -716,7 +716,7 @@ bool HcpManager::SetServo(json device, uint8 percent)
     return success;
 }
 
-bool HcpManager::SetSupercharge(uint8 setpoint, uint8 hysteresis)
+bool HcpManager::SetSupercharge(int8 setpoint, uint8 hysteresis)
 {
     bool success = false;
 	Debug::print("setpoint: %d, hysteresis: %d",setpoint,hysteresis);

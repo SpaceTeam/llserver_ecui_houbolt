@@ -147,7 +147,7 @@ void LLController::OnECUISocketRecv(json msg)
         }
         else if (type.compare("supercharge-set") == 0)
         {
-			uint8 setpoint;
+			int8 setpoint;
 			uint8 hysteresis;
 			json supercharge = msg["content"][0];
 			setpoint = supercharge["setpoint"];

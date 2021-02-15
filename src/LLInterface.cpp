@@ -102,7 +102,7 @@ std::map<std::string, double> LLInterface::GetAllSensors()
     if (useTMPoE)
     {
         std::vector<uint32> tmpValues = tmPoE->Read();
-        for (int i = 0; i < tmpValues.size(); i++)
+        for (uint32 i = 0; i < tmpValues.size(); i++)
         {
             sensors["temp " + std::to_string(i+1)] = tmpValues[i];
         }
