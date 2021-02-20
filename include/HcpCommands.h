@@ -30,6 +30,8 @@
 #define HCP_SPEAKER				0x70
 #define HCP_ST_THRUST_REQ		0x93
 #define HCP_ST_SUPERCHARGE_SET	0x95
+#define HCP_ST_SUPERCHARGE_GET	0x96
+#define HCP_ST_SUPERCHARGE_REP	0x97
 
 //replies to RPi
 #define HCP_VERS_REP			0x02

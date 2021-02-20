@@ -761,6 +761,51 @@ bool HcpManager::SetSupercharge(int8 setpoint, uint8 hysteresis)
     return success;
 }
 
+json HcpManager::GetSupercharge()
+{
+	json parameters;
+	parameters["hysteresis"] = 1;
+	parameters["setpoint"] = -1;
+
+	if (!hcpSerial->IsConnected())
+    {
+        return parameters;
+    }
+
+    HCP_MSG msg;
+	msg.optcode = HCP_ST_SUPERCHARGE_GET;
+	msg.payloadSize = 0;
+    msg.payload = nullptr;
+
+	serialMtx.lock();
+	//fprintf(stderr, "get analog %d\n", port);
+	hcpSerial->Write(msg);
+	HCP_MSG* rep = hcpSerial->ReadSync();
+	serialMtx.unlock();
+
+	if (rep != nullptr)
+	{
+		if (rep->optcode == HCP_ST_SUPERCHARGE_REP)
+		{
+			parameters["setpoint"] = (int8)(rep->payload[0]);
+			parameters["hysteresis"] = (uint8)(rep->payload[1]);
+		}
+		else
+		{
+			printf("REP yields optcode %x", rep->optcode);
+		}
+		delete rep->payload;
+		delete rep;
+	}
+	else
+	{
+		Debug::warning("hcp response message is null");
+	}
+	delete[] msg.payload;
+    
+    return parameters;
+}
+
 bool HcpManager::SetMotor(uint8 port, int8 percent)
 {
     return SetMotorRaw(port, Motor_Mode::POWER, percent*10);

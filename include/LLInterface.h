@@ -68,6 +68,8 @@ public:
 
     static bool ExecCommand(std::string name, json value);
 
+	static nlohmann::json GetSupercharge();
+
 };
 
 

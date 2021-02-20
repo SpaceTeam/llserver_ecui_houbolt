@@ -130,6 +130,11 @@ nlohmann::json LLInterface::GetAllServoData()
     return HcpManager::GetAllServoData();
 }
 
+nlohmann::json LLInterface::GetSupercharge()
+{
+    return HcpManager::GetSupercharge();
+}
+
 bool LLInterface::ExecCommand(std::string name, json value)
 {
     if (value.type() != json::value_t::number_float &&

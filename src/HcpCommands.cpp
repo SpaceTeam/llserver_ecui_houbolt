@@ -156,8 +156,8 @@ hcp_cmd_t hcp_cmds[256] = {
 	{HCP_ST_THRUST_REQ, 0, 0},															// 147 0x93
 	{HCP_ST_THRUST_REP, 0, 9},															// 148 0x94
 	{HCP_ST_SUPERCHARGE_SET, 0, 2},														// 149 0x95
-	{HCP_UNUSED},																		// 150
-	{HCP_UNUSED},																		// 151
+	{HCP_ST_SUPERCHARGE_GET, 0, 0},														// 150 0x96
+	{HCP_ST_SUPERCHARGE_REP, 0, 2},															// 151 0x97
 	{HCP_UNUSED},																		// 152
 	{HCP_UNUSED},																		// 153
 	{HCP_UNUSED},																		// 154

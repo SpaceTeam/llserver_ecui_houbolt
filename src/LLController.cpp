@@ -156,10 +156,7 @@ void LLController::OnECUISocketRecv(json msg)
         }
         else if (type.compare("supercharge-get") == 0)
         {
-			//json superchargeData = HcpManager::GetSupercharge();
-			json superchargeData;
-			superchargeData["setpoint"] = 40;
-			superchargeData["hysteresis"] = 10;
+			json superchargeData = LLInterface::GetSupercharge();
             EcuiSocket::SendJson("supercharge-load", superchargeData);
         }
         else if (type.compare("digital-outs-set") == 0)
