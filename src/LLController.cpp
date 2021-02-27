@@ -110,6 +110,8 @@ void LLController::OnECUISocketRecv(json msg)
                 name = servo["id"];
                 value = servo["value"];
                 HcpManager::SetServo(name, value);
+                json client_msg = servo;
+                EcuiSocket::SendJson("servos-sync", client_msg);
             }
         }
         else if (type.compare("servos-set-raw") == 0)
