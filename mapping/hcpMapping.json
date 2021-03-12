@@ -132,8 +132,8 @@
     "servo": {
         "fuelMainValve": {
             "endpoints": [
-                1494,
-                1500
+                945,
+                1900
             ],
             "feedbackAnalog": "fuelMainValveFb",
             "feedbackEndpoints": [
@@ -144,25 +144,25 @@
         },
         "oxMainValve": {
             "endpoints": [
-                1020,
+                1060,
                 1970
             ],
             "feedbackAnalog": "oxMainValveFb",
             "feedbackEndpoints": [
-                490,
-                1121
+                900,
+                400
             ],
             "port": 1
         },
         "oxSuperchargeValve": {
             "endpoints": [
-                1496,
-                1496
+                1000,
+                1100
             ],
             "feedbackAnalog": "oxSuperchargeValveFb",
             "feedbackEndpoints": [
-                767,
-                1764
+            	1400,
+                600
             ],
             "port": 2
         },
