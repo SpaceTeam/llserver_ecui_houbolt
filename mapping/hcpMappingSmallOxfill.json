@@ -1,182 +1,82 @@
 {
     "analog": {
-        "01_fuelMainValveFb": {
+        "01_loadingTankFeedback": {
             "port": 12,
-            "servo": "fuelMainValve"
+            "servo": "loadingTankValve"
         },
-        "02_oxMainValveFb": {
-            "port": 13,
-            "servo": "oxMainValve"
-        },
-        "03_oxSuperchargeValveFb": {
-            "port": 14,
-            "servo": "oxSuperchargeValve"
-        },
-        "04_P_fuelTank": {
+        "02_loadingTankPressure": {
             "map": {
                 "d": -8.74088,
                 "k": 0.023497
             },
             "port": 0
         },
-        "05_P_oxTank": {
-            "map": {
-                "d": -8.74088,
-                "k": 0.023497
-            },
-            "port": 2
+        "03_loadingTankVentFeedback": {
+            "port": 13,
+            "servo": "loadingTankVentValve"
         },
-        "06_T_oxTop": {
-            "map": {
-                "d": -21.625,
-                "k": 0.0228789
-            },
-            "port": 9
-        },
-        "07_P_fuelVenturi": {
-            "map": {
-                "d": -8.74088,
-                "k": 0.023497
-            },
-            "port": 1
-        },
-        "08_P_oxVenturi": {
-            "map": {
-                "d": -8.74088,
-                "k": 0.023497
-            },
-            "port": 3
-        },
-        "09_T_oxMidTop": {
-            "map": {
-                "d": -21.625,
-                "k": 0.0228789
-            },
-            "port": 11
-        },
-        "10_P_chamber": {
-            "map": {
-                "d": -8.74088,
-                "k": 0.023497
-            },
-            "port": 4
-        },
-        "11_battery": {
-            "map": {
-                "d": 0,
-                "k": 0.001
-            },
-            "port": 128
-        },
-        "12_T_oxMidBot": {
-            "map": {
-                "d": -21.625,
-                "k": 0.0228789
-            },
-            "port": 10
-        },
-        "13_oxVentValveFb": {
-            "port": 14,
-            "servo": "oxVentValve"
-        },
-        "15_T_oxBot": {
+        "04_T_coldContainer": {
             "map": {
                 "d": -21.625,
                 "k": 0.0228789
             },
             "port": 8
         },
-        "thrust": {
-            "loadCells": true,
-            "map": [
-                {
-                    "d": 78.70774104,
-                    "k": -8.252e-05
-                },
-                {
-                    "d": 122.1473418,
-                    "k": -8.252e-05
-                },
-                {
-                    "d": 80.53192816,
-                    "k": -8.252e-05
-                }
-            ]
+        "05_T_warmContainer": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 9
+        },
+        "06_supply_voltage": {
+            "map": {
+                "d": 0,
+                "k": 0.001
+            },
+            "port": 128
         }
     },
     "digital": {},
     "digitalOut": {
-        "fuelDepressSolenoid": {
-            "port": 5
-        },
-        "fuelPressSolenoid": {
-            "port": 4
-        },
-        "igniter": {
-            "port": 2
-        },
-        "igniter1": {
-            "port": 3
-        },
-        "oxDepressSolenoid": {
+        "coolingNotHeatingValve": {
             "port": 7
         },
-        "oxPressSolenoid": {
-            "port": 6
+        "coolingPump": {
+            "port": 4
         },
-        "syncLed": {
-            "port": 1
+        "heatingPump": {
+            "port": 5
+        },
+        "retractMotor": {
+            "port": 6
         }
     },
     "motor": {},
     "servo": {
-        "fuelMainValve": {
+        "loadingTankValve": {
             "endpoints": [
-                945,
-                1900
+                1025,
+                2050
             ],
-            "feedbackAnalog": "fuelMainValveFb",
+            "feedbackAnalog": "loadingTankFeedback",
             "feedbackEndpoints": [
-                1438,
-                595
+                1443,
+                575
             ],
             "port": 0
         },
-        "oxMainValve": {
-            "endpoints": [
-                1060,
-                1970
-            ],
-            "feedbackAnalog": "oxMainValveFb",
-            "feedbackEndpoints": [
-                900,
-                400
-            ],
-            "port": 1
-        },
-        "oxSuperchargeValve": {
+        "loadingTankVentValve": {
             "endpoints": [
                 1000,
-                1100
+                1900
             ],
-            "feedbackAnalog": "oxSuperchargeValveFb",
+            "feedbackAnalog": "loadingTankVentFeedback",
             "feedbackEndpoints": [
-            	1400,
-                600
+                1421,
+                679
             ],
-            "port": 2
-        },
-        "oxVentValve": {
-            "endpoints": [
-                950,
-                2000
-            ],
-            "feedbackAnalog": "oxVentValveFb",
-            "feedbackEndpoints": [
-                1620,
-                657
-            ],
-            "port": 3
+            "port": 1
         }
     }
 }

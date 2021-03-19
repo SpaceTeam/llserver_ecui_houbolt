@@ -1,50 +1,47 @@
 {
-  "version": "1.2.3@Teststand",
-  "autoabort": false,
-  "DEBUG": {
-      "printWarnings": true,
-      "printInfos": false
-  },
-  "useTMPoE": false,
-  "socket_msg_size": 65536,
-  "mapping_path": "mapping/hcpMapping.json",
-  "LOGGING": {
-    "sensor_log_rate": 100,
-    "post_sequence_script": "scripts/plot.sh"
-  },
-  "HCP": {
-    "device": "/dev/serial0",
-    "baudrate": 460800,
-    "sensor_sample_rate": 100,
-    "servo_count": 6,
-    "servo_max_ontime": 40000,
-    "motor_count": 8,
-    "motor_max_power": 1000,
-    "digital_count": 16,
-    "analog_count": 16
-  },
-  "WEBSERVER":
-  {
-    "ip": "127.0.0.1",
-    "port": 5555,
-    "sensor_transmission_interval": 100000,
-    "timer_sync_interval": 100000
-  },
-  "WARNLIGHT": {
-    "ip": "127.0.0.1",
-    "port": 25556
-  },
-  "TMPoE": {
-    "ip": "127.0.0.1",
-    "port": 25557
-  },
-  "I2C": {
-    "address" : 104
-  },
-  "Battery": {
-    "full": 12600,
-    "empty_threshold": 9100,
-    "low_threshold": 9900,
-    "voltage_hysterisis": 100
+	"version": "1.2.1@Tanking",
+	"autoabort": false,
+	"debug": false,
+	"useTMPoE": false,
+	"socket_msg_size": 65536,
+	"mapping_path": "mapping/hcpMapping.json",
+	"LOGGING": {
+	  "sensor_log_rate": 50,
+	  "post_sequence_script": "scripts/plot.sh"
+	},
+	"HCP": {
+	  "device": "/dev/serial0",
+	  "baudrate": 230400,
+	  "sensor_sample_rate": 50,
+	  "servo_count": 6,
+	  "servo_max_ontime": 40000,
+	  "motor_count": 8,
+	  "motor_max_power": 1000,
+	  "digital_count": 16,
+	  "analog_count": 16
+	},
+	"WEBSERVER":
+	{
+	  "ip": "127.0.0.1",
+	  "port": 5555,
+	  "sensor_transmission_interval": 100000,
+	  "timer_sync_interval": 100000
+	},
+	"WARNLIGHT": {
+	  "ip": "127.0.0.1",
+	  "port": 25556
+	},
+	"TMPoE": {
+	  "ip": "127.0.0.1",
+	  "port": 25557
+	},
+	"I2C": {
+	  "address" : 104
+	},
+	"Battery": {
+	  "full": 12600,
+	  "empty_threshold": 9100,
+	  "low_threshold": 9900,
+	  "voltage_hysterisis": 100
+	}
   }
-}

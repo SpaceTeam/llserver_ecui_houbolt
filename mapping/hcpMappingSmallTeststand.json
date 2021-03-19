@@ -61,7 +61,7 @@
             },
             "port": 4
         },
-        "11_battery": {
+        "11_supply_voltage": {
             "map": {
                 "d": 0,
                 "k": 0.001
