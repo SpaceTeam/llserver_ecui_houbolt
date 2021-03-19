@@ -17,7 +17,7 @@ void Config::Init(std::string filePath) {
 	catch(const std::exception& e)
 	{
 		std::cerr << "config file not found" << '\n';
-		assert(0);
+		exit(1);
 	}
 	
 }

@@ -97,7 +97,7 @@ int main(int argc, char const *argv[])
             configPath = "config_large_teststand.json";
             printf("server mode 'large teststand' not implemented\n");
         default:
-            assert(0);
+            exit(1);
 
     }
     Config::Init(configPath);
