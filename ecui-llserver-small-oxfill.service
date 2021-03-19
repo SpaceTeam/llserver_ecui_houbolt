@@ -1,0 +1,15 @@
+Description=Service for ECUI Low Level Server Cpp
+
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/TXV_ECUI_LLServer/TXV_ECUI_LLSERVER -smallOxfill
+WorkingDirectory=/home/pi/TXV_ECUI_LLServer/
+Restart=always
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

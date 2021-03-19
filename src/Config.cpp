@@ -10,7 +10,16 @@ json Config::data;
 
 void Config::Init(std::string filePath) {
 
-    data = json::parse(utils::loadFile(filePath));
+	try
+	{
+		data = json::parse(utils::loadFile(filePath));
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << "config file not found" << '\n';
+		assert(0);
+	}
+	
 }
 
 std::variant<int, double, std::string, bool, json> Config::getData(std::vector<std::string> keyChain) {

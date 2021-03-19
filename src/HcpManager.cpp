@@ -33,8 +33,10 @@ void HcpManager::Init()
 {
     string hcpDevice = std::get<std::string>(Config::getData("HCP/device"));
     int32 baudrate = std::get<int>(Config::getData("HCP/baudrate"));
-    string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
-    hcpSerial = new Serial(hcpDevice, baudrate);
+
+	string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
+    
+	hcpSerial = new Serial(hcpDevice, baudrate);
     mapping = new Mapping(mappingPath);
 
     sensorTimer = new Timer(41, "HcpTimer");

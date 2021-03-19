@@ -1,0 +1,182 @@
+{
+    "analog": {
+        "01_fuelMainValveFb": {
+            "port": 12,
+            "servo": "fuelMainValve"
+        },
+        "02_oxMainValveFb": {
+            "port": 13,
+            "servo": "oxMainValve"
+        },
+        "03_oxSuperchargeValveFb": {
+            "port": 14,
+            "servo": "oxSuperchargeValve"
+        },
+        "04_P_fuelTank": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 0
+        },
+        "05_P_oxTank": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 2
+        },
+        "06_T_oxTop": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 9
+        },
+        "07_P_fuelVenturi": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 1
+        },
+        "08_P_oxVenturi": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 3
+        },
+        "09_T_oxMidTop": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 11
+        },
+        "10_P_chamber": {
+            "map": {
+                "d": -8.74088,
+                "k": 0.023497
+            },
+            "port": 4
+        },
+        "11_battery": {
+            "map": {
+                "d": 0,
+                "k": 0.001
+            },
+            "port": 128
+        },
+        "12_T_oxMidBot": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 10
+        },
+        "13_oxVentValveFb": {
+            "port": 14,
+            "servo": "oxVentValve"
+        },
+        "15_T_oxBot": {
+            "map": {
+                "d": -21.625,
+                "k": 0.0228789
+            },
+            "port": 8
+        },
+        "thrust": {
+            "loadCells": true,
+            "map": [
+                {
+                    "d": 78.70774104,
+                    "k": -8.252e-05
+                },
+                {
+                    "d": 122.1473418,
+                    "k": -8.252e-05
+                },
+                {
+                    "d": 80.53192816,
+                    "k": -8.252e-05
+                }
+            ]
+        }
+    },
+    "digital": {},
+    "digitalOut": {
+        "fuelDepressSolenoid": {
+            "port": 5
+        },
+        "fuelPressSolenoid": {
+            "port": 4
+        },
+        "igniter": {
+            "port": 2
+        },
+        "igniter1": {
+            "port": 3
+        },
+        "oxDepressSolenoid": {
+            "port": 7
+        },
+        "oxPressSolenoid": {
+            "port": 6
+        },
+        "syncLed": {
+            "port": 1
+        }
+    },
+    "motor": {},
+    "servo": {
+        "fuelMainValve": {
+            "endpoints": [
+                945,
+                1900
+            ],
+            "feedbackAnalog": "fuelMainValveFb",
+            "feedbackEndpoints": [
+                1438,
+                595
+            ],
+            "port": 0
+        },
+        "oxMainValve": {
+            "endpoints": [
+                1060,
+                1970
+            ],
+            "feedbackAnalog": "oxMainValveFb",
+            "feedbackEndpoints": [
+                900,
+                400
+            ],
+            "port": 1
+        },
+        "oxSuperchargeValve": {
+            "endpoints": [
+                1000,
+                1100
+            ],
+            "feedbackAnalog": "oxSuperchargeValveFb",
+            "feedbackEndpoints": [
+            	1400,
+                600
+            ],
+            "port": 2
+        },
+        "oxVentValve": {
+            "endpoints": [
+                950,
+                2000
+            ],
+            "feedbackAnalog": "oxVentValveFb",
+            "feedbackEndpoints": [
+                1620,
+                657
+            ],
+            "port": 3
+        }
+    }
+}

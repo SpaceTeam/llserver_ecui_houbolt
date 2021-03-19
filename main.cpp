@@ -8,8 +8,17 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "common.h"
+
 #include "LLController.h"
 #include "Config.h"
+
+enum ServerMode
+{
+	LARGE_TESTSTAND,
+	SMALL_TESTSTAND,
+	SMALL_OXFILL
+};
 
 bool running = true;
 
@@ -56,8 +65,44 @@ int main(int argc, char const *argv[])
 
     set_latency_target();
 
-    Config::Init("config.json");
-    Debug::Init();
+    ServerMode serverMode = ServerMode::LARGE_TESTSTAND;
+    if (argc > 1)
+    {
+        if (strcmp(argv[1],"-smallTeststand") == 0)
+        {
+            serverMode = ServerMode::SMALL_TESTSTAND;
+            printf("Using Small Teststand Profile...\n");
+        }
+        else if (strcmp(argv[1],"-smallOxfill") == 0)
+        {
+            serverMode = ServerMode::SMALL_OXFILL;
+            printf("Using Small Oxfill Profile...\n");
+        }
+        else
+        {
+            printf("Defaulting to Large Teststand Profile...\n");
+        }
+    }
+
+    std::string configPath = "";
+    switch (serverMode)
+    {
+        case ServerMode::SMALL_TESTSTAND:
+            configPath = "config_small_teststand.json";
+			break;
+        case ServerMode::SMALL_OXFILL:
+            configPath = "config_small_oxfill_config.json";
+			break;
+        case ServerMode::LARGE_TESTSTAND:
+            configPath = "config_large_teststand.json";
+            printf("server mode 'large teststand' not implemented\n");
+        default:
+            assert(0);
+
+    }
+    Config::Init(configPath);
+
+	Debug::Init();
     LLController::Init();
 
     std::string inputStr;

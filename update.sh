@@ -8,6 +8,8 @@ cmake . -DCMAKE_BUILD_TYPE:STRING=Release
 
 make -j 3
 
-sudo systemctl restart ecui-llserver.service
+sudo systemctl restart ecui-llserver-large-teststand.service
+sudo systemctl restart ecui-llserver-small-teststand.service
+sudo systemctl restart ecui-llserver-small-oxfill.service
 
 
