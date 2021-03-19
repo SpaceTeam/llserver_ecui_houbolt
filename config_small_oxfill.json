@@ -4,7 +4,7 @@
 	"debug": false,
 	"useTMPoE": false,
 	"socket_msg_size": 65536,
-	"mapping_path": "mapping/hcpMapping.json",
+	"mapping_path": "mapping/hcpMappingSmallOxfill.json",
 	"LOGGING": {
 	  "sensor_log_rate": 50,
 	  "post_sequence_script": "scripts/plot.sh"
