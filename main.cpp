@@ -91,7 +91,7 @@ int main(int argc, char const *argv[])
             configPath = "config_small_teststand.json";
 			break;
         case ServerMode::SMALL_OXFILL:
-            configPath = "config_small_oxfill_config.json";
+            configPath = "config_small_oxfill.json";
 			break;
         case ServerMode::LARGE_TESTSTAND:
             configPath = "config_large_teststand.json";
