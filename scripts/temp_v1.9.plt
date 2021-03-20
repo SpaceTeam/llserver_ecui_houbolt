@@ -9,7 +9,7 @@ set grid
 set datafile separator ";"
 
 plot data_path \
-using 1:15 title 'Oxidizer Tank Bottom Temp [C]' smooth frequency with lines lw 3,\
+using 1:16 title 'Oxidizer Tank Bottom Temp [C]' smooth frequency with lines lw 3,\
 '' using 1:13 title 'Oxidizer Tank Middle Bottom Temp [C]' smooth frequency with lines lw 3,\
 '' using 1:10 title 'Oxidizer Tank Middle Top Temp [C]' smooth frequency with lines lw 3,\
 '' using 1:7 title 'Oxidizer Tank Top Temp [C]' smooth frequency with lines lw 3,\
