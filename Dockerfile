@@ -12,6 +12,6 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
         cmake \
         build-essential 
 
-WORKDIR /TXV_ECUI_LLServer
+WORKDIR /llserver_ecui_houbolt
 
 CMD ["bash"]
