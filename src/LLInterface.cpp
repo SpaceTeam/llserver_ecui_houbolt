@@ -25,6 +25,9 @@ bool LLInterface::isTransmittingSensors = false;
 int32 LLInterface::warnlightStatus = -1;
 Timer* LLInterface::sensorTimer;
 
+double LLInterface::sensorsSmoothingFactor = 0.0;
+std::map<std::string, double> LLInterface::filteredSensorBuffer;
+
 void LLInterface::Init()
 {
     if (!isInitialized)
@@ -47,14 +50,16 @@ void LLInterface::Init()
         }
         //i2cDevice = new I2C(0, "someDev"); //not in use right now
 
+		sensorsSmoothingFactor = std::get<double>(Config::getData("WEBSERVER/sensors_smoothing_factor"));
+
         isInitialized = true;
-	//update warninglight after initialization but wait 1 sec to 
-	//guarantee all sensors have already been fetched
-	std::thread updateWarnlightThread([](){
-                usleep(1000000);
-		UpdateWarningLight();
-            });
-            updateWarnlightThread.detach();
+		//update warninglight after initialization but wait 1 sec to 
+		//guarantee all sensors have already been fetched
+		std::thread updateWarnlightThread([](){
+					usleep(1000000);
+			UpdateWarningLight();
+				});
+				updateWarnlightThread.detach();
     }
 }
 
@@ -180,11 +185,26 @@ void LLInterface::GetSensors(int64 microTime)
 
 }
 
+void LLInterface::FilterSensors(std::map<std::string, double> rawSensors)
+{
+	for (const auto& sensor : rawSensors)
+    {
+		if (filteredSensorBuffer.find(sensor.first) != filteredSensorBuffer.end())
+		{
+			filteredSensorBuffer[sensor.first] = sensor.second;
+		}
+		filteredSensorBuffer[sensor.first] += sensorsSmoothingFactor * (sensor.second - filteredSensorBuffer[sensor.first]);
+	}
+
+}
+
 void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double> sensors)
 {
+	FilterSensors(sensors);
+
     json content = json::array();
     json sen;
-    for (const auto& sensor : sensors)
+    for (const auto& sensor : filteredSensorBuffer)
     {
         sen = json::object();
 

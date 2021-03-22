@@ -33,8 +33,13 @@ private:
     static int32 warnlightStatus;
     static Timer* sensorTimer;
 
+	static double sensorsSmoothingFactor;
+	static std::map<std::string, double> filteredSensorBuffer;
+
     static void GetSensors(int64 microTime);
     static void StopGetSensors();
+
+	static void FilterSensors(std::map<std::string, double> rawSensors);
 
     LLInterface();
 
