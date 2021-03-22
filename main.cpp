@@ -68,12 +68,12 @@ int main(int argc, char const *argv[])
     ServerMode serverMode = ServerMode::LARGE_TESTSTAND;
     if (argc > 1)
     {
-        if (strcmp(argv[1],"-smallTeststand") == 0)
+        if (strcmp(argv[1],"--smallTeststand") == 0)
         {
             serverMode = ServerMode::SMALL_TESTSTAND;
             printf("Using Small Teststand Profile...\n");
         }
-        else if (strcmp(argv[1],"-smallOxfill") == 0)
+        else if (strcmp(argv[1],"--smallOxfill") == 0)
         {
             serverMode = ServerMode::SMALL_OXFILL;
             printf("Using Small Oxfill Profile...\n");
