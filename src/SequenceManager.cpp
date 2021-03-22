@@ -162,7 +162,10 @@ void SequenceManager::SetupLogging()
     utils::saveFile(currentDirPath + "/AbortSequence.json", jsonAbortSequence.dump(4));
     utils::saveFile(currentDirPath + "/comments.txt", comments);
 
-    filesystem::copy("config.json", currentDirPath + "/");
+    filesystem::copy("config_large_teststand.json", currentDirPath + "/");
+    filesystem::copy("config_small_teststand.json", currentDirPath + "/");
+	filesystem::copy("config_small_oxfill.json", currentDirPath + "/");
+
 }
 
 void SequenceManager::WritePostSeqComment(std::string msg){
