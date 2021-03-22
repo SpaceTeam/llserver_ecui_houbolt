@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(TXV_ECUI_LLSERVER)
+project(llserver_ecui_houbolt)
 
 find_package(Threads REQUIRED)
 
