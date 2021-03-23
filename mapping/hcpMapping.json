@@ -79,6 +79,13 @@
             "port": 14,
             "servo": "oxVentValve"
         },
+        "14_igniter_fb": {
+            "map": {
+                "d": 0,
+                "k": 1
+            },
+            "port": 7
+        },
         "15_T_oxBot": {
             "map": {
                 "d": -21.625,
@@ -86,19 +93,26 @@
             },
             "port": 8
         },
+        "16_igniter1_fb": {
+            "map": {
+                "d": 0,
+                "k": 1
+            },
+            "port": 6
+        },
         "thrust": {
             "loadCells": true,
             "map": [
                 {
-                    "d": 78.70774104,
+                    "d": 91.16504276,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 122.1473418,
+                    "d": 82.42815524000001,
                     "k": -8.252e-05
                 },
                 {
-                    "d": 80.53192816,
+                    "d": 122.76640684,
                     "k": -8.252e-05
                 }
             ]
@@ -135,10 +149,10 @@
                 945,
                 1900
             ],
-            "feedbackAnalog": "fuelMainValveFb",
+            "feedbackAnalog": "01_fuelMainValveFb",
             "feedbackEndpoints": [
-                1438,
-                595
+                1468,
+                649
             ],
             "port": 0
         },
@@ -147,10 +161,10 @@
                 1060,
                 1970
             ],
-            "feedbackAnalog": "oxMainValveFb",
+            "feedbackAnalog": "02_oxMainValveFb",
             "feedbackEndpoints": [
-                900,
-                400
+                921,
+                392
             ],
             "port": 1
         },
@@ -159,9 +173,9 @@
                 1000,
                 1100
             ],
-            "feedbackAnalog": "oxSuperchargeValveFb",
+            "feedbackAnalog": "03_oxSuperchargeValveFb",
             "feedbackEndpoints": [
-            	1400,
+                1400,
                 600
             ],
             "port": 2
