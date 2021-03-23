@@ -9,14 +9,14 @@ set grid
 set datafile separator ";"
 
 
-stats data_path every ::2::500 using 17 name 'averageTrust1' nooutput #durchscnitt von wert 2 bis 500 herausfinden von colum 3
-stats '' every ::2::500 using 18 name 'averageTrust2' nooutput
-stats '' every ::2::500 using 19 name 'averageTrust3' nooutput
+stats data_path every ::2::500 using 18 name 'averageTrust1' nooutput #durchscnitt von wert 2 bis 500 herausfinden von colum 3
+stats '' every ::2::500 using 19 name 'averageTrust2' nooutput
+stats '' every ::2::500 using 20 name 'averageTrust3' nooutput
 
 
 plot data_path \
-using 1:17 title 'Thrust 1 in N' smooth frequency with lines lw 3,\
-'' using 1:18 title 'Thrust 2 in N' smooth frequency with lines lw 3,\
-'' using 1:19 title 'Thrust 3 in N' smooth frequency with lines lw 3,\
-'' using 1:(($17+$18+$19-averageTrust1_mean-averageTrust2_mean-averageTrust3_mean)*8.252e-5) title 'Thrust in N' smooth frequency with lines lw 3,\
+using 1:18 title 'Thrust 1 [N]' smooth frequency with lines lw 3,\
+'' using 1:19 title 'Thrust 2 [N]' smooth frequency with lines lw 3,\
+'' using 1:20 title 'Thrust 3 [N]' smooth frequency with lines lw 3,\
+'' using 1:(($18+$19+$20-averageTrust1_mean-averageTrust2_mean-averageTrust3_mean)*8.252e-5) title 'Thrust in N' smooth frequency with lines lw 3,\
 '' using 1:20 title 'Thrust Sum in N' smooth frequency with lines lw 3,\
