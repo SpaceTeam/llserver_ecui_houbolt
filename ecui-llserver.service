@@ -5,8 +5,8 @@ After=syslog.target network-online.target
 
 [Service]
 Type=simple
-ExecStart=/home/pi/TXV_ECUI_LLServer/TXV_ECUI_LLSERVER
-WorkingDirectory=/home/pi/TXV_ECUI_LLServer/
+ExecStart=/home/pi/llserver_ecui_houbolt/llserver_ecui_houbolt
+WorkingDirectory=/home/pi/llserver_ecui_houbolt/
 Restart=always
 RestartSec=10
 KillMode=process
