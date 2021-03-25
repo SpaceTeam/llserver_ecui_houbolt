@@ -161,6 +161,18 @@ void LLController::OnECUISocketRecv(json msg)
 			json superchargeData = LLInterface::GetSupercharge();
             EcuiSocket::SendJson("supercharge-load", superchargeData);
         }
+		else if (type.compare("wl-red-set") == 0)
+		{
+			LLInterface::TurnRed();
+		}
+		else if (type.compare("wl-yellow-set") == 0)
+		{
+			LLInterface::TurnYellow();
+		}
+		else if (type.compare("wl-green-set") == 0)
+		{
+			LLInterface::TurnGreen();
+		}
         else if (type.compare("digital-outs-set") == 0)
         {
             string name;
