@@ -210,11 +210,6 @@ void LLInterface::UpdateWarningLight(std::map<std::string, double> sensors)
         if (sensors["igniter feedback"] == 0)
         {
             TurnRed();
-            warnlightStatus = 2;
-        }
-        else
-        {
-            warnlightStatus = 0;
         }
     }
     if (warnlightStatus != 2)
@@ -224,12 +219,10 @@ void LLInterface::UpdateWarningLight(std::map<std::string, double> sensors)
             if (sensors["fuelTankPressure"] >= 5.0 || sensors["oxTankPressure"] >= 5.0)
             {
                 TurnYellow();
-                warnlightStatus = 1;
             }
             else if (sensors["fuelTankPressure"] < 5.0 && sensors["oxTankPressure"] < 5.0)
             {
                 TurnGreen();
-                warnlightStatus = 0;
             }
         }
     }
@@ -241,6 +234,7 @@ void LLInterface::TurnRed()
     warnLight->SetColor(255, 0, 0);
     warnLight->SetMode("default");
     warnLight->StopBuzzer();
+	warnlightStatus = 2;
 }
 
 void LLInterface::TurnGreen()
@@ -248,6 +242,7 @@ void LLInterface::TurnGreen()
     warnLight->SetColor(0, 255, 0);
     warnLight->SetMode("spin");
     warnLight->StopBuzzer();
+	warnlightStatus = 0;
 }
 
 void LLInterface::TurnYellow()
@@ -255,6 +250,7 @@ void LLInterface::TurnYellow()
     warnLight->SetColor(255, 255, 0);
     warnLight->SetMode("spin");
     warnLight->StopBuzzer();
+	warnlightStatus = 1;
 }
 
 void LLInterface::BeepRed()
@@ -262,4 +258,9 @@ void LLInterface::BeepRed()
     warnLight->SetColor(255, 0, 0);
     warnLight->SetMode("blink");
     warnLight->StartBuzzerBeep(500);
+}
+
+int32 LLInterface::GetWarninglightStatus()
+{
+	return warnlightStatus;
 }

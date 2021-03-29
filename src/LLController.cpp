@@ -161,17 +161,59 @@ void LLController::OnECUISocketRecv(json msg)
 			json superchargeData = LLInterface::GetSupercharge();
             EcuiSocket::SendJson("supercharge-load", superchargeData);
         }
-		else if (type.compare("wl-red-set") == 0)
+		else if (type.compare("parameter-set") == 0)
 		{
-			LLInterface::TurnRed();
+			json parameter = msg["content"][0];
+			string id = parameter["id"];
+			int8 value = parameter["value"];
+
+			if (id.compare("wlRed") == 0)
+			{
+				LLInterface::TurnRed();
+			}
+			else if (id.compare("wlYellow") == 0)
+			{
+				LLInterface::TurnYellow();
+			}
+			else if (id.compare("wlGreen") == 0)
+			{
+				LLInterface::TurnGreen();
+			}
+			else if (id.compare("superchargeSetpoint") == 0)
+			{
+				Debug::error("Supercharge Setpoint");	
+			}
+			else
+			{
+				Debug::error("ECUISocket: parameter id not supported");
+			}
 		}
-		else if (type.compare("wl-yellow-set") == 0)
+		else if (type.compare("parameter-get") == 0)
 		{
-			LLInterface::TurnYellow();
-		}
-		else if (type.compare("wl-green-set") == 0)
-		{
-			LLInterface::TurnGreen();
+			json parameter = msg["content"][0];
+			string id = parameter["id"];
+
+			if (id.compare("wlRed") == 0)
+			{
+				if (LLInterface::GetWarninglightStatus() == 2) parameter["value"] = 1;
+			}
+			else if (id.compare("wlYellow") == 0)
+			{
+				if (LLInterface::GetWarninglightStatus() == 1) parameter["value"] = 1;
+			}
+			else if (id.compare("wlGreen") == 0)
+			{
+				if (LLInterface::GetWarninglightStatus() == 0) parameter["value"] = 1;
+			}
+			else if (id.compare("superchargeSetpoint") == 0)
+			{
+				Debug::error("Supercharge Setpoint");	
+			}
+			else
+			{
+				Debug::error("ECUISocket: parameter id not supported");
+			}
+            EcuiSocket::SendJson("parameter-load", parameter);
 		}
         else if (type.compare("digital-outs-set") == 0)
         {
