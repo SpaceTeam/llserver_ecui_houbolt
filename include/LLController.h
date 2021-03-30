@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-#include "json.hpp"
+#include "json.txt"
 
 class LLController
 {

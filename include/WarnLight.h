@@ -7,7 +7,7 @@
 
 #include "common.h"
 #include "Socket.h"
-#include "json.hpp"
+#include "json.txt"
 
 class WarnLight
 {

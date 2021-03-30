@@ -11,7 +11,7 @@
 
 #include "Debug.h"
 //TODO: move it elsewhere
-#include "json.hpp"
+#include "json.txt"
 
 
 typedef uint8_t uint8;

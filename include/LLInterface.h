@@ -8,7 +8,7 @@
 #include "common.h"
 #include "I2C.h"
 
-#include "json.hpp"
+#include "json.txt"
 
 #include "WarnLight.h"
 #include "TmPoE.h"

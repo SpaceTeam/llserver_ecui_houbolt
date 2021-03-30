@@ -5,7 +5,7 @@
 #include <filesystem>
 
 #include "SequenceManager.h"
-#include "json.hpp"
+#include "json.txt"
 #include "EcuiSocket.h"
 
 #include "utils.h"

@@ -6,7 +6,7 @@
 #define TXV_ECUI_LLSERVER_SEQUENCEMANAGER_H
 
 #include "common.h"
-#include "json.hpp"
+#include "json.txt"
 
 #include "Logging.h"
 
