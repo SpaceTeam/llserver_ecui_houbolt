@@ -25,10 +25,31 @@ Node::InitChannels(NodeInfoMsg_t nodeInfo)
 {
 	for (int i = 0; i < sizeof(nodeInfo.channel_type)/sizeof(uint8_t); i++)
 	{
-		CHANNEL_TYPE channelType = nodeInfo.channel_type[i];
+		CHANNEL_TYPE channelType = (CHANNEL_TYPE) nodeInfo.channel_type[i];
+		Channel ch = NULL;
+
 		switch(channelType)
 		{
-			case:
+			case CHANNEL_TYPE_ADC16:
+				ch = new Adc16_t;
+			break;
+			case CHANNEL_TYPE_ADC16_SINGLE:
+				ch = new Adc16_single_t;
+			break;
+			case CHANNEL_TYPE_ADC24:
+				ch = new Adc24_Channel(i);
+			break;
+			case CHANNEL_TYPE_DIGITAL_OUT:
+				ch = new Digital_out_t;
+			break;
+			case CHANNEL_TYPE_SERVO:
+				ch = Servo_t;
+			break;
+			// TODO: default case for unknown channel types that logs (DB)
+		}
+
+		if(channel != NULL){
+			channelMap.insert(i, ch);
 		}
 	}
 }
