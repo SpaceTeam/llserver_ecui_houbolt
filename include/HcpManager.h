@@ -9,7 +9,7 @@
 #include "Serial.h"
 #include "Mapping.h"
 #include "Timer.h"
-#include "json.hpp"
+#include "json.txt"
 #include "WatchDog.h"
 
 typedef enum class battery_status_e
