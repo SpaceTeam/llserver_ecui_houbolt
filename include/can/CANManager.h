@@ -10,17 +10,18 @@
 #include <map>
 #include <functional>
 
-#include "Channel.h"
+#include "Node.h"
+#include "can/CANDriver.h"
 
-typedef struct
-{
-    nodeId;
-    channelId;
-    name;
-    value;
-} channelData_t;
-
-channelData_t sensorBuffer[];
+//typedef struct
+//{
+//    nodeId;
+//    channelId;
+//    name;
+//    value;
+//} channelData_t;
+//
+//channelData_t sensorBuffer[];
 
 /**
  * read node channel mapping on init
@@ -34,23 +35,33 @@ channelData_t sensorBuffer[];
  */
 class CANManager
 {
+
 private:
-	static std::map<uint32_t, Channel> channels;
+    static CANManager* instance;
+    CANDriver* canDriver;
 
-	static uint32_t sensorBuffer[]; //this is going to be huge!!!!
-	static uint32_t latestSensorDataBuffer[];
+    std::map<uint8_t, Node> nodes;
 
+	uint32_t* sensorBuffer; //this is going to be huge!!!!
+	uint32_t* latestSensorDataBuffer;
+
+	bool initialized = false;
+
+	CANManager(const CANManager& copy);
 	CANManager();
 	~CANManager();
 public:
-	static CANResult Init();
+    static CANManager* Instance();
 
-	static std::vector<std::string> GetChannelStates();
-	static std::map<std::string, std::function<CANResult(...)>> GetChannelCommands();
-	static std::map<std::string, double> GetLatestSensorData();
+    CANResult Init();
 
-	static void OnChannelStateChanged(std::string, double);
+	std::vector<std::string> GetChannelStates();
+	std::map<std::string, std::function<CANResult(...)>> GetChannelCommands();
+	std::map<std::string, double> GetLatestSensorData();
 
+	void OnChannelStateChanged(std::string, double);
+	void OnCANRecv(uint32_t canID, uint8_t* payload, uint32_t payloadLength);
+	void OnCANError();
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_CANMANAGER_H

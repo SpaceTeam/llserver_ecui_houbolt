@@ -4,12 +4,21 @@
 
 #include "StateController.h"
 
-StateController* instance = nullptr;
+StateController* StateController::instance = nullptr;
 
 StateController::~StateController()
 {
     delete instance;
     initialized = false;
+}
+
+StateController *StateController::Instance()
+{
+    if (instance == nullptr)
+    {
+        instance = new StateController();
+    }
+    return instance;
 }
 
 void StateController::Init(std::function<void(std::string, double)> onStateChangeCallback)
@@ -61,13 +70,4 @@ std::map<std::string, double> StateController::GetDirtyStates()
 std::map<std::string, std::tuple<double, bool>> StateController::GetAllStates()
 {
     return states;
-}
-
-StateController *StateController::Instance()
-{
-    if (instance == nullptr)
-    {
-        instance = new StateController();
-    }
-    return instance;
 }
