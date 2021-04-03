@@ -2,14 +2,14 @@
 // Created by Markus on 2019-10-15.
 //
 
-#include "Mapping.h"
+#include "hcp/HcpMapping.h"
 #include "utils.h"
 
 using namespace std;
 
 using nlohmann::json;
 
-std::map<Device_Type, std::string> Mapping::typeMap = {
+std::map<Device_Type, std::string> HcpMapping::typeMap = {
 
         {Device_Type::SERVO, "servo"},
         {Device_Type::MOTOR, "motor"},
@@ -19,7 +19,7 @@ std::map<Device_Type, std::string> Mapping::typeMap = {
 
 };
 
-Mapping::Mapping(std::string mappingPath)
+HcpMapping::HcpMapping(std::string mappingPath)
 {
     this->mappingPath = mappingPath;
     LoadMapping();
@@ -42,31 +42,31 @@ Mapping::Mapping(std::string mappingPath)
     }
 }
 
-Mapping::~Mapping()
+HcpMapping::~HcpMapping()
 {
 
 }
 
-void Mapping::LoadMapping()
+void HcpMapping::LoadMapping()
 {
     Debug::print("loading mapping...");
     this->mapping = json::parse(utils::loadFile(this->mappingPath));
     Debug::print("mapping loaded");
 }
 
-void Mapping::SaveMapping()
+void HcpMapping::SaveMapping()
 {
     utils::saveFile(this->mappingPath, mapping.dump(4));
     Debug::print("mapping saved");
 }
 
-std::string Mapping::GetTypeName(Device_Type type)
+std::string HcpMapping::GetTypeName(Device_Type type)
 {
     return this->typeMap[type];
 }
 
 //TODO: implement none for type
-Device_Type Mapping::GetTypeByName(std::string name)
+Device_Type HcpMapping::GetTypeByName(std::string name)
 {
     Device_Type type;
 
@@ -81,7 +81,7 @@ Device_Type Mapping::GetTypeByName(std::string name)
     return type;
 }
 
-json Mapping::GetDeviceByName(std::string name, Device_Type type)
+json HcpMapping::GetDeviceByName(std::string name, Device_Type type)
 {
     json device = nullptr;
 
@@ -100,12 +100,12 @@ json Mapping::GetDeviceByName(std::string name, Device_Type type)
     }
     else
     {
-        Debug::error("Mapping is null");
+        Debug::error("HcpMapping is null");
     }
     return device;
 }
 
-json Mapping::GetDeviceByPort(uint8 port, Device_Type type)
+json HcpMapping::GetDeviceByPort(uint8 port, Device_Type type)
 {
     json device = nullptr;
 
@@ -124,12 +124,12 @@ json Mapping::GetDeviceByPort(uint8 port, Device_Type type)
     }
     else
     {
-        Debug::error("Mapping is null");
+        Debug::error("HcpMapping is null");
     }
     return device;
 }
 
-nlohmann::json Mapping::GetDevices(Device_Type type)
+nlohmann::json HcpMapping::GetDevices(Device_Type type)
 {
     json devices = nullptr;
 
@@ -141,20 +141,20 @@ nlohmann::json Mapping::GetDevices(Device_Type type)
     }
     else
     {
-        Debug::error("Mapping is null");
+        Debug::error("HcpMapping is null");
     }
 
     return devices;
 }
 
-void Mapping::SetDevice(std::string name, nlohmann::json devValue, Device_Type type)
+void HcpMapping::SetDevice(std::string name, nlohmann::json devValue, Device_Type type)
 {
     string typeName = GetTypeName(type);
     mapping[typeName][name] = devValue;
     SaveMapping();
 }
 
-nlohmann::json Mapping::GetMapping()
+nlohmann::json HcpMapping::GetMapping()
 {
     return this->mapping;
 }

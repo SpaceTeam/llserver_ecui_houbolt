@@ -2,7 +2,7 @@
 // Created by Markus on 2019-10-15.
 //
 
-#include "HcpManager.h"
+#include "hcp/HcpManager.h"
 #include "EcuiSocket.h"
 #include "Timer.h"
 #include "Config.h"

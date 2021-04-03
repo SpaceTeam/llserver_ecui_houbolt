@@ -5,10 +5,10 @@
 #include "utils.h"
 #include "config_old.h"
 #include "Config.h"
-#include "HcpCommands.h"
+#include "hcp/HcpCommands.h"
 
 
-#include "HcpManager.h"
+#include "hcp/HcpManager.h"
 
 #define HCP_THRUST_SENSORS_COUNT 3
 
@@ -18,7 +18,7 @@ using json = nlohmann::json;
 using namespace std;
 
 Serial* HcpManager::hcpSerial;
-Mapping* HcpManager::mapping;
+HcpMapping* HcpManager::mapping;
 //TODO: set default position at the beginning instead
 uint16 HcpManager::lastServoPosArr[SERVO_COUNT] = {0};
 bool HcpManager::servoEnabledArr[SERVO_COUNT] = {false};
@@ -37,7 +37,7 @@ void HcpManager::Init()
 	string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
     
 	hcpSerial = new Serial(hcpDevice, baudrate);
-    mapping = new Mapping(mappingPath);
+    mapping = new HcpMapping(mappingPath);
 
     sensorTimer = new Timer(41, "HcpTimer");
     //TODO: this is only valid for the hedgehog llserver, change for other platforms (analog count doesn't have to

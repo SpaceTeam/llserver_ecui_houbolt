@@ -5,11 +5,11 @@
 #ifndef TXV_ECUI_LLSERVER_HCPMANAGER_H
 #define TXV_ECUI_LLSERVER_HCPMANAGER_H
 
-#include "HcpCommands.h"
-#include "Serial.h"
-#include "Mapping.h"
+#include "hcp/HcpCommands.h"
+#include "drivers/Serial.h"
+#include "hcp/HcpMapping.h"
 #include "Timer.h"
-#include "json.txt"
+#include "json.hpp"
 #include "WatchDog.h"
 
 typedef enum class battery_status_e
@@ -31,7 +31,7 @@ class HcpManager
 
 private:
     static Serial* hcpSerial;
-    static Mapping* mapping;
+    static HcpMapping* mapping;
     static uint16 lastServoPosArr[];
     static bool servoEnabledArr[];
     static std::recursive_mutex serialMtx;

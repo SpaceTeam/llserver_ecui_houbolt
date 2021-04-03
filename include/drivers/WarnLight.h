@@ -6,15 +6,15 @@
 #define TXV_ECUI_LLSERVER_WARNLIGHT_H
 
 #include "common.h"
-#include "Socket.h"
-#include "json.txt"
+#include "drivers/SocketOld.h"
+#include "json.hpp"
 
 class WarnLight
 {
 
 private:
 
-    Socket* socket;
+    SocketOld* socket;
 
     uint16 id;
 

@@ -4,8 +4,8 @@
 
 #include "Config.h"
 #include "utils.h"
-#include "Socket.h"
-#include "HcpManager.h"
+#include "drivers/SocketOld.h"
+#include "hcp/HcpManager.h"
 #include "SequenceManager.h"
 #include "LLInterface.h"
 #include "EcuiSocket.h"
@@ -39,9 +39,9 @@ void LLController::Init()
     LLInterface::Init();
     Debug::print("Initializing LLInterface done\n");
 
-    Debug::print("Initializing Webserver Socket...");
+    Debug::print("Initializing Webserver SocketOld...");
     EcuiSocket::Init(OnECUISocketRecv, Abort);
-    Debug::print("Initializing Webserver Socket done\n");
+    Debug::print("Initializing Webserver SocketOld done\n");
 
     Debug::print("Initializing Sequence Manager...");
     SequenceManager::init();

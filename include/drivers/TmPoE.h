@@ -6,13 +6,13 @@
 #define TXV_ECUI_LLSERVER_TMPOE_H
 
 #include "common.h"
-#include "Socket.h"
+#include "drivers/SocketOld.h"
 
 class TMPoE
 {
 
 private:
-    Socket* socket;
+    SocketOld* socket;
 
     std::mutex readMtx;
 

@@ -5,9 +5,9 @@
 #include <cstring>
 
 #include "common.h"
-#include "HcpCommands.h"
+#include "hcp/HcpCommands.h"
 
-#include "Serial.h"
+#include "drivers/Serial.h"
 
 #define MSG_SIZE 2048
 

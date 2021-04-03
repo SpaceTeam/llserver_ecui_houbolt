@@ -2,7 +2,7 @@
 // Created by Markus on 2019-09-29.
 //
 
-#include "HcpCommands.h"
+#include "hcp/HcpCommands.h"
 
 
 hcp_cmd_t hcp_cmds[256] = {

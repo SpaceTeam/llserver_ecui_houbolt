@@ -6,7 +6,7 @@
 #define TXV_ECUI_LLSERVER_SEQUENCEMANAGER_H
 
 #include "common.h"
-#include "json.txt"
+#include "json.hpp"
 
 #include "Logging.h"
 
@@ -14,7 +14,7 @@
 //#include "spdlog/sinks/basic_file_sink.h"
 
 #include "Timer.h"
-#include "I2C.h"
+#include "drivers/I2C.h"
 
 using json = nlohmann::json;
 

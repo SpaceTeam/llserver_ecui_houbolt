@@ -2,12 +2,12 @@
 // Created by Markus on 2019-10-15.
 //
 
-#ifndef TXV_ECUI_LLSERVER_MAPPING_H
-#define TXV_ECUI_LLSERVER_MAPPING_H
+#ifndef TXV_ECUI_LLSERVER_HCP_MAPPING_H
+#define TXV_ECUI_LLSERVER_HCP_MAPPING_H
 
 #include "common.h"
 
-#include "json.txt"
+#include "json.hpp"
 
 typedef enum class device_type_e
 {
@@ -18,7 +18,7 @@ typedef enum class device_type_e
 	DIGITAL
 } Device_Type;
 
-class Mapping
+class HcpMapping
 {
 
 private:
@@ -40,9 +40,9 @@ private:
 
 public:
 
-    Mapping(std::string mappingPath);
+    HcpMapping(std::string mappingPath);
 
-    ~Mapping();
+    ~HcpMapping();
 
     //WARNING: DO NOT USE typeOfNameMap unless each name is unique
     Device_Type GetTypeByName(std::string name);
@@ -61,4 +61,4 @@ public:
 };
 
 
-#endif //TXV_ECUI_LLSERVER_MAPPING_H
+#endif //TXV_ECUI_LLSERVER_HCP_MAPPING_H

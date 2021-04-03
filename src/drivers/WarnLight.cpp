@@ -2,7 +2,7 @@
 // Created by Markus on 2019-10-16.
 //
 
-#include "WarnLight.h"
+#include "drivers/WarnLight.h"
 #include "Config.h"
 
 using json = nlohmann::json;
@@ -12,7 +12,7 @@ WarnLight::WarnLight(uint16 id)
     this->id = id;
     std::string ip = std::get<std::string>(Config::getData("WARNLIGHT/ip"));
     int32 port = std::get<int>(Config::getData("WARNLIGHT/port"));
-    socket = new Socket(OnClose, ip, port, 1);
+    socket = new SocketOld(OnClose, ip, port, 1);
     Reset();
 }
 

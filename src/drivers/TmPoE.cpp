@@ -2,7 +2,7 @@
 // Created by Markus on 05.12.19.
 //
 
-#include "TmPoE.h"
+#include "drivers/TmPoE.h"
 #include "Config.h"
 
 using namespace std;
@@ -12,7 +12,7 @@ TMPoE::TMPoE(uint16 id, uint32 sampleRate)
     this->id = id;
     std::string ip = std::get<std::string>(Config::getData("TMPoE/ip"));
     int32 port = std::get<int>(Config::getData("TMPoE/port"));
-    socket = new Socket(OnClose, ip, port, 1);
+    socket = new SocketOld(OnClose, ip, port, 1);
     if (socket->isConnectionActive())
     {
         currValues.resize(8, -1);
@@ -57,7 +57,7 @@ std::vector<uint32> TMPoE::Read()
     return this->currValues;
 }
 
-//TODO: make Socket class to be able to parse current object as argument
+//TODO: make SocketOld class to be able to parse current object as argument
 void TMPoE::OnClose()
 {
 

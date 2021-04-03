@@ -8,7 +8,7 @@
 #include "common.h"
 #include "Config.h"
 
-class NewSocket
+class Socket
 {
 
 private:
@@ -27,9 +27,9 @@ private:
     
 public:
 
-    NewSocket(std::string name, std::function<void()> onCloseCallback, std::string address, uint16 port);
+    Socket(std::string name, std::function<void()> onCloseCallback, std::string address, uint16 port);
 
-    ~NewSocket();
+    ~Socket();
 
     void Send(std::string msg);
     std::string Recv();

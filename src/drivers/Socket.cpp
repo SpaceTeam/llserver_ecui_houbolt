@@ -13,14 +13,14 @@
 #include <functional>
 #include <algorithm>
 
-#include "NewSocket.h"
+#include "drivers/Socket.h"
 
 using namespace std;
 
 #define HEADER_SIZE 2
 #define MAX_MSG_LENGTH 65536
 
-NewSocket::NewSocket(std::string name, std::function<void()> onCloseCallback, std::string address, uint16 port)
+Socket::Socket(std::string name, std::function<void()> onCloseCallback, std::string address, uint16 port)
 {
     this->name =name;
     this->address = address;
@@ -28,7 +28,7 @@ NewSocket::NewSocket(std::string name, std::function<void()> onCloseCallback, st
     this->onCloseCallback = onCloseCallback;
 }
 
-NewSocket::~NewSocket()
+Socket::~Socket()
 {
     std::lock_guard<std::mutex> lock(socketMtx);
     this->shallClose = true;
@@ -37,14 +37,14 @@ NewSocket::~NewSocket()
     this->connectionActive = false;
 }
 
-int NewSocket::Connect(int32 tries)
+int Socket::Connect(int32 tries)
 {
 
     struct sockaddr_in serv_addr;
 
     if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        Debug::error("Socket - %s: Socket creation error", name.c_str());
+        Debug::error("SocketOld - %s: SocketOld creation error", name.c_str());
         return -1;
     }
 
@@ -55,15 +55,15 @@ int NewSocket::Connect(int32 tries)
     if (inet_pton(AF_INET, address.c_str(), &serv_addr.sin_addr) <= 0)
     {
         close(socketfd);
-        Debug::error("Socket - %s:Invalid address/ Address not supported", name.c_str());
+        Debug::error("SocketOld - %s:Invalid address/ Address not supported", name.c_str());
         return -2;
     }
 
     while (!shallClose && tries != 0)
     {
-        Debug::print("Socket - %s: Attempting connection...", name.c_str());
+        Debug::print("SocketOld - %s: Attempting connection...", name.c_str());
         if (connect(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == 0){
-            Debug::print("Socket - %s: Connected", name.c_str());
+            Debug::print("SocketOld - %s: Connected", name.c_str());
             connectionActive = true;
             return 0;
         }
@@ -72,7 +72,7 @@ int NewSocket::Connect(int32 tries)
 
         if (tries == 0)
         {
-            Debug::error("Socket - %s: Couldn't connect to %s PORT: %d\n", name.c_str(), address.c_str(), port);
+            Debug::error("SocketOld - %s: Couldn't connect to %s PORT: %d\n", name.c_str(), address.c_str(), port);
             return -3;
         }
 
@@ -84,14 +84,14 @@ int NewSocket::Connect(int32 tries)
 
 }
 
-void NewSocket::Send(std::string msg)
+void Socket::Send(std::string msg)
 {
     std::lock_guard<std::mutex> lock(socketMtx);
     if (connectionActive)
     {
         if (msg.size() > MAX_MSG_LENGTH)
         {
-            Debug::error("Socket - %s: error message longer than supported, closing socket..."), name.c_str();
+            Debug::error("SocketOld - %s: error message longer than supported, closing socket..."), name.c_str();
             Close();
         }
         else
@@ -105,21 +105,21 @@ void NewSocket::Send(std::string msg)
             int sentHeaderBytes = send(socketfd, header, HEADER_SIZE, 0);
             if (sentHeaderBytes < 0)
             {
-                Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
+                Debug::error("SocketOld - %s: error at send occured, closing socket..."), name.c_str();
                 Close();
                 return;
             }
             int sentBytes = send(socketfd, msg.c_str(), msg.size(), 0);
             if (sentBytes < 0)
             {
-                Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
+                Debug::error("SocketOld - %s: error at send occured, closing socket..."), name.c_str();
                 Close();
             }
         }
     }
     else
     {
-        Debug::error("Socket - %s: no connection active", name.c_str());
+        Debug::error("SocketOld - %s: no connection active", name.c_str());
     }
 }
 
@@ -127,7 +127,7 @@ void NewSocket::Send(std::string msg)
     Receive a single packet via the TCP connection, packets are expected to havethe following format [HEADER][PAYLOAD]
     The header contains the length of the packet, while the payload contains the json string
 */
-std::string NewSocket::Recv()
+std::string Socket::Recv()
 {
     uint8_t header[HEADER_SIZE];
     uint32 nBytes;
@@ -137,7 +137,7 @@ std::string NewSocket::Recv()
         //Receive the header
         nBytes = recv(socketfd, header, HEADER_SIZE, MSG_WAITALL);
         if(nBytes < HEADER_SIZE){
-            Debug::error("Socket - %s: error at recv occured (Could not read header), closing socket...", name.c_str());
+            Debug::error("SocketOld - %s: error at recv occured (Could not read header), closing socket...", name.c_str());
             Close();
             return std::string("");
         }
@@ -155,32 +155,32 @@ std::string NewSocket::Recv()
         nBytes = recv(socketfd, newBuffer, msgLen, MSG_WAITALL);
         Debug::info("First Message Byte: %d", newBuffer[0]);
         if(nBytes < msgLen){
-            Debug::error("Socket - %s: error at recv occured (Could not read entire packet), closing socket...", name.c_str());
+            Debug::error("SocketOld - %s: error at recv occured (Could not read entire packet), closing socket...", name.c_str());
             Close();
             return std::string("");
         }
 
         return std::string((char *)newBuffer);
     }else{
-        Debug::error("Socket - %s: no connection active", name.c_str());
+        Debug::error("SocketOld - %s: no connection active", name.c_str());
         Close();
         return std::string("");
     }
 }
 
 
-// std::vector<uint8> Socket::newRecvBytes()
+// std::vector<uint8> SocketOld::newRecvBytes()
 // {
 //     std::string msg = Recv();
 //     return std::vector<uint8>(msg.begin(), msg.end());
 // }
 
-bool NewSocket::isConnectionActive()
+bool Socket::isConnectionActive()
 {
     return this->connectionActive;
 }
 
-void NewSocket::Close()
+void Socket::Close()
 {
     std::lock_guard<std::mutex> lock(socketMtx);
     this->shallClose = true;

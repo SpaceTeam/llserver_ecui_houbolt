@@ -4,7 +4,7 @@
 
 #include <thread>
 
-#include "NewSocket.h"
+#include "drivers/Socket.h"
 
 #include "EcuiSocket.h"
 
@@ -12,7 +12,7 @@
 
 using namespace std;
 
-NewSocket* EcuiSocket::socket;
+Socket* EcuiSocket::socket;
 
 bool EcuiSocket::connectionActive = false;
 bool EcuiSocket::shallClose = false;
@@ -27,7 +27,7 @@ void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<voi
     string ip = std::get<std::string>(Config::getData("WEBSERVER/ip"));
     int32 port = std::get<int>(Config::getData("WEBSERVER/port"));
 
-    socket = new NewSocket("EcuiSocket", Close, ip, port);
+    socket = new Socket("EcuiSocket", Close, ip, port);
     while(socket->Connect()!=0);
     
     connectionActive = true;

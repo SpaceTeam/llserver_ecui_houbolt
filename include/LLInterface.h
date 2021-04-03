@@ -6,12 +6,12 @@
 #define TXV_ECUI_LLSERVER_LLINTERFACE_H
 
 #include "common.h"
-#include "I2C.h"
+#include "drivers/I2C.h"
 
-#include "json.txt"
+#include "json.hpp"
 
-#include "WarnLight.h"
-#include "TmPoE.h"
+#include "drivers/WarnLight.h"
+#include "drivers/TmPoE.h"
 
 class LLInterface
 {

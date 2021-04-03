@@ -5,14 +5,14 @@
 #ifndef TXV_ECUI_LLSERVER_ECUISOCKET_H
 #define TXV_ECUI_LLSERVER_ECUISOCKET_H
 
-#include "NewSocket.h"
+#include "drivers/Socket.h"
 
 class EcuiSocket
 {
 
 private:
 
-    static NewSocket* socket;
+    static Socket* socket;
 
     static bool connectionActive;
     static bool shallClose;

@@ -13,20 +13,20 @@
 #include <functional>
 #include <algorithm>
 
-#include "Socket.h"
+#include "drivers/SocketOld.h"
 
 using namespace std;
 
 #define HEADER_SIZE 2
 
-Socket::Socket(std::function<void()> onCloseCallback, std::string address, uint16 port, int32 tries)
+SocketOld::SocketOld(std::function<void()> onCloseCallback, std::string address, uint16 port, int32 tries)
 {
     buffer = new uint8[size];
     this->onCloseCallback = onCloseCallback;
     Connect(address, port, tries);
 }
 
-Socket::~Socket()
+SocketOld::~SocketOld()
 {
     std::lock_guard<std::mutex> lock(socketMtx);
     this->shallClose = true;
@@ -36,7 +36,7 @@ Socket::~Socket()
     delete buffer;
 }
 
-void Socket::Connect(std::string address, uint16 port, int32 tries)
+void SocketOld::Connect(std::string address, uint16 port, int32 tries)
 {
 
     struct sockaddr_in serv_addr;
@@ -46,7 +46,7 @@ void Socket::Connect(std::string address, uint16 port, int32 tries)
     {
         if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         {
-            Debug::error("Socket creation error");
+            Debug::error("SocketOld creation error");
             continue;
         }
 
@@ -56,7 +56,7 @@ void Socket::Connect(std::string address, uint16 port, int32 tries)
         // Convert IPv4 and IPv6 addresses from text to binary form
         if (inet_pton(AF_INET, address.c_str(), &serv_addr.sin_addr) <= 0)
         {
-            Debug::error("Socket - %s:Invalid address/ Address not supported");
+            Debug::error("SocketOld - %s:Invalid address/ Address not supported");
             continue;
         }
 
@@ -82,7 +82,7 @@ void Socket::Connect(std::string address, uint16 port, int32 tries)
     }
 }
 
-void Socket::Send(std::string msg)
+void SocketOld::Send(std::string msg)
 {
     std::lock_guard<std::mutex> lock(socketMtx);
     if (connectionActive)
@@ -104,13 +104,13 @@ void Socket::Send(std::string msg)
     Receive a single packet via the TCP connection, packets are expected to havethe following format [HEADER][PAYLOAD]
     The header contains the length of the packet, while the payload contains the json string
 */
-std::string Socket::newRecv()
+std::string SocketOld::newRecv()
 {
     uint8_t header[HEADER_SIZE];
     uint32 nBytes;
 
     if(connectionActive){
-        
+
         //Receive the header
         nBytes = recv(socketfd, header, HEADER_SIZE, MSG_WAITALL);
         if(nBytes < HEADER_SIZE){
@@ -144,13 +144,13 @@ std::string Socket::newRecv()
 }
 
 
-// std::vector<uint8> Socket::newRecvBytes()
+// std::vector<uint8> SocketOld::newRecvBytes()
 // {
 //     std::string msg = Recv();
 //     return std::vector<uint8>(msg.begin(), msg.end());
 // }
 
-std::string Socket::Recv()
+std::string SocketOld::Recv()
 {
 
     string msg = "";
@@ -178,7 +178,7 @@ std::string Socket::Recv()
     return msg;
 }
 
-std::vector<uint8> Socket::RecvBytes()
+std::vector<uint8> SocketOld::RecvBytes()
 {
     std::vector<uint8> msg;
     if (connectionActive)
@@ -205,12 +205,12 @@ std::vector<uint8> Socket::RecvBytes()
     return msg;
 }
 
-bool Socket::isConnectionActive()
+bool SocketOld::isConnectionActive()
 {
     return this->connectionActive;
 }
 
-void Socket::Close()
+void SocketOld::Close()
 {
     std::lock_guard<std::mutex> lock(socketMtx);
     this->shallClose = true;
@@ -222,7 +222,7 @@ void Socket::Close()
 
 //
 //
-//void Socket::asyncListen(std::function<void(int32, json)> onMsgCallback)
+//void SocketOld::asyncListen(std::function<void(int32, json)> onMsgCallback)
 //{
 //    char buffer[SOCKET_MSG_SIZE] = {0};
 //    int valread;
@@ -251,12 +251,12 @@ void Socket::Close()
 //    }
 //}
 //
-//void Socket::sendJson(std::string type)
+//void SocketOld::sendJson(std::string type)
 //{
 //    sendJson(type, nullptr);
 //}
 //
-//void Socket::sendJson(std::string type, json content)
+//void SocketOld::sendJson(std::string type, json content)
 //{
 //    if (connectionActive)
 //    {
@@ -287,7 +287,7 @@ void Socket::Close()
 //    }
 //}
 //
-//void Socket::sendJson(std::string type, float content)
+//void SocketOld::sendJson(std::string type, float content)
 //{
 //    if (connectionActive)
 //    {
@@ -311,14 +311,14 @@ void Socket::Close()
 //    }
 //}
 //
-//int32 Socket::readJson()
+//int32 SocketOld::readJson()
 //{
 //    std::lock_guard<std::mutex> lock(sendMtx);
 //    std::fill(std::begin(buffer), std::end(buffer), 0);
 //    return recv(socketfd, buffer, SOCKET_MSG_SIZE, 0);
 //}
 //
-//void Socket::destroy()
+//void SocketOld::destroy()
 //{
 //    shallClose = true;
 //

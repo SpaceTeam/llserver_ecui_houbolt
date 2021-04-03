@@ -6,9 +6,9 @@ find_package(Threads REQUIRED)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall")
 
-include_directories(include)
+include_directories(include include/drivers)
 
-file(GLOB sources ./*.cpp src/*.cpp src/*/*.cpp include/*.h include/*/*.h)
+file(GLOB_RECURSE sources ./*.cpp src/*.cpp include/*.h)
 
 
 add_executable(${PROJECT_NAME} ${sources})

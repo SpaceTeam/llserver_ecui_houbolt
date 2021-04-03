@@ -9,9 +9,8 @@
 #include <stdexcept>
 #include <functional>
 
-#include "Debug.h"
 //TODO: move it elsewhere
-#include "json.txt"
+#include "json.hpp"
 
 
 typedef uint8_t uint8;
@@ -27,5 +26,19 @@ typedef int32_t int32;
 typedef int64_t int64;
 
 #define TXV_ECUI_LLSERVER_COMMON_H
+
+#include "Debug.h"
+
+enum class CANResult
+{
+	SUCCESS,
+	ERROR
+};
+
+enum class LLResult
+{
+    SUCCESS,
+    ERROR
+};
 
 #endif //TXV_ECUI_LLSERVER_COMMON_H
