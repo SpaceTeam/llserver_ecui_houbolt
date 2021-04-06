@@ -7,11 +7,11 @@
 
 using namespace std;
 
-TMPoE::TMPoE(uint16 id, uint32 sampleRate)
+TMPoE::TMPoE(uint16_t id, uint32_t sampleRate)
 {
     this->id = id;
     std::string ip = std::get<std::string>(Config::getData("TMPoE/ip"));
-    int32 port = std::get<int>(Config::getData("TMPoE/port"));
+    int32_t port = std::get<int>(Config::getData("TMPoE/port"));
     socket = new SocketOld(OnClose, ip, port, 1);
     if (socket->isConnectionActive())
     {
@@ -27,13 +27,13 @@ TMPoE::~TMPoE()
     delete socket;
 }
 
-void TMPoE::AsyncListen(TMPoE *self, uint32 sampleRate)
+void TMPoE::AsyncListen(TMPoE *self, uint32_t sampleRate)
 {
-    uint32 sleepDuration = 1.0/sampleRate*1000000.0;
+    uint32_t sleepDuration = 1.0/sampleRate*1000000.0;
     while(!self->shallClose)
     {
         self->socket->Send("temp\n");
-        vector<uint8> msg = self->socket->RecvBytes();
+        vector<uint8_t> msg = self->socket->RecvBytes();
         if (msg.size() < 24)
         {
             Debug::error("TMPoE response message is too small");
@@ -51,7 +51,7 @@ void TMPoE::AsyncListen(TMPoE *self, uint32 sampleRate)
     }
 }
 
-std::vector<uint32> TMPoE::Read()
+std::vector<uint32_t> TMPoE::Read()
 {
     std::lock_guard<std::mutex> lock(readMtx);
     return this->currValues;

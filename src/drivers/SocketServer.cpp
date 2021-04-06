@@ -12,7 +12,7 @@
 
 using namespace std;
 
-void SocketServer::Open(std::string address, uint16 port)
+void SocketServer::Open(std::string address, uint16_t port)
 {
     struct addrinfo hints, *ai;
     memset(&hints, 0, sizeof hints);
@@ -79,7 +79,7 @@ void SocketServer::AsyncAccept(SocketServer *self)
 
         }
 
-        self->buffer = new uint8[self->size];
+        self->buffer = new uint8_t[self->size];
         self->_isConnectionActive = true;
     }
 
@@ -87,7 +87,7 @@ void SocketServer::AsyncAccept(SocketServer *self)
     Debug::info("quitting...\n");
 }
 
-void SocketServer::Start(string address, uint16 port, std::function<void()> onCloseCallback)
+void SocketServer::Start(string address, uint16_t port, std::function<void()> onCloseCallback)
 {
     this->onCloseCallback = onCloseCallback;
     Open(address, port);
@@ -107,7 +107,7 @@ bool SocketServer::isConnectionActive()
     return _isConnectionActive;
 }
 
-void SocketServer::Send(vector<uint8> msg)
+void SocketServer::Send(vector<uint8_t> msg)
 {
     if (_isConnectionActive)
     {
@@ -130,9 +130,9 @@ string SocketServer::Recv()
     return "";
 }
 
-vector<uint8> SocketServer::RecvBytes(uint32 sizeInBytes)
+vector<uint8_t> SocketServer::RecvBytes(uint32_t sizeInBytes)
 {
-    vector<uint8> msg;
+    vector<uint8_t> msg;
     bool finished = false;
     if (_isConnectionActive)
     {

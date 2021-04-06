@@ -20,7 +20,7 @@ using namespace std;
 Serial* HcpManager::hcpSerial;
 HcpMapping* HcpManager::mapping;
 //TODO: set default position at the beginning instead
-uint16 HcpManager::lastServoPosArr[SERVO_COUNT] = {0};
+uint16_t HcpManager::lastServoPosArr[SERVO_COUNT] = {0};
 bool HcpManager::servoEnabledArr[SERVO_COUNT] = {false};
 
 std::mutex HcpManager::sensorMtx;
@@ -32,7 +32,7 @@ std::recursive_mutex HcpManager::serialMtx;
 void HcpManager::Init()
 {
     string hcpDevice = std::get<std::string>(Config::getData("HCP/device"));
-    int32 baudrate = std::get<int>(Config::getData("HCP/baudrate"));
+    int32_t baudrate = std::get<int>(Config::getData("HCP/baudrate"));
 
 	string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
     
@@ -43,12 +43,12 @@ void HcpManager::Init()
     //TODO: this is only valid for the hedgehog llserver, change for other platforms (analog count doesn't have to
     //be the same as digital count) and + 1 for battery value
 
-    for (uint8 i = 0; i < SERVO_COUNT; i++)
+    for (uint8_t i = 0; i < SERVO_COUNT; i++)
     {
         json device = mapping->GetDeviceByPort(i, Device_Type::SERVO);
         if (device != nullptr)
         {
-            int16 closedPos;
+            int16_t closedPos;
 
             closedPos = device["endpoints"][0];
 
@@ -62,7 +62,7 @@ void HcpManager::Restart()
 {
     delete hcpSerial;
     string hcpDevice = std::get<std::string>(Config::getData("HCP/device"));
-    int32 baudrate = std::get<int>(Config::getData("HCP/baudrate"));
+    int32_t baudrate = std::get<int>(Config::getData("HCP/baudrate"));
     hcpSerial = new Serial(hcpDevice, baudrate);
 }
 
@@ -73,7 +73,7 @@ void HcpManager::Destroy()
     delete sensorTimer;
 }
 
-bool HcpManager::CheckPort(uint8 port, Device_Type type)
+bool HcpManager::CheckPort(uint8_t port, Device_Type type)
 {
 
     if (type == Device_Type::SERVO)
@@ -140,7 +140,7 @@ bool HcpManager::CheckPort(uint8 port, Device_Type type)
     return false;
 }
 
-void HcpManager::StartSensorFetch(uint32 sampleRate)
+void HcpManager::StartSensorFetch(uint32_t sampleRate)
 {
     sensorTimer->startContinous(0, 1000000/sampleRate, FetchSensors);
 }
@@ -158,7 +158,7 @@ void HcpManager::FetchSensors(uint64 microTime)
         {
             if (utils::keyExists(it.value(), "loadCells"))
             {
-                int32* cells = GetLoadCells();
+                int32_t* cells = GetLoadCells();
 
                 if (utils::keyExists(it.value(), "map"))
                 {
@@ -386,7 +386,7 @@ json HcpManager::GetAllServoData()
     return data;
 }
 
-bool HcpManager::ExecCommand(std::string name, uint8 percent)
+bool HcpManager::ExecCommand(std::string name, uint8_t percent)
 {
     bool success = false;
 
@@ -401,13 +401,13 @@ bool HcpManager::ExecCommand(std::string name, uint8 percent)
         }
         else if (type == Device_Type::MOTOR)
         {
-            uint8 port = device["port"];
-            success = SetMotor(port, (int8)percent);
+            uint8_t port = device["port"];
+            success = SetMotor(port, (int8_t)percent);
         }
         else if (type == Device_Type::DIGITAL_OUT)
         {
 
-            uint8 port = device["port"];
+            uint8_t port = device["port"];
             success = SetDigitalOutputs(port, (bool)percent);
         }
         else
@@ -424,7 +424,7 @@ bool HcpManager::ExecCommand(std::string name, uint8 percent)
     return success;
 }
 
-bool HcpManager::EnableServo(uint8 port)
+bool HcpManager::EnableServo(uint8_t port)
 {
     if (CheckPort(port, Device_Type::SERVO))
     {
@@ -434,7 +434,7 @@ bool HcpManager::EnableServo(uint8 port)
     return false;
 }
 
-bool HcpManager::DisableServo(uint8 port)
+bool HcpManager::DisableServo(uint8_t port)
 {
     if (CheckPort(port, Device_Type::SERVO))
     {
@@ -449,7 +449,7 @@ bool HcpManager::EnableAllServos()
     bool success = true;
 
     bool currSuccess;
-    for (uint8 i = 0; i < SERVO_COUNT; i++)
+    for (uint8_t i = 0; i < SERVO_COUNT; i++)
     {
         currSuccess = EnableServo(i);
         if (!currSuccess)
@@ -466,7 +466,7 @@ bool HcpManager::DisableAllServos()
     bool success = true;
 
     bool currSuccess;
-    for (uint8 i = 0; i < SERVO_COUNT; i++)
+    for (uint8_t i = 0; i < SERVO_COUNT; i++)
     {
         currSuccess = DisableServo(i);
         if (!currSuccess)
@@ -477,7 +477,7 @@ bool HcpManager::DisableAllServos()
     return success;
 }
 
-void HcpManager::SetServoMin(std::string name, uint16 min)
+void HcpManager::SetServoMin(std::string name, uint16_t min)
 {
     json servos = mapping->GetDevices(Device_Type::SERVO);
     json analogs = mapping->GetDevices(Device_Type::ANALOG);
@@ -492,10 +492,10 @@ void HcpManager::SetServoMin(std::string name, uint16 min)
             {
                 json fbckAnalog = analogs[fbckName];
 
-                bool success = SetServoRaw((uint8)servo["port"], min);
+                bool success = SetServoRaw((uint8_t)servo["port"], min);
                 if (success)
                 {
-                    uint16 fbckValue = GetAnalog((uint8)fbckAnalog["port"]);
+                    uint16_t fbckValue = GetAnalog((uint8_t)fbckAnalog["port"]);
 
                     //set new feedback endpoint
                     servo["feedbackEndpoints"][0] = fbckValue;
@@ -521,7 +521,7 @@ void HcpManager::SetServoMin(std::string name, uint16 min)
 
 }
 
-void HcpManager::SetServoMax(std::string name, uint16 max)
+void HcpManager::SetServoMax(std::string name, uint16_t max)
 {
 
     json servos = mapping->GetDevices(Device_Type::SERVO);
@@ -537,10 +537,10 @@ void HcpManager::SetServoMax(std::string name, uint16 max)
             {
                 json fbckAnalog = analogs[fbckName];
 
-                bool success = SetServoRaw((uint8)servo["port"], max);
+                bool success = SetServoRaw((uint8_t)servo["port"], max);
                 if (success)
                 {
-                    uint16 fbckValue = GetAnalog((uint8)fbckAnalog["port"]);
+                    uint16_t fbckValue = GetAnalog((uint8_t)fbckAnalog["port"]);
 
                     //set new feedback endpoint
                     servo["feedbackEndpoints"][1] = fbckValue;
@@ -565,7 +565,7 @@ void HcpManager::SetServoMax(std::string name, uint16 max)
     }
 }
 
-bool HcpManager::SetServoRaw(std::string name, uint16 onTime)
+bool HcpManager::SetServoRaw(std::string name, uint16_t onTime)
 {
     bool success = false;
 
@@ -573,7 +573,7 @@ bool HcpManager::SetServoRaw(std::string name, uint16 onTime)
 
     if (device != nullptr)
     {
-        uint8 port = device["port"];
+        uint8_t port = device["port"];
         success = SetServoRaw(port, onTime);
     }
     else
@@ -583,7 +583,7 @@ bool HcpManager::SetServoRaw(std::string name, uint16 onTime)
     return success;
 }
 
-bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
+bool HcpManager::SetServoRaw(uint8_t port, uint16_t onTime)
 {
     bool success = false;
 
@@ -599,18 +599,18 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
         HCP_MSG msg;
         msg.optcode = HCP_SERVO;
         msg.payloadSize = 3;
-        msg.payload = new uint8[msg.payloadSize];
+        msg.payload = new uint8_t[msg.payloadSize];
 
-	    uint16 dblOnTime = onTime * 2;
+	    uint16_t dblOnTime = onTime * 2;
 	    if (dblOnTime <= SERVO_MAX_ONTIME)
         {
-	        uint8 highOnTime = dblOnTime >> 8;
+	        uint8_t highOnTime = dblOnTime >> 8;
             if (servoEnabledArr[port])
             {
                 highOnTime |= 0x80;
             }
 
-            uint8 lowOnTime = dblOnTime & 0x00FF;
+            uint8_t lowOnTime = dblOnTime & 0x00FF;
 
             msg.payload[0] = port;
             msg.payload[1] = highOnTime;
@@ -654,7 +654,7 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
     return success;
 }
 
-bool HcpManager::SetServo(string name, uint8 percent)
+bool HcpManager::SetServo(string name, uint8_t percent)
 {
     bool success = false;
 
@@ -671,7 +671,7 @@ bool HcpManager::SetServo(string name, uint8 percent)
     return success;
 }
 
-bool HcpManager::SetServo(uint8 port, uint8 percent)
+bool HcpManager::SetServo(uint8_t port, uint8_t percent)
 {
     bool success = false;
 
@@ -688,22 +688,22 @@ bool HcpManager::SetServo(uint8 port, uint8 percent)
     return success;
 }
 
-bool HcpManager::SetServo(json device, uint8 percent)
+bool HcpManager::SetServo(json device, uint8_t percent)
 {
     bool success = false;
     if (device != nullptr)
     {
-        uint8 port = device["port"];
+        uint8_t port = device["port"];
         if (CheckPort(port, Device_Type::SERVO))
         {
             percent = clamp((int)percent, 0, 100);
 
-            int32 endpoints[2];
+            int32_t endpoints[2];
 
             endpoints[0] = device["endpoints"][0];
             endpoints[1] = device["endpoints"][1];
 
-            uint16 onTime = (((endpoints[1] - endpoints[0]) / 100.0) * percent) + endpoints[0];
+            uint16_t onTime = (((endpoints[1] - endpoints[0]) / 100.0) * percent) + endpoints[0];
             success = SetServoRaw(port, onTime);
         }
         else
@@ -718,7 +718,7 @@ bool HcpManager::SetServo(json device, uint8 percent)
     return success;
 }
 
-bool HcpManager::SetSupercharge(int8 setpoint, uint8 hysteresis)
+bool HcpManager::SetSupercharge(int8_t setpoint, uint8_t hysteresis)
 {
     bool success = false;
 	Debug::print("setpoint: %d, hysteresis: %d",setpoint,hysteresis);
@@ -731,7 +731,7 @@ bool HcpManager::SetSupercharge(int8 setpoint, uint8 hysteresis)
     HCP_MSG msg;
     msg.optcode = HCP_ST_SUPERCHARGE_SET;
     msg.payloadSize = 2;
-    msg.payload = new uint8[msg.payloadSize];
+    msg.payload = new uint8_t[msg.payloadSize];
 
     msg.payload[0] = setpoint;
     msg.payload[1] = hysteresis;
@@ -789,8 +789,8 @@ json HcpManager::GetSupercharge()
 	{
 		if (rep->optcode == HCP_ST_SUPERCHARGE_REP)
 		{
-			parameters["setpoint"] = (int8)(rep->payload[0]);
-			parameters["hysteresis"] = (uint8)(rep->payload[1]);
+			parameters["setpoint"] = (int8_t)(rep->payload[0]);
+			parameters["hysteresis"] = (uint8_t)(rep->payload[1]);
 		}
 		else
 		{
@@ -808,12 +808,12 @@ json HcpManager::GetSupercharge()
     return parameters;
 }
 
-bool HcpManager::SetMotor(uint8 port, int8 percent)
+bool HcpManager::SetMotor(uint8_t port, int8_t percent)
 {
     return SetMotorRaw(port, Motor_Mode::POWER, percent*10);
 }
 
-bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16 amount)
+bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16_t amount)
 {
     bool success = false;
 
@@ -821,7 +821,7 @@ bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16 amount)
 
     if (device != nullptr)
     {
-        uint8 port = device["port"];
+        uint8_t port = device["port"];
         success = SetMotorRaw(port, mode, amount);
     }
     else
@@ -831,7 +831,7 @@ bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16 amount)
     return success;
 }
 
-bool HcpManager::SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount)
+bool HcpManager::SetMotorRaw(uint8_t port, Motor_Mode mode, int16_t amount)
 {
     bool success = false;
 
@@ -846,14 +846,14 @@ bool HcpManager::SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount)
         HCP_MSG msg;
         msg.optcode = HCP_MOTOR;
         msg.payloadSize = 4;
-        msg.payload = new uint8[msg.payloadSize];
+        msg.payload = new uint8_t[msg.payloadSize];
 
-        uint8 highAmount = amount >> 8;
+        uint8_t highAmount = amount >> 8;
 
-        uint8 lowAmount = amount & 0x00FF;
+        uint8_t lowAmount = amount & 0x00FF;
 
         msg.payload[0] = port;
-        msg.payload[1] = (uint8) mode;
+        msg.payload[1] = (uint8_t) mode;
         msg.payload[2] = highAmount;
         msg.payload[3] = lowAmount;
 
@@ -898,7 +898,7 @@ bool HcpManager::SetDigitalOutputs(std::string name, bool enable)
 
     if (device != nullptr)
     {
-        uint8 port = device["port"];
+        uint8_t port = device["port"];
         SetDigitalOutputs(port, enable);
     }
     else
@@ -909,7 +909,7 @@ bool HcpManager::SetDigitalOutputs(std::string name, bool enable)
 }
 
 //careful: digitalOut and motor share the same ports
-bool HcpManager::SetDigitalOutputs(uint8 port, bool enable)
+bool HcpManager::SetDigitalOutputs(uint8_t port, bool enable)
 {
     bool success = false;
 
@@ -933,10 +933,10 @@ bool HcpManager::SetDigitalOutputs(uint8 port, bool enable)
     return success;
 }
 
-int32 *HcpManager::GetLoadCells()
+int32_t *HcpManager::GetLoadCells()
 {
 
-    int32 *value = new int32[HCP_THRUST_SENSORS_COUNT];
+    int32_t *value = new int32_t[HCP_THRUST_SENSORS_COUNT];
     std::fill( value, value+HCP_THRUST_SENSORS_COUNT, -1 );
 
     if (!hcpSerial->IsConnected())
@@ -961,7 +961,7 @@ int32 *HcpManager::GetLoadCells()
     {
         if (rep->optcode == HCP_ST_THRUST_REP)
         {
-            uint8 signBytes[HCP_THRUST_SENSORS_COUNT] = {0};
+            uint8_t signBytes[HCP_THRUST_SENSORS_COUNT] = {0};
             for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
             {
                 if (rep->payload[i*3] >= 0x80)
@@ -1011,7 +1011,7 @@ void HcpManager::TareLoadCells()
 
                         if (maps.size() > 0)
                         {
-                            int32* cells = GetLoadCells();
+                            int32_t* cells = GetLoadCells();
 
                             for (int i = 0; i < HCP_THRUST_SENSORS_COUNT; i++)
                             {
@@ -1069,7 +1069,7 @@ double HcpManager::GetAnalog(std::string name)
 
     if (device != nullptr)
     {
-        value = GetAnalog((uint8)device["port"]);
+        value = GetAnalog((uint8_t)device["port"]);
 
         if (utils::keyExists(device, "servo"))
         {
@@ -1079,8 +1079,8 @@ double HcpManager::GetAnalog(std::string name)
             string servoName = device["servo"];
             json servo = mapping->GetDeviceByName(servoName, Device_Type::SERVO);
 
-            vector<uint16> servoEndpoints = servo["endpoints"];
-            vector<uint16> fbckEndpoints = servo["feedbackEndpoints"];
+            vector<uint16_t> servoEndpoints = servo["endpoints"];
+            vector<uint16_t> fbckEndpoints = servo["feedbackEndpoints"];
 
             double norm = (((value-fbckEndpoints[0])*1.0) / (fbckEndpoints[1] - fbckEndpoints[0]));
 
@@ -1110,9 +1110,9 @@ double HcpManager::GetAnalog(std::string name)
     return value;
 }
 
-int32 HcpManager::GetAnalog(uint8 port)
+int32_t HcpManager::GetAnalog(uint8_t port)
 {
-    int32 value = -1;
+    int32_t value = -1;
 
     if (!hcpSerial->IsConnected())
     {
@@ -1123,7 +1123,7 @@ int32 HcpManager::GetAnalog(uint8 port)
         HCP_MSG msg;
         msg.optcode = HCP_ANALOG_REQ;
         msg.payloadSize = 1;
-        msg.payload = new uint8[msg.payloadSize];
+        msg.payload = new uint8_t[msg.payloadSize];
 
         msg.payload[0] = port;
 
@@ -1170,15 +1170,15 @@ int32 HcpManager::GetAnalog(uint8 port)
     return value;
 }
 
-uint8 HcpManager::GetDigital(std::string name)
+uint8_t HcpManager::GetDigital(std::string name)
 {
-    uint8 state = -1;
+    uint8_t state = -1;
 
     json device = mapping->GetDeviceByName(name, Device_Type::DIGITAL);
 
     if (device != nullptr)
     {
-        state = GetDigital((uint8)device["port"]);
+        state = GetDigital((uint8_t)device["port"]);
     }
     else
     {
@@ -1188,9 +1188,9 @@ uint8 HcpManager::GetDigital(std::string name)
     return state;
 }
 
-uint8 HcpManager::GetDigital(uint8 port)
+uint8_t HcpManager::GetDigital(uint8_t port)
 {
-    uint8 state = -1;
+    uint8_t state = -1;
 
     if (!hcpSerial->IsConnected())
     {
@@ -1201,7 +1201,7 @@ uint8 HcpManager::GetDigital(uint8 port)
         HCP_MSG msg;
         msg.optcode = HCP_DIGITAL_REQ;
         msg.payloadSize = 1;
-        msg.payload = new uint8[msg.payloadSize];
+        msg.payload = new uint8_t[msg.payloadSize];
 
         msg.payload[0] = port;
 
@@ -1250,7 +1250,7 @@ uint8 HcpManager::GetDigital(uint8 port)
     return state;
 }
 
-uint16 HcpManager::GetBatteryLevel()
+uint16_t HcpManager::GetBatteryLevel()
 {
     return GetAnalog(HCP_ANALOG_SUPPLY_PORT);
 }

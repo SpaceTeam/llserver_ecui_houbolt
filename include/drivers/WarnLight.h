@@ -16,21 +16,21 @@ private:
 
     SocketOld* socket;
 
-    uint16 id;
+    uint16_t id;
 
     static void OnClose();
     void SendJson(json message);
 public:
 
-    WarnLight(uint16 id);
+    WarnLight(uint16_t id);
 
     ~WarnLight();
 
     void Reset();
-    void SetColor(uint8 red, uint8 green, uint8 blue);
+    void SetColor(uint8_t red, uint8_t green, uint8_t blue);
     void SetMode(std::string mode);
     void StopBuzzer();
-    void StartBuzzerBeep(uint16 time);
+    void StartBuzzerBeep(uint16_t time);
     void StartBuzzerContinuous();
 };
 

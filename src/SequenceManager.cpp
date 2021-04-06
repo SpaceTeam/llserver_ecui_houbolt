@@ -21,9 +21,9 @@ bool SequenceManager::isAutoAbort = true;
 bool SequenceManager::isAbort = false;
 bool SequenceManager::isAbortRunning = false;
 
-int32 SequenceManager::sensorTransmissionInterval = 0;
-int32 SequenceManager::sensorSampleRate = 0;
-int32 SequenceManager::timerSyncInterval = 0;
+int32_t SequenceManager::sensorTransmissionInterval = 0;
+int32_t SequenceManager::sensorSampleRate = 0;
+int32_t SequenceManager::timerSyncInterval = 0;
 
 std::mutex SequenceManager::syncMtx;
 Timer* SequenceManager::timer;
@@ -41,7 +41,7 @@ std::map<int64, std::map<std::string, double[2]>> SequenceManager::sensorsNomina
 std::map<std::string, std::map<int64, double[2]>> SequenceManager::sensorsNominalRangeMap;
 std::map<std::string, std::map<int64, double>> SequenceManager::deviceMap;
 
-void SequenceManager::plotMaps(uint8 option=2)
+void SequenceManager::plotMaps(uint8_t option=2)
 {
     if (option != 1)
     {
@@ -473,7 +473,7 @@ void SequenceManager::Tick(int64 microTime)
             }
 
             bool shallExec;
-            uint8 nextValue = 0;
+            uint8_t nextValue = 0;
 
             for (const auto &devItem : deviceMap)
             {
@@ -486,7 +486,7 @@ void SequenceManager::Tick(int64 microTime)
 
                     if (microTime >= nextIt->first)
                     {
-                        nextValue = (uint8) nextIt->second;
+                        nextValue = (uint8_t) nextIt->second;
                         deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
                     }
                     else
@@ -510,7 +510,7 @@ void SequenceManager::Tick(int64 microTime)
                             }
                             case Interpolation::NONE:
                             default:
-                                nextValue = (uint8) prevIt->second;
+                                nextValue = (uint8_t) prevIt->second;
                                 shallExec = false;
                         }
                     }
@@ -600,7 +600,7 @@ void SequenceManager::StartAbortSequence()
         {
             if (it.key().compare("timestamp") != 0)
             {
-                Debug::info(it.key() + " | %d", (uint8)it.value());
+                Debug::info(it.key() + " | %d", (uint8_t)it.value());
                 LLInterface::ExecCommand(it.key(), it.value());
             }
         }

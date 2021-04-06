@@ -13,9 +13,9 @@ class SocketOld
 
 private:
 
-    int32 socketfd;
+    int32_t socketfd;
     int size = std::get<int>(Config::getData("socket_msg_size"));
-    uint8 *buffer;
+    uint8_t *buffer;
 
     bool connectionActive = false;
     bool shallClose = false;
@@ -23,18 +23,18 @@ private:
 
     std::mutex socketMtx;
 
-    void Connect(std::string address, uint16 port, int32 tries=-1);
+    void Connect(std::string address, uint16_t port, int32_t tries=-1);
     void Close();
 public:
 
-    SocketOld(std::function<void()> onCloseCallback, std::string address, uint16 port, int32 tries=-1);
+    SocketOld(std::function<void()> onCloseCallback, std::string address, uint16_t port, int32_t tries=-1);
 
     ~SocketOld();
 
     void Send(std::string msg);
     std::string Recv();
     std::string newRecv();
-    std::vector<uint8> RecvBytes();
+    std::vector<uint8_t> RecvBytes();
     bool isConnectionActive();
 
 };

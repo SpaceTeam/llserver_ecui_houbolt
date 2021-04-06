@@ -104,7 +104,7 @@ void LLController::OnECUISocketRecv(json msg)
         else if (type.compare("servos-set") == 0)
         {
             string name;
-            uint8 value;
+            uint8_t value;
             for (auto servo : msg["content"])
             {
                 name = servo["id"];
@@ -117,7 +117,7 @@ void LLController::OnECUISocketRecv(json msg)
         else if (type.compare("servos-set-raw") == 0)
         {
             string name;
-            uint16 value;
+            uint16_t value;
             for (auto servo : msg["content"])
             {
                 name = servo["id"];
@@ -149,8 +149,8 @@ void LLController::OnECUISocketRecv(json msg)
         }
         else if (type.compare("supercharge-set") == 0)
         {
-			int8 setpoint;
-			uint8 hysteresis;
+			int8_t setpoint;
+			uint8_t hysteresis;
 			json supercharge = msg["content"][0];
 			setpoint = supercharge["setpoint"];
 			hysteresis = supercharge["hysteresis"];

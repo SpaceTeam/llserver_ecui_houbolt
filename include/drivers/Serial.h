@@ -13,9 +13,9 @@
 
 struct HCP_MSG
 {
-	uint8 optcode;
+	uint8_t optcode;
 	size_t payloadSize;
-	uint8 *payload = nullptr;
+	uint8_t *payload = nullptr;
 };
 
 class Serial {

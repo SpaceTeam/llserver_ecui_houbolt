@@ -7,11 +7,11 @@
 
 using json = nlohmann::json;
 
-WarnLight::WarnLight(uint16 id)
+WarnLight::WarnLight(uint16_t id)
 {
     this->id = id;
     std::string ip = std::get<std::string>(Config::getData("WARNLIGHT/ip"));
-    int32 port = std::get<int>(Config::getData("WARNLIGHT/port"));
+    int32_t port = std::get<int>(Config::getData("WARNLIGHT/port"));
     socket = new SocketOld(OnClose, ip, port, 1);
     Reset();
 }
@@ -33,7 +33,7 @@ void WarnLight::Reset()
     SendJson(message);
 }
 
-void WarnLight::SetColor(uint8 red, uint8 green, uint8 blue)
+void WarnLight::SetColor(uint8_t red, uint8_t green, uint8_t blue)
 {
     json message = {
         {"type", "set-color"},
@@ -63,7 +63,7 @@ void WarnLight::StopBuzzer()
     SendJson(message);
 }
 
-void WarnLight::StartBuzzerBeep(uint16 time)
+void WarnLight::StartBuzzerBeep(uint16_t time)
 {
     json message = {
         {"type", "start-buzzer-beep"},

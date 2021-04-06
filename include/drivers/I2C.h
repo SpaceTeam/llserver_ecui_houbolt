@@ -27,9 +27,9 @@ public:
 
     ~I2C();
 
-    uint8 Read8();
-    uint16 Read16();
-    bool Write8(uint8 byte);
+    uint8_t Read8();
+    uint16_t Read16();
+    bool Write8(uint8_t byte);
 
     std::string GetName();
 

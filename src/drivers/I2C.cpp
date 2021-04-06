@@ -21,21 +21,21 @@ I2C::~I2C()
 
 }
 
-uint8 I2C::Read8()
+uint8_t I2C::Read8()
 {
     std::lock_guard<std::mutex> lock(i2cMtx);
 
     return rand() % 255;
 }
 
-uint16 I2C::Read16()
+uint16_t I2C::Read16()
 {
     std::lock_guard<std::mutex> lock(i2cMtx);
 
     return rand() % 0xFFFF;
 }
 
-bool I2C::Write8(uint8 byte)
+bool I2C::Write8(uint8_t byte)
 {
     std::lock_guard<std::mutex> lock(i2cMtx);
 

@@ -16,23 +16,23 @@ private:
 
     std::mutex readMtx;
 
-    uint16 id;
+    uint16_t id;
 
-    std::vector<uint32> currValues;
+    std::vector<uint32_t> currValues;
 
     std::thread* asyncListenThread;
 
     bool shallClose = false;
 
     static void OnClose();
-    static void AsyncListen(TMPoE *self, uint32 sampleRate);
+    static void AsyncListen(TMPoE *self, uint32_t sampleRate);
 public:
 
-    TMPoE(uint16 id, uint32 sampleRate);
+    TMPoE(uint16_t id, uint32_t sampleRate);
 
     ~TMPoE();
 
-    std::vector<uint32> Read();
+    std::vector<uint32_t> Read();
 
 
 };

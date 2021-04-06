@@ -19,9 +19,9 @@ using namespace std;
 
 #define HEADER_SIZE 2
 
-SocketOld::SocketOld(std::function<void()> onCloseCallback, std::string address, uint16 port, int32 tries)
+SocketOld::SocketOld(std::function<void()> onCloseCallback, std::string address, uint16_t port, int32_t tries)
 {
-    buffer = new uint8[size];
+    buffer = new uint8_t[size];
     this->onCloseCallback = onCloseCallback;
     Connect(address, port, tries);
 }
@@ -36,11 +36,11 @@ SocketOld::~SocketOld()
     delete buffer;
 }
 
-void SocketOld::Connect(std::string address, uint16 port, int32 tries)
+void SocketOld::Connect(std::string address, uint16_t port, int32_t tries)
 {
 
     struct sockaddr_in serv_addr;
-    int32 totalTries = tries;
+    int32_t totalTries = tries;
 
     while (!connectionActive && !shallClose && tries != 0)
     {
@@ -107,7 +107,7 @@ void SocketOld::Send(std::string msg)
 std::string SocketOld::newRecv()
 {
     uint8_t header[HEADER_SIZE];
-    uint32 nBytes;
+    uint32_t nBytes;
 
     if(connectionActive){
 
@@ -119,7 +119,7 @@ std::string SocketOld::newRecv()
         }
 
         //Prepare to receive the payload
-        uint32 msgLen;
+        uint32_t msgLen;
         msgLen  = header[1];
         msgLen += header[0] << 8;
 
@@ -144,10 +144,10 @@ std::string SocketOld::newRecv()
 }
 
 
-// std::vector<uint8> SocketOld::newRecvBytes()
+// std::vector<uint8_t> SocketOld::newRecvBytes()
 // {
 //     std::string msg = Recv();
-//     return std::vector<uint8>(msg.begin(), msg.end());
+//     return std::vector<uint8_t>(msg.begin(), msg.end());
 // }
 
 std::string SocketOld::Recv()
@@ -156,7 +156,7 @@ std::string SocketOld::Recv()
     string msg = "";
     if (connectionActive)
     {
-        int32 valread;
+        int32_t valread;
 
         valread = recv(socketfd, buffer, size, 0);
 
@@ -178,12 +178,12 @@ std::string SocketOld::Recv()
     return msg;
 }
 
-std::vector<uint8> SocketOld::RecvBytes()
+std::vector<uint8_t> SocketOld::RecvBytes()
 {
-    std::vector<uint8> msg;
+    std::vector<uint8_t> msg;
     if (connectionActive)
     {
-        int32 valread;
+        int32_t valread;
 
         valread = recv(socketfd, buffer, size, 0);
 
@@ -222,7 +222,7 @@ void SocketOld::Close()
 
 //
 //
-//void SocketOld::asyncListen(std::function<void(int32, json)> onMsgCallback)
+//void SocketOld::asyncListen(std::function<void(int32_t, json)> onMsgCallback)
 //{
 //    char buffer[SOCKET_MSG_SIZE] = {0};
 //    int valread;
@@ -311,7 +311,7 @@ void SocketOld::Close()
 //    }
 //}
 //
-//int32 SocketOld::readJson()
+//int32_t SocketOld::readJson()
 //{
 //    std::lock_guard<std::mutex> lock(sendMtx);
 //    std::fill(std::begin(buffer), std::end(buffer), 0);

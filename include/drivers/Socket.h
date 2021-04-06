@@ -12,11 +12,11 @@ class Socket
 {
 
 private:
-    int32 socketfd;
+    int32_t socketfd;
     
     std::string name;
     std::string address;
-    uint16 port;
+    uint16_t port;
 
     bool connectionActive = false;
     bool shallClose = false;
@@ -27,16 +27,16 @@ private:
     
 public:
 
-    Socket(std::string name, std::function<void()> onCloseCallback, std::string address, uint16 port);
+    Socket(std::string name, std::function<void()> onCloseCallback, std::string address, uint16_t port);
 
     ~Socket();
 
     void Send(std::string msg);
     std::string Recv();
-    // std::vector<uint8> RecvBytes();
+    // std::vector<uint8_t> RecvBytes();
     bool isConnectionActive();
     void Close();
-    int Connect(int32 tries=-1);
+    int Connect(int32_t tries=-1);
 
 };
 

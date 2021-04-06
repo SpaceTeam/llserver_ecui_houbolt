@@ -9,8 +9,11 @@
 
 #include <map>
 #include <functional>
+#include <mutex>
 
+#include "Singleton.h"
 #include "Node.h"
+#include "can/CANMapping.h"
 #include "can/CANDriver.h"
 
 //typedef struct
@@ -23,6 +26,14 @@
 //
 //channelData_t sensorBuffer[];
 
+typedef struct
+{
+    uint8_t priority;
+    uint8_t special_cmd;
+    uint8_t node_id;
+    uint8_t direction;
+} CANID_t;
+
 /**
  * read node channel mapping on init
  * save scaling
@@ -33,34 +44,54 @@
  *
  * channel scaling is constant and channel specific
  */
-class CANManager
+class CANManager : public Singleton<CANManager>
 {
 
 private:
-    static CANManager* instance;
-    CANDriver* canDriver;
+    CANDriver *canDriver;
+    std::mutex sensorMtx;
+    CANMapping *mapping;
 
-    std::map<uint8_t, Node> nodes;
+    std::map<uint8_t, Node *> nodeMap;
 
-	uint32_t* sensorBuffer; //this is going to be huge!!!!
-	uint32_t* latestSensorDataBuffer;
+    /**
+     * key: nodeId << 8 | channelId
+     * value: sensorName, scaling
+     */
+    std::map<uint16_t, std::tuple<std::string, double>> sensorNames;
+
+	uint32_t *sensorDataBuffer; //this is going to be huge!!!!
+	size_t sensorDataBufferLength;
+
+	typedef struct
+    {
+        uint8_t nodeId;
+        uint16_t channelId;
+        uint32_t data;
+    } SensorData_t;
+
+	SensorData_t *latestSensorDataBuffer;
+	size_t latestSensorDataBufferLength;
 
 	bool initialized = false;
 
-	CANManager(const CANManager& copy);
-	CANManager();
 	~CANManager();
+
+	CANResult RequestCANInfo();
+	static inline uint8_t GetNodeID(uint32_t &canID);
+	std::string GetChannelName(uint8_t &nodeID, uint8_t &channelID);
 public:
-    static CANManager* Instance();
 
     CANResult Init();
 
-	std::vector<std::string> GetChannelStates();
-	std::map<std::string, std::function<CANResult(...)>> GetChannelCommands();
+//	std::vector<std::string> GetChannelStates();
+//	std::map<std::string, std::function<CANResult(...)>> GetChannelCommands();
+
 	std::map<std::string, double> GetLatestSensorData();
 
 	void OnChannelStateChanged(std::string, double);
-	void OnCANRecv(uint32_t canID, uint8_t* payload, uint32_t payloadLength);
+	void OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength);
+	void OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength);
 	void OnCANError();
 };
 

@@ -32,7 +32,7 @@ class HcpManager
 private:
     static Serial* hcpSerial;
     static HcpMapping* mapping;
-    static uint16 lastServoPosArr[];
+    static uint16_t lastServoPosArr[];
     static bool servoEnabledArr[];
     static std::recursive_mutex serialMtx;
 
@@ -40,9 +40,9 @@ private:
     static Timer *sensorTimer;
     static std::map<std::string, double> sensorBuffer;
 
-    static bool CheckPort(uint8 port, Device_Type type);
+    static bool CheckPort(uint8_t port, Device_Type type);
     static void FetchSensors(uint64 microTime);
-    static bool SetServo(nlohmann::json device, uint8 percent);
+    static bool SetServo(nlohmann::json device, uint8_t percent);
 
     HcpManager();
 
@@ -53,7 +53,7 @@ public:
     static void Restart();
     static void Destroy();
 
-    static void StartSensorFetch(uint32 sampleRate);
+    static void StartSensorFetch(uint32_t sampleRate);
     static void StopSensorFetch();
 
     static std::vector<std::string> GetAllSensorNames();
@@ -63,43 +63,43 @@ public:
 
     static nlohmann::json GetAllServoData();
 
-    static bool ExecCommand(std::string name, uint8 percent);
+    static bool ExecCommand(std::string name, uint8_t percent);
 
-    static bool EnableServo(uint8 port);
-    static bool DisableServo(uint8 port);
+    static bool EnableServo(uint8_t port);
+    static bool DisableServo(uint8_t port);
 
     static bool EnableAllServos();
     static bool DisableAllServos();
 
-    static void SetServoMin(std::string name, uint16 min);
-    static void SetServoMax(std::string name, uint16 max);
+    static void SetServoMin(std::string name, uint16_t min);
+    static void SetServoMax(std::string name, uint16_t max);
 
-    static bool SetServoRaw(std::string port, uint16 onTime);
-    static bool SetServoRaw(uint8 port, uint16 onTime);
-    static bool SetServo(uint8 port, uint8 percent);
-    static bool SetServo(std::string name, uint8 percent);
+    static bool SetServoRaw(std::string port, uint16_t onTime);
+    static bool SetServoRaw(uint8_t port, uint16_t onTime);
+    static bool SetServo(uint8_t port, uint8_t percent);
+    static bool SetServo(std::string name, uint8_t percent);
 
-	static bool SetSupercharge(int8 setpoint, uint8 hysteresis);
+	static bool SetSupercharge(int8_t setpoint, uint8_t hysteresis);
 	static nlohmann::json GetSupercharge();
 	
-    static bool SetMotor(uint8 port, int8 percent);
-    static bool SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount);
-    static bool SetMotor(std::string name, Motor_Mode mode, int16 amount);
+    static bool SetMotor(uint8_t port, int8_t percent);
+    static bool SetMotorRaw(uint8_t port, Motor_Mode mode, int16_t amount);
+    static bool SetMotor(std::string name, Motor_Mode mode, int16_t amount);
 
-    static bool SetDigitalOutputs(uint8 port, bool enable);
+    static bool SetDigitalOutputs(uint8_t port, bool enable);
     static bool SetDigitalOutputs(std::string name, bool enable);
 
-    //returns exactly 3 int32 values
-    static int32 *GetLoadCells();
+    //returns exactly 3 int32_t values
+    static int32_t *GetLoadCells();
     static void TareLoadCells();
 
     static double GetAnalog(std::string name);
-    static int32 GetAnalog(uint8 port);
+    static int32_t GetAnalog(uint8_t port);
 
-    static uint8 GetDigital(std::string name);
-    static uint8 GetDigital(uint8 port);
+    static uint8_t GetDigital(std::string name);
+    static uint8_t GetDigital(uint8_t port);
 
-    static uint16 GetBatteryLevel();
+    static uint16_t GetBatteryLevel();
 
 
 };

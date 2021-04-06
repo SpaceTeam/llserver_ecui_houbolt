@@ -17,10 +17,10 @@ class SocketServer
 
 private:
 
-    int32 sockfd = -1;
-    int32 connfd = -1;
-    int32 size = std::get<int>(Config::getData("socket_msg_size"));
-    uint8 *buffer;
+    int32_t sockfd = -1;
+    int32_t connfd = -1;
+    int32_t size = std::get<int>(Config::getData("socket_msg_size"));
+    uint8_t *buffer;
 
     std::thread* asyncAcceptThread;
 
@@ -30,7 +30,7 @@ private:
 
     std::mutex socketMtx;
 
-    void Open(std::string address, uint16 port);
+    void Open(std::string address, uint16_t port);
     static void AsyncAccept(SocketServer *self);
 
 public:
@@ -39,12 +39,12 @@ public:
 
     ~SocketServer();
 
-    void Start(std::string address, uint16 port, std::function<void()> onCloseCallback);
+    void Start(std::string address, uint16_t port, std::function<void()> onCloseCallback);
     void Stop();
 
-    void Send(std::vector<uint8> msg);
+    void Send(std::vector<uint8_t> msg);
     std::string Recv();
-    std::vector<uint8> RecvBytes(uint32 sizeInBytes);
+    std::vector<uint8_t> RecvBytes(uint32_t sizeInBytes);
     bool isConnectionActive();
 
 };

@@ -5283,7 +5283,7 @@ class binary_reader
                 return sax->null();
             }
 
-            case 0x10: // int32
+            case 0x10: // int32_t
             {
                 std::int32_t value;
                 return get_number<std::int32_t, true>(input_format_t::bson, value) and sax->number_integer(value);
@@ -11984,7 +11984,7 @@ class binary_writer
     {
         if ((std::numeric_limits<std::int32_t>::min)() <= value and value <= (std::numeric_limits<std::int32_t>::max)())
         {
-            write_bson_entry_header(name, 0x10); // int32
+            write_bson_entry_header(name, 0x10); // int32_t
             write_number<std::int32_t, true>(static_cast<std::int32_t>(value));
         }
         else
@@ -12012,7 +12012,7 @@ class binary_writer
     {
         if (value <= static_cast<std::uint64_t>((std::numeric_limits<std::int32_t>::max)()))
         {
-            write_bson_entry_header(name, 0x10 /* int32 */);
+            write_bson_entry_header(name, 0x10 /* int32_t */);
             write_number<std::int32_t, true>(static_cast<std::int32_t>(value));
         }
         else if (value <= static_cast<std::uint64_t>((std::numeric_limits<std::int64_t>::max)()))
@@ -12245,7 +12245,7 @@ class binary_writer
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('i'));  // int8
+                oa->write_character(to_char_type('i'));  // int8_t
             }
             write_number(static_cast<std::uint8_t>(n));
         }
@@ -12253,7 +12253,7 @@ class binary_writer
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('U'));  // uint8
+                oa->write_character(to_char_type('U'));  // uint8_t
             }
             write_number(static_cast<std::uint8_t>(n));
         }
@@ -12261,7 +12261,7 @@ class binary_writer
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('I'));  // int16
+                oa->write_character(to_char_type('I'));  // int16_t
             }
             write_number(static_cast<std::int16_t>(n));
         }
@@ -12269,7 +12269,7 @@ class binary_writer
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('l'));  // int32
+                oa->write_character(to_char_type('l'));  // int32_t
             }
             write_number(static_cast<std::int32_t>(n));
         }
@@ -12298,7 +12298,7 @@ class binary_writer
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('i'));  // int8
+                oa->write_character(to_char_type('i'));  // int8_t
             }
             write_number(static_cast<std::int8_t>(n));
         }
@@ -12306,7 +12306,7 @@ class binary_writer
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('U'));  // uint8
+                oa->write_character(to_char_type('U'));  // uint8_t
             }
             write_number(static_cast<std::uint8_t>(n));
         }
@@ -12314,7 +12314,7 @@ class binary_writer
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('I'));  // int16
+                oa->write_character(to_char_type('I'));  // int16_t
             }
             write_number(static_cast<std::int16_t>(n));
         }
@@ -12322,7 +12322,7 @@ class binary_writer
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('l'));  // int32
+                oa->write_character(to_char_type('l'));  // int32_t
             }
             write_number(static_cast<std::int32_t>(n));
         }
@@ -20964,9 +20964,9 @@ class basic_json
     boolean         | `true`                            | true             | 0xC3
     boolean         | `false`                           | false            | 0xC2
     number_integer  | -9223372036854775808..-2147483649 | int64            | 0xD3
-    number_integer  | -2147483648..-32769               | int32            | 0xD2
-    number_integer  | -32768..-129                      | int16            | 0xD1
-    number_integer  | -128..-33                         | int8             | 0xD0
+    number_integer  | -2147483648..-32769               | int32_t            | 0xD2
+    number_integer  | -32768..-129                      | int16_t            | 0xD1
+    number_integer  | -128..-33                         | int8_t             | 0xD0
     number_integer  | -32..-1                           | negative fixint  | 0xE0..0xFF
     number_integer  | 0..127                            | positive fixint  | 0x00..0x7F
     number_integer  | 128..255                          | uint 8           | 0xCC
@@ -21060,17 +21060,17 @@ class basic_json
     boolean         | `true`                            | true        | `T`
     boolean         | `false`                           | false       | `F`
     number_integer  | -9223372036854775808..-2147483649 | int64       | `L`
-    number_integer  | -2147483648..-32769               | int32       | `l`
-    number_integer  | -32768..-129                      | int16       | `I`
-    number_integer  | -128..127                         | int8        | `i`
-    number_integer  | 128..255                          | uint8       | `U`
-    number_integer  | 256..32767                        | int16       | `I`
-    number_integer  | 32768..2147483647                 | int32       | `l`
+    number_integer  | -2147483648..-32769               | int32_t       | `l`
+    number_integer  | -32768..-129                      | int16_t       | `I`
+    number_integer  | -128..127                         | int8_t        | `i`
+    number_integer  | 128..255                          | uint8_t       | `U`
+    number_integer  | 256..32767                        | int16_t       | `I`
+    number_integer  | 32768..2147483647                 | int32_t       | `l`
     number_integer  | 2147483648..9223372036854775807   | int64       | `L`
-    number_unsigned | 0..127                            | int8        | `i`
-    number_unsigned | 128..255                          | uint8       | `U`
-    number_unsigned | 256..32767                        | int16       | `I`
-    number_unsigned | 32768..2147483647                 | int32       | `l`
+    number_unsigned | 0..127                            | int8_t        | `i`
+    number_unsigned | 128..255                          | uint8_t       | `U`
+    number_unsigned | 256..32767                        | int16_t       | `I`
+    number_unsigned | 32768..2147483647                 | int32_t       | `l`
     number_unsigned | 2147483648..9223372036854775807   | int64       | `L`
     number_float    | *any value*                       | float64     | `D`
     string          | *with shortest length indicator*  | string      | `S`
@@ -21160,9 +21160,9 @@ class basic_json
     null            | `null`                            | null        | 0x0A
     boolean         | `true`, `false`                   | boolean     | 0x08
     number_integer  | -9223372036854775808..-2147483649 | int64       | 0x12
-    number_integer  | -2147483648..2147483647           | int32       | 0x10
+    number_integer  | -2147483648..2147483647           | int32_t       | 0x10
     number_integer  | 2147483648..9223372036854775807   | int64       | 0x12
-    number_unsigned | 0..2147483647                     | int32       | 0x10
+    number_unsigned | 0..2147483647                     | int32_t       | 0x10
     number_unsigned | 2147483648..9223372036854775807   | int64       | 0x12
     number_unsigned | 9223372036854775808..18446744073709551615| --   | --
     number_float    | *any value*                       | double      | 0x01
@@ -21481,10 +21481,10 @@ class basic_json
     true        | `true`                                  | `T`
     float32     | number_float                            | `d`
     float64     | number_float                            | `D`
-    uint8       | number_unsigned                         | `U`
-    int8        | number_integer                          | `i`
-    int16       | number_integer                          | `I`
-    int32       | number_integer                          | `l`
+    uint8_t       | number_unsigned                         | `U`
+    int8_t        | number_integer                          | `i`
+    int16_t       | number_integer                          | `I`
+    int32_t       | number_integer                          | `l`
     int64       | number_integer                          | `L`
     string      | string                                  | `S`
     char        | string                                  | `C`
@@ -21578,7 +21578,7 @@ class basic_json
     JavaScript Code | 0x0D             | still unsupported
     Symbol          | 0x0E             | still unsupported
     JavaScript Code | 0x0F             | still unsupported
-    int32           | 0x10             | number_integer
+    int32_t           | 0x10             | number_integer
     Timestamp       | 0x11             | still unsupported
     128-bit decimal float | 0x13       | still unsupported
     Max Key         | 0x7F             | still unsupported

@@ -25,7 +25,7 @@ void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<voi
     EcuiSocket::onCloseCallback = onCloseCallback;
 
     string ip = std::get<std::string>(Config::getData("WEBSERVER/ip"));
-    int32 port = std::get<int>(Config::getData("WEBSERVER/port"));
+    int32_t port = std::get<int>(Config::getData("WEBSERVER/port"));
 
     socket = new Socket("EcuiSocket", Close, ip, port);
     while(socket->Connect()!=0);

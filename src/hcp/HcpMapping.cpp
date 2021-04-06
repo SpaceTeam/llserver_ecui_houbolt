@@ -105,7 +105,7 @@ json HcpMapping::GetDeviceByName(std::string name, Device_Type type)
     return device;
 }
 
-json HcpMapping::GetDeviceByPort(uint8 port, Device_Type type)
+json HcpMapping::GetDeviceByPort(uint8_t port, Device_Type type)
 {
     json device = nullptr;
 

@@ -43,7 +43,7 @@ std::string Debug::getTimeString()
     return "<" + std::string(time_string) + std::to_string(curr_time_struct.tv_nsec/1000000) + ">\t";
 }
 
-int32 Debug::printNoTime(std::string fmt, ...)
+int32_t Debug::printNoTime(std::string fmt, ...)
 {
     std::lock_guard<std::recursive_mutex> lock(_outMutex);
 
@@ -59,7 +59,7 @@ int32 Debug::printNoTime(std::string fmt, ...)
     return printed;
 }
 
-int32 Debug::print(std::string fmt, ...)
+int32_t Debug::print(std::string fmt, ...)
 {
     std::lock_guard<std::recursive_mutex> lock(_outMutex);
 
@@ -76,7 +76,7 @@ int32 Debug::print(std::string fmt, ...)
     return printed;
 }
 
-int32 Debug::info(std::string fmt, ...)
+int32_t Debug::info(std::string fmt, ...)
 {
     if (printInfos)
     {
@@ -96,7 +96,7 @@ int32 Debug::info(std::string fmt, ...)
 	return 0;
 }
 
-int32 Debug::warning(std::string fmt, ...)
+int32_t Debug::warning(std::string fmt, ...)
 {
     if (printWarnings)
     {
@@ -211,7 +211,7 @@ void Debug::writeToFile()
     }
 }
 
-int32 Debug::error(std::string fmt, ...)
+int32_t Debug::error(std::string fmt, ...)
 {
     int printed;
     va_list args;

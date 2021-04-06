@@ -30,7 +30,7 @@ private:
     static bool useTMPoE;
 
     static bool isTransmittingSensors;
-    static int32 warnlightStatus;
+    static int32_t warnlightStatus;
     static Timer* sensorTimer;
 
 	static double sensorsSmoothingFactor;

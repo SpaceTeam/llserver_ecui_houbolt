@@ -43,9 +43,9 @@ private:
     static std::mutex syncMtx;
 
     //config variables
-    static int32 sensorTransmissionInterval;
-    static int32 sensorSampleRate;
-    static int32 timerSyncInterval;
+    static int32_t sensorTransmissionInterval;
+    static int32_t sensorSampleRate;
+    static int32_t timerSyncInterval;
     //----
 
     static json jsonSequence;
@@ -76,7 +76,7 @@ private:
     static void StartAbortSequence();
 
 
-    static void plotMaps(uint8 option);
+    static void plotMaps(uint8_t option);
 
     SequenceManager();
 

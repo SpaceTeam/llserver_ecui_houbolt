@@ -22,7 +22,7 @@ bool LLInterface::isInitialized = false;
 bool LLInterface::useTMPoE = false;
 
 bool LLInterface::isTransmittingSensors = false;
-int32 LLInterface::warnlightStatus = -1;
+int32_t LLInterface::warnlightStatus = -1;
 Timer* LLInterface::sensorTimer;
 
 double LLInterface::sensorsSmoothingFactor = 0.0;
@@ -113,8 +113,8 @@ std::map<std::string, double> LLInterface::GetAllSensors()
 
     if (useTMPoE)
     {
-        std::vector<uint32> tmpValues = tmPoE->Read();
-        for (uint32 i = 0; i < tmpValues.size(); i++)
+        std::vector<uint32_t> tmpValues = tmPoE->Read();
+        for (uint32_t i = 0; i < tmpValues.size(); i++)
         {
             sensors["temp " + std::to_string(i+1)] = tmpValues[i];
         }
@@ -148,7 +148,7 @@ bool LLInterface::ExecCommand(std::string name, json value)
     {
         return false;
     }
-    return HcpManager::ExecCommand(name, (uint8)value);
+    return HcpManager::ExecCommand(name, (uint8_t)value);
 }
 
 void LLInterface::StartSensorTransmission()

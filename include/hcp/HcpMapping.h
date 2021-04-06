@@ -50,7 +50,7 @@ public:
     nlohmann::json GetDeviceByName(std::string name, Device_Type type);
 
     //note: use FindObjectByName if possible, it is faster
-    nlohmann::json GetDeviceByPort(uint8 port, Device_Type type);
+    nlohmann::json GetDeviceByPort(uint8_t port, Device_Type type);
 
     nlohmann::json GetDevices(Device_Type type);
 

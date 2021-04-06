@@ -137,7 +137,7 @@ HCP_MSG* Serial::ReadSync()
 {
     std::lock_guard<std::mutex> lock(serialMtx);
     //----- CHECK FOR ANY RX BYTES -----
-    uint8 rxBuffer[MSG_SIZE] = {0};
+    uint8_t rxBuffer[MSG_SIZE] = {0};
     //msg.msg = rxBuffer;
     bool finished = false;
     if (_uartFilestream != -1)
@@ -173,7 +173,7 @@ HCP_MSG* Serial::ReadSync()
 
 
                 msg->payloadSize = msgLength;
-                msg->payload = new uint8[msg->payloadSize];
+                msg->payload = new uint8_t[msg->payloadSize];
 
                 while (remainingBytes > 0)
                 {
@@ -194,7 +194,7 @@ HCP_MSG* Serial::ReadSync()
                     else
                     {
 
-                        int32 startIndex = msgLength - remainingBytes;
+                        int32_t startIndex = msgLength - remainingBytes;
                         std::copy_n(rxBuffer, rxLength, &(msg->payload[startIndex]));
                         remainingBytes -= rxLength;
                     }
@@ -228,7 +228,7 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
 {
     std::lock_guard<std::mutex> lock(serialMtx);
     //----- CHECK FOR ANY RX BYTES -----
-    uint8 rxBuffer[MSG_SIZE] = {0};
+    uint8_t rxBuffer[MSG_SIZE] = {0};
     //msg.msg = rxBuffer;
     bool finished = false;
 
@@ -265,7 +265,7 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
 
 
                 msg.payloadSize = msgLength;
-                msg.payload = new uint8[msg.payloadSize];
+                msg.payload = new uint8_t[msg.payloadSize];
 
                 while (remainingBytes > 0)
                 {
@@ -285,7 +285,7 @@ void Serial::ReadAsync(std::function<void(HCP_MSG)> callback)
                     }
                     else
                     {
-                        int32 startIndex = msgLength - remainingBytes;
+                        int32_t startIndex = msgLength - remainingBytes;
                         std::copy_n(rxBuffer, rxLength, &(msg.payload[startIndex]));
                         remainingBytes -= rxLength;
                     }
@@ -310,7 +310,7 @@ void Serial::Write(HCP_MSG message)
 {
     std::lock_guard<std::mutex> lock(serialMtx);
 
-    uint8 buffer[message.payloadSize+1];
+    uint8_t buffer[message.payloadSize+1];
     buffer[0] = message.optcode;
     Debug::info("Writing Optcode %x...", message.optcode);
     if (message.payloadSize > 0)

@@ -42,11 +42,11 @@ public:
     static void changeOutputFile(std::string outFilePath);
     static void log(std::string msg);
 
-    static int32 print(std::string fmt, ...);
-    static int32 printNoTime(std::string fmt, ...);
-    static int32 error(std::string fmt, ...);
-    static int32 info(std::string fmt, ...);
-    static int32 warning(std::string fmt, ...);
+    static int32_t print(std::string fmt, ...);
+    static int32_t printNoTime(std::string fmt, ...);
+    static int32_t error(std::string fmt, ...);
+    static int32_t info(std::string fmt, ...);
+    static int32_t warning(std::string fmt, ...);
 
 };
 

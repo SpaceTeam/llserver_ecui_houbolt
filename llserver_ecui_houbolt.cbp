@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="llserver_ecui_houbolt"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="llserver_ecui_houbolt">
+				<Option output="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/llserver_ecui_houbolt" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include"/>
+					<Add directory="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can_houbolt"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 llserver_ecui_houbolt"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="llserver_ecui_houbolt/fast">
+				<Option output="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/llserver_ecui_houbolt" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include"/>
+					<Add directory="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can_houbolt"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 llserver_ecui_houbolt/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/CMakeFiles/3.15.3/CompilerIdCXX/CMakeCXXCompilerId.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/CMakeFiles/3.19.1/CompilerIdCXX/CMakeCXXCompilerId.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/Config.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/DataFilter.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/Debug.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/EcuiSocket.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/EventManager.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/LLController.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/LLInterface.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/Logging.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/SequenceManager.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/Singleton.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/StateController.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/Timer.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/WatchDog.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can/ADC16.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can/ADC24.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can/CANDriver.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can/CANManager.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can/CANMapping.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can/Channel.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can/DigitalOut.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can/Node.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can/Servo.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can_houbolt/channels/adc16_channel.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can_houbolt/channels/adc24_channel.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can_houbolt/channels/digital_out_channel.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can_houbolt/channels/servo_channel.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can_houbolt/cmds.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/can_houbolt/generic_cmds.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/common.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/config_old.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/drivers/I2C.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/drivers/JSONMapping.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/drivers/Serial.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/drivers/Socket.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/drivers/SocketOld.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/drivers/SocketServer.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/drivers/TmPoE.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/drivers/WarnLight.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/hcp/HcpCommands.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/hcp/HcpManager.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/hcp/HcpMapping.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/utils.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/main.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Config.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Debug.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/EcuiSocket.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/EventManager.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/LLController.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/LLInterface.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/SequenceManager.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Socket.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/StateController.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Timer.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/WatchDog.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/can/ADC16.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/can/ADC24.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/can/CANDriver.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/can/CANManager.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/can/CANMapping.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/can/DigitalOut.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/can/Node.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/can/Servo.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/drivers/I2C.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/drivers/JSONMapping.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/drivers/Serial.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/drivers/Socket.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/drivers/SocketOld.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/drivers/SocketServer.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/drivers/TmPoE.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/drivers/WarnLight.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/hcp/HcpCommands.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/hcp/HcpManager.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/hcp/HcpMapping.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/utils.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/xtest/main.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

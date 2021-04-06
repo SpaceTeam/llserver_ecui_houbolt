@@ -1,7 +1,6 @@
 #include "can/Node.h"
 
 #include <map>
-#include "can_houbolt/generic_cmds.h"
 #include "can/DigitalOut.h"
 #include "can/ADC16.h"
 #include "can/ADC24.h"
@@ -14,19 +13,20 @@
  * @param driver
  */
 
-Node::Node(uint8_t id, NodeInfoMsg_t& nodeInfo, CANDriver* driver)
+//
+
+Node::Node(uint8_t nodeID, const std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, CANDriver *driver)
+    : nodeID(nodeID), driver(driver), Channel::Channel(0xFF, nodeChannelName, 1.0, this)
 {
-	this->id = id;
-	this->driver = driver;
-	InitChannels(nodeInfo);
+    InitChannels(nodeInfo);
 }
 
-bool Node::InitChannels(NodeInfoMsg_t& nodeInfo)
+CANResult Node::InitChannels(NodeInfoMsg_t &nodeInfo)
 {
     bool success = true;
 	for (uint8_t i = 0; i < sizeof(nodeInfo.channel_type)/sizeof(uint8_t); i++)
 	{
-		CHANNEL_TYPE channelType = (CHANNEL_TYPE) nodeInfo.channel_type[i];
+		auto channelType = (CHANNEL_TYPE) nodeInfo.channel_type[i];
 		Channel* ch = nullptr;
 
 		switch(channelType)
@@ -49,6 +49,7 @@ bool Node::InitChannels(NodeInfoMsg_t& nodeInfo)
 		    default:
 		        success = false;
 		        Debug::error("channel type not recognized");
+		        return CANResult::ERROR;
 			    // TODO: default case for unknown channel types that logs (DB)
 		}
 
@@ -57,13 +58,10 @@ bool Node::InitChannels(NodeInfoMsg_t& nodeInfo)
 			channelMap[i] = ch;
 		}
 	}
-	return success;
+	return CANResult::SUCCESS;
 }
 
 Node::~Node()
 {
-    for (auto& ch: channelMap)
-    {
-        delete ch.second;
-    }
+    delete &channelMap;
 }
