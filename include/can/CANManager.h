@@ -95,6 +95,7 @@ public:
 	void OnChannelStateChanged(std::string stateName, double value, uint64_t timestamp);
 	void OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint32_t timestamp);
 	void OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint32_t timestamp);
+
 	//TODO: MP add error info to arguments
 	void OnCANError();
 };

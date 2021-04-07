@@ -15,9 +15,9 @@
 class CANDriver
 {
     private:
-        std::function<void(uint32_t *, uint8_t *, uint32_t *, uint32_t *)> onRecvCallback;
-        std::function<void(uint32_t *, uint8_t *, uint32_t *, uint32_t *)> seqRecvCallback;
-        std::function<void()> onErrorCallback; //TODO: fix parameters also in constructor
+        std::function<void(uint32_t, uint8_t *, uint32_t, uint32_t)> onRecvCallback;
+        std::function<void(uint32_t, uint8_t *, uint32_t, uint32_t)> seqRecvCallback;
+        std::function<void(char *)> onErrorCallback;
 
         void OnCANCallback(int handle, void *context, unsigned int event);
         
