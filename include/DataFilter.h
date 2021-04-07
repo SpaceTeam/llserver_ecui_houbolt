@@ -7,15 +7,20 @@
 
 #include "common.h"
 
+#include <map>
+#include <string>
+
 class DataFilter
 {
 private:
     double sensorsSmoothingFactor;
-    std::map<std::string, double> filteredSensorDataMap[];
+    std::map<std::string, double> filteredSensorDataMap;
 
 public:
-    DataFilter(double smoothingFactor) : sensorsSmoothingFactor(smoothingFactor);
+    DataFilter(double smoothingFactor);
 	~DataFilter();
+
+	std::map<std::string, double> FilterData(std::map<std::string, double> &rawSensorDataMap);
 };
 
 

@@ -13,7 +13,7 @@
 class StateController
 {
 private:
-    std::map<std::string, std::tuple<double, bool>> states;
+    std::map<std::string, std::tuple<double, uint64_t, bool>> states;
     std::function<void(std::string, double)> onStateChangeCallback;
 
 	static StateController* instance;
@@ -23,12 +23,21 @@ private:
 	~StateController();
 
 public:
+    //TODO: MP Maybe add timestamp to callback argument as well
     void Init(std::function<void(std::string, double)> onStateChangeCallback);
-    void AddStates(std::map<std::string, double> states);
-    bool ChangeState(std::string stateName, double value);
 
-    std::map<std::string, double> GetDirtyStates();
-	std::map<std::string, std::tuple<double, bool>> GetAllStates();
+    /**
+     * blocks until all map entries have a timestamp != 0
+     * all states should already be added at this point, no checking if sates are added afterwards
+     */
+    void WaitUntilStatesInitialized();
+
+    void AddStates(std::map<std::string, std::tuple<double, uint64_t>> &states);
+    void ChangeState(std::string stateName, double value, uint64_t timestamp);
+
+    double GetStateValue(std::string stateName);
+    std::map<std::string, std::tuple<double, uint64_t>> GetDirtyStates();
+	std::map<std::string, std::tuple<double, uint64_t, bool>> GetAllStates();
 
 	static StateController* Instance();
 

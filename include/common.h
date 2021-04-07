@@ -7,7 +7,6 @@
 #define TXV_ECUI_LLSERVER_COMMON_H
 
 #include <stdint.h>
-#include <iostream>
 #include <stdexcept>
 
 #include "Debug.h"
@@ -22,7 +21,8 @@ enum class CANResult
 enum class LLResult
 {
     SUCCESS,
-    ERROR
+    ERROR,
+    NOT_IMPLEMENTED
 };
 
 #endif //TXV_ECUI_LLSERVER_COMMON_H

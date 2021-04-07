@@ -24,11 +24,11 @@ private:
     std::string threadName;
     static int nameIndex;
 
-    int64 microTime;
-    int64 endTime;
+    int64_t microTime;
+    int64_t endTime;
 
-    int64 reportedOffset;
-    uint64 interval_ns;
+    int64_t reportedOffset;
+    uint64_t interval_ns;
 
 #ifdef ENABLE_TIMER_DIAGNOSTICS
     long max_exec_time=0;
@@ -40,11 +40,11 @@ private:
     std::thread* timerThread;
     std::mutex syncMtx;
     std::function<void()> stopCallback;
-    std::function<void(int64)> tickCallback;
+    std::function<void(int64_t)> tickCallback;
 
-    static void tick(Timer* self, uint64 interval, int64 endTime, int64 microTime);
-    static void highPerformanceTimerLoop(Timer* self, uint64 interval, int64 endTime, int64 microTime);
-    static void highPerformanceContinousTimerLoop(Timer* self, uint64 interval, int64 microTime);
+    static void tick(Timer* self, uint64_t interval, int64_t endTime, int64_t microTime);
+    static void highPerformanceTimerLoop(Timer* self, uint64_t interval, int64_t endTime, int64_t microTime);
+    static void highPerformanceContinousTimerLoop(Timer* self, uint64_t interval, int64_t microTime);
     static void nullStopCallback() {};
 
     void internalLoop(void);
@@ -54,12 +54,12 @@ public:
 
     Timer(int prio=40, std::string threadName="Thread"+std::to_string(nameIndex++));
 
-    void start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback = nullStopCallback);
-    void startContinous(int64 startTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback = nullStopCallback);
+    void start(int64_t startTimeMicros, int64_t endTimeMicros, uint64_t intervalMicros, std::function<void(int64_t)> tickCallback, std::function<void()> stopCallback = nullStopCallback);
+    void startContinous(int64_t startTimeMicros, uint64_t intervalMicros, std::function<void(int64_t)> tickCallback, std::function<void()> stopCallback = nullStopCallback);
     void stop();
 
-    void startContinousNow(uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback);
-    void incrementTimeSpec(struct timespec *ts, uint64 nsec, struct timespec *tsAfter);
+    void startContinousNow(uint64_t intervalMicros, std::function<void(int64_t)> tickCallback, std::function<void()> stopCallback);
+    void incrementTimeSpec(struct timespec *ts, uint64_t nsec, struct timespec *tsAfter);
     void normalizeTimestamp(struct timespec *ts);
     void diffTimeSpec(struct timespec *ts, struct timespec *ts2, struct timespec *result);
 

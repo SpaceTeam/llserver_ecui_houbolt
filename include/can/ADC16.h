@@ -9,9 +9,11 @@
 
 class ADC16 : public Channel
 {
-	public:
-		ADC16(uint8_t id);
-		~ADC16();
+public:
+    ADC16(uint8_t channelId, const std::string &channelName, double scaling, Channel *parent);
+
+public:
+
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_ADC16_H

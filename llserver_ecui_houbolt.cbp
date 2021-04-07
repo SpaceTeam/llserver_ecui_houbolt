@@ -105,6 +105,9 @@
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/EventManager.h">
 			<Option target="llserver_ecui_houbolt"/>
 		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/HcpManager.h">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/include/LLController.h">
 			<Option target="llserver_ecui_houbolt"/>
 		</Unit>
@@ -222,6 +225,9 @@
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Config.cpp">
 			<Option target="llserver_ecui_houbolt"/>
 		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/DataFilter.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/Debug.cpp">
 			<Option target="llserver_ecui_houbolt"/>
 		</Unit>
@@ -229,6 +235,9 @@
 			<Option target="llserver_ecui_houbolt"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/EventManager.cpp">
+			<Option target="llserver_ecui_houbolt"/>
+		</Unit>
+		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/HcpManager.cpp">
 			<Option target="llserver_ecui_houbolt"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/LLController.cpp">
@@ -310,9 +319,6 @@
 			<Option target="llserver_ecui_houbolt"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/src/utils.cpp">
-			<Option target="llserver_ecui_houbolt"/>
-		</Unit>
-		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/xtest/main.cpp">
 			<Option target="llserver_ecui_houbolt"/>
 		</Unit>
 		<Unit filename="/Volumes/Data/markus/Programming/TXV_ECUI_LLServer/CMakeLists.txt">

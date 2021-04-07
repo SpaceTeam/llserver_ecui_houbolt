@@ -23,7 +23,9 @@ class CANDriver
         
         canHandle canHandle;
     public:
-        CANDriver(unsigned channel, std::function<void(uint32_t *, uint8_t *, uint32_t *, uint32_t *)> onInitRecvCallback, std::function<void(uint32_t*, uint8_t *, uint32_t*, uint32_t*)> onRecvCallback, std::function<void()> onErrorCallback);
+        CANDriver(unsigned channel, std::function<void(uint32_t *, uint8_t *, uint32_t *, uint32_t *)> onInitRecvCallback,
+                std::function<void(uint32_t*, uint8_t *, uint32_t*, uint32_t*)> onRecvCallback,
+                std::function<void()> onErrorCallback);
         ~CANDriver();
 
         //Tells the can driver that initialization is done and canlib callback gets rerouted from initrecvcallback to recvcallback

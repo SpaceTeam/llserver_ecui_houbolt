@@ -58,8 +58,9 @@ private:
      * key: nodeId << 8 | channelId
      * value: sensorName, scaling
      */
-    std::map<uint16_t, std::tuple<std::string, double>> sensorNames;
+    std::map<uint16_t, std::tuple<std::string, double>> sensorInfoMap;
 
+    //TODO: MP add timestamp to buffer, and maybe to states
 	uint32_t *sensorDataBuffer; //this is going to be huge!!!!
 	size_t sensorDataBufferLength;
 
@@ -67,7 +68,8 @@ private:
     {
         uint8_t nodeId;
         uint16_t channelId;
-        uint32_t data;
+        uint64_t timestamp;
+        double data;
     } SensorData_t;
 
 	SensorData_t *latestSensorDataBuffer;
@@ -79,6 +81,7 @@ private:
 
 	CANResult RequestCANInfo();
 	static inline uint8_t GetNodeID(uint32_t &canID);
+	static inline uint16_t MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &channelId);
 	std::string GetChannelName(uint8_t &nodeID, uint8_t &channelID);
 public:
 
@@ -87,11 +90,12 @@ public:
 //	std::vector<std::string> GetChannelStates();
 //	std::map<std::string, std::function<CANResult(...)>> GetChannelCommands();
 
-	std::map<std::string, double> GetLatestSensorData();
+	std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
 
-	void OnChannelStateChanged(std::string, double);
-	void OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength);
-	void OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength);
+	void OnChannelStateChanged(std::string stateName, double value, uint64_t timestamp);
+	void OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint32_t timestamp);
+	void OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint32_t timestamp);
+	//TODO: MP add error info to arguments
 	void OnCANError();
 };
 

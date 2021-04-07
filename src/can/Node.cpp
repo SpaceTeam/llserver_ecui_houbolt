@@ -15,50 +15,51 @@
 
 //
 
-Node::Node(uint8_t nodeID, const std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, CANDriver *driver)
+Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, CANDriver *driver)
     : nodeID(nodeID), driver(driver), Channel::Channel(0xFF, nodeChannelName, 1.0, this)
 {
-    InitChannels(nodeInfo);
+    InitChannels(nodeInfo, channelInfo);
 }
 
-CANResult Node::InitChannels(NodeInfoMsg_t &nodeInfo)
+void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo)
 {
-    bool success = true;
-	for (uint8_t i = 0; i < sizeof(nodeInfo.channel_type)/sizeof(uint8_t); i++)
-	{
-		auto channelType = (CHANNEL_TYPE) nodeInfo.channel_type[i];
-		Channel* ch = nullptr;
+	for (uint8_t i = 0; i < 32; i++)
+    {
+        uint32_t mask = 0x00000001 & (nodeInfo.channel_mask >> i);
+        if (mask == 1)
+        {
+            auto channelType = (CHANNEL_TYPE) nodeInfo.channel_type[i];
+            Channel* ch = nullptr;
 
-		switch(channelType)
-		{
-			case CHANNEL_TYPE_ADC16:
-				ch = new ADC16(i);
-			break;
-//			case CHANNEL_TYPE_ADC16_SINGLE:
-//				ch = new Adc16_single_t;
-//			break;
-			case CHANNEL_TYPE_ADC24:
-				ch = new ADC24(i);
-			break;
-			case CHANNEL_TYPE_DIGITAL_OUT:
-				ch = new DigitalOut(i);
-			break;
-			case CHANNEL_TYPE_SERVO:
-				ch = new Servo(i);
-			break;
-		    default:
-		        success = false;
-		        Debug::error("channel type not recognized");
-		        return CANResult::ERROR;
-			    // TODO: default case for unknown channel types that logs (DB)
-		}
+            switch(channelType)
+            {
+                case CHANNEL_TYPE_ADC16:
+                    ch = new ADC16(i, std::get<0>(channelInfo[i]), std::get<1>(channelInfo[i]), this);
+                break;
+    //			case CHANNEL_TYPE_ADC16_SINGLE:
+    //				ch = new Adc16_single_t;
+    //			break;
+                case CHANNEL_TYPE_ADC24:
+                    ch = new ADC24(i, std::get<0>(channelInfo[i]), std::get<1>(channelInfo[i]), this);
+                break;
+                case CHANNEL_TYPE_DIGITAL_OUT:
+                    ch = new DigitalOut(i, std::get<0>(channelInfo[i]), std::get<1>(channelInfo[i]), this);
+                break;
+                case CHANNEL_TYPE_SERVO:
+                    ch = new Servo(i, std::get<0>(channelInfo[i]), std::get<1>(channelInfo[i]), this);
+                break;
+                default:
+                    throw std::runtime_error("channel type not recognized");
+                    // TODO: default case for unknown channel types that logs (DB)
+            }
 
-		if (ch != nullptr)
-		{
-			channelMap[i] = ch;
-		}
+            channelMap[i] = ch;
+        }
+        else if (mask > 1)
+        {
+            throw std::runtime_error("Node - InitChannels: mask convertion of node info failed");
+        }
 	}
-	return CANResult::SUCCESS;
 }
 
 Node::~Node()

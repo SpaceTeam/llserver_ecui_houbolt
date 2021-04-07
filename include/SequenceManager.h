@@ -20,8 +20,8 @@ using json = nlohmann::json;
 
 typedef struct point_s
 {
-    int64 x;
-    int64 y;
+    int64_t x;
+    int64_t y;
 } Point;
 
 typedef enum class interpolation_e
@@ -56,21 +56,21 @@ private:
     static std::string lastDir;
 
     static std::map<std::string, Interpolation> interpolationMap;
-    static std::map<int64, std::map<std::string, double[2]>> sensorsNominalRangeTimeMap;
-    static std::map<std::string, std::map<int64, double[2]>> sensorsNominalRangeMap;
-    static std::map<std::string, std::map<int64, double>> deviceMap;
+    static std::map<int64_t, std::map<std::string, double[2]>> sensorsNominalRangeTimeMap;
+    static std::map<std::string, std::map<int64_t, double[2]>> sensorsNominalRangeMap;
+    static std::map<std::string, std::map<int64_t, double>> deviceMap;
 
     static void SetupLogging();
 
     static void LoadInterpolationMap();
     static bool LoadSequence(json jsonSeq);
 
-    static void LogSensors(int64 microTime, std::vector<double > sensors);
+    static void LogSensors(int64_t microTime, std::vector<double > sensors);
     static void StopGetSensors();
-    static void GetSensors(int64 microTime);
+    static void GetSensors(int64_t microTime);
 
     static double GetTimestamp(json obj);
-    static void Tick(int64 microTime);
+    static void Tick(int64_t microTime);
 
     static void StopAbortSequence();
     static void StartAbortSequence();

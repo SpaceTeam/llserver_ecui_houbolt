@@ -37,9 +37,9 @@ string SequenceManager::logFileName = "";
 string SequenceManager::lastDir = "";
 
 std::map<std::string, Interpolation> SequenceManager::interpolationMap;
-std::map<int64, std::map<std::string, double[2]>> SequenceManager::sensorsNominalRangeTimeMap;
-std::map<std::string, std::map<int64, double[2]>> SequenceManager::sensorsNominalRangeMap;
-std::map<std::string, std::map<int64, double>> SequenceManager::deviceMap;
+std::map<int64_t, std::map<std::string, double[2]>> SequenceManager::sensorsNominalRangeTimeMap;
+std::map<std::string, std::map<int64_t, double[2]>> SequenceManager::sensorsNominalRangeMap;
+std::map<std::string, std::map<int64_t, double>> SequenceManager::deviceMap;
 
 void SequenceManager::plotMaps(uint8_t option=2)
 {
@@ -180,7 +180,7 @@ bool SequenceManager::LoadSequence(json jsonSeq)
     for (auto dataItem : jsonSeq["data"])
     {
         double timeCmd = GetTimestamp(dataItem);
-        int64 timestampCmdMicros = utils::toMicros(timeCmd);
+        int64_t timestampCmdMicros = utils::toMicros(timeCmd);
 
         for (auto actionItem : dataItem["actions"])
         {
@@ -193,7 +193,7 @@ bool SequenceManager::LoadSequence(json jsonSeq)
             }
 
             double time = GetTimestamp(actionItem);
-            int64 timestampMicros = utils::toMicros(time);
+            int64_t timestampMicros = utils::toMicros(time);
             if (timestampMicros < 0)
             {
                 Debug::error("timestamp in action must be positive");
@@ -286,9 +286,9 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
 
             LoadInterpolationMap();
 
-            int64 startTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
-            int64 endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
-            int64 interval = utils::toMicros(jsonSeq["globals"]["interval"]);
+            int64_t startTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
+            int64_t endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
+            int64_t interval = utils::toMicros(jsonSeq["globals"]["interval"]);
             Debug::info("%d %d %d", startTime, endTime, interval);
 
             EcuiSocket::SendJson("timer-start");
@@ -326,7 +326,7 @@ void SequenceManager::LoadInterpolationMap()
 
 }
 
-void SequenceManager::LogSensors(int64 microTime, vector<double> sensors)
+void SequenceManager::LogSensors(int64_t microTime, vector<double> sensors)
 {
     string msg;
     double secs = microTime/1000000.0;
@@ -367,7 +367,7 @@ void SequenceManager::StopGetSensors()
     system((scriptPath + " " + currentDirPath + " " + logFileName).c_str());
 }
 
-void SequenceManager::GetSensors(int64 microTime)
+void SequenceManager::GetSensors(int64_t microTime)
 {
     map<string, double> sensors = LLInterface::GetAllSensors();
 
@@ -443,7 +443,7 @@ double SequenceManager::GetTimestamp(json obj)
     return time;
 }
 
-void SequenceManager::Tick(int64 microTime)
+void SequenceManager::Tick(int64_t microTime)
 {
     if (microTime % 500000 == 0)
     {
@@ -532,7 +532,7 @@ void SequenceManager::Tick(int64 microTime)
         if (sensorsNominalRangeTimeMap.size() > 1)
         {
             auto beginRangeIt = sensorsNominalRangeTimeMap.begin();
-            int64 nextRangeChange = beginRangeIt->first;
+            int64_t nextRangeChange = beginRangeIt->first;
             if (microTime >= nextRangeChange)
             {
                 for (const auto& sensor : beginRangeIt->second)
@@ -561,7 +561,7 @@ void SequenceManager::StopAbortSequence()
         if (utils::keyExists(jsonAbortSequence["globals"], "endTime") &&
             (jsonAbortSequence["globals"]["endTime"].type() == json::value_t::number_float))
         {
-            int64 afterSeqLogTime = ((double)jsonAbortSequence["globals"]["endTime"]) * 1000000.0;
+            int64_t afterSeqLogTime = ((double)jsonAbortSequence["globals"]["endTime"]) * 1000000.0;
             afterSeqLogTime = abs(afterSeqLogTime);
 
             Debug::info("After Seq %lld \n", afterSeqLogTime);

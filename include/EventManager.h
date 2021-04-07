@@ -10,6 +10,7 @@
 #include <map>
 #include <functional>
 #include <vector>
+#include <string>
 
 #include "Singleton.h"
 #include "drivers/JSONMapping.h"
@@ -25,24 +26,25 @@ private:
     //TODO: write channel cmds as method in each channel class
     //<stateName, <callback, pointer to state>
     std::map<std::string, std::function<void(std::vector<double>)>> eventMap;
-    std::map<std::string, std::function<CANResult(std::vector<double>)>> commandMap;
+    std::map<std::string, std::function<void(std::vector<double>)>> commandMap;
 
     JSONMapping *mapping;
+    nlohmann::json mappingJSON;
 
     ~EventManager();
 
-    LLResult CheckEvents();
+    bool CheckEvents();
 public:
-    LLResult Init();
+    void Init();
 
     /**
      * this is used, so mapping and command loading don't need to be done at the same time,
      * this way, the event manager doesn't need to call any classes below the llinterface
      */
-    LLResult Start();
+    void Start();
 
-    LLResult AddCommands(std::map<std::string, std::function<void(std::vector<double>)>> commands);
-    void OnStateChange(std::string stateName, double value);
+    void AddCommands(std::map<std::string, std::function<void(std::vector<double>)>> commands);
+    void OnStateChange(const std::string& stateName, double value);
 
 
 };

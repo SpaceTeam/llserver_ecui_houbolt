@@ -4,6 +4,10 @@
 
 #include "EventManager.h"
 
+#include <format>
+
+#include "StateController.h"
+
 #include "Config.h"
 
 EventManager::~EventManager()
@@ -15,13 +19,14 @@ EventManager::~EventManager()
     }
 }
 
-LLResult EventManager::Init()
+void EventManager::Init()
 {
     if (!initialized)
     {
         Debug::print("Initializing EventMapping...");
         std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
         mapping = new JSONMapping(mappingPath, (std::string &) "EventMapping");
+        mappingJSON = *mapping->GetJSONMapping();
         Debug::print("EventMapping initialized");
         initialized = true;
     }
@@ -31,11 +36,11 @@ LLResult EventManager::Init()
     }
 }
 
-LLResult EventManager::Start()
+void EventManager::Start()
 {
     if (initialized)
     {
-        if (CheckEvents() == LLResult::SUCCESS)
+        if (CheckEvents())
         {
             started = true;
         }
@@ -46,52 +51,79 @@ LLResult EventManager::Start()
     }
 }
 
-LLResult EventManager::CheckEvents()
+bool EventManager::CheckEvents()
 {
-    LLResult ret = LLResult::SUCCESS;
 
     for (auto &event : eventMap)
     {
-        if (commandMap.find(event.first) != commandMap.end())
+        if (commandMap.find(event.first) == commandMap.end())
         {
-            ret = LLResult::ERROR;
             Debug::error("EventManager - CheckEvents: Command '%s' not found in available commands", event.first);
+
+            //TODO: MP call command but with argument to only check parameters
+            return false;
         }
     }
 
-    return ret;
+    return true;
 }
 
-LLResult EventManager::AddCommands(std::map<std::string, std::function<void(std::vector<double>)>> commands)
+void EventManager::AddCommands(std::map<std::string, std::function<void(std::vector<double>)>> commands)
 {
-    LLResult ret = LLResult::ERROR;
     if (initialized)
     {
         try
         {
             commandMap.insert(commands.begin(), commands.end());
-            ret = LLResult::SUCCESS;
         }
         catch (const std::exception& e)
         {
-            Debug::error("EventManager - AddCommands: %s", e.what());
+            throw std::runtime_error("EventManager - AddCommands: " + std::string(e.what()));
         }
 
     }
     else
     {
-        Debug::error("EventManager - AddCommands: EventManager not initialized");
+        throw std::runtime_error("EventManager - AddCommands: EventManager not initialized");
     }
-    return ret;
 }
 
-void EventManager::OnStateChange(std::string stateName, double value)
+/**
+ * when exception occurs the error is only logged but nothing else happens
+ * @param stateName
+ * @param value
+ */
+void EventManager::OnStateChange(const std::string& stateName, double value)
 {
     try
     {
-        nlohmann::json eventJSON = eventMap[stateName];
+        nlohmann::json eventJSON = mappingJSON[stateName];
         std::vector<double> argumentList;
-        for ()
+        for (nlohmann::json &param : eventJSON["parameters"])
+        {
+
+            if (param.is_string())
+            {
+                if (stateName.compare(param) == 0)
+                {
+                    argumentList.push_back(value);
+                }
+                else
+                {
+                    StateController *controller = StateController::Instance();
+                    double val = controller->GetStateValue(param);
+                    argumentList.push_back(val);
+                }
+            }
+            else if (param.is_number())
+            {
+                argumentList.push_back(param);
+            }
+            else
+            {
+                throw std::invalid_argument( "parameter not string or number" );
+            }
+        }
 
     }
     catch (const std::exception& e)

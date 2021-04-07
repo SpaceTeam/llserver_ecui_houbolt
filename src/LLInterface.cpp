@@ -2,7 +2,8 @@
 // Created by Markus on 2019-10-15.
 //
 
-#include "hcp/HcpManager.h"
+//#include "hcp/HcpManager.h"
+#include "can/CANManager.h"
 #include "EcuiSocket.h"
 #include "Timer.h"
 #include "Config.h"
@@ -13,6 +14,12 @@ I2C* LLInterface::i2cDevice;
 WarnLight* LLInterface::warnLight;
 TMPoE *LLInterface::tmPoE;
 
+CANManager *LLInterface::canManager;
+EventManager *LLInterface::eventManager;
+StateController *LLInterface::stateController;
+
+DataFilter *LLInterface::dataFilter;
+
 //GPIO[] LLInterface::gpioDevices;
 
 //SPI* LLInterface::spiDevice;
@@ -21,24 +28,47 @@ bool LLInterface::isInitialized = false;
 
 bool LLInterface::useTMPoE = false;
 
-bool LLInterface::isTransmittingSensors = false;
+bool LLInterface::isTransmittingStates = false;
 int32_t LLInterface::warnlightStatus = -1;
+Timer* LLInterface::stateTimer;
 Timer* LLInterface::sensorTimer;
 
-double LLInterface::sensorsSmoothingFactor = 0.0;
-std::map<std::string, double> LLInterface::filteredSensorBuffer;
 
 void LLInterface::Init()
 {
     if (!isInitialized)
     {
-        Debug::print("Initializing HcpManager...");
-        HcpManager::Init();
-        Debug::print("Initializing HcpManager done\n");
-        Debug::print("Starting periodic sensor fetching...");
-        HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
-        Debug::print("Periodic sensor fetching started\n");
-        sensorTimer = new Timer(40, "SensorTimer");
+//        Debug::print("Initializing HcpManager...");
+//        HcpManager::Init();
+//        Debug::print("Initializing HcpManager done\n");
+//        Debug::print("Starting periodic sensor fetching...");
+//        HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
+//        Debug::print("Periodic sensor fetching started\n");
+
+        Debug::print("Initializing EventManager...");
+        eventManager = EventManager::Instance();
+        eventManager->Init();
+        Debug::print("Initializing EventManager done\n");
+
+        Debug::print("Initializing StateController...");
+        stateController = StateController::Instance();
+        stateController->Init(std::bind(&EventManager::OnStateChange, eventManager, std::placeholders::_1, std::placeholders::_2));
+        Debug::print("Initializing StateController done\n");
+
+        Debug::print("Initializing CANManager...");
+        canManager = CANManager::Instance();
+        canManager->Init();
+        Debug::print("Initializing CANManager done\n");
+
+        Debug::print("Initializing DataFilter...");
+        double sensorsSmoothingFactor = std::get<double>(Config::getData("WEBSERVER/sensors_smoothing_factor"));
+        dataFilter = new DataFilter(sensorsSmoothingFactor);
+        Debug::print("Initializing DataFilter done\n");
+
+        stateTimer = new Timer(40, "stateTimer");
+        sensorTimer = new Timer(40, "sensorTimer");
+        uint64_t sensorSamplingRate = std::get<int>(Config::getData("LLSERVER/sensor_sampling_rate"));
+        sensorTimer->startContinous(0, sensorSamplingRate, LLInterface::FilterSensors, LLInterface::StopFilterSensors);
         Debug::print("Connecting to warning light...");
         warnLight = new WarnLight(0);
 
@@ -50,7 +80,7 @@ void LLInterface::Init()
         }
         //i2cDevice = new I2C(0, "someDev"); //not in use right now
 
-		sensorsSmoothingFactor = std::get<double>(Config::getData("WEBSERVER/sensors_smoothing_factor"));
+
 
         isInitialized = true;
 		//update warninglight after initialization but wait 1 sec to 
@@ -73,19 +103,8 @@ void LLInterface::Destroy()
         {
             delete tmPoE;
         }
-        HcpManager::StopSensorFetch();
-        HcpManager::Destroy();
+        //TODO: MP destruct CANManager?
     }
-}
-
-void LLInterface::EnableAllOutputDevices()
-{
-    HcpManager::EnableAllServos();
-}
-
-void LLInterface::DisableAllOutputDevices()
-{
-    HcpManager::DisableAllServos();
 }
 
 std::vector<std::string> LLInterface::GetAllSensorNames()
@@ -140,77 +159,74 @@ nlohmann::json LLInterface::GetSupercharge()
     return HcpManager::GetSupercharge();
 }
 
-bool LLInterface::ExecCommand(std::string name, json value)
+bool LLInterface::ExecCommand(std::string name, nlohmann::json value)
 {
-    if (value.type() != json::value_t::number_float &&
-        value.type() != json::value_t::number_integer &&
-        value.type() != json::value_t::number_unsigned)
+    if (value.type() != nlohmann::json::value_t::number_float &&
+        value.type() != nlohmann::json::value_t::number_integer &&
+        value.type() != nlohmann::json::value_t::number_unsigned)
     {
         return false;
     }
     return HcpManager::ExecCommand(name, (uint8_t)value);
 }
 
-void LLInterface::StartSensorTransmission()
+void LLInterface::StartStateTransmission()
 {
-    if (!isTransmittingSensors)
+    if (!isTransmittingStates)
     {
-        isTransmittingSensors = true;
-        sensorTimer->startContinous(0,100000, LLInterface::GetSensors, LLInterface::StopGetSensors);
+        uint64_t stateSamplingRate = std::get<int>(Config::getData("LLSERVER/state_sampling_rate"));
+        isTransmittingStates = true;
+        stateTimer->startContinous(0, stateSamplingRate, LLInterface::GetStates, LLInterface::StopGetStates);
     }
 }
 
-void LLInterface::StopSensorTransmission()
+void LLInterface::StopStateTransmission()
 {
-    if (isTransmittingSensors)
+    if (isTransmittingStates)
     {
 
-        sensorTimer->stop();
-        isTransmittingSensors = false;
+        stateTimer->stop();
+        isTransmittingStates = false;
     }
 }
 
-void LLInterface::StopGetSensors()
+void LLInterface::StopGetStates()
 {
 
 }
 
-void LLInterface::GetSensors(int64 microTime)
+void LLInterface::GetStates(int64_t microTime)
 {
-    std::map<std::string, double> sensors = GetAllSensors();
+    std::map<std::string, double> states = stateController->GetDirtyStates();
 
-    TransmitSensors(microTime, sensors);
-
-    UpdateWarningLight(sensors);
+    TransmitStates(microTime, states);
 
 }
 
-void LLInterface::FilterSensors(std::map<std::string, double> rawSensors)
+void LLInterface::FilterSensors(int64_t microTime)
 {
-	for (const auto& sensor : rawSensors)
+    std::map<std::string, double> rawSensors;
+    rawSensors = canManager->GetLatestSensorData();
+
+    std::map<std::string, double> filteredSensors;
+    filteredSensors = dataFilter->FilterData(rawSensors);
+
+
+
+}
+
+void LLInterface::TransmitStates(int64_t microTime, std::map<std::string, double> &states)
+{
+
+    nlohmann::json content = nlohmann::json::array();
+    nlohmann::json statesJson;
+    for (const auto& state : states)
     {
-		if (filteredSensorBuffer.find(sensor.first) != filteredSensorBuffer.end())
-		{
-			filteredSensorBuffer[sensor.first] = sensor.second;
-		}
-		filteredSensorBuffer[sensor.first] += sensorsSmoothingFactor * (sensor.second - filteredSensorBuffer[sensor.first]);
-	}
+        stateJson = nlohmann::json::object();
 
-}
-
-void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double> sensors)
-{
-	FilterSensors(sensors);
-
-    json content = json::array();
-    json sen;
-    for (const auto& sensor : filteredSensorBuffer)
-    {
-        sen = json::object();
-
-        sen["name"] = sensor.first;
-        sen["value"] = sensor.second;
-        sen["time"] = (double)((microTime / 1000) / 1000.0);
+        stateJson["name"] = state.first;
+        stateJson["value"] = state.second;
+        stateJson["time"] = (double)((microTime / 1000) / 1000.0);
 
         content.push_back(sen);
     }

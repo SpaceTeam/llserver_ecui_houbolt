@@ -9,9 +9,10 @@
 
 class Servo : public Channel
 {
-	public:
-		Servo(uint8_t id);
-		~Servo();
+public:
+    Servo(uint8_t channelId, const std::string &channelName, double scaling, Channel *parent);
+
+public:
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_SERVO_H

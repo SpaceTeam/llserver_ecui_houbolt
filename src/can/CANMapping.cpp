@@ -21,12 +21,12 @@ CANMappingObj CANMapping::GetNodeObj(uint8_t &nodeID)
     try
     {
         nodeObj = this->mapping[nodeID];
-        mappingObj.stringId = nodeObj["stringID"].get<std::string>();
-        mappingObj.scaling = nodeObj["scaling"].get<double>();
+        mappingObj.stringID = nodeObj["stringID"].get<std::string>();
+        mappingObj.scaling = 1;
     }
     catch(std::exception& e)
     {
-        Debug::error("Node id or hlid do not exist: %s", e.what());
+        Debug::error("Node id or stringID do not exist: %s", e.what());
     }
     return mappingObj;
 }
@@ -38,12 +38,12 @@ CANMappingObj CANMapping::GetChannelObj(uint8_t &nodeID, uint8_t &channelID)
     try
     {
         channelObj = this->mapping[nodeID][channelID];
-        mappingObj.stringId = channelObj["stringID"].get<std::string>();
+        mappingObj.stringID = channelObj["stringID"].get<std::string>();
         mappingObj.scaling = channelObj["scaling"].get<double>();
     }
     catch(std::exception& e)
     {
-        Debug::error("Node id, channel id or hlid do not exist: %s", e.what());
+        Debug::error("Node id, channel id or stringID do not exist: %s", e.what());
     }
     return mappingObj;
 }

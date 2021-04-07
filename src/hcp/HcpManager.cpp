@@ -147,7 +147,7 @@ void HcpManager::StartSensorFetch(uint32_t sampleRate)
 
 //NOTE: at this point, writing the sensor buffer doesn't occur in one lock segment, meaning that it can be the case
 //that some sensor values of the controller get logged before the other ones, although they are read in the same timer tick
-void HcpManager::FetchSensors(uint64 microTime)
+void HcpManager::FetchSensors(uint64_t microTime)
 {
 
     json analogs = mapping->GetDevices(Device_Type::ANALOG);

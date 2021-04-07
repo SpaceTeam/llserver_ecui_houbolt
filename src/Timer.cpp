@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <sys/time.h>
 
-#define TS_TO_MICRO(x) (int64)(((int64)(x.tv_nsec) / 1000)+((int64)(x.tv_sec)*1000000))
+#define TS_TO_MICRO(x) (int64_t)(((int64_t)(x.tv_nsec) / 1000)+((int64_t)(x.tv_sec)*1000000))
 
 int Timer::nameIndex = 0;
 
@@ -33,7 +33,7 @@ Timer::~Timer()
 
 }
 
-void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback)
+void Timer::start(int64_t startTimeMicros, int64_t endTimeMicros, uint64_t intervalMicros, std::function<void(int64_t)> tickCallback, std::function<void()> stopCallback)
 {
     if (!this->isRunning)
     {
@@ -54,7 +54,7 @@ void Timer::start(int64 startTimeMicros, int64 endTimeMicros, uint64 intervalMic
     }
 }
 
-void Timer::startContinous(int64 startTimeMicros, uint64 intervalMicros, std::function<void(int64)> tickCallback, std::function<void()> stopCallback)
+void Timer::startContinous(int64_t startTimeMicros, uint64_t intervalMicros, std::function<void(int64_t)> tickCallback, std::function<void()> stopCallback)
 {
     if (!this->isRunning)
     {
@@ -91,7 +91,7 @@ void Timer::stop()
 /**
     DO NOT INCREMENT MORE THAN 1SECOND AT TIME
 */
-void Timer::incrementTimeSpec(struct timespec *ts, uint64 nsec, struct timespec *tsAfter){
+void Timer::incrementTimeSpec(struct timespec *ts, uint64_t nsec, struct timespec *tsAfter){
     struct timespec tsBefore = {ts->tv_sec, ts->tv_nsec};
     ts->tv_nsec += nsec;
     normalizeTimestamp(ts);
@@ -191,7 +191,7 @@ void Timer::internalContinousLoop(void){
 
 #ifdef ENABLE_TIMER_DIAGNOSTICS
     int counts = 0;
-    int64 lastExceed = TS_TO_MICRO(next_expiration);
+    int64_t lastExceed = TS_TO_MICRO(next_expiration);
 #endif
 
     while(isRunning){
@@ -202,7 +202,7 @@ void Timer::internalContinousLoop(void){
 #endif
 
         /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
-        int64 sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
+        int64_t sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
         tickCallback(sequence_time);
 
 #ifdef ENABLE_TIMER_DIAGNOSTICS
@@ -253,7 +253,7 @@ void Timer::internalLoop(void){
 
     while(isRunning){
         /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
-        int64 sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
+        int64_t sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
 //        printf("SEQTIME: %lld\n", sequence_time);
 
         tickCallback(sequence_time);

@@ -41,7 +41,7 @@ private:
     static std::map<std::string, double> sensorBuffer;
 
     static bool CheckPort(uint8_t port, Device_Type type);
-    static void FetchSensors(uint64 microTime);
+    static void FetchSensors(uint64_t microTime);
     static bool SetServo(nlohmann::json device, uint8_t percent);
 
     HcpManager();

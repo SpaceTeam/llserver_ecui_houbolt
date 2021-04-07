@@ -22,6 +22,11 @@ inline uint8_t CANManager::GetNodeID(uint32_t &canID)
     return (uint8_t) ((0x0000008F & canID) >> 1);
 }
 
+inline uint16_t CANManager::MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &channelId)
+{
+    return (uint16_t) ((nodeId << 8) | channelId);
+}
+
 
 CANResult CANManager::Init()
 {
@@ -78,48 +83,69 @@ CANResult CANManager::RequestCANInfo()
  * try_lock is used on the other side, so no blocking occurs at time critical part
  * @return
  */
-std::map<std::string, double> CANManager::GetLatestSensorData()
+std::map<std::string, std::tuple<double, uint64_t>> CANManager::GetLatestSensorData()
 {
-    uint32_t* latestSensorDataBufferCopy;
-    std::map<std::string, double> latestSensorDataMap;
+    SensorData_t* latestSensorDataBufferCopy = new SensorData_t[sensorInfoMap.size()];
+    std::map<std::string, std::tuple<double, uint64_t>> latestSensorDataMap;
     sensorMtx.lock();
     latestSensorDataBufferCopy = std::copy(latestSensorDataBuffer,
             latestSensorDataBuffer+latestSensorDataBufferLength,
             latestSensorDataBufferCopy);
     sensorMtx.unlock();
-    for (uint32_t *ptr = latestSensorDataBufferCopy; ptr < latestSensorDataBufferCopy + latestSensorDataBufferLength; ptr += sizeof(SensorData_t))
+    for (SensorData_t *sensorData = latestSensorDataBufferCopy; sensorData < latestSensorDataBufferCopy + sensorInfoMap.size(); sensorData += sizeof(SensorData_t))
     {
-        SensorData_t *sensorData = (SensorData_t *) ptr;
         uint16_t key = (sensorData->nodeId << 8) | sensorData->channelId;
 
-        std::tuple<std::string, double> value = sensorNames[key];
+        std::tuple<std::string, double> value = sensorInfoMap[key];
         std::string name = std::get<0>(value);
         double scaling = std::get<1>(value);
-        latestSensorDataMap[name] = (double)sensorData->data * scaling;
+        latestSensorDataMap[name] = {sensorData->data * scaling, sensorData->timestamp};
     }
     return latestSensorDataMap;
 }
 
-void CANManager::OnChannelStateChanged(std::string, double)
+void CANManager::OnChannelStateChanged(std::string stateName, double value, uint64_t timestamp)
 {
-
+    StateController *stateController = StateController::Instance();
+    stateController->ChangeState(stateName, value, timestamp);
 }
 
 void CANManager::OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength)
 {
     //TODO: only accept node info messages in this stage
-    if (canID == 0)
+    if (payloadLength >= (sizeof(NodeInfoMsg_t)+1) && payload[1] == GENERIC_NODE_INFO)
     {
         uint8_t nodeID = CANManager::GetNodeID(canID);
-        NodeInfoMsg_t nodeInfo; //TODO: convert payload accordingly
-        CANMappingObj mappingObj = mapping->GetNodeObj(nodeID);
-        Node *node = new Node(nodeID, mappingObj.stringId, nodeInfo, canDriver);
+        CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
+
+        NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *)payload;
+
+        std::map<uint8_t, std::tuple<std::string, double>> channelInfo;
+        for (uint8_t channelID = 0; channelID < 32; channelID++)
+        {
+            uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
+            if (mask == 1)
+            {
+                CANMappingObj channelMappingObj = mapping->GetNodeObj(channelID);
+                channelInfo[channelID] = {channelMappingObj.stringID, channelMappingObj.scaling};
+
+                //add sensor names to array if needed
+                uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
+                sensorInfoMap[mergedID] = {channelMappingObj.stringID, channelMappingObj.scaling};
+            }
+            else if (mask > 1)
+            {
+                throw std::runtime_error("CANManager - OnCANInit: mask convertion of node info failed");
+            }
+        }
+
+        Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, channelInfo, canDriver);
         nodeMap[nodeID] = node;
 
         //add states to state controller
+        auto states = node->GetStates();
         StateController *stateController = StateController::Instance();
-        stateController->AddStates(node->GetStates());
-        //add sensor name to array
+        stateController->AddStates(states);
 
 
         //add available commands to event manager
@@ -146,7 +172,7 @@ void CANManager::OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLen
 
 void CANManager::OnCANError()
 {
-
+    Debug::error("CANManager - OnCANError: CAN error");
 }
 
 //std::vector<std::string> CANManager::GetChannelStates()

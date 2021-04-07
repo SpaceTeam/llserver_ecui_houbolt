@@ -10,7 +10,7 @@
 class CANMappingObj
 {
 public:
-    std::string stringId;
+    std::string stringID;
     double scaling;
 };
 

@@ -17,11 +17,11 @@ private:
 	std::map<uint8_t, Channel *> channelMap;
     CANDriver* driver;
 
-	CANResult InitChannels(NodeInfoMsg_t &nodeInfo);
+	void InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo);
 
 public:
     //TODO: consider if putting channelid as parameter is necessary adapt initializer list if so
-	Node(uint8_t nodeID, const std::string nodeChannelName, NodeInfoMsg_t &nodeInfo, CANDriver *driver);
+	Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, CANDriver *driver);
 	~Node();
 
 	uint8_t GetNodeID();

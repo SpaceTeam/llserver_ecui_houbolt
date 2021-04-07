@@ -25,7 +25,7 @@ public:
     JSONMapping(std::string mappingPath, std::string mappingID);
     virtual ~JSONMapping();
 
-    nlohmann::json GetJSONMapping();
+    nlohmann::json *GetJSONMapping();
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_MAPPING_H

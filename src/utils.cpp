@@ -9,9 +9,9 @@ namespace utils
 {
 
 
-    int64 toMicros(double val)
+    int64_t toMicros(double val)
     {
-        return (int64) (val * 1000000);
+        return (int64_t) (val * 1000000);
     }
 
     std::string loadFile(std::string filePath)

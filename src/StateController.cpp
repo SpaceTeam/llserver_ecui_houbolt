@@ -30,44 +30,60 @@ void StateController::Init(std::function<void(std::string, double)> onStateChang
     }
 }
 
-void StateController::AddStates(std::map<std::string, double> states)
+void StateController::AddStates(std::map<std::string, std::tuple<double, uint64_t>> &states)
 {
     for (auto& state : states)
     {
-        this->states[state.first] = {state.second, false};
+        this->states[state.first] = {std::get<0>(state.second), std::get<1>(state.second), false};
     }
 }
 
-bool StateController::ChangeState(std::string stateName, double value)
+void StateController::ChangeState(std::string stateName, double value, uint64_t timestamp)
 {
     try
     {
         auto& state = this->states[stateName];
         std::get<0>(state) = value;
-        std::get<1>(state) = true;
+        std::get<1>(state) = timestamp;
+        std::get<2>(state) = true;
         this->onStateChangeCallback(stateName, value);
     }
     catch (const std::exception& e)
     {
-        Debug::error(e.what());
+        throw std::runtime_error("StateController - ChangeState: " + std::string(e.what()));
     }
 }
 
-std::map<std::string, double> StateController::GetDirtyStates()
+double StateController::GetStateValue(std::string stateName)
 {
-    std::map<std::string, double> dirties;
+    double value;
+    try
+    {
+        value = std::get<0>(states[stateName]);
+    }
+    catch (const std::exception& e)
+    {
+        throw std::runtime_error("StateController - GetStateValue: " + std::string(e.what()));
+    }
+    return value;
+}
+
+std::map<std::string, std::tuple<double, uint64_t>> StateController::GetDirtyStates()
+{
+    std::map<std::string, std::tuple<double, uint64_t>> dirties;
     for (auto& state : this->states)
     {
-        if (std::get<1>(state.second))
+        if (std::get<2>(state.second))
         {
-            dirties[state.first] =  std::get<0>(state.second);
+            dirties[state.first] =  {std::get<0>(state.second), std::get<1>(state.second)};
+            std::get<2>(state.second) = false;
         }
     }
 
     return dirties;
 }
 
-std::map<std::string, std::tuple<double, bool>> StateController::GetAllStates()
+std::map<std::string, std::tuple<double, uint64_t, bool>> StateController::GetAllStates()
 {
     return states;
 }

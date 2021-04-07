@@ -5289,7 +5289,7 @@ class binary_reader
                 return get_number<std::int32_t, true>(input_format_t::bson, value) and sax->number_integer(value);
             }
 
-            case 0x12: // int64
+            case 0x12: // int64_t
             {
                 std::int64_t value;
                 return get_number<std::int64_t, true>(input_format_t::bson, value) and sax->number_integer(value);
@@ -11989,7 +11989,7 @@ class binary_writer
         }
         else
         {
-            write_bson_entry_header(name, 0x12); // int64
+            write_bson_entry_header(name, 0x12); // int64_t
             write_number<std::int64_t, true>(static_cast<std::int64_t>(value));
         }
     }
@@ -12017,12 +12017,12 @@ class binary_writer
         }
         else if (value <= static_cast<std::uint64_t>((std::numeric_limits<std::int64_t>::max)()))
         {
-            write_bson_entry_header(name, 0x12 /* int64 */);
+            write_bson_entry_header(name, 0x12 /* int64_t */);
             write_number<std::int64_t, true>(static_cast<std::int64_t>(value));
         }
         else
         {
-            JSON_THROW(out_of_range::create(407, "integer number " + std::to_string(value) + " cannot be represented by BSON as it does not fit int64"));
+            JSON_THROW(out_of_range::create(407, "integer number " + std::to_string(value) + " cannot be represented by BSON as it does not fit int64_t"));
         }
     }
 
@@ -12277,13 +12277,13 @@ class binary_writer
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('L'));  // int64
+                oa->write_character(to_char_type('L'));  // int64_t
             }
             write_number(static_cast<std::int64_t>(n));
         }
         else
         {
-            JSON_THROW(out_of_range::create(407, "integer number " + std::to_string(n) + " cannot be represented by UBJSON as it does not fit int64"));
+            JSON_THROW(out_of_range::create(407, "integer number " + std::to_string(n) + " cannot be represented by UBJSON as it does not fit int64_t"));
         }
     }
 
@@ -12330,14 +12330,14 @@ class binary_writer
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('L'));  // int64
+                oa->write_character(to_char_type('L'));  // int64_t
             }
             write_number(static_cast<std::int64_t>(n));
         }
         // LCOV_EXCL_START
         else
         {
-            JSON_THROW(out_of_range::create(407, "integer number " + std::to_string(n) + " cannot be represented by UBJSON as it does not fit int64"));
+            JSON_THROW(out_of_range::create(407, "integer number " + std::to_string(n) + " cannot be represented by UBJSON as it does not fit int64_t"));
         }
         // LCOV_EXCL_STOP
     }
@@ -20963,7 +20963,7 @@ class basic_json
     null            | `null`                            | nil              | 0xC0
     boolean         | `true`                            | true             | 0xC3
     boolean         | `false`                           | false            | 0xC2
-    number_integer  | -9223372036854775808..-2147483649 | int64            | 0xD3
+    number_integer  | -9223372036854775808..-2147483649 | int64_t            | 0xD3
     number_integer  | -2147483648..-32769               | int32_t            | 0xD2
     number_integer  | -32768..-129                      | int16_t            | 0xD1
     number_integer  | -128..-33                         | int8_t             | 0xD0
@@ -21059,19 +21059,19 @@ class basic_json
     null            | `null`                            | null        | `Z`
     boolean         | `true`                            | true        | `T`
     boolean         | `false`                           | false       | `F`
-    number_integer  | -9223372036854775808..-2147483649 | int64       | `L`
+    number_integer  | -9223372036854775808..-2147483649 | int64_t       | `L`
     number_integer  | -2147483648..-32769               | int32_t       | `l`
     number_integer  | -32768..-129                      | int16_t       | `I`
     number_integer  | -128..127                         | int8_t        | `i`
     number_integer  | 128..255                          | uint8_t       | `U`
     number_integer  | 256..32767                        | int16_t       | `I`
     number_integer  | 32768..2147483647                 | int32_t       | `l`
-    number_integer  | 2147483648..9223372036854775807   | int64       | `L`
+    number_integer  | 2147483648..9223372036854775807   | int64_t       | `L`
     number_unsigned | 0..127                            | int8_t        | `i`
     number_unsigned | 128..255                          | uint8_t       | `U`
     number_unsigned | 256..32767                        | int16_t       | `I`
     number_unsigned | 32768..2147483647                 | int32_t       | `l`
-    number_unsigned | 2147483648..9223372036854775807   | int64       | `L`
+    number_unsigned | 2147483648..9223372036854775807   | int64_t       | `L`
     number_float    | *any value*                       | float64     | `D`
     string          | *with shortest length indicator*  | string      | `S`
     array           | *see notes on optimized format*   | array       | `[`
@@ -21159,11 +21159,11 @@ class basic_json
     --------------- | --------------------------------- | ----------- | ------
     null            | `null`                            | null        | 0x0A
     boolean         | `true`, `false`                   | boolean     | 0x08
-    number_integer  | -9223372036854775808..-2147483649 | int64       | 0x12
+    number_integer  | -9223372036854775808..-2147483649 | int64_t       | 0x12
     number_integer  | -2147483648..2147483647           | int32_t       | 0x10
-    number_integer  | 2147483648..9223372036854775807   | int64       | 0x12
+    number_integer  | 2147483648..9223372036854775807   | int64_t       | 0x12
     number_unsigned | 0..2147483647                     | int32_t       | 0x10
-    number_unsigned | 2147483648..9223372036854775807   | int64       | 0x12
+    number_unsigned | 2147483648..9223372036854775807   | int64_t       | 0x12
     number_unsigned | 9223372036854775808..18446744073709551615| --   | --
     number_float    | *any value*                       | double      | 0x01
     string          | *any value*                       | string      | 0x02
@@ -21485,7 +21485,7 @@ class basic_json
     int8_t        | number_integer                          | `i`
     int16_t       | number_integer                          | `I`
     int32_t       | number_integer                          | `l`
-    int64       | number_integer                          | `L`
+    int64_t       | number_integer                          | `L`
     string      | string                                  | `S`
     char        | string                                  | `C`
     array       | array (optimized values are supported)  | `[`

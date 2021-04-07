@@ -47,9 +47,9 @@ void JSONMapping::SaveMapping()
 
 }
 
-nlohmann::json JSONMapping::GetJSONMapping()
+nlohmann::json *JSONMapping::GetJSONMapping()
 {
-    return this->mapping;
+    return &this->mapping;
 }
 
 JSONMapping::JSONMapping(std::string mappingPath)
