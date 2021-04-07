@@ -12,6 +12,8 @@
 #include <functional>
 #include <canlib.h>
 
+#define CAN_CHANNELS 4
+
 class CANDriver
 {
     private:
@@ -20,20 +22,20 @@ class CANDriver
         std::function<void(char *)> onErrorCallback;
 
         void OnCANCallback(int handle, void *context, unsigned int event);
+        void InitializeCANChannel(uint32_t canChannelID);
         
-        canHandle canHandle;
+        canHandle canHandles[4];
     public:
-        CANDriver(unsigned channel,
-                std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onInitRecvCallback,
-                std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onRecvCallback,
-                std::function<void(char *)> onErrorCallback);
+        CANDriver(std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onInitRecvCallback,
+                  std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onRecvCallback,
+                  std::function<void(char *)> onErrorCallback);
         ~CANDriver();
 
         //Tells the can driver that initialization is done and canlib callback gets rerouted from initrecvcallback to recvcallback
         void InitDone(void);
-        void SendCANMessage(uint32_t canID, uint8_t *payload, uint32_t payloadLength);
+        void SendCANMessage(uint32_t canChannelID, uint8_t *payload, uint32_t payloadLength);
 
-        std::map<std::string, bool> GetCANStatusReadable();
+        std::map<std::string, bool> GetCANStatusReadable(uitn32_t canChannelID);
 
 };
 

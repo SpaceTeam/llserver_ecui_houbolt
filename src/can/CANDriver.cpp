@@ -7,63 +7,34 @@
 #include <utility>
 #include <string>
 
-char* CANError(canStatus status) {
-    char msg[64];
-    canGetErrorText(status, msg, sizeof msg);
-    return msg;
-}
+canStatus InitializeCANChannel(uint32_t canChannelID);
+char* CANError(canStatus status);
 
-CANDriver::CANDriver(unsigned channel, std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onInitRecvCallback,
+CANDriver::CANDriver(std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onInitRecvCallback,
                      std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onRecvCallback, std::function<void(char *)> onErrorCallback)
                      : onRecvCallback(std::move(onRecvCallback)), seqRecvCallback(std::move(onRecvCallback)), onErrorCallback(std::move(onErrorCallback))
 {
     canStatus stat;
-    canInitializeLibrary();
-    // TODO: Might want to remove canOPEN_ACCEPT_VIRTUAL later (DB)
-    canHandle = canOpenChannel(channel, canOPEN_EXCLUSIVE | canOPEN_CAN_FD | canOPEN_ACCEPT_LARGE_DLC | canOPEN_ACCEPT_VIRTUAL);
-    if(canHandle < 0){
-        throw new std::runtime_error("Couldn't open CAN channel");
+    for (size_t i = 0; i < CAN_CHANNELS; i++)
+    {
+        if((stat = InitializeCANChannel(i)) < 0) { 
+            std::ostringstream stringStream;
+            stringStream << "CAN-Channel " << i << ": " << CANError(stat);
+            throw std::runtime_error(stringStream.str());
+        }
     }
-
-    stat = canSetBusParamsFdTq(canHandle, canFdParams);
-    if(stat < 0) {
-        throw new std::runtime_error(CANError(stat));
-    }
-
-    stat = canSetBusOutputControl(canHandle, canDRIVER_NORMAL);
-    if(stat < 0) {
-        throw new std::runtime_error(CANError(stat));
-    }
-
-    stat = canBusOn(canHandle);
-    if(stat < 0) {
-        throw new std::runtime_error(CANError(stat));
-    }
-
-    // Register callback for receiving a msg when the rcv buffer has been empty or when an error frame got received
-    stat = kvSetNotifyCallback(canHandle, (kvCallback_t) &OnCANCallback, NULL, canNOTIFY_RX | canNOTIFY_ERROR);
-    if(stat < 0) {
-        throw new std::runtime_error(CANError(stat));
-    }
-
-    // Filter messages with direction=0
-    /* stat = canAccept(canHandle, 0x1, canFILTER_SET_MASK_EXT);
-    if(stat < 0) {
-        throw new std::runtime_error(CANError(stat));
-    }
-
-    stat = canAccept(canHandle, 0x1, canFILTER_SET_CODE_EXT);
-    if(stat < 0) {
-        throw new std::runtime_error(CANError(stat));
-    } */
+    
 }
 
 CANDriver::~CANDriver()
 {
-    // Empty transfer queue (not strictly necessary but recommended by Kvaser)
-    (void) canWriteSync(canHandle, 5);
-    (void) canBusOff(canHandle);
-    (void) canClose(canHandle);
+    // Empty transfer queues (not strictly necessary but recommended by Kvaser)
+    for (size_t i = 0; i < CAN_CHANNELS; i++)
+    {
+        (void) canWriteSync(canHandles[i], 5);
+        (void) canBusOff(canHandles[i]);
+        (void) canClose(canHandles[i]);
+    }
     canUnloadLibrary();
 }
 
@@ -72,21 +43,21 @@ void CANDriver::InitDone(void)
     onRecvCallback = seqRecvCallback;
 }
 
-void CANDriver::SendCANMessage(uint32_t canID, uint8_t *payload, uint32_t payloadLength)
+void CANDriver::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength)
 {
     // Flags mean that the message is a FD message (FDF, BRS) and that an extended id is used (EXT)
-    canStatus stat = canWrite(canHandle, canID, (void *) payload, payload_length, canFDMSG_FDF | canFDMSG_BRS | canMSG_EXT);
+    canStatus stat = canWrite(canHandles[canChannelID], canID, (void *) payload, payload_length, canFDMSG_FDF | canFDMSG_BRS | canMSG_EXT);
 
     if(stat < 0) {
         throw std::runtime_error(CANError(stat));
     }
 }
 
-std::map<std::string, bool> CANDriver::GetCANStatusReadable()
+std::map<std::string, bool> CANDriver::GetCANStatusReadable(uint32_t canChannelID)
 {
     std::map<std::string, bool> CANState;
     uint64_t flags;
-    canStatus stat = canReadStatus(canHandle, &flags);
+    canStatus stat = canReadStatus(canHandles[canChannelID], &flags);
 
     if(stat == canOK) {
         uint8_t length = 8;
@@ -133,3 +104,51 @@ void CANDriver::OnCANCallback(int handle, void *context, unsigned int event)
     }
 }
 
+
+char* CANError(canStatus status); {
+    char msg[64];
+    canGetErrorText(status, msg, sizeof msg);
+    return msg;
+}
+
+canStatus InitializeCANChannel(uint32_t canChannelID) {
+    canStatus stat;
+    canInitializeLibrary();
+    // TODO: Might want to remove canOPEN_ACCEPT_VIRTUAL later (DB)
+    canHandles[canChannelID] = canOpenChannel(channel, canOPEN_EXCLUSIVE | canOPEN_CAN_FD | canOPEN_ACCEPT_LARGE_DLC | canOPEN_ACCEPT_VIRTUAL);
+    if(canHandles[canChannelID] < 0){
+        return stat;
+    }
+
+    stat = canSetBusParamsFdTq(canHandles[canChannelID], canFdParams);
+    if(stat < 0) {
+        return stat;
+    }
+
+    stat = canSetBusOutputControl(canHandles[canChannelID], canDRIVER_NORMAL);
+    if(stat < 0) {
+        return stat;
+    }
+
+    stat = canBusOn(canHandles[canChannelID]);
+    if(stat < 0) {
+        return stat;
+    }
+
+    // Register callback for receiving a msg when the rcv buffer has been empty or when an error frame got received
+    stat = kvSetNotifyCallback(canHandles[canChannelID], (kvCallback_t) &OnCANCallback, NULL, canNOTIFY_RX | canNOTIFY_ERROR);
+    if(stat < 0) {
+        return stat;
+    }
+
+    // Filter messages with direction=0
+    /* stat = canAccept(canHandles[canChannelID], 0x1, canFILTER_SET_MASK_EXT);
+    if(stat < 0) {
+        throw new std::runtime_error(CANError(stat));
+    }
+
+    stat = canAccept(canHandles[canChannelID], 0x1, canFILTER_SET_CODE_EXT);
+    if(stat < 0) {
+        throw new std::runtime_error(CANError(stat));
+    } */
+}
