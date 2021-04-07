@@ -13,8 +13,8 @@ char* CANError(canStatus status) {
     return msg;
 }
 
-CANDriver::CANDriver(unsigned channel, std::function<void(uint32_t, uint8_t *, uint32_t, uint32_t)> onInitRecvCallback,
-                     std::function<void(uint32_t, uint8_t *, uint32_t, uint32_t)> onRecvCallback, std::function<void(char *)> onErrorCallback)
+CANDriver::CANDriver(unsigned channel, std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onInitRecvCallback,
+                     std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onRecvCallback, std::function<void(char *)> onErrorCallback)
                      : onRecvCallback(std::move(onRecvCallback)), seqRecvCallback(std::move(onRecvCallback)), onErrorCallback(std::move(onErrorCallback))
 {
     canStatus stat;
@@ -85,7 +85,7 @@ void CANDriver::SendCANMessage(uint32_t canID, uint8_t *payload, uint32_t payloa
 std::map<std::string, bool> CANDriver::GetCANStatusReadable()
 {
     std::map<std::string, bool> CANState;
-    unsigned long flags;
+    uint64_t flags;
     canStatus stat = canReadStatus(canHandle, &flags);
 
     if(stat == canOK) {
@@ -107,7 +107,7 @@ void CANDriver::OnCANCallback(int handle, void *context, unsigned int event)
     canStatus stat;
     uint32_t id, dlc, flags;
     uint8_t data[64];
-    uint32_t timestamp;
+    uint64_t timestamp;
     
     // As the callback only gets entered when the receive queue was empty, empty it in here
     do {
