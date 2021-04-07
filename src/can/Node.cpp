@@ -15,45 +15,51 @@
 
 //
 
-Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, CANDriver *driver)
+Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
     : nodeID(nodeID), driver(driver), Channel::Channel(0xFF, nodeChannelName, 1.0, this)
 {
+    canBusChannelID = canBusChannelID;
     InitChannels(nodeInfo, channelInfo);
 }
 
+/**
+ * might also throw exceptions from channelInfo, if channel id is not present
+ * @param nodeInfo
+ * @param channelInfo
+ */
 void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo)
 {
-	for (uint8_t i = 0; i < 32; i++)
+	for (uint8_t channelID = 0; channelID < 32; channelID++)
     {
-        uint32_t mask = 0x00000001 & (nodeInfo.channel_mask >> i);
+        uint32_t mask = 0x00000001 & (nodeInfo.channel_mask >> channelID);
         if (mask == 1)
         {
-            auto channelType = (CHANNEL_TYPE) nodeInfo.channel_type[i];
+            auto channelType = (CHANNEL_TYPE) nodeInfo.channel_type[channelID];
             Channel* ch = nullptr;
 
             switch(channelType)
             {
                 case CHANNEL_TYPE_ADC16:
-                    ch = new ADC16(i, std::get<0>(channelInfo[i]), std::get<1>(channelInfo[i]), this);
+                    ch = new ADC16(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                 break;
     //			case CHANNEL_TYPE_ADC16_SINGLE:
     //				ch = new Adc16_single_t;
     //			break;
                 case CHANNEL_TYPE_ADC24:
-                    ch = new ADC24(i, std::get<0>(channelInfo[i]), std::get<1>(channelInfo[i]), this);
+                    ch = new ADC24(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                 break;
                 case CHANNEL_TYPE_DIGITAL_OUT:
-                    ch = new DigitalOut(i, std::get<0>(channelInfo[i]), std::get<1>(channelInfo[i]), this);
+                    ch = new DigitalOut(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                 break;
                 case CHANNEL_TYPE_SERVO:
-                    ch = new Servo(i, std::get<0>(channelInfo[i]), std::get<1>(channelInfo[i]), this);
+                    ch = new Servo(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                 break;
                 default:
                     throw std::runtime_error("channel type not recognized");
                     // TODO: default case for unknown channel types that logs (DB)
             }
 
-            channelMap[i] = ch;
+            channelMap[channelID] = ch;
         }
         else if (mask > 1)
         {
@@ -66,3 +72,13 @@ Node::~Node()
 {
     delete &channelMap;
 }
+
+std::vector<std::string> Node::GetStates()
+{
+    for (auto &channel : channelMap)
+    {
+        channel.second->GetStates();
+    }
+}
+
+

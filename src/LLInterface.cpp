@@ -60,6 +60,10 @@ void LLInterface::Init()
         canManager->Init();
         Debug::print("Initializing CANManager done\n");
 
+        Debug::print("Waiting for States to be initialized...");
+        stateController->WaitUntilStatesInitialized();
+        Debug::print("All States initialized\n");
+
         Debug::print("Initializing DataFilter...");
         double sensorsSmoothingFactor = std::get<double>(Config::getData("WEBSERVER/sensors_smoothing_factor"));
         dataFilter = new DataFilter(sensorsSmoothingFactor);
@@ -83,13 +87,6 @@ void LLInterface::Init()
 
 
         isInitialized = true;
-		//update warninglight after initialization but wait 1 sec to 
-		//guarantee all sensors have already been fetched
-		std::thread updateWarnlightThread([](){
-					usleep(1000000);
-			UpdateWarningLight();
-				});
-				updateWarnlightThread.detach();
     }
 }
 
@@ -105,69 +102,6 @@ void LLInterface::Destroy()
         }
         //TODO: MP destruct CANManager?
     }
-}
-
-std::vector<std::string> LLInterface::GetAllSensorNames()
-{
-    std::vector<std::string> sensorNames;
-    sensorNames = HcpManager::GetAllSensorNames();
-
-    if (useTMPoE)
-    {
-        for (int i = 0; i < 8; i++)
-        {
-            sensorNames.push_back("temp " + std::to_string(i+1));
-        }
-    }
-
-    std::sort(sensorNames.begin(), sensorNames.end());
-    return sensorNames;
-}
-
-std::map<std::string, double> LLInterface::GetAllSensors()
-{
-    //auto startTime = Clock::now();
-    std::map<std::string, double> sensors;
-    sensors = HcpManager::GetAllSensors();
-
-    if (useTMPoE)
-    {
-        std::vector<uint32_t> tmpValues = tmPoE->Read();
-        for (uint32_t i = 0; i < tmpValues.size(); i++)
-        {
-            sensors["temp " + std::to_string(i+1)] = tmpValues[i];
-        }
-    }
-
-    return sensors;
-}
-
-std::vector<std::string> LLInterface::GetAllOutputNames()
-{
-    std::vector<std::string> outputNames;
-    outputNames = HcpManager::GetAllOutputNames();
-    return outputNames;
-}
-
-nlohmann::json LLInterface::GetAllServoData()
-{
-    return HcpManager::GetAllServoData();
-}
-
-nlohmann::json LLInterface::GetSupercharge()
-{
-    return HcpManager::GetSupercharge();
-}
-
-bool LLInterface::ExecCommand(std::string name, nlohmann::json value)
-{
-    if (value.type() != nlohmann::json::value_t::number_float &&
-        value.type() != nlohmann::json::value_t::number_integer &&
-        value.type() != nlohmann::json::value_t::number_unsigned)
-    {
-        return false;
-    }
-    return HcpManager::ExecCommand(name, (uint8_t)value);
 }
 
 void LLInterface::StartStateTransmission()
@@ -197,7 +131,7 @@ void LLInterface::StopGetStates()
 
 void LLInterface::GetStates(int64_t microTime)
 {
-    std::map<std::string, double> states = stateController->GetDirtyStates();
+    std::map<std::string, std::tuple<double, uint64_t>> states = stateController->GetDirtyStates();
 
     TransmitStates(microTime, states);
 
@@ -205,17 +139,17 @@ void LLInterface::GetStates(int64_t microTime)
 
 void LLInterface::FilterSensors(int64_t microTime)
 {
-    std::map<std::string, double> rawSensors;
+    std::map<std::string, std::tuple<double, uint64_t>> rawSensors;
     rawSensors = canManager->GetLatestSensorData();
 
-    std::map<std::string, double> filteredSensors;
+    std::map<std::string, std::tuple<double, uint64_t>> filteredSensors;
     filteredSensors = dataFilter->FilterData(rawSensors);
 
 
 
 }
 
-void LLInterface::TransmitStates(int64_t microTime, std::map<std::string, double> &states)
+void LLInterface::TransmitStates(int64_t microTime, std::map<std::string, std::tuple<double, uint64_t>> &states)
 {
 
     nlohmann::json content = nlohmann::json::array();
@@ -225,51 +159,12 @@ void LLInterface::TransmitStates(int64_t microTime, std::map<std::string, double
         stateJson = nlohmann::json::object();
 
         stateJson["name"] = state.first;
-        stateJson["value"] = state.second;
-        stateJson["time"] = (double)((microTime / 1000) / 1000.0);
+        stateJson["value"] = std::get<0>(state.second);
+        stateJson["time"] = std::get<1>(state.second);
 
-        content.push_back(sen);
+        content.push_back(stateJson);
     }
-    EcuiSocket::SendJson("sensors", content);
-}
-
-void LLInterface::UpdateWarningLight(std::map<std::string, double> sensors)
-{
-    if (sensors.size() < 1)
-    {
-        sensors = GetAllSensors();
-    }
-
-
-    if (sensors.find("igniter feedback") != sensors.end())
-    {
-        if (sensors["igniter feedback"] == 0)
-        {
-            TurnRed();
-            warnlightStatus = 2;
-        }
-        else
-        {
-            warnlightStatus = 0;
-        }
-    }
-    if (warnlightStatus != 2)
-    {
-        if (sensors.find("fuelTankPressure") != sensors.end() && sensors.find("oxTankPressure") != sensors.end())
-        {
-            if (sensors["fuelTankPressure"] >= 5.0 || sensors["oxTankPressure"] >= 5.0)
-            {
-                TurnYellow();
-                warnlightStatus = 1;
-            }
-            else if (sensors["fuelTankPressure"] < 5.0 && sensors["oxTankPressure"] < 5.0)
-            {
-                TurnGreen();
-                warnlightStatus = 0;
-            }
-        }
-    }
-
+    EcuiSocket::SendJson("states", content);
 }
 
 void LLInterface::TurnRed()

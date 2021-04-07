@@ -24,17 +24,17 @@ public:
         channelID(channelID), channelName(std::move(channelName)), scaling(scaling), parent(parent) {};
     virtual ~Channel() {};
 
-    virtual void ProcessCANCommand(uint32_t *msg, size_t msgSize);
+    virtual void ProcessCANCommand(uint32_t *msg, size_t msgSize) {throw std::logic_error("Channel - ProcessCANCommand: not implemented");};
     virtual uint8_t GetChannelID() {return this->channelID;};
     virtual std::string GetChannelName() {return this->channelName;};
     virtual void SetScaling(double) {this->scaling = scaling;};
 
     /**
-     * fetches each value for each state of the channel and combines it with channelName to a map
-     * @return
+     * returns of the channel and combines it with channelName to a map
+     * @return states of channel, sends a can command for each state, process can command writes the result to the
+     * state controller
      */
-    virtual std::map<std::string, std::tuple<double, uint64_t>> GetStates();
-    virtual std::vector<std::string> GetStateNames();
+    virtual std::vector<std::string> GetStates();
 	virtual std::map<std::string, std::function<void(std::vector<double>)>> GetCommands();
 
 	virtual std::string GetSensorName() {return channelName + ":sensor";};

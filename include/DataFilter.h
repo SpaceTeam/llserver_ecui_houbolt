@@ -14,13 +14,13 @@ class DataFilter
 {
 private:
     double sensorsSmoothingFactor;
-    std::map<std::string, double> filteredSensorDataMap;
+    std::map<std::string, std::tuple<double, uint64_t>> filteredSensorDataMap;
 
 public:
     DataFilter(double smoothingFactor);
 	~DataFilter();
 
-	std::map<std::string, double> FilterData(std::map<std::string, double> &rawSensorDataMap);
+	std::map<std::string, std::tuple<double, uint64_t>> FilterData(std::map<std::string, std::tuple<double, uint64_t>> &rawSensorDataMap);
 };
 
 

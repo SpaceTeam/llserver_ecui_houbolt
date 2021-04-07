@@ -9,6 +9,7 @@
 
 #include <map>
 #include <tuple>
+#include <vector>
 
 class StateController
 {
@@ -32,6 +33,7 @@ public:
      */
     void WaitUntilStatesInitialized();
 
+    void AddUninitializedStates(std::vector<std::string> &states);
     void AddStates(std::map<std::string, std::tuple<double, uint64_t>> &states);
     void ChangeState(std::string stateName, double value, uint64_t timestamp);
 

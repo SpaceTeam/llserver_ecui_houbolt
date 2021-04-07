@@ -25,8 +25,42 @@ void StateController::Init(std::function<void(std::string, double)> onStateChang
 {
     if (!initialized)
     {
-        this->onStateChangeCallback = onStateChangeCallback;
+        this->onStateChangeCallback = std::move(onStateChangeCallback);
         initialized = true;
+    }
+}
+
+void StateController::WaitUntilStatesInitialized()
+{
+    bool done = false;
+    bool aborted = false;
+    while (!done)
+    {
+        for (auto& state : states)
+        {
+            if (std::get<1>(state.second) == 0)
+            {
+                aborted = true;
+                break;
+            }
+        }
+        if (aborted)
+        {
+            aborted = false;
+        }
+        else
+        {
+            done = true;
+        }
+    }
+
+}
+
+void StateController::AddUninitializedStates(std::vector<std::string> &states)
+{
+    for (std::string &state : states)
+    {
+        this->states[state] = {0.0, 0, false};
     }
 }
 

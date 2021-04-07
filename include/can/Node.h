@@ -13,6 +13,7 @@
 class Node : public Channel
 {
 private:
+    uint8_t canBusChannelID;
 	uint8_t nodeID;
 	std::map<uint8_t, Channel *> channelMap;
     CANDriver* driver;
@@ -20,14 +21,13 @@ private:
 	void InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo);
 
 public:
-    //TODO: consider if putting channelid as parameter is necessary adapt initializer list if so
-	Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, CANDriver *driver);
+    //TODO: MP consider if putting channelid as parameter is necessary adapt initializer list if so
+	Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver);
 	~Node();
 
 	uint8_t GetNodeID();
 
-
-
+    std::vector<std::string> GetStates() override;
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_NODE_H

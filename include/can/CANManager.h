@@ -52,6 +52,7 @@ private:
     std::mutex sensorMtx;
     CANMapping *mapping;
 
+    std::mutex nodeMapMtx;
     std::map<uint8_t, Node *> nodeMap;
 
     /**
@@ -83,6 +84,8 @@ private:
 	static inline uint8_t GetNodeID(uint32_t &canID);
 	static inline uint16_t MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &channelId);
 	std::string GetChannelName(uint8_t &nodeID, uint8_t &channelID);
+
+    uint32_t GetNodeCount();
 public:
 
     CANResult Init();
@@ -93,8 +96,8 @@ public:
 	std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
 
 	void OnChannelStateChanged(std::string stateName, double value, uint64_t timestamp);
-	void OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint32_t timestamp);
-	void OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint32_t timestamp);
+	void OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp);
+	void OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp);
 
 	//TODO: MP add error info to arguments
 	void OnCANError();

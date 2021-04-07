@@ -5,15 +5,20 @@
 #ifndef LLSERVER_ECUI_HOUBOLT_ADC16_H
 #define LLSERVER_ECUI_HOUBOLT_ADC16_H
 
+#include "common.h"
+
 #include "can/Channel.h"
+
+#include <map>
 
 class ADC16 : public Channel
 {
+
 public:
     ADC16(uint8_t channelId, const std::string &channelName, double scaling, Channel *parent);
 
 public:
-
+    std::vector<std::string> GetStates() override;
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_ADC16_H

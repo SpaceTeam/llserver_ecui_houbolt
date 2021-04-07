@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <thread>
+#include <utility>
 
 #include "Config.h"
 #include "can/CANManager.h"
@@ -39,7 +40,7 @@ CANResult CANManager::Init()
 
         Debug::print("Initializing CANDriver...");
         //arbitration bus parameters
-        int32_t tq = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_quanta"));
+        =
         int32_t phase1 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/phase1"));
         int32_t phase2 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/phase2"));
         int32_t sjw = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/sync_jump_width"));
@@ -60,6 +61,8 @@ CANResult CANManager::Init()
         RequestCANInfo();
         using namespace std::chrono_literals;
         //TODO: wait for user input or expected node count to continue
+        int32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
+        while( nodeCount)
         std::this_thread::sleep_for(std::chrono::duration<int, std::chrono::milliseconds>(1000));
 
         initialized = true;
@@ -107,10 +110,10 @@ std::map<std::string, std::tuple<double, uint64_t>> CANManager::GetLatestSensorD
 void CANManager::OnChannelStateChanged(std::string stateName, double value, uint64_t timestamp)
 {
     StateController *stateController = StateController::Instance();
-    stateController->ChangeState(stateName, value, timestamp);
+    stateController->ChangeState(std::move(stateName), value, timestamp);
 }
 
-void CANManager::OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength)
+void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
 {
     //TODO: only accept node info messages in this stage
     if (payloadLength >= (sizeof(NodeInfoMsg_t)+1) && payload[1] == GENERIC_NODE_INFO)
@@ -139,13 +142,13 @@ void CANManager::OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLen
             }
         }
 
-        Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, channelInfo, canDriver);
+        Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, channelInfo, canBusChannelID, canDriver);
         nodeMap[nodeID] = node;
 
         //add states to state controller
         auto states = node->GetStates();
         StateController *stateController = StateController::Instance();
-        stateController->AddStates(states);
+        stateController->AddUninitializedStates(states);
 
 
         //add available commands to event manager
@@ -154,7 +157,7 @@ void CANManager::OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLen
     }
 }
 
-void CANManager::OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength)
+void CANManager::OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
 {
     uint8_t nodeID = CANManager::GetNodeID(canID);
     try

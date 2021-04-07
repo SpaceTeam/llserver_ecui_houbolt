@@ -29,11 +29,7 @@ private:
     static CANManager *canManager;
     static EventManager *eventManager;
     static StateController *stateController;
-
     static DataFilter *dataFilter;
-    //static GPIO[] gpioDevices;
-
-    //static SPI* spiDevice;
 
     static bool isInitialized;
 
@@ -41,6 +37,7 @@ private:
 
     static bool isTransmittingStates;
     static int32_t warnlightStatus;
+
     static Timer* stateTimer;
     static Timer* sensorTimer;
 
@@ -58,28 +55,15 @@ public:
     static void Init();
     static void Destroy();
 
-    static void TransmitStates(int64_t microTime, std::map<std::string, double> &states);
-
-    static std::vector<std::string> GetAllSensorNames();
-    static std::map<std::string, double> GetAllSensors();
-
-    static std::vector<std::string> GetAllOutputNames();
+    static void TransmitStates(int64_t microTime, std::map<std::string, std::tuple<double, uint64_t>> &states);
 
     static void StartStateTransmission();
     static void StopStateTransmission();
-
-    static nlohmann::json GetAllServoData();
 
     static void TurnRed();
     static void TurnGreen();
     static void TurnYellow();
     static void BeepRed();
-    static void UpdateWarningLight(std::map<std::string, double> sensors={});
-
-
-    static bool ExecCommand(std::string name, json value);
-
-	static nlohmann::json GetSupercharge();
 
 };
 
