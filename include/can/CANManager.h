@@ -90,8 +90,8 @@ public:
 	std::map<std::string, double> GetLatestSensorData();
 
 	void OnChannelStateChanged(std::string, double);
-	void OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength);
-	void OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength);
+	void OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint32_t timeStamp);
+	void OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint32_t timeStamp);
 	void OnCANError();
 };
 
