@@ -13,8 +13,8 @@ char* CANError(canStatus status) {
     return msg;
 }
 
-CANDriver::CANDriver(unsigned channel, std::function<void(uint32_t *, uint8_t *, uint32_t *, uint32_t *)> onInitRecvCallback,
-                     std::function<void(uint32_t *, uint8_t *, uint32_t *, uint32_t *)> onRecvCallback, std::function<void()> onErrorCallback)
+CANDriver::CANDriver(unsigned channel, std::function<void(uint32_t, uint8_t *, uint32_t, uint32_t)> onInitRecvCallback,
+                     std::function<void(uint32_t, uint8_t *, uint32_t, uint32_t)> onRecvCallback, std::function<void(char *)> onErrorCallback)
                      : onRecvCallback(std::move(onRecvCallback)), seqRecvCallback(std::move(onRecvCallback)), onErrorCallback(std::move(onErrorCallback))
 {
     canStatus stat;
@@ -115,7 +115,7 @@ void CANDriver::OnCANCallback(int handle, void *context, unsigned int event)
 
         switch(event) {
             case canNOTIFY_ERROR:
-                onErrorCallback();
+                onErrorCallback(CANError(stat));
             break;
             case canNOTIFY_RX:
                 onRecvCallback(&id, data, &dlc, &timestamp);
