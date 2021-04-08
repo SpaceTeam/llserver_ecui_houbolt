@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall")
 
 include_directories(include include/can_houbolt)
 
-file(GLOB_RECURSE sources ./*.cpp src/*.cpp include/*.h)
+file(GLOB_RECURSE sources main.cpp src/*.cpp include/*.h)
 
 
 add_executable(${PROJECT_NAME} ${sources})
@@ -19,7 +19,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(LINUX)
-   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs)
+   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -lcanlib)
 else()
    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 endif()
