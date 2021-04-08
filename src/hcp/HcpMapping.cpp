@@ -50,7 +50,7 @@ HcpMapping::~HcpMapping()
 void HcpMapping::LoadMapping()
 {
     Debug::print("loading mapping...");
-    this->mapping = json::parse(utils::loadFile(this->mappingPath));
+    this->mapping = nlohmann::json::parse(utils::loadFile(this->mappingPath));
     Debug::print("mapping loaded");
 }
 
@@ -81,9 +81,9 @@ Device_Type HcpMapping::GetTypeByName(std::string name)
     return type;
 }
 
-json HcpMapping::GetDeviceByName(std::string name, Device_Type type)
+nlohmann::json HcpMapping::GetDeviceByName(std::string name, Device_Type type)
 {
-    json device = nullptr;
+    nlohmann::json device = nullptr;
 
     if (mapping != nullptr)
     {
@@ -105,9 +105,9 @@ json HcpMapping::GetDeviceByName(std::string name, Device_Type type)
     return device;
 }
 
-json HcpMapping::GetDeviceByPort(uint8_t port, Device_Type type)
+nlohmann::json HcpMapping::GetDeviceByPort(uint8_t port, Device_Type type)
 {
-    json device = nullptr;
+    nlohmann::json device = nullptr;
 
     if (mapping != nullptr)
     {
@@ -131,7 +131,7 @@ json HcpMapping::GetDeviceByPort(uint8_t port, Device_Type type)
 
 nlohmann::json HcpMapping::GetDevices(Device_Type type)
 {
-    json devices = nullptr;
+    nlohmann::json devices = nullptr;
 
     if (mapping != nullptr)
     {

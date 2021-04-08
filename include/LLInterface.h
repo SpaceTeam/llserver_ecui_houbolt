@@ -47,6 +47,9 @@ private:
 	static void FilterSensors(int64_t microTime);
 	static void StopFilterSensors();
 
+	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states);
+	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t, bool>> &states);
+
     LLInterface();
 
     ~LLInterface();
@@ -59,6 +62,9 @@ public:
 
     static void StartStateTransmission();
     static void StopStateTransmission();
+
+    static nlohmann::json GetAllStates();
+    static void SetState(std::string stateName, double value, uint64_t timestamp);
 
     static void TurnRed();
     static void TurnGreen();

@@ -20,7 +20,7 @@ bool EcuiSocket::shallClose = false;
 std::thread* EcuiSocket::asyncListenThread;
 std::function<void()> EcuiSocket::onCloseCallback;
 
-void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<void()> onCloseCallback)
+void EcuiSocket::Init(std::function<void(nlohmann::json)> onMsgCallback, std::function<void()> onCloseCallback)
 {
     EcuiSocket::onCloseCallback = onCloseCallback;
 
@@ -36,18 +36,18 @@ void EcuiSocket::Init(std::function<void(json)> onMsgCallback, std::function<voi
 
 }
 
-void EcuiSocket::AsyncListen(std::function<void(json)> onMsgCallback)
+void EcuiSocket::AsyncListen(std::function<void(nlohmann::json)> onMsgCallback)
 {
     while(!shallClose)
     {
         string msg;
         try {
             msg = socket->Recv();
-            json jsonMsg = json::parse(msg);
+            nlohmann::json jsonMsg = nlohmann::json::parse(msg);
             onMsgCallback(jsonMsg);
         } catch (const std::exception& e) {
 			std::cerr << e.what();
-            Debug::error("json message of Webserver is invalid:\n" + msg);
+            Debug::error("nlohmann::json message of Webserver is invalid:\n" + msg);
             socket->Connect();
         }
 
@@ -65,13 +65,13 @@ void EcuiSocket::SendJson(std::string type)
     SendJson(type, nullptr);
 }
 
-void EcuiSocket::SendJson(std::string type, json content)
+void EcuiSocket::SendJson(std::string type, nlohmann::json content)
 {
 
     if (connectionActive)
     {
 
-        json jsonMsg = json::object();
+        nlohmann::json jsonMsg = nlohmann::json::object();
         jsonMsg["type"] = type;
 
         if (content != nullptr)
@@ -80,7 +80,7 @@ void EcuiSocket::SendJson(std::string type, json content)
         }
         else
         {
-            jsonMsg["content"] = json::object();
+            jsonMsg["content"] = nlohmann::json::object();
         }
         //    cout << "Content: "<< content.dump() << endl;
         //    cout << "Msg: "<< jsonMsg.dump() << endl;
@@ -103,7 +103,7 @@ void EcuiSocket::SendJson(std::string type, float content)
     if (connectionActive)
     {
 
-        json jsonMsg = json::object();
+        nlohmann::json jsonMsg = nlohmann::json::object();
         jsonMsg["type"] = type;
 
         jsonMsg["content"] = content;

@@ -4,21 +4,9 @@
 
 #include "StateController.h"
 
-StateController* StateController::instance = nullptr;
-
 StateController::~StateController()
 {
-    delete instance;
     initialized = false;
-}
-
-StateController *StateController::Instance()
-{
-    if (instance == nullptr)
-    {
-        instance = new StateController();
-    }
-    return instance;
 }
 
 void StateController::Init(std::function<void(std::string, double)> onStateChangeCallback)
@@ -72,7 +60,7 @@ void StateController::AddStates(std::map<std::string, std::tuple<double, uint64_
     }
 }
 
-void StateController::ChangeState(std::string stateName, double value, uint64_t timestamp)
+void StateController::SetState(std::string stateName, double value, uint64_t timestamp)
 {
     try
     {

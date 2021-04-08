@@ -10,32 +10,38 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <string>
 #include <canlib.h>
+#include <bus_params_tq.h>
 
 #define CAN_CHANNELS 4
 
 class CANDriver
 {
     private:
-        std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onRecvCallback;
-        std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> seqRecvCallback;
-        std::function<void(char *)> onErrorCallback;
+        std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback;
+        std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> seqRecvCallback;
+        std::function<void(std::string)> onErrorCallback;
+
+        kvBusParamsTq arbitrationParams;
+        kvBusParamsTq dataParams;
+        canHandle canHandles[CAN_CHANNELS];
 
         void OnCANCallback(int handle, void *context, unsigned int event);
-        void InitializeCANChannel(uint32_t canChannelID);
-        
-        canHandle canHandles[4];
+        std::string CANError(canStatus status);
+        canStatus InitializeCANChannel(uint32_t canChannelID);
+
     public:
-        CANDriver(std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onInitRecvCallback,
-                  std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onRecvCallback,
-                  std::function<void(char *)> onErrorCallback);
+        CANDriver(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onInitRecvCallback,
+                  std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
+                  std::function<void(std::string)> onErrorCallback, kvBusParamsTq arbitrationParams, kvBusParamsTq dataParams);
         ~CANDriver();
 
         //Tells the can driver that initialization is done and canlib callback gets rerouted from initrecvcallback to recvcallback
         void InitDone(void);
-        void SendCANMessage(uint32_t canChannelID, uint8_t *payload, uint32_t payloadLength);
+        void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength);
 
-        std::map<std::string, bool> GetCANStatusReadable(uitn32_t canChannelID);
+        std::map<std::string, bool> GetCANStatusReadable(uint32_t canChannelID);
 
 };
 

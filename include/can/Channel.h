@@ -8,6 +8,9 @@
 #include <cstdarg>
 #include <map>
 #include <utility>
+#include <vector>
+#include <functional>
+#include <string>
 
 class Channel {
 protected:
@@ -34,11 +37,14 @@ public:
      * @return states of channel, sends a can command for each state, process can command writes the result to the
      * state controller
      */
-    virtual std::vector<std::string> GetStates();
-	virtual std::map<std::string, std::function<void(std::vector<double>)>> GetCommands();
+    virtual std::vector<std::string> GetStates() {/*return states;*/};
+	virtual std::map<std::string, std::function<void(std::vector<double>)>> GetCommands() {/*return commandsMap;*/};
 
 	virtual std::string GetSensorName() {return channelName + ":sensor";};
 
 };
 
-#endif; // LLSERVER_ECUI_HOUBOLT_CHANNEL_H
+//const std::vector<std::string> Channel::states;
+//const std::map<std::string, std::function<void(std::vector<double>)>> Channel::commandsMap;
+
+#endif // LLSERVER_ECUI_HOUBOLT_CHANNEL_H

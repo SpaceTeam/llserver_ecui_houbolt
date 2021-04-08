@@ -222,7 +222,7 @@ void SocketOld::Close()
 
 //
 //
-//void SocketOld::asyncListen(std::function<void(int32_t, json)> onMsgCallback)
+//void SocketOld::asyncListen(std::function<void(int32_t, nlohmann::json)> onMsgCallback)
 //{
 //    char buffer[SOCKET_MSG_SIZE] = {0};
 //    int valread;
@@ -241,7 +241,7 @@ void SocketOld::Close()
 //        string msg(buffer);
 //        cout << msg << endl;
 //
-//        json jsonMsg = json::parse(msg);
+//        nlohmann::json jsonMsg = nlohmann::json::parse(msg);
 //
 //        onMsgCallback(socketfd, jsonMsg);
 //
@@ -256,13 +256,13 @@ void SocketOld::Close()
 //    sendJson(type, nullptr);
 //}
 //
-//void SocketOld::sendJson(std::string type, json content)
+//void SocketOld::sendJson(std::string type, nlohmann::json content)
 //{
 //    if (connectionActive)
 //    {
 //        sendMtx.lock();
 //
-//        json jsonMsg = json::object();
+//        nlohmann::json jsonMsg = nlohmann::json::object();
 //        jsonMsg["type"] = type;
 //
 //        if (content != nullptr)
@@ -271,7 +271,7 @@ void SocketOld::Close()
 //        }
 //        else
 //        {
-//            jsonMsg["content"] = json::object();
+//            jsonMsg["content"] = nlohmann::json::object();
 //        }
 ////	cout << "Content: "<< content.dump() << endl;
 ////	cout << "Msg: "<< jsonMsg.dump() << endl;
@@ -293,7 +293,7 @@ void SocketOld::Close()
 //    {
 //        sendMtx.lock();
 //
-//        json jsonMsg = json::object();
+//        nlohmann::json jsonMsg = nlohmann::json::object();
 //        jsonMsg["type"] = type;
 //
 //        jsonMsg["content"] = content;

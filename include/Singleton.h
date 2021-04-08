@@ -11,8 +11,9 @@ class Singleton
 protected:
     static T *instance;    // elements
 
-    Singleton(const Singleton& copy);
-    Singleton();
+    Singleton(const Singleton& copy) {};
+    Singleton() {};
+public:
 
     virtual ~Singleton()
     {
@@ -22,7 +23,7 @@ protected:
             instance = nullptr;
         }
     }
-public:
+
     static T* Instance() {
         if (instance == nullptr)
         {

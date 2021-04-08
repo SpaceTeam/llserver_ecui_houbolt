@@ -149,22 +149,64 @@ void LLInterface::FilterSensors(int64_t microTime)
 
 }
 
-void LLInterface::TransmitStates(int64_t microTime, std::map<std::string, std::tuple<double, uint64_t>> &states)
+void LLInterface::StopFilterSensors()
 {
 
+}
+
+nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states)
+{
     nlohmann::json content = nlohmann::json::array();
     nlohmann::json statesJson;
     for (const auto& state : states)
     {
-        stateJson = nlohmann::json::object();
+        nlohmann::json stateJson = nlohmann::json::object();
 
         stateJson["name"] = state.first;
         stateJson["value"] = std::get<0>(state.second);
-        stateJson["time"] = std::get<1>(state.second);
+        stateJson["timestamp"] = (double(std::get<1>(state.second))/1000.0);
 
         content.push_back(stateJson);
     }
-    EcuiSocket::SendJson("states", content);
+
+    return statesJson;
+}
+
+nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double, uint64_t, bool>> &states)
+{
+    nlohmann::json content = nlohmann::json::array();
+    nlohmann::json statesJson;
+    for (const auto& state : states)
+    {
+        nlohmann::json stateJson = nlohmann::json::object();
+
+        stateJson["name"] = state.first;
+        stateJson["value"] = std::get<0>(state.second);
+        stateJson["timestamp"] = (double(std::get<1>(state.second))/1000.0);
+
+        content.push_back(stateJson);
+    }
+
+    return statesJson;
+}
+
+void LLInterface::TransmitStates(int64_t microTime, std::map<std::string, std::tuple<double, uint64_t>> &states)
+{
+
+    nlohmann::json statesJson = StatesToJson(states);
+    EcuiSocket::SendJson("states", statesJson);
+}
+
+nlohmann::json LLInterface::GetAllStates()
+{
+    std::map<std::string, std::tuple<double, uint64_t, bool>> states = stateController->GetAllStates();
+    nlohmann::json statesJson = StatesToJson(states);
+    return statesJson;
+}
+
+void LLInterface::SetState(std::string stateName, double value, uint64_t timestamp)
+{
+
 }
 
 void LLInterface::TurnRed()

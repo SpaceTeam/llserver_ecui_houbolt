@@ -5,9 +5,10 @@
 #ifndef TXV_ECUI_LLSERVER_WATCHDOG_H
 #define TXV_ECUI_LLSERVER_WATCHDOG_H
 
-#include <chrono>
-
 #include "common.h"
+
+#include <chrono>
+#include <functional>
 
 //if pause and restart functions are not used, behaves like a normal periodic watchdog timer
 //if watchdog is started with pause option, it can be resumed with Restart();

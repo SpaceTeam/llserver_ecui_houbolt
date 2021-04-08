@@ -48,8 +48,8 @@ private:
     static int32_t timerSyncInterval;
     //----
 
-    static json jsonSequence;
-    static json jsonAbortSequence;
+    static nlohmann::json jsonSequence;
+    static nlohmann::json jsonAbortSequence;
     static std::string comments;
     static std::string currentDirPath;
     static std::string logFileName;
@@ -63,13 +63,13 @@ private:
     static void SetupLogging();
 
     static void LoadInterpolationMap();
-    static bool LoadSequence(json jsonSeq);
+    static bool LoadSequence(nlohmann::json jsonSeq);
 
     static void LogSensors(int64_t microTime, std::vector<double > sensors);
     static void StopGetSensors();
     static void GetSensors(int64_t microTime);
 
-    static double GetTimestamp(json obj);
+    static double GetTimestamp(nlohmann::json obj);
     static void Tick(int64_t microTime);
 
     static void StopAbortSequence();
@@ -88,7 +88,7 @@ public:
 
     static void AbortSequence(std::string abortMsg="abort");
     static void StopSequence();
-    static void StartSequence(json jsonSeq, json jsonAbortSeq, std::string comments);
+    static void StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments);
     static void WritePostSeqComment(std::string msg);
 
 };

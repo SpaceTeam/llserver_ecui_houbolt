@@ -5,25 +5,28 @@
 #ifndef LLSERVER_ECUI_HOUBOLT_STATECONTROLLER_H
 #define LLSERVER_ECUI_HOUBOLT_STATECONTROLLER_H
 
-#include "common.h"
-
 #include <map>
 #include <tuple>
 #include <vector>
+#include <functional>
+#include <string>
 
-class StateController
+#include "common.h"
+
+#include "Singleton.h"
+
+class StateController : public Singleton<StateController>
 {
 private:
     std::map<std::string, std::tuple<double, uint64_t, bool>> states;
     std::function<void(std::string, double)> onStateChangeCallback;
 
-	static StateController* instance;
 	bool initialized = false;
-	StateController(const StateController& copy);
-	StateController();
-	~StateController();
+
 
 public:
+    ~StateController();
+
     //TODO: MP Maybe add timestamp to callback argument as well
     void Init(std::function<void(std::string, double)> onStateChangeCallback);
 
@@ -35,13 +38,11 @@ public:
 
     void AddUninitializedStates(std::vector<std::string> &states);
     void AddStates(std::map<std::string, std::tuple<double, uint64_t>> &states);
-    void ChangeState(std::string stateName, double value, uint64_t timestamp);
+    void SetState(std::string stateName, double value, uint64_t timestamp);
 
     double GetStateValue(std::string stateName);
     std::map<std::string, std::tuple<double, uint64_t>> GetDirtyStates();
 	std::map<std::string, std::tuple<double, uint64_t, bool>> GetAllStates();
-
-	static StateController* Instance();
 
 };
 

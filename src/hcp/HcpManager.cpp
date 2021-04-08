@@ -45,7 +45,7 @@ void HcpManager::Init()
 
     for (uint8_t i = 0; i < SERVO_COUNT; i++)
     {
-        json device = mapping->GetDeviceByPort(i, Device_Type::SERVO);
+        nlohmann::json device = mapping->GetDeviceByPort(i, Device_Type::SERVO);
         if (device != nullptr)
         {
             int16_t closedPos;
@@ -150,8 +150,8 @@ void HcpManager::StartSensorFetch(uint32_t sampleRate)
 void HcpManager::FetchSensors(uint64_t microTime)
 {
 
-    json analogs = mapping->GetDevices(Device_Type::ANALOG);
-    json digitals = mapping->GetDevices(Device_Type::DIGITAL);
+    nlohmann::json analogs = mapping->GetDevices(Device_Type::ANALOG);
+    nlohmann::json digitals = mapping->GetDevices(Device_Type::DIGITAL);
     if (analogs != nullptr)
     {
         for (auto it = analogs.begin(); it != analogs.end(); ++it)
@@ -164,9 +164,9 @@ void HcpManager::FetchSensors(uint64_t microTime)
                 {
                     Debug::info("mapping thrust values");
 
-                    json maps = it.value()["map"];
+                    nlohmann::json maps = it.value()["map"];
 
-                    if (maps.type() == json::value_t::array)
+                    if (maps.type() == nlohmann::json::value_t::array)
                     {
                         double mappedValues[HCP_THRUST_SENSORS_COUNT] = {-1.0};
                         double mappedSum = 0.0;
@@ -262,8 +262,8 @@ std::vector<std::string> HcpManager::GetAllSensorNames()
 {
     vector<std::string> sensorNames;
 
-    json analogs = mapping->GetDevices(Device_Type::ANALOG);
-    json digitals = mapping->GetDevices(Device_Type::DIGITAL);
+    nlohmann::json analogs = mapping->GetDevices(Device_Type::ANALOG);
+    nlohmann::json digitals = mapping->GetDevices(Device_Type::DIGITAL);
     if (analogs != nullptr)
     {
         for (auto it = analogs.begin(); it != analogs.end(); ++it)
@@ -318,9 +318,9 @@ std::vector<std::string> HcpManager::GetAllOutputNames()
 {
     vector<std::string> outputNames;
 
-    json servos = mapping->GetDevices(Device_Type::SERVO);
-    json motors = mapping->GetDevices(Device_Type::MOTOR);
-    json digitals = mapping->GetDevices(Device_Type::DIGITAL_OUT);
+    nlohmann::json servos = mapping->GetDevices(Device_Type::SERVO);
+    nlohmann::json motors = mapping->GetDevices(Device_Type::MOTOR);
+    nlohmann::json digitals = mapping->GetDevices(Device_Type::DIGITAL_OUT);
     if (servos != nullptr)
     {
         for (auto it = servos.begin(); it != servos.end(); ++it)
@@ -361,17 +361,17 @@ std::vector<std::string> HcpManager::GetAllOutputNames()
     return outputNames;
 }
 
-json HcpManager::GetAllServoData()
+nlohmann::json HcpManager::GetAllServoData()
 {
-    json data = json::array();
+    nlohmann::json data = nlohmann::json::array();
 
-    json servos = mapping->GetDevices(Device_Type::SERVO);
+    nlohmann::json servos = mapping->GetDevices(Device_Type::SERVO);
     if (servos != nullptr)
     {
-        json currServo;
+        nlohmann::json currServo;
         for (auto it = servos.begin(); it != servos.end(); ++it)
         {
-            currServo = json::object();
+            currServo = nlohmann::json::object();
             currServo["name"] = it.key();
             currServo["endpoints"] = it.value()["endpoints"];
 
@@ -391,7 +391,7 @@ bool HcpManager::ExecCommand(std::string name, uint8_t percent)
     bool success = false;
 
     Device_Type type = mapping->GetTypeByName(name);
-    json device = mapping->GetDeviceByName(name, type);
+    nlohmann::json device = mapping->GetDeviceByName(name, type);
 
     if (device != nullptr)
     {
@@ -479,18 +479,18 @@ bool HcpManager::DisableAllServos()
 
 void HcpManager::SetServoMin(std::string name, uint16_t min)
 {
-    json servos = mapping->GetDevices(Device_Type::SERVO);
-    json analogs = mapping->GetDevices(Device_Type::ANALOG);
+    nlohmann::json servos = mapping->GetDevices(Device_Type::SERVO);
+    nlohmann::json analogs = mapping->GetDevices(Device_Type::ANALOG);
 
     if (utils::keyExists(servos, name))
     {
-        json servo = servos[name];
+        nlohmann::json servo = servos[name];
         if (utils::keyExists(servo, "feedbackAnalog"))
         {
             string fbckName = servo["feedbackAnalog"];
             if (utils::keyExists(analogs, fbckName))
             {
-                json fbckAnalog = analogs[fbckName];
+                nlohmann::json fbckAnalog = analogs[fbckName];
 
                 bool success = SetServoRaw((uint8_t)servo["port"], min);
                 if (success)
@@ -524,18 +524,18 @@ void HcpManager::SetServoMin(std::string name, uint16_t min)
 void HcpManager::SetServoMax(std::string name, uint16_t max)
 {
 
-    json servos = mapping->GetDevices(Device_Type::SERVO);
-    json analogs = mapping->GetDevices(Device_Type::ANALOG);
+    nlohmann::json servos = mapping->GetDevices(Device_Type::SERVO);
+    nlohmann::json analogs = mapping->GetDevices(Device_Type::ANALOG);
 
     if (utils::keyExists(servos, name))
     {
-        json servo = servos[name];
+        nlohmann::json servo = servos[name];
         if (utils::keyExists(servo, "feedbackAnalog"))
         {
             string fbckName = servo["feedbackAnalog"];
             if (utils::keyExists(analogs, fbckName))
             {
-                json fbckAnalog = analogs[fbckName];
+                nlohmann::json fbckAnalog = analogs[fbckName];
 
                 bool success = SetServoRaw((uint8_t)servo["port"], max);
                 if (success)
@@ -569,7 +569,7 @@ bool HcpManager::SetServoRaw(std::string name, uint16_t onTime)
 {
     bool success = false;
 
-    json device = mapping->GetDeviceByName(name, Device_Type::SERVO);
+    nlohmann::json device = mapping->GetDeviceByName(name, Device_Type::SERVO);
 
     if (device != nullptr)
     {
@@ -658,7 +658,7 @@ bool HcpManager::SetServo(string name, uint8_t percent)
 {
     bool success = false;
 
-    json device = mapping->GetDeviceByName(name, Device_Type::SERVO);
+    nlohmann::json device = mapping->GetDeviceByName(name, Device_Type::SERVO);
 
     if (device != nullptr)
     {
@@ -675,7 +675,7 @@ bool HcpManager::SetServo(uint8_t port, uint8_t percent)
 {
     bool success = false;
 
-    json device = mapping->GetDeviceByPort(port, Device_Type::SERVO);
+    nlohmann::json device = mapping->GetDeviceByPort(port, Device_Type::SERVO);
 
     if (device != nullptr)
     {
@@ -688,7 +688,7 @@ bool HcpManager::SetServo(uint8_t port, uint8_t percent)
     return success;
 }
 
-bool HcpManager::SetServo(json device, uint8_t percent)
+bool HcpManager::SetServo(nlohmann::json device, uint8_t percent)
 {
     bool success = false;
     if (device != nullptr)
@@ -763,9 +763,9 @@ bool HcpManager::SetSupercharge(int8_t setpoint, uint8_t hysteresis)
     return success;
 }
 
-json HcpManager::GetSupercharge()
+nlohmann::json HcpManager::GetSupercharge()
 {
-	json parameters;
+	nlohmann::json parameters;
 	parameters["hysteresis"] = 1;
 	parameters["setpoint"] = -1;
 
@@ -817,7 +817,7 @@ bool HcpManager::SetMotor(std::string name, Motor_Mode mode, int16_t amount)
 {
     bool success = false;
 
-    json device = mapping->GetDeviceByName(name, Device_Type::MOTOR);
+    nlohmann::json device = mapping->GetDeviceByName(name, Device_Type::MOTOR);
 
     if (device != nullptr)
     {
@@ -894,7 +894,7 @@ bool HcpManager::SetDigitalOutputs(std::string name, bool enable)
 {
     bool success = false;
 
-    json device = mapping->GetDeviceByName(name, Device_Type::DIGITAL_OUT);
+    nlohmann::json device = mapping->GetDeviceByName(name, Device_Type::DIGITAL_OUT);
 
     if (device != nullptr)
     {
@@ -992,7 +992,7 @@ int32_t *HcpManager::GetLoadCells()
 
 void HcpManager::TareLoadCells()
 {
-    json analogs = mapping->GetDevices(Device_Type::ANALOG);
+    nlohmann::json analogs = mapping->GetDevices(Device_Type::ANALOG);
     if (analogs != nullptr)
     {
         for (auto it = analogs.begin(); it != analogs.end(); ++it)
@@ -1003,10 +1003,10 @@ void HcpManager::TareLoadCells()
                 {
                     Debug::info("mapping thrust values");
 
-                    json loadCells = it.value();
-                    json maps = loadCells["map"];
+                    nlohmann::json loadCells = it.value();
+                    nlohmann::json maps = loadCells["map"];
 
-                    if (maps.type() == json::value_t::array)
+                    if (maps.type() == nlohmann::json::value_t::array)
                     {
 
                         if (maps.size() > 0)
@@ -1065,7 +1065,7 @@ double HcpManager::GetAnalog(std::string name)
 {
     double value = -1;
 
-    json device = mapping->GetDeviceByName(name, Device_Type::ANALOG);
+    nlohmann::json device = mapping->GetDeviceByName(name, Device_Type::ANALOG);
 
     if (device != nullptr)
     {
@@ -1077,7 +1077,7 @@ double HcpManager::GetAnalog(std::string name)
             //get servo of fbck sensor
 
             string servoName = device["servo"];
-            json servo = mapping->GetDeviceByName(servoName, Device_Type::SERVO);
+            nlohmann::json servo = mapping->GetDeviceByName(servoName, Device_Type::SERVO);
 
             vector<uint16_t> servoEndpoints = servo["endpoints"];
             vector<uint16_t> fbckEndpoints = servo["feedbackEndpoints"];
@@ -1094,7 +1094,7 @@ double HcpManager::GetAnalog(std::string name)
         {
             Debug::info("mapping sensor value");
 
-            json map = device["map"];
+            nlohmann::json map = device["map"];
 
             double before = value;
             value = ((double)value * (double)map["k"]) + (double)map["d"];
@@ -1174,7 +1174,7 @@ uint8_t HcpManager::GetDigital(std::string name)
 {
     uint8_t state = -1;
 
-    json device = mapping->GetDeviceByName(name, Device_Type::DIGITAL);
+    nlohmann::json device = mapping->GetDeviceByName(name, Device_Type::DIGITAL);
 
     if (device != nullptr)
     {

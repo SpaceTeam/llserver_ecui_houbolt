@@ -10,9 +10,8 @@
 class DigitalOut : public Channel
 {
 public:
-    DigitalOut(uint8_t channelId, const std::string &channelName, double scaling, Channel *parent);
+    using Channel::Channel;
 
-public:
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_DIGITALOUT_H

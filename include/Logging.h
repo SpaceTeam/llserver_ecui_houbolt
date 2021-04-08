@@ -288,28 +288,28 @@ size_t work() {
   return 10;
 }
 
-int main(void) {
-  //configure logging, if you dont it defaults to standard out logging with colors
-  //logging::configure({ {"type", "file"}, {"file_name", "test.log"}, {"reopen_interval", "1"} });
-
-  //start up some threads
-  std::vector<std::future<size_t> > results;
-  for(size_t i = 0; i < 4; ++i) {
-    results.emplace_back(std::async(std::launch::async, work));
-  }
-
-  //dont really care about the results but we can pretend
-  bool exit_code = 0;
-  for(auto& result : results) {
-    try {
-      size_t count = result.get();
-    }
-    catch(std::exception& e) {
-      std::cout << e.what();
-      exit_code++;
-    }
-  }
-  return exit_code;
-}
+//int main(void) {
+//  //configure logging, if you dont it defaults to standard out logging with colors
+//  //logging::configure({ {"type", "file"}, {"file_name", "test.log"}, {"reopen_interval", "1"} });
+//
+//  //start up some threads
+//  std::vector<std::future<size_t> > results;
+//  for(size_t i = 0; i < 4; ++i) {
+//    results.emplace_back(std::async(std::launch::async, work));
+//  }
+//
+//  //dont really care about the results but we can pretend
+//  bool exit_code = 0;
+//  for(auto& result : results) {
+//    try {
+//      size_t count = result.get();
+//    }
+//    catch(std::exception& e) {
+//      std::cout << e.what();
+//      exit_code++;
+//    }
+//  }
+//  return exit_code;
+//}
 
 #endif //TXV_ECUI_LLSERVER_LOGGING_H

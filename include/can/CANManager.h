@@ -78,8 +78,6 @@ private:
 
 	bool initialized = false;
 
-	~CANManager();
-
 	CANResult RequestCANInfo();
 	static inline uint8_t GetNodeID(uint32_t &canID);
 	static inline uint16_t MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &channelId);
@@ -87,6 +85,7 @@ private:
 
     uint32_t GetNodeCount();
 public:
+    ~CANManager();
 
     CANResult Init();
 
@@ -96,11 +95,13 @@ public:
 	std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
 
 	void OnChannelStateChanged(std::string stateName, double value, uint64_t timestamp);
-	void OnCANInit(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp);
-	void OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp);
+	void OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp);
+	void OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp);
 
 	//TODO: MP add error info to arguments
-	void OnCANError();
+	void OnCANError(std::string error);
+
+
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_CANMANAGER_H

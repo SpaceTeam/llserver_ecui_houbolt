@@ -4,8 +4,6 @@
 
 #include "EventManager.h"
 
-#include <format>
-
 #include "StateController.h"
 
 #include "Config.h"

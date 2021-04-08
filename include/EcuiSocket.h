@@ -5,6 +5,10 @@
 #ifndef TXV_ECUI_LLSERVER_ECUISOCKET_H
 #define TXV_ECUI_LLSERVER_ECUISOCKET_H
 
+#include "common.h"
+
+#include "json.hpp"
+
 #include "drivers/Socket.h"
 
 class EcuiSocket

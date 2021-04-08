@@ -10,7 +10,7 @@ using namespace std;
 
 I2C::I2C(int devId, std::string devName)
 {
-    cout << "Not on LINUX ... simulate connection" << endl;
+    Debug::error("Not on LINUX ... simulate connection");
     this->connected = true;
     this->devId = devId;
     this->devName = devName;

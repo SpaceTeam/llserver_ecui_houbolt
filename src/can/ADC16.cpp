@@ -6,10 +6,10 @@
 
 #include <vector>
 
-static const std::vector<std::string> states = {"REFRESH_DIVIDER"};
-static const std::map<std::string, std::function<void(std::vector<double>)>> commandsMap;
+//const std::vector<std::string> ADC16::states = {"REFRESH_DIVIDER"};
+//const std::map<std::string, std::function<void(std::vector<double>)>> ADC16::commandsMap;
 
 std::vector<std::string> ADC16::GetStates()
 {
-
+    return std::vector<std::string>();
 }

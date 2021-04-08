@@ -21,21 +21,21 @@ WarnLight::~WarnLight()
     delete socket;
 }
 
-void WarnLight::SendJson(json message)
+void WarnLight::SendJson(nlohmann::json message)
 {
     socket->Send(message.dump() + "\n");
 }
 
 void WarnLight::Reset()
 {
-    json message;
+    nlohmann::json message;
     message["type"] = "reset";
     SendJson(message);
 }
 
 void WarnLight::SetColor(uint8_t red, uint8_t green, uint8_t blue)
 {
-    json message = {
+    nlohmann::json message = {
         {"type", "set-color"},
         {"content", {
             {"red", red},
@@ -47,7 +47,7 @@ void WarnLight::SetColor(uint8_t red, uint8_t green, uint8_t blue)
 }
 
 void WarnLight::SetMode(std::string mode) {
-    json message = {
+    nlohmann::json message = {
         {"type", "set-mode"},
         {"content", {
             {"mode", mode}
@@ -58,14 +58,14 @@ void WarnLight::SetMode(std::string mode) {
 
 void WarnLight::StopBuzzer()
 {
-    json message;
+    nlohmann::json message;
     message["type"] = "stop-buzzer";
     SendJson(message);
 }
 
 void WarnLight::StartBuzzerBeep(uint16_t time)
 {
-    json message = {
+    nlohmann::json message = {
         {"type", "start-buzzer-beep"},
         {"content", {
             {"period", time}
@@ -76,7 +76,7 @@ void WarnLight::StartBuzzerBeep(uint16_t time)
 
 void WarnLight::StartBuzzerContinuous()
 {
-    json message;
+    nlohmann::json message;
     message["type"] = "start-buzzer-continuous";
     SendJson(message);
 }

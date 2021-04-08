@@ -7,6 +7,8 @@
 
 #include "common.h"
 
+#include "json.hpp"
+
 #include <map>
 #include <functional>
 #include <vector>
@@ -31,10 +33,11 @@ private:
     JSONMapping *mapping;
     nlohmann::json mappingJSON;
 
+    bool CheckEvents();
+
+public:
     ~EventManager();
 
-    bool CheckEvents();
-public:
     void Init();
 
     /**

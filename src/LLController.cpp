@@ -12,8 +12,6 @@
 
 #include "LLController.h"
 
-using namespace std;
-
 void LLController::PrintLogo()
 {
     std::ifstream f("img/txvLogoSquashed.txt");
@@ -30,7 +28,7 @@ void LLController::Init()
     //LLInterface needs to be initialized first to ensure proper initialization before receiving
     //aynchronous commands from the web server
     PrintLogo();
-    string version = std::get<std::string>(Config::getData("version"));
+    std::string version = std::get<std::string>(Config::getData("version"));
 
     Debug::printNoTime("Version: " + version);
     Debug::printNoTime("\n----------------------");
@@ -43,9 +41,9 @@ void LLController::Init()
     EcuiSocket::Init(OnECUISocketRecv, Abort);
     Debug::print("Initializing Webserver SocketOld done\n");
 
-    Debug::print("Initializing Sequence Manager...");
-    SequenceManager::init();
-    Debug::print("Initializing Sequence Manager done\n");
+//    Debug::print("Initializing Sequence Manager...");
+//    SequenceManager::init();
+//    Debug::print("Initializing Sequence Manager done\n");
 
     Debug::printNoTime("----------------------");
     Debug::print("Low-Level Server started!\n");
@@ -53,7 +51,7 @@ void LLController::Init()
 
 void LLController::Destroy()
 {
-    SequenceManager::AbortSequence();
+//    SequenceManager::AbortSequence();
     EcuiSocket::Destroy();
     Debug::close();
     LLInterface::Destroy();
@@ -64,125 +62,57 @@ void LLController::Abort()
     Destroy();
 }
 
-void LLController::OnECUISocketRecv(json msg)
+void LLController::OnECUISocketRecv(nlohmann::json msg)
 {
     if (utils::keyExists(msg, "type"))
     {
-        string type = msg["type"];
+        std::string type = msg["type"];
 
         if (type.compare("sequence-start") == 0)
         {
             //stop Transmission first
-            LLInterface::StopSensorTransmission();
+            LLInterface::StopStateTransmission();
 
             //send(sock, strmsg.c_str(), strmsg.size(), 0);
-            json seq = msg["content"][0];
-            json abortSeq = msg["content"][1];
-            SequenceManager::StartSequence(msg["content"][0], msg["content"][1], msg["content"][2]);
+            nlohmann::json seq = msg["content"][0];
+            nlohmann::json abortSeq = msg["content"][1];
+//            SequenceManager::StartSequence(msg["content"][0], msg["content"][1], msg["content"][2]);
         }
         else if (type.compare("send-postseq-comment") == 0)
         {
-            SequenceManager::WritePostSeqComment(msg["content"][0]);
+//            SequenceManager::WritePostSeqComment(msg["content"][0]);
         }
+        //TODO: MP Move this logic to state and event manager
         else if (type.compare("abort") == 0)
         {
-            SequenceManager::AbortSequence("manual abort");
+//            SequenceManager::AbortSequence("manual abort");
         }
-        else if (type.compare("servos-load") == 0)
+        //TODO: MP probably not even needed
+        else if (type.compare("states-load") == 0)
         {
-            json servosData = HcpManager::GetAllServoData();
-            EcuiSocket::SendJson("servos-load", servosData);
+            nlohmann::json states = LLInterface::GetAllStates();
+            EcuiSocket::SendJson("states-load", states);
         }
-        else if (type.compare("servos-enable") == 0)
+        else if (type.compare("states-set") == 0)
         {
-            HcpManager::EnableAllServos();
-        }
-        else if (type.compare("servos-disable") == 0)
-        {
-            HcpManager::DisableAllServos();
-        }
-        else if (type.compare("servos-set") == 0)
-        {
-            string name;
-            uint8_t value;
+            std::string name;
+            double value;
+            uint64_t timestamp;
             for (auto servo : msg["content"])
             {
-                name = servo["id"];
+                name = servo["state"];
                 value = servo["value"];
-                HcpManager::SetServo(name, value);
-                json client_msg = servo;
-                EcuiSocket::SendJson("servos-sync", client_msg);
+                timestamp = servo["timestamp"];
+                LLInterface::SetState(name, value, timestamp);
             }
         }
-        else if (type.compare("servos-set-raw") == 0)
+        else if (type.compare("states-start") == 0)
         {
-            string name;
-            uint16_t value;
-            for (auto servo : msg["content"])
-            {
-                name = servo["id"];
-                value = servo["value"];
-                HcpManager::SetServoRaw(name, value);
-            }
+            LLInterface::StartStateTransmission();
         }
-        else if (type.compare("servos-calibrate") == 0)
+        else if (type.compare("states-stop") == 0)
         {
-            for (auto servo : msg["content"])
-            {
-                if (utils::keyExists(servo, "min"))
-                {
-                    HcpManager::SetServoMin(servo["id"], servo["min"]);
-                }
-                else if (utils::keyExists(servo, "max"))
-                {
-                    HcpManager::SetServoMax(servo["id"], servo["max"]);
-                }
-                else
-                {
-                    Debug::error("no valid key in servos-calibrate found");
-                }
-            }
-            //Could be more efficient if new min and max are saved from for loop above
-            json servosData = HcpManager::GetAllServoData();
-            EcuiSocket::SendJson("servos-load", servosData);
-
-        }
-        else if (type.compare("supercharge-set") == 0)
-        {
-			int8_t setpoint;
-			uint8_t hysteresis;
-			json supercharge = msg["content"][0];
-			setpoint = supercharge["setpoint"];
-			hysteresis = supercharge["hysteresis"];
-			HcpManager::SetSupercharge(setpoint,hysteresis);
-        }
-        else if (type.compare("supercharge-get") == 0)
-        {
-			json superchargeData = LLInterface::GetSupercharge();
-            EcuiSocket::SendJson("supercharge-load", superchargeData);
-        }
-        else if (type.compare("digital-outs-set") == 0)
-        {
-            string name;
-            bool value;
-            for (auto digitalOutputs : msg["content"])
-            {
-                name = digitalOutputs["id"];
-                value = digitalOutputs["value"];
-                HcpManager::SetDigitalOutputs(name, value);
-            }
-        }
-        else if (type.compare("sensors-start") == 0)
-        {
-            LLInterface::StartSensorTransmission();
-        }
-        else if (type.compare("sensors-stop") == 0)
-        {
-            LLInterface::StopSensorTransmission();
-        }
-        else if (type.compare("tare") == 0)
-        {
-            HcpManager::TareLoadCells();
+            LLInterface::StopStateTransmission();
         }
         else
         {

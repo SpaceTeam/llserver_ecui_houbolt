@@ -12,7 +12,7 @@
 class ADC24 : public Channel
 {
 public:
-    ADC24(uint8_t channelId, const std::string &channelName, double scaling, Channel *parent);
+    using Channel::Channel;
 
 public:
 };

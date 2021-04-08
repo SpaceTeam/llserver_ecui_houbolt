@@ -19,7 +19,7 @@ private:
     uint16_t id;
 
     static void OnClose();
-    void SendJson(json message);
+    void SendJson(nlohmann::json message);
 public:
 
     WarnLight(uint16_t id);

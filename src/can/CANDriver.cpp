@@ -7,19 +7,23 @@
 #include <utility>
 #include <string>
 
-canStatus InitializeCANChannel(uint32_t canChannelID);
-char* CANError(canStatus status);
-
-CANDriver::CANDriver(std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onInitRecvCallback,
-                     std::function<void(uint32_t, uint8_t *, uint32_t, uint64_t)> onRecvCallback, std::function<void(char *)> onErrorCallback)
-                     : onRecvCallback(std::move(onRecvCallback)), seqRecvCallback(std::move(onRecvCallback)), onErrorCallback(std::move(onErrorCallback))
+CANDriver::CANDriver(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onInitRecvCallback,
+                     std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
+                     std::function<void(std::string)> onErrorCallback,
+                     kvBusParamsTq arbitrationParams,
+                     kvBusParamsTq dataParams)
+                     : onRecvCallback(std::move(onInitRecvCallback)),
+                     seqRecvCallback(std::move(onRecvCallback)),
+                     onErrorCallback(std::move(onErrorCallback)),
+                     arbitrationParams(arbitrationParams), dataParams(dataParams)
 {
     canStatus stat;
     for (size_t i = 0; i < CAN_CHANNELS; i++)
     {
-        if((stat = InitializeCANChannel(i)) < 0) { 
+        stat = InitializeCANChannel(i);
+        if (stat < 0) {
             std::ostringstream stringStream;
-            stringStream << "CAN-Channel " << i << ": " << CANError(stat);
+            stringStream << "CANDriver - Constructor: CAN-Channel " << i << ": " << CANError(stat);
             throw std::runtime_error(stringStream.str());
         }
     }
@@ -40,58 +44,81 @@ CANDriver::~CANDriver()
 
 void CANDriver::InitDone(void)
 {
+    //TODO: MP mutual exclusion needed if implemented this way
     onRecvCallback = seqRecvCallback;
 }
 
 void CANDriver::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength)
 {
     // Flags mean that the message is a FD message (FDF, BRS) and that an extended id is used (EXT)
-    canStatus stat = canWrite(canHandles[canChannelID], canID, (void *) payload, payload_length, canFDMSG_FDF | canFDMSG_BRS | canMSG_EXT);
+    canStatus stat = canWrite(canHandles[canChannelID], canID, (void *) payload, payloadLength, canFDMSG_FDF | canFDMSG_BRS | canMSG_EXT);
 
     if(stat < 0) {
         throw std::runtime_error(CANError(stat));
     }
 }
 
-std::map<std::string, bool> CANDriver::GetCANStatusReadable(uint32_t canChannelID)
+std::map<std::string, bool> CANDriver::GetCANStatusReadable(uint32_t canBusChannelID)
 {
-    std::map<std::string, bool> CANState;
+    std::map<std::string, bool> canState;
     uint64_t flags;
-    canStatus stat = canReadStatus(canHandles[canChannelID], &flags);
+    canStatus stat = canReadStatus(canHandles[canBusChannelID], &flags);
 
     if(stat == canOK) {
-        uint8_t length = 8;
-        std::string names[length] = {"ERROR_PASSIVE", "BUS_OFF", "ERROR_WARNING", "ERROR_ACTIVE",
+        std::vector<std::string> names = {"ERROR_PASSIVE", "BUS_OFF", "ERROR_WARNING", "ERROR_ACTIVE",
                              "TX_PENDING", "RX_PENDING", "RESERVED_1", "TXERR", "RXERR", "HW_OVERRUN",
                              "SW_OVERRUN", "OVERRUN"};
 
-        for(uint8_t i = 0; i < length; i++){
-            CANState.insert(names[i], (bool)(state & (1 << i)));
+        for(uint8_t i = 0; i < names.size(); i++){
+            canState[names[i]] = (bool)(stat & (1 << i));
         }
     }
 
-    return CANState;
+    return canState;
 }
 
+//TODO: MP maybe create 2 callbacks one for until init done and one for afterwards to eliminate bus channel id search
+// if not needed
 void CANDriver::OnCANCallback(int handle, void *context, unsigned int event)
 {
     canStatus stat;
-    uint32_t id, dlc, flags;
+    int64_t id;
+    uint32_t dlc, flags;
     uint8_t data[64];
     uint64_t timestamp;
     
     // As the callback only gets entered when the receive queue was empty, empty it in here
     do {
-        stat = canRead(hnd, &id, data, &dlc, &flags, &timestamp);
+        stat = canRead(handle, &id, data, &dlc, &flags, &timestamp);
+
+        if (id < 0)
+        {
+            Debug::error("CANDriver - OnCANCallback: id negative");
+            return;
+        }
+        uint8_t canBusChannelID = -1;
+        for (int i = 0; i < CAN_CHANNELS; i++)
+        {
+            if (handle == canHandles[i])
+            {
+                canBusChannelID = i;
+            }
+        }
+        if (canBusChannelID == (uint8_t)-1)
+        {
+            Debug::error("CANDriver - OnCANCallback: can handle not found");
+            return;
+        }
 
         switch(event) {
             case canNOTIFY_ERROR:
                 onErrorCallback(CANError(stat));
             break;
             case canNOTIFY_RX:
-                onRecvCallback(&id, data, &dlc, &timestamp);
+                onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, timestamp);
             break;
             default:
+                //TODO: MP since this thread is managed by the canlib, should we really throw exceptions?
                 throw std::runtime_error("Callback got called with neither ERROR nor RX, gigantic UFF");
             break;
         }
@@ -105,38 +132,38 @@ void CANDriver::OnCANCallback(int handle, void *context, unsigned int event)
 }
 
 
-char* CANError(canStatus status); {
+std::string CANDriver::CANError(canStatus status) {
     char msg[64];
     canGetErrorText(status, msg, sizeof msg);
     return msg;
 }
 
-canStatus InitializeCANChannel(uint32_t canChannelID) {
+canStatus CANDriver::InitializeCANChannel(uint32_t canBusChannelID) {
     canStatus stat;
     canInitializeLibrary();
     // TODO: Might want to remove canOPEN_ACCEPT_VIRTUAL later (DB)
-    canHandles[canChannelID] = canOpenChannel(channel, canOPEN_EXCLUSIVE | canOPEN_CAN_FD | canOPEN_ACCEPT_LARGE_DLC | canOPEN_ACCEPT_VIRTUAL);
-    if(canHandles[canChannelID] < 0){
+    canHandles[canBusChannelID] = canOpenChannel(canBusChannelID, canOPEN_EXCLUSIVE | canOPEN_CAN_FD | canOPEN_ACCEPT_LARGE_DLC | canOPEN_ACCEPT_VIRTUAL);
+    if(canHandles[canBusChannelID] < 0){
         return stat;
     }
 
-    stat = canSetBusParamsFdTq(canHandles[canChannelID], canFdParams);
+    stat = canSetBusParamsFdTq(canHandles[canBusChannelID], arbitrationParams, dataParams);
     if(stat < 0) {
         return stat;
     }
 
-    stat = canSetBusOutputControl(canHandles[canChannelID], canDRIVER_NORMAL);
+    stat = canSetBusOutputControl(canHandles[canBusChannelID], canDRIVER_NORMAL);
     if(stat < 0) {
         return stat;
     }
 
-    stat = canBusOn(canHandles[canChannelID]);
+    stat = canBusOn(canHandles[canBusChannelID]);
     if(stat < 0) {
         return stat;
     }
 
     // Register callback for receiving a msg when the rcv buffer has been empty or when an error frame got received
-    stat = kvSetNotifyCallback(canHandles[canChannelID], (kvCallback_t) &OnCANCallback, NULL, canNOTIFY_RX | canNOTIFY_ERROR);
+    stat = kvSetNotifyCallback(canHandles[canBusChannelID], (kvCallback_t) &CANDriver::OnCANCallback, NULL, canNOTIFY_RX | canNOTIFY_ERROR);
     if(stat < 0) {
         return stat;
     }

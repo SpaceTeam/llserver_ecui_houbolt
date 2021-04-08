@@ -7,6 +7,8 @@
 
 #include "common.h"
 
+#include <map>
+
 #include "json.hpp"
 
 typedef enum class device_type_e

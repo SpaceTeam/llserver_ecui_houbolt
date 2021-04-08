@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <utility>
+#include <bus_params_tq.h>
 
 #include "Config.h"
 #include "can/CANManager.h"
@@ -40,12 +41,13 @@ CANResult CANManager::Init()
 
         Debug::print("Initializing CANDriver...");
         //arbitration bus parameters
-        =
+        int32_t tq = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_quanta"));
         int32_t phase1 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/phase1"));
         int32_t phase2 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/phase2"));
         int32_t sjw = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/sync_jump_width"));
         int32_t prop = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/propagation_segment"));
         int32_t presc = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/prescaler"));
+        kvBusParamsTq arbitrationParams = {tq, phase1, phase2, sjw, prop, presc};
         //data bus parameters
         int32_t tqData = std::get<int>(Config::getData("CAN/BUS/DATA/time_quanta"));
         int32_t phase1Data = std::get<int>(Config::getData("CAN/BUS/DATA/phase1"));
@@ -53,17 +55,27 @@ CANResult CANManager::Init()
         int32_t sjwData = std::get<int>(Config::getData("CAN/BUS/DATA/sync_jump_width"));
         int32_t propData = std::get<int>(Config::getData("CAN/BUS/DATA/propagation_segment"));
         int32_t prescData = std::get<int>(Config::getData("CAN/BUS/DATA/prescaler"));
-        canDriver = new CANDriver(std::bind(&CANManager::OnCANInit, this, std::placeholders::_1, std::placeholders::_2,std::placeholders::_3),
-                std::bind(&CANManager::OnCANRecv, this, std::placeholders::_1, std::placeholders::_2,std::placeholders::_3),
-                std::bind(&CANManager::OnCANError, this));
+        kvBusParamsTq dataParams = {tqData, phase1Data, phase2Data, sjwData, propData, prescData};
+        canDriver = new CANDriver(std::bind(&CANManager::OnCANInit, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
+                std::bind(&CANManager::OnCANRecv, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
+                std::bind(&CANManager::OnCANError, this, std::placeholders::_1), arbitrationParams, dataParams);
 
         Debug::print("Retreiving CANHardware info...");
         RequestCANInfo();
         using namespace std::chrono_literals;
         //TODO: wait for user input or expected node count to continue
         int32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
-        while( nodeCount)
-        std::this_thread::sleep_for(std::chrono::duration<int, std::chrono::milliseconds>(1000));
+        uint32_t currNodeCount = 0;
+        do {
+            std::this_thread::sleep_for(100ms);
+            nodeMapMtx.lock();
+            currNodeCount = nodeMap.size();
+            nodeMapMtx.unlock();
+            Debug::print("Waiting for nodes... %d of %d", currNodeCount, nodeCount);
+        }
+        while(currNodeCount < nodeCount);
+        Debug::print("Initialized all nodes\n");
+
 
         initialized = true;
     }
@@ -110,7 +122,7 @@ std::map<std::string, std::tuple<double, uint64_t>> CANManager::GetLatestSensorD
 void CANManager::OnChannelStateChanged(std::string stateName, double value, uint64_t timestamp)
 {
     StateController *stateController = StateController::Instance();
-    stateController->ChangeState(std::move(stateName), value, timestamp);
+    stateController->SetState(std::move(stateName), value, timestamp);
 }
 
 void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
@@ -157,7 +169,7 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
     }
 }
 
-void CANManager::OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
+void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
 {
     uint8_t nodeID = CANManager::GetNodeID(canID);
     try
@@ -173,9 +185,9 @@ void CANManager::OnCANRecv(uint32_t canID, uint8_t *payload, uint32_t payloadLen
 
 }
 
-void CANManager::OnCANError()
+void CANManager::OnCANError(std::string error)
 {
-    Debug::error("CANManager - OnCANError: CAN error");
+    Debug::error("CANManager - OnCANError: CAN error %s", error);
 }
 
 //std::vector<std::string> CANManager::GetChannelStates()

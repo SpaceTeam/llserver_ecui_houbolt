@@ -10,6 +10,8 @@
 
 #include "common.h"
 
+#include "json.hpp"
+
 namespace utils
 {
 
