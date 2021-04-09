@@ -13,8 +13,6 @@
  * @param driver
  */
 
-//
-
 Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
     : nodeID(nodeID), driver(driver), Channel::Channel(0xFF, nodeChannelName, 1.0, this)
 {
@@ -76,7 +74,7 @@ Node::~Node()
 std::vector<std::string> Node::GetStates()
 {
     std::vector<std::string> states;
-    //states.insert(states.end(), Node::states.begin(), Node::states.end());
+    states.insert(states.end(), Node::states.begin(), Node::states.end());
     for (auto &channel : channelMap)
     {
         std::vector<std::string> chStates = channel.second->GetStates();
@@ -88,7 +86,7 @@ std::vector<std::string> Node::GetStates()
 std::map<std::string, std::function<void(std::vector<double>)>> Node::GetCommands()
 {
     std::map<std::string, std::function<void(std::vector<double>)>> commands;
-    //commands.insert(Node::commandsMap.begin(), Node::commandsMap.end());
+    commands.insert(Node::commandsMap.begin(), Node::commandsMap.end());
     for (auto &channel : channelMap)
     {
         std::map<std::string, std::function<void(std::vector<double>)>> chCommands = channel.second->GetCommands();
@@ -96,3 +94,10 @@ std::map<std::string, std::function<void(std::vector<double>)>> Node::GetCommand
     }
     return commands;
 }
+
+// const std::vector<std::string> states = {""};
+// std::map<std::string, std::function<void(std::vector<double>)>> = {
+//     {},
+//     {},
+//     {}
+// };
