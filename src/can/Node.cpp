@@ -75,10 +75,24 @@ Node::~Node()
 
 std::vector<std::string> Node::GetStates()
 {
+    std::vector<std::string> states;
+    //states.insert(states.end(), Node::states.begin(), Node::states.end());
     for (auto &channel : channelMap)
     {
-        channel.second->GetStates();
+        std::vector<std::string> chStates = channel.second->GetStates();
+        states.insert(states.end(), chStates.begin(), chStates.end());
     }
+    return states;
 }
 
-
+std::map<std::string, std::function<void(std::vector<double>)>> Node::GetCommands()
+{
+    std::map<std::string, std::function<void(std::vector<double>)>> commands;
+    //commands.insert(Node::commandsMap.begin(), Node::commandsMap.end());
+    for (auto &channel : channelMap)
+    {
+        std::map<std::string, std::function<void(std::vector<double>)>> chCommands = channel.second->GetCommands();
+        commands.insert(chCommands.begin(), chCommands.end());
+    }
+    return commands;
+}

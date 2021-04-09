@@ -28,6 +28,7 @@ public:
 	uint8_t GetNodeID();
 
     std::vector<std::string> GetStates() override;
+	std::map<std::string, std::function<void(std::vector<double>)>> GetCommands() override;
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_NODE_H

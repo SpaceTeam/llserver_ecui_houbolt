@@ -114,7 +114,7 @@ int main(int argc, char const *argv[])
         }
         else
         {
-            printf("Defaulting to Large Teststand Profile...\n");
+            printf("Defaulting to Franz Profile...\n");
         }
     }
 
@@ -128,7 +128,7 @@ int main(int argc, char const *argv[])
             configPath = "config_small_oxfill.json";
 			break;
         case ServerMode::LARGE_TESTSTAND:
-            configPath = "config_large_teststand.json";
+            configPath = "config_Franz.json";
             break;
         default:
             exit(1);

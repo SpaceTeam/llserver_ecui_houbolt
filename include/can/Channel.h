@@ -37,8 +37,11 @@ public:
      * @return states of channel, sends a can command for each state, process can command writes the result to the
      * state controller
      */
-    virtual std::vector<std::string> GetStates() {/*return states;*/};
-	virtual std::map<std::string, std::function<void(std::vector<double>)>> GetCommands() {/*return commandsMap;*/};
+    virtual std::vector<std::string> GetStates() {return std::vector<std::string>();/*return states;*/};
+	virtual std::map<std::string, std::function<void(std::vector<double>)>> GetCommands() 
+    {
+        return std::map<std::string, std::function<void(std::vector<double>)>>();
+        /*return commandsMap;*/};
 
 	virtual std::string GetSensorName() {return channelName + ":sensor";};
 

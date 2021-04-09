@@ -144,7 +144,7 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
             uint8_t nodeID = CANManager::GetNodeID(canID);
             CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
 
-            NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *)payload;
+            NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *)&payload[1];
 
             std::map<uint8_t, std::tuple<std::string, double>> channelInfo;
             for (uint8_t channelID = 0; channelID < 32; channelID++)

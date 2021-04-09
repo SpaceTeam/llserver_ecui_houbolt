@@ -39,6 +39,7 @@ CANMappingObj CANMapping::GetChannelObj(uint8_t &nodeID, uint8_t &channelID)
     try
     {
         channelObj = this->mapping[std::to_string(nodeID)][std::to_string(channelID)];
+        Debug::print(channelObj.dump(4));
         mappingObj.stringID = channelObj["stringID"];
         mappingObj.scaling = channelObj["scaling"];
     }
