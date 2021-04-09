@@ -32,13 +32,13 @@ void testFnc()
 
     InfoMsgDummy_t msg;
     msg.msgType = GENERIC_NODE_INFO;
-    NodeInfoMsg_t info = msg.info;
-    info.firmware_version = 10000;
-    info.channel_mask = 0x000B;
-    info.channel_type[0] = CHANNEL_TYPE_ADC24;
-    info.channel_type[1] = CHANNEL_TYPE_ADC16;
-    info.channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
-    info.channel_type[3] = CHANNEL_TYPE_SERVO;
+    NodeInfoMsg_t *info = &msg.info;
+    info->firmware_version = 10000;
+    info->channel_mask = 0x000B;
+    info->channel_type[0] = CHANNEL_TYPE_ADC24;
+    info->channel_type[1] = CHANNEL_TYPE_ADC16;
+    info->channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
+    info->channel_type[3] = CHANNEL_TYPE_SERVO;
     uint16_t canID = 0b00000000010;
 
     CANManager *manager = CANManager::Instance();

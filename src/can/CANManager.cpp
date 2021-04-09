@@ -152,7 +152,7 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
                 uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
                 if (mask == 1)
                 {
-                    CANMappingObj channelMappingObj = mapping->GetNodeObj(channelID);
+                    CANMappingObj channelMappingObj = mapping->GetChannelObj(nodeID, channelID);
                     channelInfo[channelID] = {channelMappingObj.stringID, channelMappingObj.scaling};
 
                     //add sensor names to array if needed

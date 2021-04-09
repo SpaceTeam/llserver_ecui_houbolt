@@ -1,6 +1,6 @@
 {
     "CANMapping": {
-        "2" : {
+        "1" : {
             "stringID" : "node2String",
             "0" : {
                 "stringID" : "ch0String",
