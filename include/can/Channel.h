@@ -21,7 +21,7 @@ protected:
 	Channel *parent; //Should only be from node type
 
     static const std::vector<std::string> states;
-    static const std::map<std::string, std::function<void(std::vector<double>)>> commandsMap;
+    static const std::map<std::string, std::function<void(std::vector<double>)>> commandMap;
 public:
     Channel(uint8_t channelID, std::string channelName, double scaling, Channel *parent) :
         channelID(channelID), channelName(std::move(channelName)), scaling(scaling), parent(parent) {};
@@ -47,7 +47,7 @@ public:
 
 };
 
-//const std::vector<std::string> Channel::states;
-//const std::map<std::string, std::function<void(std::vector<double>)>> Channel::commandsMap;
+const std::vector<std::string> Channel::states = {};
+const std::map<std::string, std::function<void(std::vector<double>)>> Channel::commandMap = {};
 
 #endif // LLSERVER_ECUI_HOUBOLT_CHANNEL_H

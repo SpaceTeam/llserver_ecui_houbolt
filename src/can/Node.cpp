@@ -86,7 +86,7 @@ std::vector<std::string> Node::GetStates()
 std::map<std::string, std::function<void(std::vector<double>)>> Node::GetCommands()
 {
     std::map<std::string, std::function<void(std::vector<double>)>> commands;
-    commands.insert(Node::commandsMap.begin(), Node::commandsMap.end());
+    commands.insert(Node::commandMap.begin(), Node::commandMap.end());
     for (auto &channel : channelMap)
     {
         std::map<std::string, std::function<void(std::vector<double>)>> chCommands = channel.second->GetCommands();
@@ -95,9 +95,15 @@ std::map<std::string, std::function<void(std::vector<double>)>> Node::GetCommand
     return commands;
 }
 
-// const std::vector<std::string> states = {""};
-// std::map<std::string, std::function<void(std::vector<double>)>> = {
-//     {},
-//     {},
-//     {}
-// };
+void Node::SetRefreshDivider(std::vector<double> &params)
+{
+    
+}
+
+
+
+const std::vector<std::string> Channel::states = {"RefreshDivider"};
+std::map<std::string, std::function<void(std::vector<double>)>> Channel::commandMap = {
+    {"SetRefreshDivider", },
+    {"GetRefreshDivider", }
+};
