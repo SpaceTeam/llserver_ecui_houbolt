@@ -13,6 +13,40 @@
 #include "LLController.h"
 #include "Config.h"
 
+//#ifdef TEST_LLSERVER
+#include <thread>
+#include "can/CANManager.h"
+#include "can_houbolt/generic_cmds.h"
+
+typedef struct
+{
+    uint8_t msgType;
+    NodeInfoMsg_t info;
+} InfoMsgDummy_t;
+
+void testFnc()
+{
+    //wait a sec before executing function
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(1000ms);
+
+    InfoMsgDummy_t msg;
+    msg.msgType = GENERIC_NODE_INFO;
+    NodeInfoMsg_t *info = &msg.info;
+    info->firmware_version = 10000;
+    info->channel_mask = 0x000B;
+    info->channel_type[0] = CHANNEL_TYPE_ADC24;
+    info->channel_type[1] = CHANNEL_TYPE_ADC16;
+    info->channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
+    info->channel_type[3] = CHANNEL_TYPE_SERVO;
+    uint16_t canID = 0b00000000010;
+
+    CANManager *manager = CANManager::Instance();
+    manager->OnCANInit(0, canID, (uint8_t *)&msg, sizeof(msg), 0x1);
+}
+
+//#endif
+
 enum ServerMode
 {
 	LARGE_TESTSTAND,
@@ -95,7 +129,7 @@ int main(int argc, char const *argv[])
 			break;
         case ServerMode::LARGE_TESTSTAND:
             configPath = "config_large_teststand.json";
-            printf("server mode 'large teststand' not implemented\n");
+            break;
         default:
             exit(1);
 
@@ -103,7 +137,15 @@ int main(int argc, char const *argv[])
     Config::Init(configPath);
 
 	Debug::Init();
+
+	//#ifdef TEST_LLSERVER
+        std::thread *testThread = new std::thread(testFnc);
+
+    //#endif
+
     LLController::Init();
+
+    testThread->join();
 
     std::string inputStr;
     while (true){

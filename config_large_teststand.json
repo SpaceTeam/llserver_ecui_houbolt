@@ -2,33 +2,52 @@
   "version": "1.2.4@Large Teststand",
   "autoabort": false,
   "DEBUG": {
-      "printWarnings": true,
+      "printWarnings": false,
       "printInfos": false
   },
   "useTMPoE": false,
   "socket_msg_size": 65536,
-  "mapping_path": "mapping/hcpMappingLargeTeststand.json",
+  "mapping_path": "mapping/FranzlMapping.json",
   "LOGGING": {
     "sensor_log_rate": 100,
     "post_sequence_script": "scripts/plot.sh"
   },
-  "HCP": {
-    "device": "/dev/serial0",
-    "baudrate": 460800,
-    "sensor_sample_rate": 100,
-    "servo_count": 6,
-    "servo_max_ontime": 40000,
-    "motor_count": 8,
-    "motor_max_power": 1000,
-    "digital_count": 16,
-    "analog_count": 16
+  "CAN" :
+  {
+    "node_count" : 1,
+    "BUS" :
+    {
+        "ARBITRATION":
+        {
+          "time_quanta" : 80,
+          "phase1" : 2,
+          "phase2" : 2,
+          "sync_jump_width" : 2,
+          "propagation_segment" : 75,
+          "prescaler" : 1
+        },
+        "DATA":
+        {
+          "time_quanta" : 10,
+          "phase1" : 7,
+          "phase2" : 2,
+          "sync_jump_width" : 2,
+          "propagation_segment" : 0,
+          "prescaler" : 1
+        }
+    }
+  },
+  "LLSERVER" :
+  {
+    "sensor_sampling_rate": 100
   },
   "WEBSERVER":
   {
-    "ip": "127.0.0.1",
+    "ip": "192.168.0.213",
     "port": 5555,
     "sensor_transmission_interval": 100000,
-    "timer_sync_interval": 100000
+    "timer_sync_interval": 100000,
+    "sensors_smoothing_factor": 0.3
   },
   "WARNLIGHT": {
     "ip": "127.0.0.1",

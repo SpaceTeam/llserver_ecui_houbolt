@@ -37,9 +37,9 @@ void LLController::Init()
     LLInterface::Init();
     Debug::print("Initializing LLInterface done\n");
 
-    Debug::print("Initializing Webserver SocketOld...");
+    Debug::print("Initializing ECUISocket...");
     EcuiSocket::Init(OnECUISocketRecv, Abort);
-    Debug::print("Initializing Webserver SocketOld done\n");
+    Debug::print("Initializing ECUISocket done\n");
 
 //    Debug::print("Initializing Sequence Manager...");
 //    SequenceManager::init();

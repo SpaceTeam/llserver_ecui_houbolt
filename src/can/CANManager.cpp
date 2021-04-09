@@ -35,49 +35,58 @@ CANResult CANManager::Init()
     if (!initialized)
     {
         Debug::print("Initializing CANMapping...");
-        std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
-        mapping = new CANMapping(mappingPath, (std::string &) "CANMapping");
-        Debug::print("CANMapping initialized");
 
-        Debug::print("Initializing CANDriver...");
-        //arbitration bus parameters
-        int32_t tq = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_quanta"));
-        int32_t phase1 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/phase1"));
-        int32_t phase2 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/phase2"));
-        int32_t sjw = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/sync_jump_width"));
-        int32_t prop = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/propagation_segment"));
-        int32_t presc = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/prescaler"));
-        kvBusParamsTq arbitrationParams = {tq, phase1, phase2, sjw, prop, presc};
-        //data bus parameters
-        int32_t tqData = std::get<int>(Config::getData("CAN/BUS/DATA/time_quanta"));
-        int32_t phase1Data = std::get<int>(Config::getData("CAN/BUS/DATA/phase1"));
-        int32_t phase2Data = std::get<int>(Config::getData("CAN/BUS/DATA/phase2"));
-        int32_t sjwData = std::get<int>(Config::getData("CAN/BUS/DATA/sync_jump_width"));
-        int32_t propData = std::get<int>(Config::getData("CAN/BUS/DATA/propagation_segment"));
-        int32_t prescData = std::get<int>(Config::getData("CAN/BUS/DATA/prescaler"));
-        kvBusParamsTq dataParams = {tqData, phase1Data, phase2Data, sjwData, propData, prescData};
-        canDriver = new CANDriver(std::bind(&CANManager::OnCANInit, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
-                std::bind(&CANManager::OnCANRecv, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
-                std::bind(&CANManager::OnCANError, this, std::placeholders::_1), arbitrationParams, dataParams);
+        try
+        {
+            std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
+            mapping = new CANMapping(mappingPath, "CANMapping");
+            Debug::print("CANMapping initialized");
 
-        Debug::print("Retreiving CANHardware info...");
-        RequestCANInfo();
-        using namespace std::chrono_literals;
-        //TODO: wait for user input or expected node count to continue
-        int32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
-        uint32_t currNodeCount = 0;
-        do {
-            std::this_thread::sleep_for(100ms);
-            nodeMapMtx.lock();
-            currNodeCount = nodeMap.size();
-            nodeMapMtx.unlock();
-            Debug::print("Waiting for nodes... %d of %d", currNodeCount, nodeCount);
+            Debug::print("Initializing CANDriver...");
+            //arbitration bus parameters
+            int32_t tq = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_quanta"));
+            int32_t phase1 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/phase1"));
+            int32_t phase2 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/phase2"));
+            int32_t sjw = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/sync_jump_width"));
+            int32_t prop = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/propagation_segment"));
+            int32_t presc = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/prescaler"));
+            kvBusParamsTq arbitrationParams = {tq, phase1, phase2, sjw, prop, presc};
+            //data bus parameters
+            int32_t tqData = std::get<int>(Config::getData("CAN/BUS/DATA/time_quanta"));
+            int32_t phase1Data = std::get<int>(Config::getData("CAN/BUS/DATA/phase1"));
+            int32_t phase2Data = std::get<int>(Config::getData("CAN/BUS/DATA/phase2"));
+            int32_t sjwData = std::get<int>(Config::getData("CAN/BUS/DATA/sync_jump_width"));
+            int32_t propData = std::get<int>(Config::getData("CAN/BUS/DATA/propagation_segment"));
+            int32_t prescData = std::get<int>(Config::getData("CAN/BUS/DATA/prescaler"));
+            kvBusParamsTq dataParams = {tqData, phase1Data, phase2Data, sjwData, propData, prescData};
+            canDriver = new CANDriver(std::bind(&CANManager::OnCANInit, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
+                    std::bind(&CANManager::OnCANRecv, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
+                    std::bind(&CANManager::OnCANError, this, std::placeholders::_1), arbitrationParams, dataParams);
+
+            Debug::print("Retreiving CANHardware info...");
+            RequestCANInfo();
+            using namespace std::chrono_literals;
+            //TODO: wait for user input or expected node count to continue
+            int32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
+            uint32_t currNodeCount = 0;
+            do {
+                std::this_thread::sleep_for(100ms);
+                nodeMapMtx.lock();
+                currNodeCount = nodeMap.size();
+                nodeMapMtx.unlock();
+                Debug::print("Waiting for nodes... %d of %d", currNodeCount, nodeCount);
+            }
+            while(currNodeCount < nodeCount);
+            Debug::print("Initialized all nodes\n");
+
+
+            initialized = true;
         }
-        while(currNodeCount < nodeCount);
-        Debug::print("Initialized all nodes\n");
+        catch (std::exception& e)
+        {
+            Debug::error("Initializing CANManager failed: %s", e.what());
+        }
 
-
-        initialized = true;
     }
     else
     {
@@ -128,45 +137,54 @@ void CANManager::OnChannelStateChanged(std::string stateName, double value, uint
 void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
 {
     //TODO: only accept node info messages in this stage
-    if (payloadLength >= (sizeof(NodeInfoMsg_t)+1) && payload[1] == GENERIC_NODE_INFO)
+    try
     {
-        uint8_t nodeID = CANManager::GetNodeID(canID);
-        CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
-
-        NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *)payload;
-
-        std::map<uint8_t, std::tuple<std::string, double>> channelInfo;
-        for (uint8_t channelID = 0; channelID < 32; channelID++)
+        if (payloadLength >= (sizeof(NodeInfoMsg_t)+1) && payload[0] == GENERIC_NODE_INFO)
         {
-            uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
-            if (mask == 1)
-            {
-                CANMappingObj channelMappingObj = mapping->GetNodeObj(channelID);
-                channelInfo[channelID] = {channelMappingObj.stringID, channelMappingObj.scaling};
+            uint8_t nodeID = CANManager::GetNodeID(canID);
+            CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
 
-                //add sensor names to array if needed
-                uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
-                sensorInfoMap[mergedID] = {channelMappingObj.stringID, channelMappingObj.scaling};
-            }
-            else if (mask > 1)
+            NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *)payload;
+
+            std::map<uint8_t, std::tuple<std::string, double>> channelInfo;
+            for (uint8_t channelID = 0; channelID < 32; channelID++)
             {
-                throw std::runtime_error("CANManager - OnCANInit: mask convertion of node info failed");
+                uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
+                if (mask == 1)
+                {
+                    CANMappingObj channelMappingObj = mapping->GetChannelObj(nodeID, channelID);
+                    channelInfo[channelID] = {channelMappingObj.stringID, channelMappingObj.scaling};
+
+                    //add sensor names to array if needed
+                    uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
+                    sensorInfoMap[mergedID] = {channelMappingObj.stringID, channelMappingObj.scaling};
+                }
+                else if (mask > 1)
+                {
+                    throw std::runtime_error("CANManager - OnCANInit: mask convertion of node info failed");
+                }
             }
+
+            Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, channelInfo, canBusChannelID, canDriver);
+            nodeMap[nodeID] = node;
+
+            //add states to state controller
+            auto states = node->GetStates();
+            StateController *stateController = StateController::Instance();
+            stateController->AddUninitializedStates(states);
+
+
+            //add available commands to event manager
+            EventManager *eventManager = EventManager::Instance();
+            eventManager->AddCommands(node->GetCommands());
         }
-
-        Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, channelInfo, canBusChannelID, canDriver);
-        nodeMap[nodeID] = node;
-
-        //add states to state controller
-        auto states = node->GetStates();
-        StateController *stateController = StateController::Instance();
-        stateController->AddUninitializedStates(states);
-
-
-        //add available commands to event manager
-        EventManager *eventManager = EventManager::Instance();
-        eventManager->AddCommands(node->GetCommands());
     }
+    catch (std::exception &e)
+    {
+        Debug::error("%s", e.what());
+    }
+
+
 }
 
 void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
