@@ -1,0 +1,29 @@
+{
+    "CANMapping": {
+        "2" : {
+            "stringID" : "node2String",
+            "0" : {
+                "stringID" : "ch0String",
+                "scaling" : 0
+            },
+            "1" : {
+                "stringID" : "ch1String",
+                "scaling" : 1
+            },
+            "2" : {
+                "stringID" : "ch2String",
+                "scaling" : 2
+            },
+            "3" : {
+                "stringID" : "ch3String",
+                "scaling" : 3
+            }
+        }
+    },
+    "EventMapping" : {
+
+    },
+    "GUIMapping" : {
+
+    }
+}

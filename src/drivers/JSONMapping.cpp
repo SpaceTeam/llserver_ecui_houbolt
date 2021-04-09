@@ -18,7 +18,7 @@ void JSONMapping::LoadMapping(std::string &mappingID)
     {
         Debug::print("loading mapping...");
         this->mapping = nlohmann::json::parse(utils::loadFile(this->mappingPath));
-        if (mappingID.empty())
+        if (!mappingID.empty())
         {
             this->mapping = this->mapping[mappingID];
         }

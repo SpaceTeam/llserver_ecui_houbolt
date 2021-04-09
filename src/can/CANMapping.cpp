@@ -20,7 +20,7 @@ CANMappingObj CANMapping::GetNodeObj(uint8_t &nodeID)
     CANMappingObj mappingObj;
     try
     {
-        nodeObj = this->mapping[nodeID];
+        nodeObj = this->mapping[std::to_string(nodeID)];
         mappingObj.stringID = nodeObj["stringID"].get<std::string>();
         mappingObj.scaling = 1;
     }
@@ -37,7 +37,7 @@ CANMappingObj CANMapping::GetChannelObj(uint8_t &nodeID, uint8_t &channelID)
     CANMappingObj mappingObj;
     try
     {
-        channelObj = this->mapping[nodeID][channelID];
+        channelObj = this->mapping[std::to_string(nodeID)][std::to_string(channelID)];
         mappingObj.stringID = channelObj["stringID"].get<std::string>();
         mappingObj.scaling = channelObj["scaling"].get<double>();
     }
