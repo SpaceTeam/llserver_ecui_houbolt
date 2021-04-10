@@ -23,7 +23,7 @@ void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *comman
     msg.bit.cmd_id = cmdID;
     msg.bit.data.uint8 = command;
 
-    uint32_t msgLength = sizeof(Can_MessageDataInfo_t) + sizeof(uint8_t) + commandLength;
+    uint32_t msgLength = CAN_MSG_LENGTH(commandLength);
 
     if (!testOnly)
     {

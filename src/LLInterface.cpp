@@ -3,7 +3,6 @@
 //
 
 //#include "hcp/HcpManager.h"
-#include "can/CANManager.h"
 #include "EcuiSocket.h"
 #include "Timer.h"
 #include "Config.h"
@@ -14,6 +13,7 @@ I2C* LLInterface::i2cDevice;
 WarnLight* LLInterface::warnLight;
 TMPoE *LLInterface::tmPoE;
 
+JSONMapping *LLInterface::guiMapping;
 CANManager *LLInterface::canManager;
 EventManager *LLInterface::eventManager;
 StateController *LLInterface::stateController;
@@ -63,6 +63,11 @@ void LLInterface::Init()
         Debug::print("Waiting for States to be initialized...");
         stateController->WaitUntilStatesInitialized();
         Debug::print("All States initialized\n");
+
+        Debug::print("Initializing GUIMapping...");
+        std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
+        guiMapping = new JSONMapping(mappingPath, "GUIMapping");
+        Debug::print("GUIMapping initialized");
 
         Debug::print("Initializing DataFilter...");
         double sensorsSmoothingFactor = std::get<double>(Config::getData("WEBSERVER/sensors_smoothing_factor"));
