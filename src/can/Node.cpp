@@ -1,6 +1,8 @@
 #include "can/Node.h"
 
 #include <map>
+#include <string>
+#include <functional>
 #include "can/DigitalOut.h"
 #include "can/ADC16.h"
 #include "can/ADC24.h"
@@ -16,6 +18,21 @@
 Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
     : nodeID(nodeID), driver(driver), Channel::Channel(0xFF, nodeChannelName, 1.0, this)
 {
+    commandMap = {
+        {"SetBus1Voltage", std::bind(&Node::SetBus1Voltage, this, std::placeholders::_1, std::placeholders::_2)},
+        {"GetBus1Voltage", std::bind(&Node::GetBus1Voltage, this, std::placeholders::_1, std::placeholders::_2)},
+        {"SetBus2Voltage", std::bind(&Node::SetBus2Voltage, this, std::placeholders::_1, std::placeholders::_2)},
+        {"GetBus2Voltage", std::bind(&Node::GetBus2Voltage, this, std::placeholders::_1, std::placeholders::_2)},
+        {"SetPowerVoltage", std::bind(&Node::SetPowerVoltage, this, std::placeholders::_1, std::placeholders::_2)},
+        {"GetPowerVoltage", std::bind(&Node::GetPowerVoltage, this, std::placeholders::_1, std::placeholders::_2)},
+        {"SetPowerCurrent", std::bind(&Node::SetPowerCurrent, this, std::placeholders::_1, std::placeholders::_2)},
+        {"GetPowerCurrent", std::bind(&Node::GetPowerCurrent, this, std::placeholders::_1, std::placeholders::_2)},
+        {"SetRefreshDivider", std::bind(&Node::SetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2)},
+        {"GetRefreshDivider", std::bind(&Node::GetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2)},
+        {"SetRefreshTime", std::bind(&Node::SetRefreshTime, this, std::placeholders::_1, std::placeholders::_2)},
+        {"GetRefreshTime", std::bind(&Node::GetRefreshTime, this, std::placeholders::_1, std::placeholders::_2)}
+    };
+
     canBusChannelID = canBusChannelID;
     InitChannels(nodeInfo, channelInfo);
 }
@@ -83,27 +100,164 @@ std::vector<std::string> Node::GetStates()
     return states;
 }
 
-std::map<std::string, std::function<void(std::vector<double>)>> Node::GetCommands()
+std::map<std::string, std::function<void(std::vector<double> &, bool)>> Node::GetCommands()
 {
-    std::map<std::string, std::function<void(std::vector<double>)>> commands;
+    std::map<std::string, std::function<void(std::vector<double> &, bool)>> commands;
     commands.insert(Node::commandMap.begin(), Node::commandMap.end());
     for (auto &channel : channelMap)
     {
-        std::map<std::string, std::function<void(std::vector<double>)>> chCommands = channel.second->GetCommands();
+        std::map<std::string, std::function<void(std::vector<double> &, bool)>> chCommands = channel.second->GetCommands();
         commands.insert(chCommands.begin(), chCommands.end());
     }
     return commands;
 }
 
-void Node::SetRefreshDivider(std::vector<double> &params)
+void Node::SetBus1Voltage(std::vector<double> &params, bool testOnly)
 {
-    
+    std::vector<double> scalingParams = scalingMap.at("Bus1Voltage");
+    try
+    {
+        SetVariable(GENERIC_REQ_SET_VARIABLE, this->nodeID, GENERIC_BUS1_VOLTAGE, scalingParams, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - SetBus1Voltage: " + std::string(e.what()));
+    }
 }
 
+void Node::GetBus1Voltage(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(GENERIC_REQ_GET_VARIABLE, this->nodeID, GENERIC_BUS1_VOLTAGE, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - GetBus1Voltage: " + std::string(e.what()));
+    }
+}
 
+void Node::SetBus2Voltage(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("Bus2Voltage");
+    try
+    {
+        SetVariable(GENERIC_REQ_SET_VARIABLE, this->nodeID, GENERIC_BUS2_VOLTAGE, scalingParams, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - SetBus2Voltage: " + std::string(e.what()));
+    }
+}
 
-const std::vector<std::string> Channel::states = {"RefreshDivider"};
-std::map<std::string, std::function<void(std::vector<double>)>> Channel::commandMap = {
-    {"SetRefreshDivider", },
-    {"GetRefreshDivider", }
-};
+void Node::GetBus2Voltage(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(GENERIC_REQ_GET_VARIABLE, this->nodeID, GENERIC_BUS2_VOLTAGE, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - GetBus2Voltage: " + std::string(e.what()));
+    }
+}
+
+void Node::SetPowerVoltage(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("PowerVoltage");
+    try
+    {
+        SetVariable(GENERIC_REQ_SET_VARIABLE, this->nodeID, GENERIC_PWR_VOLTAGE, scalingParams, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - SetPowerVoltage: " + std::string(e.what()));
+    }
+}
+
+void Node::GetPowerVoltage(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(GENERIC_REQ_GET_VARIABLE, this->nodeID, GENERIC_PWR_VOLTAGE, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - GetPowerVoltage: " + std::string(e.what()));
+    }
+}
+
+void Node::SetPowerCurrent(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("PowerCurrent");
+    try
+    {
+        SetVariable(GENERIC_REQ_SET_VARIABLE, this->nodeID, GENERIC_PWR_CURRENT, scalingParams, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - SetPowerCurrent: " + std::string(e.what()));
+    }
+}
+
+void Node::GetPowerCurrent(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(GENERIC_REQ_GET_VARIABLE, this->nodeID, GENERIC_PWR_CURRENT, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - GetPowerCurrent: " + std::string(e.what()));
+    }
+}
+
+void Node::SetRefreshDivider(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("RefreshDivider");
+    try
+    {
+        SetVariable(GENERIC_REQ_SET_VARIABLE, this->nodeID, GENERIC_REFRESH_DIVIDER, scalingParams, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - SetRefreshDivider: " + std::string(e.what()));
+    }
+}
+
+void Node::GetRefreshDivider(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(GENERIC_REQ_GET_VARIABLE, this->nodeID, GENERIC_REFRESH_DIVIDER, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - GetRefreshDivider: " + std::string(e.what()));
+    }
+}
+
+void Node::SetRefreshRate(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("RefreshRate");
+    try
+    {
+        SetVariable(GENERIC_REQ_SET_VARIABLE, this->nodeID, GENERIC_REFRESH_RATE, scalingParams, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - SetRefreshRate: " + std::string(e.what()));
+    }
+}
+
+void Node::GetRefreshRate(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(GENERIC_REQ_GET_VARIABLE, this->nodeID, GENERIC_REFRESH_RATE, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - GetRefreshRate: " + std::string(e.what()));
+    }
+}

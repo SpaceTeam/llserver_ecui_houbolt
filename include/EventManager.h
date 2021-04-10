@@ -27,8 +27,8 @@ private:
     bool started = false;
     //TODO: write channel cmds as method in each channel class
     //<stateName, <callback, pointer to state>
-    std::map<std::string, std::function<void(std::vector<double>)>> eventMap;
-    std::map<std::string, std::function<void(std::vector<double>)>> commandMap;
+    std::map<std::string, std::function<void(std::vector<double> &, bool)>> eventMap;
+    std::map<std::string, std::function<void(std::vector<double> &, bool)>> commandMap;
 
     JSONMapping *mapping;
     nlohmann::json mappingJSON;
@@ -46,7 +46,7 @@ public:
      */
     void Start();
 
-    void AddCommands(std::map<std::string, std::function<void(std::vector<double>)>> commands);
+    void AddCommands(std::map<std::string, std::function<void(std::vector<double> &, bool)>> commands);
     void OnStateChange(const std::string& stateName, double value);
 
 

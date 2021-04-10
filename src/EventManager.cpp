@@ -75,7 +75,7 @@ bool EventManager::CheckEvents()
     return true;
 }
 
-void EventManager::AddCommands(std::map<std::string, std::function<void(std::vector<double>)>> commands)
+void EventManager::AddCommands(std::map<std::string, std::function<void(std::vector<double> &, bool)>> commands)
 {
     if (initialized)
     {

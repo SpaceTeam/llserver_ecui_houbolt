@@ -96,9 +96,32 @@ CANResult CANManager::Init()
     return CANResult::SUCCESS;
 }
 
+/**
+ * only protocol message implemented inside CANManager
+ * @return
+ */
 CANResult CANManager::RequestCANInfo()
 {
-    return CANResult::ERROR;
+    //TODO: MP change to correct broadcasting id
+    Can_MessageId_t canID;
+    canID.info.direction = MASTER2NODE_DIRECTION;
+    canID.info.node_id = 0;
+    canID.info.special_cmd = STANDARD_SPECIAL_CMD;
+    canID.info.priority = STANDARD_PRIORITY;
+
+    Can_MessageData_t msg;
+    msg.bit.info.buffer = DIRECT_BUFFER;
+    msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
+    msg.bit.cmd_id = GENERIC_REQ_NODE_INFO;
+    msg.bit.data.uint8 = NULL;
+
+    uint32_t msgLength = sizeof(Can_MessageDataInfo_t) + sizeof(uint8_t);
+
+    //TODO: MP be careful if one channel is used for backup
+    canDriver->SendCANMessage(0, canID.uint32, msg.uint8, msgLength);
+    canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength);
+    canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength);
+    canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength);
 }
 
 /**
@@ -139,7 +162,7 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
     //TODO: only accept node info messages in this stage
     try
     {
-        if (payloadLength >= (sizeof(NodeInfoMsg_t)+1) && payload[0] == GENERIC_NODE_INFO)
+        if (payloadLength >= (sizeof(NodeInfoMsg_t)+1) && payload[0] == GENERIC_RES_NODE_INFO)
         {
             uint8_t nodeID = CANManager::GetNodeID(canID);
             CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
