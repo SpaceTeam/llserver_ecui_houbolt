@@ -8,6 +8,18 @@
 #include "can/ADC24.h"
 #include "can/Servo.h"
 
+
+const std::vector<std::string> Node::states = {"Bus1Voltage", "Bus2Voltage", "PowerVoltage", "PowerCurrent", "RefreshDivider", "RefreshRate"};
+const std::map<std::string, std::vector<double>> Node::scalingMap =
+        {
+            {"Bus1Voltage", {1.0, 0.0}},
+            {"Bus2Voltage", {1.0, 0.0}},
+            {"PowerVoltage", {1.0, 0.0}},
+            {"PowerCurrent", {1.0, 0.0}},
+            {"RefreshDivider", {1.0, 0.0}},
+            {"RefreshRate", {1.0, 0.0}}
+        };
+
 /**
  * consider putting event mapping into llinterface
  * @param id
@@ -29,8 +41,8 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
         {"GetPowerCurrent", std::bind(&Node::GetPowerCurrent, this, std::placeholders::_1, std::placeholders::_2)},
         {"SetRefreshDivider", std::bind(&Node::SetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2)},
         {"GetRefreshDivider", std::bind(&Node::GetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2)},
-        {"SetRefreshTime", std::bind(&Node::SetRefreshTime, this, std::placeholders::_1, std::placeholders::_2)},
-        {"GetRefreshTime", std::bind(&Node::GetRefreshTime, this, std::placeholders::_1, std::placeholders::_2)}
+        {"SetRefreshTime", std::bind(&Node::SetRefreshRate, this, std::placeholders::_1, std::placeholders::_2)},
+        {"GetRefreshTime", std::bind(&Node::GetRefreshRate, this, std::placeholders::_1, std::placeholders::_2)}
     };
 
     canBusChannelID = canBusChannelID;

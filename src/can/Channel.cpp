@@ -5,6 +5,9 @@
 #include <can_houbolt/can_cmds.h>
 #include "can/Channel.h"
 
+const std::vector<std::string> Channel::states = {};
+const std::map<std::string, std::vector<double>> Channel::scalingMap = {};
+
 void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *command, uint32_t commandLength,
                                   uint8_t canBusChannelID, CANDriver *driver, bool testOnly)
 {

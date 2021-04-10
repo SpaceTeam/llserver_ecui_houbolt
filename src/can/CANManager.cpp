@@ -9,7 +9,7 @@
 
 #include "Config.h"
 #include "can/CANManager.h"
-#include "can_houbolt/generic_cmds.h"
+#include "can_houbolt/channels/generic_channel_def.h"
 
 #include "StateController.h"
 #include "EventManager.h"

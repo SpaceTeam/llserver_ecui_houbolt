@@ -16,7 +16,8 @@
 //#ifdef TEST_LLSERVER
 #include <thread>
 #include "can/CANManager.h"
-#include "can_houbolt/generic_cmds.h"
+#include "can_houbolt/can_cmds.h"
+#include "can_houbolt/channels/generic_channel_def.h"
 
 typedef struct
 {
@@ -31,7 +32,7 @@ void testFnc()
     std::this_thread::sleep_for(1000ms);
 
     InfoMsgDummy_t msg;
-    msg.msgType = GENERIC_NODE_INFO;
+    msg.msgType = GENERIC_RES_NODE_INFO;
     NodeInfoMsg_t *info = &msg.info;
     info->firmware_version = 10000;
     info->channel_mask = 0x000B;

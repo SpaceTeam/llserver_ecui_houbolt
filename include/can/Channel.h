@@ -79,7 +79,4 @@ public:
 
 };
 
-const std::vector<std::string> Channel::states = {};
-const std::map<std::string, std::vector<double>> Channel::scalingMap = {};
-
 #endif // LLSERVER_ECUI_HOUBOLT_CHANNEL_H

@@ -55,15 +55,4 @@ public:
 
 };
 
-const std::vector<std::string> Node::states = {"Bus1Voltage", "Bus2Voltage", "PowerVoltage", "PowerCurrent", "RefreshDivider", "RefreshRate"};
-const std::map<std::string, std::vector<double>> Node::scalingMap =
-        {
-            {"Bus1Voltage", {1.0, 0.0}},
-            {"Bus2Voltage", {1.0, 0.0}},
-            {"PowerVoltage", {1.0, 0.0}},
-            {"PowerCurrent", {1.0, 0.0}},
-            {"RefreshDivider", {1.0, 0.0}},
-            {"RefreshRate", {1.0, 0.0}}
-        };
-
 #endif //LLSERVER_ECUI_HOUBOLT_NODE_H
