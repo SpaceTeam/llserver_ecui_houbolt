@@ -13,7 +13,7 @@
 #include "LLController.h"
 #include "Config.h"
 
-//#ifdef TEST_LLSERVER
+#ifdef TEST_LLSERVER
 #include <thread>
 #include "can/CANManager.h"
 #include "can_houbolt/can_cmds.h"
@@ -46,7 +46,7 @@ void testFnc()
     manager->OnCANInit(0, canID, (uint8_t *)&msg, sizeof(msg), 0x1);
 }
 
-//#endif
+#endif
 
 enum ServerMode
 {
@@ -139,14 +139,17 @@ int main(int argc, char const *argv[])
 
 	Debug::Init();
 
-	//#ifdef TEST_LLSERVER
+#ifdef TEST_LLSERVER
         std::thread *testThread = new std::thread(testFnc);
 
-    //#endif
+#endif
 
     LLController::Init();
 
+#ifdef TEST_LLSERVER
+
     testThread->join();
+#endif
 
     std::string inputStr;
     while (true){

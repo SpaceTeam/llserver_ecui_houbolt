@@ -19,7 +19,7 @@
     {
         "ARBITRATION":
         {
-          "time_quanta" : 80,
+          "time_quanta" : 1000000,
           "phase1" : 2,
           "phase2" : 2,
           "sync_jump_width" : 2,
@@ -28,7 +28,7 @@
         },
         "DATA":
         {
-          "time_quanta" : 10,
+          "time_quanta" : 8000000,
           "phase1" : 7,
           "phase2" : 2,
           "sync_jump_width" : 2,

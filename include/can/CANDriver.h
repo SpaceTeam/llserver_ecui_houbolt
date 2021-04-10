@@ -21,20 +21,20 @@ class CANDriver
     private:
         std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback;
         std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> seqRecvCallback;
-        std::function<void(std::string)> onErrorCallback;
+        std::function<void(std::string *)> onErrorCallback;
 
         kvBusParamsTq arbitrationParams;
         kvBusParamsTq dataParams;
         canHandle canHandles[CAN_CHANNELS];
 
-        void OnCANCallback(int handle, void *context, unsigned int event);
+        static void OnCANCallback(int handle, void *driver, unsigned int event);
         std::string CANError(canStatus status);
         canStatus InitializeCANChannel(uint32_t canChannelID);
 
     public:
         CANDriver(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onInitRecvCallback,
                   std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
-                  std::function<void(std::string)> onErrorCallback, kvBusParamsTq arbitrationParams, kvBusParamsTq dataParams);
+                  std::function<void(std::string *)> onErrorCallback, kvBusParamsTq arbitrationParams, kvBusParamsTq dataParams);
         ~CANDriver();
 
         //Tells the can driver that initialization is done and canlib callback gets rerouted from initrecvcallback to recvcallback

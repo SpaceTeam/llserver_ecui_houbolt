@@ -103,13 +103,13 @@ CANResult CANManager::Init()
 CANResult CANManager::RequestCANInfo()
 {
     //TODO: MP change to correct broadcasting id
-    Can_MessageId_t canID;
+    Can_MessageId_t canID = {0};
     canID.info.direction = MASTER2NODE_DIRECTION;
-    canID.info.node_id = 0;
+    canID.info.node_id = 12;
     canID.info.special_cmd = STANDARD_SPECIAL_CMD;
     canID.info.priority = STANDARD_PRIORITY;
 
-    Can_MessageData_t msg;
+    Can_MessageData_t msg = {0};
     msg.bit.info.buffer = DIRECT_BUFFER;
     msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
     msg.bit.cmd_id = GENERIC_REQ_NODE_INFO;
@@ -226,9 +226,9 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
 }
 
-void CANManager::OnCANError(std::string error)
+void CANManager::OnCANError(std::string *error)
 {
-    Debug::error("CANManager - OnCANError: CAN error %s", error);
+    Debug::error("CANManager - OnCANError: CAN error %s", error->c_str());
 }
 
 //std::vector<std::string> CANManager::GetChannelStates()

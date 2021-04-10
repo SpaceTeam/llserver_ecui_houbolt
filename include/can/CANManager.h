@@ -99,7 +99,7 @@ public:
 	void OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp);
 
 	//TODO: MP add error info to arguments
-	void OnCANError(std::string error);
+	void OnCANError(std::string *error);
 
 
 };
