@@ -2,12 +2,17 @@
 // Created by Markus on 2019-10-15.
 //
 
+#include <regex>
+#include <utils.h>
+
 //#include "hcp/HcpManager.h"
 #include "EcuiSocket.h"
 #include "Timer.h"
 #include "Config.h"
 
 #include "LLInterface.h"
+
+
 
 I2C* LLInterface::i2cDevice;
 WarnLight* LLInterface::warnLight;
@@ -67,6 +72,7 @@ void LLInterface::Init()
         Debug::print("Initializing GUIMapping...");
         std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
         guiMapping = new JSONMapping(mappingPath, "GUIMapping");
+        LoadGUIStates();
         Debug::print("GUIMapping initialized");
 
         Debug::print("Initializing DataFilter...");
@@ -107,6 +113,63 @@ void LLInterface::Destroy()
         }
         //TODO: MP destruct CANManager?
     }
+}
+
+/**
+ * loads all states from the gui mapping
+ * all gui mapping states must have a prefix named 'gui:' followed by at least one
+ */
+void LLInterface::LoadGUIStates()
+{
+    nlohmann::json *guiMappingJson = guiMapping->GetJSONMapping();
+
+    try
+    {
+
+        std::map<std::string, std::tuple<double, uint64_t>> states;
+        for (auto &group : guiMappingJson->items())
+        {
+            for (auto &elem : group.value()["elements"])
+            {
+                for (auto it = elem["states"].begin(); it != elem["states"].end(); ++it)
+                {
+                    std::string stateName = it.value()["stateName"];
+                    if (std::regex_match(stateName, std::regex("gui:(\w+)(:\w+)*")))
+                    {
+                        double defaultValue = 0.0;
+                        if (utils::keyExists(it.value(), "default"))
+                        {
+                            if (it.value()["default"].is_number())
+                            {
+                                defaultValue = it.value()["default"];
+                            }
+                            else
+                            {
+                                Debug::error("LLInterface - LoadGUIStates: default value in GUIMapping not a number, ignoring value");
+                            }
+                        }
+
+                        auto now = std::chrono::high_resolution_clock::now();
+                        uint64_t timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
+                                now.time_since_epoch()).count();
+
+                        states[it.key()] = {defaultValue, timestamp};
+                    }
+                }
+            }
+        }
+
+        stateController->AddStates(states);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("LLInterface - LoadGUIStates:" + std::string(e.what()));
+    }
+}
+
+nlohmann::json LLInterface::GetGUIMapping()
+{
+    return *guiMapping->GetJSONMapping();
 }
 
 void LLInterface::StartStateTransmission()
@@ -211,7 +274,7 @@ nlohmann::json LLInterface::GetAllStates()
 
 void LLInterface::SetState(std::string stateName, double value, uint64_t timestamp)
 {
-
+    stateController->SetState(stateName, value, timestamp);
 }
 
 void LLInterface::TurnRed()

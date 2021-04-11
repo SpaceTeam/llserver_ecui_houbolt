@@ -24,6 +24,7 @@ void StateController::WaitUntilStatesInitialized()
     bool aborted = false;
     while (!done)
     {
+        stateMtx.lock();
         for (auto& state : states)
         {
             if (std::get<1>(state.second) == 0)
@@ -32,6 +33,7 @@ void StateController::WaitUntilStatesInitialized()
                 break;
             }
         }
+        stateMtx.unlock();
         if (aborted)
         {
             aborted = false;
@@ -46,6 +48,7 @@ void StateController::WaitUntilStatesInitialized()
 
 void StateController::AddUninitializedStates(std::vector<std::string> &states)
 {
+    std::lock_guard<std::mutex> lock(stateMtx);
     for (std::string &state : states)
     {
         this->states[state] = {0.0, 0, false};
@@ -54,6 +57,7 @@ void StateController::AddUninitializedStates(std::vector<std::string> &states)
 
 void StateController::AddStates(std::map<std::string, std::tuple<double, uint64_t>> &states)
 {
+    std::lock_guard<std::mutex> lock(stateMtx);
     for (auto& state : states)
     {
         this->states[state.first] = {std::get<0>(state.second), std::get<1>(state.second), false};
@@ -64,10 +68,12 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
 {
     try
     {
-        auto& state = this->states[stateName];
-        std::get<0>(state) = value;
-        std::get<1>(state) = timestamp;
-        std::get<2>(state) = true;
+        stateMtx.lock();
+        auto *state = &this->states[stateName];
+        std::get<0>(*state) = value;
+        std::get<1>(*state) = timestamp;
+        std::get<2>(*state) = true;
+        stateMtx.unlock();
         this->onStateChangeCallback(stateName, value);
     }
     catch (const std::exception& e)
@@ -78,6 +84,7 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
 
 double StateController::GetStateValue(std::string stateName)
 {
+    std::lock_guard<std::mutex> lock(stateMtx);
     double value;
     try
     {
@@ -92,6 +99,7 @@ double StateController::GetStateValue(std::string stateName)
 
 std::map<std::string, std::tuple<double, uint64_t>> StateController::GetDirtyStates()
 {
+    std::lock_guard<std::mutex> lock(stateMtx);
     std::map<std::string, std::tuple<double, uint64_t>> dirties;
     for (auto& state : this->states)
     {
@@ -107,5 +115,8 @@ std::map<std::string, std::tuple<double, uint64_t>> StateController::GetDirtySta
 
 std::map<std::string, std::tuple<double, uint64_t, bool>> StateController::GetAllStates()
 {
-    return states;
+    std::lock_guard<std::mutex> lock(stateMtx);
+    std::map<std::string, std::tuple<double, uint64_t, bool>> statesCopy;
+    statesCopy.insert(states.begin(), states.end());
+    return statesCopy;
 }

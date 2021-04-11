@@ -23,7 +23,46 @@
     "EventMapping" : {
 
     },
-    "GUIMapping" : {
+    "GUIMapping" :
+    {
+        "group1":
+        {
+            "position" : 0,
+            "label" : "Oxfill Subsystem",
+            "elements" :
+            [
+                {
+                    "states":
+                    {
+                        "setState":
+                        {
+                            "stateName": "gui:ox_main_valve:slider",
+                            "default": 0.0
+                        },
+                        "feedback":
+                        {
+                            "stateName": "ox_main_valve:sensor"
+                        }
+                    },
+                    "type": "feedback-slider",
+                    "label": "Ox Main Valve",
+                    "position" : 0
+                },
+                {
+                    "states":
+                    {
+                        "setState":
+                        {
+                            "stateName": "gui:pressurize_ox_system:button",
+                            "default": 0.0
+                        }
+                    },
+                    "type": "button",
+                    "label": "Pressurize Oxfill System",
+                    "position" : 1
+                }
 
+            ]
+        }
     }
 }

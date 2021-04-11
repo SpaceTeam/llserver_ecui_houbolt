@@ -16,6 +16,15 @@
 
 #define CAN_CHANNELS 4
 
+typedef struct
+{
+    int64_t bitrate;
+    int32_t timeSegment1;
+    int32_t timeSeqment2;
+    int32_t syncJumpWidth;
+    int32_t noSamplingPoints; //unused for can fd data params
+} CANParams;
+
 class CANDriver
 {
     private:
@@ -23,8 +32,8 @@ class CANDriver
         std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> seqRecvCallback;
         std::function<void(std::string *)> onErrorCallback;
 
-        kvBusParamsTq arbitrationParams;
-        kvBusParamsTq dataParams;
+        CANParams arbitrationParams;
+        CANParams dataParams;
         canHandle canHandles[CAN_CHANNELS];
 
         static void OnCANCallback(int handle, void *driver, unsigned int event);
@@ -34,7 +43,7 @@ class CANDriver
     public:
         CANDriver(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onInitRecvCallback,
                   std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
-                  std::function<void(std::string *)> onErrorCallback, kvBusParamsTq arbitrationParams, kvBusParamsTq dataParams);
+                  std::function<void(std::string *)> onErrorCallback, CANParams arbitrationParams, CANParams dataParams);
         ~CANDriver();
 
         //Tells the can driver that initialization is done and canlib callback gets rerouted from initrecvcallback to recvcallback

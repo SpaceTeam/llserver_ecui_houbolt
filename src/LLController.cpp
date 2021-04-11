@@ -95,15 +95,15 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
         }
         else if (type.compare("states-set") == 0)
         {
-            std::string name;
+            std::string stateName;
             double value;
             uint64_t timestamp;
             for (auto servo : msg["content"])
             {
-                name = servo["state"];
+                stateName = servo["state"];
                 value = servo["value"];
                 timestamp = servo["timestamp"];
-                LLInterface::SetState(name, value, timestamp);
+                LLInterface::SetState(stateName, value, timestamp);
             }
         }
         else if (type.compare("states-start") == 0)
@@ -113,6 +113,11 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
         else if (type.compare("states-stop") == 0)
         {
             LLInterface::StopStateTransmission();
+        }
+        else if (type.compare("gui-mapping-load") == 0)
+        {
+            nlohmann::json mapping = LLInterface::GetGUIMapping();
+            EcuiSocket::SendJson("gui-mapping-load", mapping);
         }
         else
         {

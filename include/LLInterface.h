@@ -50,6 +50,8 @@ private:
 	static void FilterSensors(int64_t microTime);
 	static void StopFilterSensors();
 
+	static void LoadGUIStates();
+
 	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states);
 	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t, bool>> &states);
 
@@ -60,6 +62,8 @@ public:
 
     static void Init();
     static void Destroy();
+
+    static nlohmann::json GetGUIMapping();
 
     static void TransmitStates(int64_t microTime, std::map<std::string, std::tuple<double, uint64_t>> &states);
 

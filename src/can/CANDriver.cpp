@@ -10,8 +10,8 @@
 CANDriver::CANDriver(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onInitRecvCallback,
                      std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
                      std::function<void(std::string *)> onErrorCallback,
-                     kvBusParamsTq arbitrationParams,
-                     kvBusParamsTq dataParams)
+                     CANParams arbitrationParams,
+                     CANParams dataParams)
                      : onRecvCallback(std::move(onInitRecvCallback)),
                      seqRecvCallback(std::move(onRecvCallback)),
                      onErrorCallback(std::move(onErrorCallback)),
@@ -156,13 +156,23 @@ canStatus CANDriver::InitializeCANChannel(uint32_t canBusChannelID) {
         return stat;
     }
 
-    stat = canSetBusParams(canHandles[canBusChannelID], 1000000, 77, 2, 2, 1, 0);
+    stat = canSetBusParams(canHandles[canBusChannelID],
+            arbitrationParams.bitrate,
+            arbitrationParams.timeSegment1,
+            arbitrationParams.timeSeqment2,
+            arbitrationParams.syncJumpWidth,
+            arbitrationParams.noSamplingPoints, 0); //sycmode Unsupported and ignored.
     if(stat < 0){
         return stat;
 
     }
 
-    stat = canSetBusParamsFd(canHandles[canBusChannelID], 8000000, 7, 2, 2);
+    stat = canSetBusParamsFd(canHandles[canBusChannelID],
+            dataParams.bitrate,
+            dataParams.timeSegment1,
+            dataParams.timeSeqment2,
+            dataParams.syncJumpWidth);
+
     if(stat < 0){
         return stat;
     }

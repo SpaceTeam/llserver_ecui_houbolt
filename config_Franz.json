@@ -19,21 +19,18 @@
     {
         "ARBITRATION":
         {
-          "time_quanta" : 1000000,
-          "phase1" : 2,
-          "phase2" : 2,
+          "bitrate" : 1000000,
+          "time_segment_1" : 77,
+          "time_segment_2" : 2,
           "sync_jump_width" : 2,
-          "propagation_segment" : 75,
-          "prescaler" : 1
+          "no_sampling_points" : 1
         },
         "DATA":
         {
-          "time_quanta" : 8000000,
-          "phase1" : 7,
-          "phase2" : 2,
-          "sync_jump_width" : 2,
-          "propagation_segment" : 0,
-          "prescaler" : 1
+          "bitrate" : 8000000,
+          "time_segment_1" : 7,
+          "time_segment_2" : 2,
+          "sync_jump_width" : 2
         }
     }
   },

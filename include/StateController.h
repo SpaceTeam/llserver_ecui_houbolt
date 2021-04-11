@@ -23,6 +23,7 @@ private:
 
 	bool initialized = false;
 
+	std::mutex stateMtx;
 
 public:
     ~StateController();

@@ -44,21 +44,22 @@ CANResult CANManager::Init()
 
             Debug::print("Initializing CANDriver...");
             //arbitration bus parameters
-            int32_t tq = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_quanta"));
-            int32_t phase1 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/phase1"));
-            int32_t phase2 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/phase2"));
+            int32_t bitrate = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/bitrate"));
+            int32_t tseg1 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_segment_1"));
+            int32_t tseg2 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_segment_2"));
             int32_t sjw = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/sync_jump_width"));
-            int32_t prop = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/propagation_segment"));
-            int32_t presc = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/prescaler"));
-            kvBusParamsTq arbitrationParams = {tq, phase1, phase2, sjw, prop, presc};
+            int32_t noSamp = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/no_sampling_points"));
+
+            CANParams arbitrationParams = {bitrate, tseg1, tseg2, sjw, noSamp};
+
             //data bus parameters
-            int32_t tqData = std::get<int>(Config::getData("CAN/BUS/DATA/time_quanta"));
-            int32_t phase1Data = std::get<int>(Config::getData("CAN/BUS/DATA/phase1"));
-            int32_t phase2Data = std::get<int>(Config::getData("CAN/BUS/DATA/phase2"));
+            int64_t bitrateData = std::get<int>(Config::getData("CAN/BUS/DATA/bitrate"));
+            int32_t tseg1Data = std::get<int>(Config::getData("CAN/BUS/DATA/time_segment_1"));
+            int32_t tseg2Data = std::get<int>(Config::getData("CAN/BUS/DATA/time_segment_2"));
             int32_t sjwData = std::get<int>(Config::getData("CAN/BUS/DATA/sync_jump_width"));
-            int32_t propData = std::get<int>(Config::getData("CAN/BUS/DATA/propagation_segment"));
-            int32_t prescData = std::get<int>(Config::getData("CAN/BUS/DATA/prescaler"));
-            kvBusParamsTq dataParams = {tqData, phase1Data, phase2Data, sjwData, propData, prescData};
+
+            CANParams dataParams = {bitrateData, tseg1Data, tseg2Data, sjwData};
+
             canDriver = new CANDriver(std::bind(&CANManager::OnCANInit, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
                     std::bind(&CANManager::OnCANRecv, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
                     std::bind(&CANManager::OnCANError, this, std::placeholders::_1), arbitrationParams, dataParams);
