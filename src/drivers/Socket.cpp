@@ -44,7 +44,7 @@ int Socket::Connect(int32_t tries)
 
     if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        Debug::error("SocketOld - %s: SocketOld creation error", name.c_str());
+        Debug::error("Socket - %s: Socket creation error", name.c_str());
         return -1;
     }
 
@@ -55,15 +55,15 @@ int Socket::Connect(int32_t tries)
     if (inet_pton(AF_INET, address.c_str(), &serv_addr.sin_addr) <= 0)
     {
         close(socketfd);
-        Debug::error("SocketOld - %s:Invalid address/ Address not supported", name.c_str());
+        Debug::error("Socket - %s:Invalid address/ Address not supported", name.c_str());
         return -2;
     }
 
     while (!shallClose && tries != 0)
     {
-        Debug::print("SocketOld - %s: Attempting connection...", name.c_str());
+        Debug::print("Socket - %s: Attempting connection...", name.c_str());
         if (connect(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == 0){
-            Debug::print("SocketOld - %s: Connected", name.c_str());
+            Debug::print("Socket - %s: Connected", name.c_str());
             connectionActive = true;
             return 0;
         }
@@ -72,7 +72,7 @@ int Socket::Connect(int32_t tries)
 
         if (tries == 0)
         {
-            Debug::error("SocketOld - %s: Couldn't connect to %s PORT: %d\n", name.c_str(), address.c_str(), port);
+            Debug::error("Socket - %s: Couldn't connect to %s PORT: %d\n", name.c_str(), address.c_str(), port);
             return -3;
         }
 
@@ -91,7 +91,7 @@ void Socket::Send(std::string msg)
     {
         if (msg.size() > MAX_MSG_LENGTH)
         {
-            Debug::error("SocketOld - %s: error message longer than supported, closing socket..."), name.c_str();
+            Debug::error("Socket - %s: error message longer than supported, closing socket..."), name.c_str();
             Close();
         }
         else
@@ -105,21 +105,21 @@ void Socket::Send(std::string msg)
             int sentHeaderBytes = send(socketfd, header, HEADER_SIZE, 0);
             if (sentHeaderBytes < 0)
             {
-                Debug::error("SocketOld - %s: error at send occured, closing socket..."), name.c_str();
+                Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
                 Close();
                 return;
             }
             int sentBytes = send(socketfd, msg.c_str(), msg.size(), 0);
             if (sentBytes < 0)
             {
-                Debug::error("SocketOld - %s: error at send occured, closing socket..."), name.c_str();
+                Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
                 Close();
             }
         }
     }
     else
     {
-        Debug::error("SocketOld - %s: no connection active", name.c_str());
+        Debug::error("Socket - %s: no connection active", name.c_str());
     }
 }
 
@@ -137,7 +137,7 @@ std::string Socket::Recv()
         //Receive the header
         nBytes = recv(socketfd, header, HEADER_SIZE, MSG_WAITALL);
         if(nBytes < HEADER_SIZE){
-            Debug::error("SocketOld - %s: error at recv occured (Could not read header), closing socket...", name.c_str());
+            Debug::error("Socket - %s: error at recv occured (Could not read header), closing socket...", name.c_str());
             Close();
             return std::string("");
         }
@@ -155,21 +155,21 @@ std::string Socket::Recv()
         nBytes = recv(socketfd, newBuffer, msgLen, MSG_WAITALL);
         Debug::info("First Message Byte: %d", newBuffer[0]);
         if(nBytes < msgLen){
-            Debug::error("SocketOld - %s: error at recv occured (Could not read entire packet), closing socket...", name.c_str());
+            Debug::error("Socket - %s: error at recv occured (Could not read entire packet), closing socket...", name.c_str());
             Close();
             return std::string("");
         }
 
         return std::string((char *)newBuffer);
     }else{
-        Debug::error("SocketOld - %s: no connection active", name.c_str());
+        Debug::error("Socket - %s: no connection active", name.c_str());
         Close();
         return std::string("");
     }
 }
 
 
-// std::vector<uint8_t> SocketOld::newRecvBytes()
+// std::vector<uint8_t> Socket::newRecvBytes()
 // {
 //     std::string msg = Recv();
 //     return std::vector<uint8_t>(msg.begin(), msg.end());

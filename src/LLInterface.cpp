@@ -134,7 +134,7 @@ void LLInterface::LoadGUIStates()
                 for (auto it = elem["states"].begin(); it != elem["states"].end(); ++it)
                 {
                     std::string stateName = it.value()["stateName"];
-                    if (std::regex_match(stateName, std::regex("gui:(\w+)(:\w+)*")))
+                    if (std::regex_match(stateName, std::regex("gui:(\\w+)(:\\w+)*")))
                     {
                         double defaultValue = 0.0;
                         if (utils::keyExists(it.value(), "default"))
@@ -153,7 +153,7 @@ void LLInterface::LoadGUIStates()
                         uint64_t timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
                                 now.time_since_epoch()).count();
 
-                        states[it.key()] = {defaultValue, timestamp};
+                        states[stateName] = {defaultValue, timestamp};
                     }
                 }
             }

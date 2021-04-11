@@ -37,7 +37,7 @@
                         "setState":
                         {
                             "stateName": "gui:ox_main_valve:slider",
-                            "default": 0.0
+                            "default": 1.5234234
                         },
                         "feedback":
                         {
