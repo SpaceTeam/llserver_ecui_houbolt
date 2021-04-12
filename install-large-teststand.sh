@@ -2,6 +2,8 @@
 
 cd "$(dirname "$0")"
 
+[ ! -d "./.git/logs" ] && echo "/.git/logs directory doesn't exist! Create it!" && exit 1
+
 sudo apt-get install cmake
 
 sudo cp ecui-llserver-large-teststand.service /etc/systemd/system/
