@@ -19,18 +19,18 @@
     {
         "ARBITRATION":
         {
-          "bitrate" : 1000000,
-          "time_segment_1" : 77,
+          "bitrate" : 200000,
+          "time_segment_1" : 7,
           "time_segment_2" : 2,
-          "sync_jump_width" : 2,
+          "sync_jump_width" : 1,
           "no_sampling_points" : 1
         },
         "DATA":
         {
-          "bitrate" : 8000000,
+          "bitrate" : 800000,
           "time_segment_1" : 7,
           "time_segment_2" : 2,
-          "sync_jump_width" : 2
+          "sync_jump_width" : 1
         }
     }
   },

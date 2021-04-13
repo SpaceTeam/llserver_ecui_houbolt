@@ -65,15 +65,15 @@ void LLInterface::Init()
         canManager->Init();
         Debug::print("Initializing CANManager done\n");
 
-        Debug::print("Waiting for States to be initialized...");
-        stateController->WaitUntilStatesInitialized();
-        Debug::print("All States initialized\n");
-
         Debug::print("Initializing GUIMapping...");
         std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
         guiMapping = new JSONMapping(mappingPath, "GUIMapping");
         LoadGUIStates();
         Debug::print("GUIMapping initialized");
+
+        Debug::print("Waiting for States to be initialized...");
+        stateController->WaitUntilStatesInitialized();
+        Debug::print("All States initialized\n");
 
         Debug::print("Initializing DataFilter...");
         double sensorsSmoothingFactor = std::get<double>(Config::getData("WEBSERVER/sensors_smoothing_factor"));

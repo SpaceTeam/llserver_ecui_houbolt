@@ -13,6 +13,8 @@
 #include "LLController.h"
 #include "Config.h"
 
+//#define TEST_LLSERVER
+
 #ifdef TEST_LLSERVER
 #include <thread>
 #include "can/CANManager.h"
