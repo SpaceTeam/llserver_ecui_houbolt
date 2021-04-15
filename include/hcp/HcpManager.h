@@ -8,9 +8,9 @@
 #include "hcp/HcpCommands.h"
 #include "drivers/Serial.h"
 #include "hcp/HcpMapping.h"
-#include "Timer.h"
-#include "json.hpp"
-#include "WatchDog.h"
+#include "utility/Timer.h"
+#include "utility/json.hpp"
+#include "utility/WatchDog.h"
 
 typedef enum class battery_status_e
 {

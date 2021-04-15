@@ -3,7 +3,7 @@
 //
 
 #include "drivers/WarnLight.h"
-#include "Config.h"
+#include "utility/Config.h"
 
 using json = nlohmann::json;
 

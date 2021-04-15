@@ -8,6 +8,7 @@
 #include "common.h"
 #include "can/Channel.h"
 #include "can/CANDriver.h"
+#include "can/CANManager.h"
 #include "can_houbolt/channels/generic_channel_def.h"
 
 class Node : public Channel
@@ -22,6 +23,7 @@ private:
 	uint8_t nodeID;
 	std::map<uint8_t, Channel *> channelMap;
     CANDriver* driver;
+    Sensor_t *latestSensorBuffer;
 
 	void InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo);
 
@@ -34,6 +36,10 @@ public:
 
     std::vector<std::string> GetStates() override;
 	std::map<std::string, std::function<void(std::vector<double> &, bool)>> GetCommands() override;
+
+    
+
+
 
 	void SetBus1Voltage(std::vector<double> &params, bool testOnly=false);
 	void GetBus1Voltage(std::vector<double> &params, bool testOnly=false);

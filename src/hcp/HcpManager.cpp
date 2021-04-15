@@ -2,9 +2,9 @@
 // Created by Markus on 2019-09-30.
 //
 
-#include "utils.h"
-#include "config_old.h"
-#include "Config.h"
+#include "utility/utils.h"
+#include "utility/config_old.h"
+#include "utility/Config.h"
 #include "hcp/HcpCommands.h"
 
 

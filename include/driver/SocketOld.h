@@ -6,7 +6,7 @@
 #define TXV_ECUI_LLSERVER_SOCKET_H
 
 #include "common.h"
-#include "Config.h"
+#include "utility/Config.h"
 
 class SocketOld
 {

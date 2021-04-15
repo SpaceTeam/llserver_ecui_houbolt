@@ -3,40 +3,14 @@
 //
 
 #include <regex>
-#include <utils.h>
+#include <utility/utils.h>
 
 //#include "hcp/HcpManager.h"
 #include "EcuiSocket.h"
-#include "Timer.h"
-#include "Config.h"
+#include "utility/Timer.h"
+#include "utility/Config.h"
 
 #include "LLInterface.h"
-
-
-
-I2C* LLInterface::i2cDevice;
-WarnLight* LLInterface::warnLight;
-TMPoE *LLInterface::tmPoE;
-
-JSONMapping *LLInterface::guiMapping;
-CANManager *LLInterface::canManager;
-EventManager *LLInterface::eventManager;
-StateController *LLInterface::stateController;
-
-DataFilter *LLInterface::dataFilter;
-
-//GPIO[] LLInterface::gpioDevices;
-
-//SPI* LLInterface::spiDevice;
-
-bool LLInterface::isInitialized = false;
-
-bool LLInterface::useTMPoE = false;
-
-bool LLInterface::isTransmittingStates = false;
-int32_t LLInterface::warnlightStatus = -1;
-Timer* LLInterface::stateTimer;
-Timer* LLInterface::sensorTimer;
 
 
 void LLInterface::Init()
@@ -80,10 +54,13 @@ void LLInterface::Init()
         dataFilter = new DataFilter(sensorsSmoothingFactor);
         Debug::print("Initializing DataFilter done\n");
 
+        Debug::print("Starting Sensor State Timer...");
         stateTimer = new Timer(40, "stateTimer");
         sensorTimer = new Timer(40, "sensorTimer");
         uint64_t sensorSamplingRate = std::get<int>(Config::getData("LLSERVER/sensor_sampling_rate"));
-        sensorTimer->startContinous(0, sensorSamplingRate, LLInterface::FilterSensors, LLInterface::StopFilterSensors);
+        sensorTimer->startContinous(0, sensorSamplingRate,
+                std::bind(&LLInterface::FilterSensors, this, std::placeholders::_1),
+                std::bind(&LLInterface::StopFilterSensors, this));
         Debug::print("Connecting to warning light...");
         warnLight = new WarnLight(0);
 
@@ -101,17 +78,39 @@ void LLInterface::Init()
     }
 }
 
-void LLInterface::Destroy()
+LLInterface::~LLInterface()
 {
     if (isInitialized)
     {
+        //Debug::print("Shutting down I2C...");
         //delete i2cDevice;
+        Debug::print("Shutting down Debug...");
         delete warnLight;
         if (useTMPoE)
         {
+            Debug::print("Shutting down Debug...");
             delete tmPoE;
         }
-        //TODO: MP destruct CANManager?
+
+        Debug::print("Stopping State transmission...");
+        StopStateTransmission();
+        Debug::print("Stopping Sensor State Timer...");
+        sensorTimer->stop();
+
+        Debug::print("Deleting Data Filter...");
+        delete dataFilter;
+
+        Debug::print("Deleting GUI Mapping Manager...");
+        delete guiMapping;
+
+        Debug::print("Shutting down CANManager...");
+        delete canManager;
+
+        Debug::print("Shutting down StateController...");
+        delete stateController;
+
+        Debug::print("Shutting down EventManager...");
+        delete eventManager;
     }
 }
 
@@ -178,7 +177,9 @@ void LLInterface::StartStateTransmission()
     {
         uint64_t stateSamplingRate = std::get<int>(Config::getData("LLSERVER/state_sampling_rate"));
         isTransmittingStates = true;
-        stateTimer->startContinous(0, stateSamplingRate, LLInterface::GetStates, LLInterface::StopGetStates);
+        stateTimer->startContinous(0, stateSamplingRate,
+                std::bind(&LLInterface::GetStates, this, std::placeholders::_1),
+                std::bind(&LLInterface::StopGetStates, this));
     }
 }
 

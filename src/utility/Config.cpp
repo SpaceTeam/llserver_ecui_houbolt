@@ -2,8 +2,8 @@
 // Created by luis on 1/12/20.
 //
 
-#include "Config.h"
-#include "utils.h"
+#include "utility/Config.h"
+#include "utility/utils.h"
 #include "common.h"
 
 nlohmann::json Config::data;

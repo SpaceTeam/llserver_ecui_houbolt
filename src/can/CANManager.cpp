@@ -7,7 +7,7 @@
 #include <utility>
 #include <bus_params_tq.h>
 
-#include "Config.h"
+#include "utility/Config.h"
 #include "can/CANManager.h"
 #include "can_houbolt/channels/generic_channel_def.h"
 
@@ -19,6 +19,7 @@ CANManager::~CANManager()
     delete &nodeMap;
 }
 
+//TODO: MP maybe move to node class
 inline uint8_t CANManager::GetNodeID(uint32_t &canID)
 {
     return (uint8_t) ((0x0000008F & canID) >> 1);
@@ -79,6 +80,7 @@ CANResult CANManager::Init()
             }
             while(currNodeCount < nodeCount);
             Debug::print("Initialized all nodes\n");
+            canDriver->InitDone();
 
 
             initialized = true;
@@ -142,9 +144,7 @@ std::map<std::string, std::tuple<double, uint64_t>> CANManager::GetLatestSensorD
     sensorMtx.unlock();
     for (SensorData_t *sensorData = latestSensorDataBufferCopy; sensorData < latestSensorDataBufferCopy + sensorInfoMap.size(); sensorData += sizeof(SensorData_t))
     {
-        uint16_t key = (sensorData->nodeId << 8) | sensorData->channelId;
-
-        std::tuple<std::string, double> value = sensorInfoMap[key];
+        std::tuple<std::string, double> value = sensorInfoMap[sensorData->nodeChannelID];
         std::string name = std::get<0>(value);
         double scaling = std::get<1>(value);
         latestSensorDataMap[name] = {sensorData->data * scaling, sensorData->timestamp};
@@ -170,26 +170,32 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
             NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *)&payload[1];
 
-            std::map<uint8_t, std::tuple<std::string, double>> channelInfo;
+            std::map<uint8_t, std::tuple<std::string, double>> nodeChannelInfo;
             for (uint8_t channelID = 0; channelID < 32; channelID++)
             {
                 uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
                 if (mask == 1)
                 {
-                    CANMappingObj channelMappingObj = mapping->GetChannelObj(nodeID, channelID);
-                    channelInfo[channelID] = {channelMappingObj.stringID, channelMappingObj.scaling};
+                    if (payloadLength <= ((sizeof(NodeInfoMsg_t)+1) + channelID))
+                    {
+                        throw std::runtime_error("CANManager - OnCANInit: payload length is shorter than channel mask says, ignoring whole node...");
+                    }
 
-                    //add sensor names to array if needed
+                    CANMappingObj channelMappingObj = mapping->GetChannelObj(nodeID, channelID);
+                    nodeChannelInfo[channelID] = {channelMappingObj.stringID, channelMappingObj.scaling};
+
+                    //add sensor names and scaling to array for fast sensor processing
                     uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
                     sensorInfoMap[mergedID] = {channelMappingObj.stringID, channelMappingObj.scaling};
+
                 }
                 else if (mask > 1)
                 {
-                    throw std::runtime_error("CANManager - OnCANInit: mask convertion of node info failed");
+                    throw std::logic_error("CANManager - OnCANInit: mask conversion of node info failed");
                 }
             }
 
-            Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, channelInfo, canBusChannelID, canDriver);
+            Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, nodeChannelInfo, canBusChannelID, canDriver);
             nodeMap[nodeID] = node;
 
             //add states to state controller
@@ -211,11 +217,49 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
 }
 
+//TODO: move to can_houbolt headers
+typedef struct __attribute__((__packed__))
+{
+	uint32_t channel_mask;
+	uint8_t channel_type[MAX_CHANNELS];
+} SensorMsg_t;
+
+void CANManager::ProcessSensorData(uint8_t &nodeID, uint8_t *payload, uint32_t &payloadLength, uint64_t &timestamp)
+{
+
+    SensorMsg_t *sensorMsg = (SensorMsg_t *) &payload[1];
+
+    for (uint8_t channelID = 0; channelID < 32; channelID++)
+    {
+        uint32_t mask = 0x00000001 & (sensorMsg->channel_mask >> channelID);
+        if (mask == 1)
+        {
+            if (payloadLength <= ((sizeof(NodeInfoMsg_t)+1) + channelID))
+            {
+                throw std::runtime_error("CANManager - OnCANInit: payload length is shorter than channel mask says, ignoring whole node...");
+            }
+
+            uint16_t nodeChannelID = MergeNodeIDAndChannelID(nodeID, channelID);
+            latestSensorDataBuffer[nodeChannelID] = {};
+
+        }
+        else if (mask > 1)
+        {
+            throw std::logic_error("CANManager - OnCANInit: mask convertion of node info failed");
+        }
+    }
+}
+
 void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
 {
     uint8_t nodeID = CANManager::GetNodeID(canID);
     try
     {
+        if (payloadLength >= (sizeof(SensorMsg_t)+1) && payload[0] == GENERIC_RES_DATA)
+        {
+
+        }
+
         Node *node = nodeMap[nodeID];
         //TODO: process can command inside node
     }

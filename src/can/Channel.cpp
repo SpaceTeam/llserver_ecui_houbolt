@@ -8,6 +8,48 @@
 const std::vector<std::string> Channel::states = {};
 const std::map<std::string, std::vector<double>> Channel::scalingMap = {};
 
+inline int32_t Channel::ScaleAndConvert(double value, double a, double b)
+{
+    double result = a * value + b;
+    if (result < INT32_MIN || result > INT32_MAX)
+    {
+        throw std::runtime_error("ScaleAndConvert: result exceeds int32_t value range, actual value: " + std::to_string(result));
+    }
+    return (int32_t) result;
+};
+
+/**
+ * assumes pointer has valid data!!!
+ * @param valuePtr points to array which includes value data
+ * @param valueLength returns number of bytes used for value
+ * @param value
+ */
+void Channel::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &value)
+{
+    valueLength = this->typeSize;
+    int32_t intValue = 0;
+    switch (valueLength)
+    {
+        case 1:
+            intValue = (valuePtr[0]);
+            break;
+        case 2:
+            intValue = (valuePtr[0] << 8 | valuePtr[1]);
+            break;
+        case 3:
+            intValue = (valuePtr[0] << 16 | valuePtr[1] << 8 | valuePtr[2]);
+            break;
+        case 4:
+            intValue = (valuePtr[0] << 24 | valuePtr[1] << 16 | valuePtr[2] << 8 | valuePtr[3]);
+            break;
+        default:
+            throw std::logic_error("Channel - GetSensorValue: channel type has more than 4 bytes\n\tgood luck if this exception happens");
+    }
+
+    value = (double)(intValue);
+
+}
+
 void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *command, uint32_t commandLength,
                                   uint8_t canBusChannelID, CANDriver *driver, bool testOnly)
 {

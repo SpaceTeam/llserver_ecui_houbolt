@@ -1,6 +1,7 @@
 #include <string>
 #include <iomanip>      // std::setprecision
 #include <sched.h>
+#include <csignal>
 
 #include <sys/stat.h>
 
@@ -11,15 +12,17 @@
 #include "common.h"
 
 #include "LLController.h"
-#include "Config.h"
+#include "utility/Config.h"
 
-//#define TEST_LLSERVER
+#define TEST_LLSERVER
 
 #ifdef TEST_LLSERVER
 #include <thread>
 #include "can/CANManager.h"
 #include "can_houbolt/can_cmds.h"
 #include "can_houbolt/channels/generic_channel_def.h"
+
+std::thread *testThread = nullptr;
 
 typedef struct
 {
@@ -49,15 +52,6 @@ void testFnc()
 }
 
 #endif
-
-enum ServerMode
-{
-	LARGE_TESTSTAND,
-	SMALL_TESTSTAND,
-	SMALL_OXFILL
-};
-
-bool running = true;
 
 static int latency_target_fd = -1;
 static int32_t latency_target_value = 0;
@@ -91,6 +85,32 @@ static void set_latency_target(void)
     }
 }
 
+void signalHandler(int signum)
+{
+
+#ifdef TEST_LLSERVER
+    if (testThread != nullptr && testThread->joinable())
+    {
+        testThread->join();
+        delete testThread;
+    }
+
+#endif
+    Debug::error("posix signal fired: %d, shutting down...", signum);
+
+    try
+    {
+        delete LLController::Instance();
+    }
+    catch (std::exception &e)
+    {
+        Debug::error("signal handler: failed to shutdown LLController, %s", e.what());
+    }
+
+
+    exit(signum);
+}
+
 int main(int argc, char const *argv[])
 {
     system("clear");
@@ -101,6 +121,11 @@ int main(int argc, char const *argv[])
 	sched_setscheduler(0, SCHED_FIFO, &sp);
 
     set_latency_target();
+
+    // register signal SIGINT and signal handler
+    signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
+    signal(SIGABRT, signalHandler);
 
     ServerMode serverMode = ServerMode::LARGE_TESTSTAND;
     if (argc > 1)
@@ -121,45 +146,19 @@ int main(int argc, char const *argv[])
         }
     }
 
-    std::string configPath = "";
-    switch (serverMode)
-    {
-        case ServerMode::SMALL_TESTSTAND:
-            configPath = "config_small_teststand.json";
-			break;
-        case ServerMode::SMALL_OXFILL:
-            configPath = "config_small_oxfill.json";
-			break;
-        case ServerMode::LARGE_TESTSTAND:
-            configPath = "config_Franz.json";
-            break;
-        default:
-            exit(1);
-
-    }
-    Config::Init(configPath);
-
-	Debug::Init();
-
 #ifdef TEST_LLSERVER
-        std::thread *testThread = new std::thread(testFnc);
+    testThread = new std::thread(testFnc);
 
 #endif
 
-    LLController::Init();
-
-#ifdef TEST_LLSERVER
-
-    testThread->join();
-#endif
+    LLController *llController = LLController::Instance();
+    llController->Init(serverMode);
 
     std::string inputStr;
-    while (true){
+    while (true)
+    {
 	    sleep(1);
     }
-    std::cout << "quit" << std::endl;
-
-    LLController::Destroy();
 
     return 0;
 }

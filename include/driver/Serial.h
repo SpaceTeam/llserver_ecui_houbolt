@@ -9,7 +9,7 @@
 #include <functional>
 
 #include "common.h"
-#include "WatchDog.h"
+#include "utility/WatchDog.h"
 
 struct HCP_MSG
 {

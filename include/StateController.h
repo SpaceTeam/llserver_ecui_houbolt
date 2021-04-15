@@ -13,7 +13,7 @@
 
 #include "common.h"
 
-#include "Singleton.h"
+#include "utility/Singleton.h"
 
 class StateController : public Singleton<StateController>
 {

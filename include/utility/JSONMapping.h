@@ -6,7 +6,7 @@
 #define LLSERVER_ECUI_HOUBOLT_MAPPING_H
 
 #include "common.h"
-#include "json.hpp"
+#include "utility/json.hpp"
 
 class JSONMapping
 {

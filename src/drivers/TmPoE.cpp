@@ -3,7 +3,7 @@
 //
 
 #include "drivers/TmPoE.h"
-#include "Config.h"
+#include "utility/Config.h"
 
 using namespace std;
 

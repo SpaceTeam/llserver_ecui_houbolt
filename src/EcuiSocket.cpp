@@ -8,7 +8,7 @@
 
 #include "EcuiSocket.h"
 
-#include "Config.h"
+#include "utility/Config.h"
 
 using namespace std;
 

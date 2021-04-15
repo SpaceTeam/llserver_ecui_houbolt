@@ -7,14 +7,14 @@
 
 #include "common.h"
 
-#include "json.hpp"
+#include "utility/json.hpp"
 
 #include <map>
 #include <functional>
 #include <vector>
 #include <string>
 
-#include "Singleton.h"
+#include "utility/Singleton.h"
 #include "drivers/JSONMapping.h"
 
 //change event mapping when sequence is running to still be able to throw events when sequence is running (or just disable)

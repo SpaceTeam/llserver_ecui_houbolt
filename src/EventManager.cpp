@@ -6,7 +6,7 @@
 
 #include "StateController.h"
 
-#include "Config.h"
+#include "utility/Config.h"
 
 EventManager::~EventManager()
 {

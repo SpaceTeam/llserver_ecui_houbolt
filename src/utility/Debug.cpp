@@ -10,9 +10,9 @@
 #include <mutex>
 #include <thread>
 
-#include "Debug.h"
+#include "utility/Debug.h"
 
-#include "Config.h"
+#include "utility/Config.h"
 
 std::recursive_mutex Debug::_outMutex;
 std::mutex Debug::outFileMutex;

@@ -6,9 +6,12 @@
 #define TXV_ECUI_LLSERVER_LLINTERFACE_H
 
 #include "common.h"
+
+#include "utility/Singleton.h"
+
 #include "drivers/I2C.h"
 
-#include "json.hpp"
+#include "utility/json.hpp"
 
 #include "drivers/WarnLight.h"
 #include "drivers/TmPoE.h"
@@ -19,64 +22,64 @@
 #include "EventManager.h"
 #include "StateController.h"
 
-class LLInterface
+class LLInterface : public Singleton<LLInterface>
 {
 
 private:
 
-    static I2C* i2cDevice;
-    static WarnLight* warnLight;
-    static TMPoE *tmPoE;
+    I2C* i2cDevice;
+    WarnLight* warnLight;
+    TMPoE *tmPoE;
 
-    static JSONMapping *guiMapping;
-    static CANManager *canManager;
-    static EventManager *eventManager;
-    static StateController *stateController;
-    static DataFilter *dataFilter;
+    JSONMapping *guiMapping;
+    CANManager *canManager;
+    EventManager *eventManager;
+    StateController *stateController;
+    DataFilter *dataFilter;
 
-    static bool isInitialized;
+    bool isInitialized;
 
-    static bool useTMPoE;
+    bool useTMPoE;
 
-    static bool isTransmittingStates;
-    static int32_t warnlightStatus;
+    bool isTransmittingStates;
+    int32_t warnlightStatus;
 
-    static Timer* stateTimer;
-    static Timer* sensorTimer;
+    Timer* stateTimer;
+    Timer* sensorTimer;
 
-    static void GetStates(int64_t microTime);
-    static void StopGetStates();
+    void GetStates(int64_t microTime);
+    void StopGetStates();
 
-	static void FilterSensors(int64_t microTime);
-	static void StopFilterSensors();
+	void FilterSensors(int64_t microTime);
+	void StopFilterSensors();
 
-	static void LoadGUIStates();
+	void LoadGUIStates();
 
 	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states);
 	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t, bool>> &states);
 
     LLInterface();
 
-    ~LLInterface();
+
 public:
 
-    static void Init();
-    static void Destroy();
+    void Init();
+    ~LLInterface();
 
-    static nlohmann::json GetGUIMapping();
+    nlohmann::json GetGUIMapping();
 
-    static void TransmitStates(int64_t microTime, std::map<std::string, std::tuple<double, uint64_t>> &states);
+    void TransmitStates(int64_t microTime, std::map<std::string, std::tuple<double, uint64_t>> &states);
 
-    static void StartStateTransmission();
-    static void StopStateTransmission();
+    void StartStateTransmission();
+    void StopStateTransmission();
 
-    static nlohmann::json GetAllStates();
-    static void SetState(std::string stateName, double value, uint64_t timestamp);
+    nlohmann::json GetAllStates();
+    void SetState(std::string stateName, double value, uint64_t timestamp);
 
-    static void TurnRed();
-    static void TurnGreen();
-    static void TurnYellow();
-    static void BeepRed();
+    void TurnRed();
+    void TurnGreen();
+    void TurnYellow();
+    void BeepRed();
 
 };
 

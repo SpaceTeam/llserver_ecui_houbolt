@@ -11,7 +11,7 @@
 #include <functional>
 #include <mutex>
 
-#include "Singleton.h"
+#include "utility/Singleton.h"
 #include "Node.h"
 #include "can/CANMapping.h"
 #include "can/CANDriver.h"
@@ -25,6 +25,26 @@
 //} channelData_t;
 //
 //channelData_t sensorBuffer[];
+
+typedef struct
+{
+    uint64_t timestamp;
+    double value;
+} SensorData_t;
+
+typedef struct
+{
+    union
+    {
+        struct
+        {
+            uint8_t nodeId;
+            uint8_t channelId;
+        } separate;
+        uint16_t nodeChannelID;
+    };
+    SensorData_t data;
+} Sensor_t;
 
 typedef struct
 {
@@ -61,21 +81,6 @@ private:
      */
     std::map<uint16_t, std::tuple<std::string, double>> sensorInfoMap;
 
-    //TODO: MP add timestamp to buffer, and maybe to states
-	uint32_t *sensorDataBuffer; //this is going to be huge!!!!
-	size_t sensorDataBufferLength;
-
-	typedef struct
-    {
-        uint8_t nodeId;
-        uint16_t channelId;
-        uint64_t timestamp;
-        double data;
-    } SensorData_t;
-
-	SensorData_t *latestSensorDataBuffer;
-	size_t latestSensorDataBufferLength;
-
 	bool initialized = false;
 
 	CANResult RequestCANInfo();
@@ -84,6 +89,10 @@ private:
 	std::string GetChannelName(uint8_t &nodeID, uint8_t &channelID);
 
     uint32_t GetNodeCount();
+
+    //TODO: MP check if inline makes any difference
+    void ProcessSensorData(uint8_t &nodeID, uint8_t *payload, uint32_t &payloadLength, uint64_t &timestamp);
+
 public:
     ~CANManager();
 

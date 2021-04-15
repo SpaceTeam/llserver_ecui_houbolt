@@ -21,45 +21,39 @@ class Channel {
 private:
     //TODO: MP check if this is the only and correct way to implement static const with inheritation
     static const std::vector<std::string> states;
-    static const std::map<std::string, std::vector<double>> scalingMap;
+    static const std::map<std::string, std::vector<double>> sensorScalingMap;
 
 protected:
 
     uint8_t channelID;
     const std::string channelName;
-    double scaling;
+    double sensorScaling;
+    const uint8_t typeSize; //in bytes
 	Channel *parent; //Should only be from node type
 
 	std::map<std::string, std::function<void(std::vector<double> &, bool)>> commandMap;
 
-	static int32_t ScaleAndConvert(double value, double a, double b)
-    {
-	    double result = a * value + b;
-	    if (result < INT32_MIN || result > INT32_MAX)
-        {
-	        throw std::runtime_error("ScaleAndConvert: result exceeds int32_t value range, actual value: " + std::to_string(result));
-        }
-	    return (int32_t) result;
-    };
+	static inline int32_t ScaleAndConvert(double value, double a, double b);
 
-	virtual void SetVariable(uint8_t cmdID, uint8_t nodeID, uint8_t variableID, std::vector<double> &scalingParams, std::vector<double> &params, uint8_t canBusChannelID, CANDriver *driver, bool testOnly);
+	virtual void SetVariable(uint8_t cmdID, uint8_t nodeID, uint8_t variableID, std::vector<double> &sensorScalingParams, std::vector<double> &params, uint8_t canBusChannelID, CANDriver *driver, bool testOnly);
 	virtual void GetVariable(uint8_t cmdID, uint8_t nodeID, uint8_t variableID, std::vector<double> &params, uint8_t canBusChannelID, CANDriver *driver, bool testOnly);
 
 
 	virtual void SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *command, uint32_t commandLength, uint8_t canBusChannelID, CANDriver *driver, bool testOnly);
 
 public:
-    Channel(uint8_t channelID, std::string channelName, double scaling, Channel *parent) :
-        channelID(channelID), channelName(std::move(channelName)), scaling(scaling), parent(parent)
+    Channel(uint8_t channelID, std::string channelName, double sensorScaling, Channel *parent) :
+        channelID(channelID), channelName(std::move(channelName)), sensorScaling(sensorScaling), parent(parent)
     {
         commandMap = std::map<std::string, std::function<void(std::vector<double> &, bool)>>();
     };
     virtual ~Channel() {};
 
     virtual void ProcessCANCommand(uint32_t *msg, size_t msgSize) {throw std::logic_error("Channel - ProcessCANCommand: not implemented");};
+    virtual void GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &value);
     virtual uint8_t GetChannelID() {return this->channelID;};
     virtual std::string GetChannelName() {return this->channelName;};
-    virtual void SetScaling(double) {this->scaling = scaling;};
+    virtual void SetScaling(double) {this->sensorScaling = sensorScaling;};
 
     /**
      * returns of the channel and combines it with channelName to a map

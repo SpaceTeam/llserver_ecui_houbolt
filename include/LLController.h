@@ -7,30 +7,40 @@
 
 #include "common.h"
 
-#include "json.hpp"
+#include "utility/Singleton.h"
 
-class LLController
+#include "utility/json.hpp"
+
+enum ServerMode
+{
+	LARGE_TESTSTAND,
+	SMALL_TESTSTAND,
+	SMALL_OXFILL
+};
+
+class LLController : public Singleton<LLController>
 {
 
 private:
 
-
+    LLInterface *llInterface;
 
     LLController();
 
-    ~LLController();
+
 
     static void PrintLogo();
 
 public:
 
-    static void Init();
+    ~LLController();
 
-    static void Destroy();
+    void Init(ServerMode serverMode);
 
-    static void Abort();
+    void Abort(std::string &abortMsg);
 
-    static void OnECUISocketRecv(nlohmann::json msg);
+    void OnECUISocketRecv(nlohmann::json msg);
+    void OnECUISocketClose();
 
 };
 
