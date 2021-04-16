@@ -54,6 +54,7 @@ typedef struct
     uint8_t direction;
 } CANID_t;
 
+//TODO: MP guarantee that nodeMap is read only after initialization process
 /**
  * read node channel mapping on init
  * save scaling
@@ -69,7 +70,6 @@ class CANManager : public Singleton<CANManager>
 
 private:
     CANDriver *canDriver;
-    std::mutex sensorMtx;
     CANMapping *mapping;
 
     std::mutex nodeMapMtx;
@@ -86,9 +86,6 @@ private:
 	CANResult RequestCANInfo();
 	static inline uint8_t GetNodeID(uint32_t &canID);
 	static inline uint16_t MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &channelId);
-	std::string GetChannelName(uint8_t &nodeID, uint8_t &channelID);
-
-    uint32_t GetNodeCount();
 
 public:
     ~CANManager();

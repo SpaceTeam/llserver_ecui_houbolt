@@ -27,6 +27,7 @@ private:
 	std::map<uint8_t, Channel *> channelMap;
     CANDriver* driver;
     SensorData_t *latestSensorBuffer;
+    size_t latestSensorBufferLength;
     std::mutex bufferMtx;
 
 	void InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo);
@@ -42,6 +43,7 @@ public:
 	std::map<std::string, std::function<void(std::vector<double> &, bool)>> GetCommands() override;
 
     void ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &payloadLength, uint64_t &timestamp, RingBuffer<Sensor_t> &buffer);
+    std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
 
 
 

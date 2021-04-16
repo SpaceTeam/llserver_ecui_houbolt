@@ -129,25 +129,20 @@ CANResult CANManager::RequestCANInfo()
 
 /**
  * returns latest sensor data in map format
- * locks the sensor buffer, copies it and unlocks it immediately afterwards so values can be updated again
- * try_lock is used on the other side, so no blocking occurs at time critical part
  * @return
  */
 std::map<std::string, std::tuple<double, uint64_t>> CANManager::GetLatestSensorData()
 {
-    SensorData_t* latestSensorDataBufferCopy = new SensorData_t[sensorInfoMap.size()];
     std::map<std::string, std::tuple<double, uint64_t>> latestSensorDataMap;
-    sensorMtx.lock();
-    latestSensorDataBufferCopy = std::copy(latestSensorDataBuffer,
-            latestSensorDataBuffer+latestSensorDataBufferLength,
-            latestSensorDataBufferCopy);
-    sensorMtx.unlock();
-    for (SensorData_t *sensorData = latestSensorDataBufferCopy; sensorData < latestSensorDataBufferCopy + sensorInfoMap.size(); sensorData += sizeof(SensorData_t))
+    std::map<std::string, std::tuple<double, uint64_t>> currentMap;
+    Node *currNode;
+    for (auto &it : nodeMap)
     {
-        std::tuple<std::string, double> value = sensorInfoMap[sensorData->nodeChannelID];
-        std::string name = std::get<0>(value);
-        double scaling = std::get<1>(value);
-        latestSensorDataMap[name] = {sensorData->data * scaling, sensorData->timestamp};
+        currNode = it.second;
+        currentMap = currNode->GetLatestSensorData();
+        latestSensorDataMap.insert(currentMap.begin(), currentMap.end());
+        //TODO: MP check if this delete is correct
+        delete &currentMap;
     }
     return latestSensorDataMap;
 }
@@ -196,7 +191,9 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
             }
 
             Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, nodeChannelInfo, canBusChannelID, canDriver);
+            nodeMapMtx.lock();
             nodeMap[nodeID] = node;
+            nodeMapMtx.unlock();
 
             //add states to state controller
             auto states = node->GetStates();
@@ -222,10 +219,11 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
     uint8_t nodeID = CANManager::GetNodeID(canID);
     try
     {
+        //Don't require mutex at this point, since it is read only after initialization
         Node *node = nodeMap[nodeID];
         if (payloadLength <= 0)
         {
-            std::runtime_error("message with 0 payload not supported");
+            throw std::runtime_error("CANManager - OnCANRecv: message with 0 payload not supported");
         }
         //TODO: move logic to node
         else if (payload[0] == GENERIC_RES_DATA)

@@ -47,6 +47,9 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
 
     canBusChannelID = canBusChannelID;
     InitChannels(nodeInfo, channelInfo);
+    //init latest sensor buffer with largest channel id
+    latestSensorBufferLength = channelMap.end()->first + 1;
+    latestSensorBuffer = new SensorData_t[latestSensorBufferLength];
 }
 
 /**
@@ -163,6 +166,28 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &pay
             throw std::logic_error("CANManager - OnCANInit: mask convertion of node info failed");
         }
     }
+}
+
+std::map<std::string, std::tuple<double, uint64_t>> Node::GetLatestSensorData()
+{
+    std::map<std::string, std::tuple<double, uint64_t>> sensorData;
+    SensorData_t *copy = new SensorData_t[latestSensorBufferLength];
+    size_t bytes = latestSensorBufferLength * sizeof(SensorData_t);
+
+    bufferMtx.lock();
+    std::memcpy(copy, latestSensorBuffer, bytes);
+    bufferMtx.unlock();
+
+    for (int32_t i = 0; i < latestSensorBufferLength; i++)
+    {
+        if (channelMap.find(i) != channelMap.end())
+        {
+
+            sensorData[channelMap[i]->GetSensorName()] = {copy[i].value, copy[i].timestamp};
+        }
+
+    }
+    return sensorData;
 }
 
 std::vector<std::string> Node::GetStates()
