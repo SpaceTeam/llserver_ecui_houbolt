@@ -100,6 +100,71 @@ Node::~Node()
     delete &channelMap;
 }
 
+//TODO: move to can_houbolt headers
+typedef struct __attribute__((__packed__))
+{
+	uint32_t channel_mask;
+	uint8_t channel_types[MAX_CHANNELS];
+} SensorMsg_t;
+
+//TODO: add buffer writing
+void Node::ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &payloadLength,
+                                                 uint64_t &timestamp, RingBuffer<Sensor_t> &buffer)
+{
+    //TODO: make this more efficient
+    if (payloadLength < (sizeof(SensorMsg_t)+1) || ((payloadLength > 0) && payload[0] != GENERIC_RES_NODE_INFO))
+    {
+        throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: payload length is 0, not allowed");
+    }
+
+    SensorMsg_t *sensorMsg = (SensorMsg_t *) &payload[1];
+    uint8_t *valuePtr = sensorMsg->channel_types;
+    uint8_t currValueLength = 0;
+    double currValue;
+    for (uint8_t channelID = 0; channelID < 32; channelID++)
+    {
+        uint32_t mask = 0x00000001 & (sensorMsg->channel_mask >> channelID);
+        if (mask == 1)
+        {
+            if (payloadLength <= ((sizeof(NodeInfoMsg_t)+1) + channelID))
+            {
+                throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: payload length is shorter than channel mask says, ignoring whole node...");
+            }
+
+            Channel *ch;
+            try
+            {
+                 ch = channelMap[channelID];
+
+                 ch->GetSensorValue(valuePtr, currValueLength, currValue);
+                if (currValueLength <= 0)
+                {
+                    throw std::logic_error("Node - ProcessSensorDataAndWriteToRingBuffer: value length from channel is 0");
+                }
+                Sensor_t sensor = {{{nodeID, channelID}}, {currValue, timestamp}};
+
+                {
+                    std::lock_guard<std::mutex> lock(bufferMtx);
+
+                    latestSensorBuffer[channelID] = {currValue, timestamp};
+                    //buffer.push_back(sensor); //TODO: uncomment if implemented
+                }
+
+                valuePtr += currValueLength;
+            }
+            catch (std::exception &e)
+            {
+                throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: " + std::string(e.what()));
+            }
+
+        }
+        else if (mask > 1)
+        {
+            throw std::logic_error("CANManager - OnCANInit: mask convertion of node info failed");
+        }
+    }
+}
+
 std::vector<std::string> Node::GetStates()
 {
     std::vector<std::string> states;

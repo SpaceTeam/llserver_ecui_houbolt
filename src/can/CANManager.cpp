@@ -217,50 +217,21 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
 }
 
-//TODO: move to can_houbolt headers
-typedef struct __attribute__((__packed__))
-{
-	uint32_t channel_mask;
-	uint8_t channel_type[MAX_CHANNELS];
-} SensorMsg_t;
-
-void CANManager::ProcessSensorData(uint8_t &nodeID, uint8_t *payload, uint32_t &payloadLength, uint64_t &timestamp)
-{
-
-    SensorMsg_t *sensorMsg = (SensorMsg_t *) &payload[1];
-
-    for (uint8_t channelID = 0; channelID < 32; channelID++)
-    {
-        uint32_t mask = 0x00000001 & (sensorMsg->channel_mask >> channelID);
-        if (mask == 1)
-        {
-            if (payloadLength <= ((sizeof(NodeInfoMsg_t)+1) + channelID))
-            {
-                throw std::runtime_error("CANManager - OnCANInit: payload length is shorter than channel mask says, ignoring whole node...");
-            }
-
-            uint16_t nodeChannelID = MergeNodeIDAndChannelID(nodeID, channelID);
-            latestSensorDataBuffer[nodeChannelID] = {};
-
-        }
-        else if (mask > 1)
-        {
-            throw std::logic_error("CANManager - OnCANInit: mask convertion of node info failed");
-        }
-    }
-}
-
 void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
 {
     uint8_t nodeID = CANManager::GetNodeID(canID);
     try
     {
-        if (payloadLength >= (sizeof(SensorMsg_t)+1) && payload[0] == GENERIC_RES_DATA)
-        {
-
-        }
-
         Node *node = nodeMap[nodeID];
+        if (payloadLength <= 0)
+        {
+            std::runtime_error("message with 0 payload not supported");
+        }
+        //TODO: move logic to node
+        else if (payload[0] == GENERIC_RES_DATA)
+        {
+            node->ProcessSensorDataAndWriteToRingBuffer(nodeID, payload, payloadLength, timestamp, nullptr);
+        }
         //TODO: process can command inside node
     }
     catch(std::exception& e)

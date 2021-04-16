@@ -28,8 +28,8 @@
 
 typedef struct
 {
-    uint64_t timestamp;
     double value;
+    uint64_t timestamp;
 } SensorData_t;
 
 typedef struct
@@ -89,9 +89,6 @@ private:
 	std::string GetChannelName(uint8_t &nodeID, uint8_t &channelID);
 
     uint32_t GetNodeCount();
-
-    //TODO: MP check if inline makes any difference
-    void ProcessSensorData(uint8_t &nodeID, uint8_t *payload, uint32_t &payloadLength, uint64_t &timestamp);
 
 public:
     ~CANManager();

@@ -9,13 +9,13 @@
 
 #include "utility/Singleton.h"
 
-#include "drivers/I2C.h"
+#include "driver/I2C.h"
 
 #include "utility/json.hpp"
 
-#include "drivers/WarnLight.h"
-#include "drivers/TmPoE.h"
-#include "drivers/JSONMapping.h"
+#include "driver/WarnLight.h"
+#include "driver/TmPoE.h"
+#include "utility/JSONMapping.h"
 
 #include "can/CANManager.h"
 #include "DataFilter.h"

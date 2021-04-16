@@ -5,11 +5,14 @@
 #ifndef LLSERVER_ECUI_HOUBOLT_NODE_H
 #define LLSERVER_ECUI_HOUBOLT_NODE_H
 
+#include <mutex>
+
 #include "common.h"
 #include "can/Channel.h"
 #include "can/CANDriver.h"
 #include "can/CANManager.h"
 #include "can_houbolt/channels/generic_channel_def.h"
+#include "utility/RingBuffer.h"
 
 class Node : public Channel
 {
@@ -23,7 +26,8 @@ private:
 	uint8_t nodeID;
 	std::map<uint8_t, Channel *> channelMap;
     CANDriver* driver;
-    Sensor_t *latestSensorBuffer;
+    SensorData_t *latestSensorBuffer;
+    std::mutex bufferMtx;
 
 	void InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo);
 
@@ -37,7 +41,7 @@ public:
     std::vector<std::string> GetStates() override;
 	std::map<std::string, std::function<void(std::vector<double> &, bool)>> GetCommands() override;
 
-    
+    void ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &payloadLength, uint64_t &timestamp, RingBuffer<Sensor_t> &buffer);
 
 
 
