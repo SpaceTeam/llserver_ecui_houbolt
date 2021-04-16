@@ -156,9 +156,10 @@ void CANManager::OnChannelStateChanged(std::string stateName, double value, uint
 void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
 {
     //TODO: only accept node info messages in this stage
+    Can_MessageData_t *canMsg = (Can_MessageData_t *) payload;
     try
     {
-        if (payloadLength >= (sizeof(NodeInfoMsg_t)+1) && payload[0] == GENERIC_RES_NODE_INFO)
+        if (canMsg->bit.info.channel_id == GENERIC_CHANNEL_ID && canMsg->bit.cmd_id == GENERIC_RES_NODE_INFO)
         {
             uint8_t nodeID = CANManager::GetNodeID(canID);
             CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
@@ -216,6 +217,7 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
 void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
 {
+    Can_MessageData_t *canMsg = (Can_MessageData_t *) payload;
     uint8_t nodeID = CANManager::GetNodeID(canID);
     try
     {
@@ -226,9 +228,11 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
             throw std::runtime_error("CANManager - OnCANRecv: message with 0 payload not supported");
         }
         //TODO: move logic to node
-        else if (payload[0] == GENERIC_RES_DATA)
+        else if (canMsg->bit.info.channel_id == GENERIC_CHANNEL_ID && canMsg->bit.cmd_id == GENERIC_RES_DATA)
         {
-            node->ProcessSensorDataAndWriteToRingBuffer(nodeID, payload, payloadLength, timestamp, nullptr);
+            //TODO: remove when ringbuffer implemented
+            RingBuffer<Sensor_t> buffer;
+            node->ProcessSensorDataAndWriteToRingBuffer(payload, payloadLength, timestamp, buffer);
         }
         //TODO: process can command inside node
     }

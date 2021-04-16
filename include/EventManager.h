@@ -15,7 +15,7 @@
 #include <string>
 
 #include "utility/Singleton.h"
-#include "drivers/JSONMapping.h"
+#include "utility/JSONMapping.h"
 
 //change event mapping when sequence is running to still be able to throw events when sequence is running (or just disable)
 

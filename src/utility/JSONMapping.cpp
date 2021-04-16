@@ -2,7 +2,7 @@
 // Created by Markus on 05.04.21.
 //
 
-#include "drivers/JSONMapping.h"
+#include "utility/JSONMapping.h"
 
 #include "utility/utils.h"
 

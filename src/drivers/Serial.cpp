@@ -7,7 +7,7 @@
 #include "common.h"
 #include "hcp/HcpCommands.h"
 
-#include "drivers/Serial.h"
+#include "driver/Serial.h"
 
 #define MSG_SIZE 2048
 

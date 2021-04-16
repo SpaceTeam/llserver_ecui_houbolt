@@ -2,7 +2,7 @@
 // Created by Markus on 2019-10-16.
 //
 
-#include "drivers/WarnLight.h"
+#include "driver/WarnLight.h"
 #include "utility/Config.h"
 
 using json = nlohmann::json;

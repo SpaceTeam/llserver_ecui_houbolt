@@ -42,8 +42,8 @@ protected:
 	virtual void SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *command, uint32_t commandLength, uint8_t canBusChannelID, CANDriver *driver, bool testOnly);
 
 public:
-    Channel(uint8_t channelID, std::string channelName, double sensorScaling, Channel *parent) :
-        channelID(channelID), channelName(std::move(channelName)), sensorScaling(sensorScaling), parent(parent)
+    Channel(uint8_t channelID, std::string channelName, double sensorScaling, Channel *parent, uint8_t typeSize=0) :
+        channelID(channelID), channelName(std::move(channelName)), sensorScaling(sensorScaling), parent(parent), typeSize(typeSize)
     {
         commandMap = std::map<std::string, std::function<void(std::vector<double> &, bool)>>();
     };

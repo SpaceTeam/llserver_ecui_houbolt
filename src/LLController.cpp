@@ -7,7 +7,7 @@
 
 #include "utility/Config.h"
 #include "utility/utils.h"
-#include "drivers/SocketOld.h"
+#include "driver/SocketOld.h"
 #include "hcp/HcpManager.h"
 #include "SequenceManager.h"
 #include "LLInterface.h"
@@ -104,7 +104,7 @@ void LLController::Abort(std::string &abortMsg)
     EcuiSocket::SendJson("abort", abortMsg);
 }
 
-void LLController::OnECUISocketRecv(nlohmann::json msg)+
+void LLController::OnECUISocketRecv(nlohmann::json msg)
 {
     try
     {
@@ -174,4 +174,9 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)+
         Debug::error("LLController - OnECUISocketRecv: Message processing failed ignoring msg for now, %s", e.what());
         Debug::print("Json msg dump: \n%s", ((std::string) msg.dump(4)).c_str());
     }
+}
+
+void LLController::OnECUISocketClose()
+{
+
 }

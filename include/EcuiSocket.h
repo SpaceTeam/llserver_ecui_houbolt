@@ -9,7 +9,7 @@
 
 #include "utility/json.hpp"
 
-#include "drivers/Socket.h"
+#include "driver/Socket.h"
 
 class EcuiSocket
 {

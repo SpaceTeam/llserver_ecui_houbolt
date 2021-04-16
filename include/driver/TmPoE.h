@@ -6,7 +6,7 @@
 #define TXV_ECUI_LLSERVER_TMPOE_H
 
 #include "common.h"
-#include "drivers/SocketOld.h"
+#include "driver/SocketOld.h"
 
 class TMPoE
 {

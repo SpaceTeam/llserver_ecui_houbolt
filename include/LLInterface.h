@@ -16,6 +16,7 @@
 #include "driver/WarnLight.h"
 #include "driver/TmPoE.h"
 #include "utility/JSONMapping.h"
+#include "utility/Timer.h"
 
 #include "can/CANManager.h"
 #include "DataFilter.h"
@@ -57,8 +58,6 @@ private:
 
 	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states);
 	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t, bool>> &states);
-
-    LLInterface();
 
 
 public:

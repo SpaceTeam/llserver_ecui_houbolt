@@ -8,9 +8,29 @@
 #include <mutex>
 
 #include "common.h"
+
+typedef struct
+{
+    double value;
+    uint64_t timestamp;
+} SensorData_t;
+
+typedef struct
+{
+    union
+    {
+        struct
+        {
+            uint8_t nodeId;
+            uint8_t channelId;
+        } separate;
+        uint16_t nodeChannelID;
+    };
+    SensorData_t data;
+} Sensor_t;
+
 #include "can/Channel.h"
 #include "can/CANDriver.h"
-#include "can/CANManager.h"
 #include "can_houbolt/channels/generic_channel_def.h"
 #include "utility/RingBuffer.h"
 

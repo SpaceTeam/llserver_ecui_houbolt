@@ -7,12 +7,20 @@
 
 #include "common.h"
 
+typedef struct
+{
+    uint8_t priority;
+    uint8_t special_cmd;
+    uint8_t node_id;
+    uint8_t direction;
+} CANID_t;
+
 #include <map>
 #include <functional>
 #include <mutex>
 
 #include "utility/Singleton.h"
-#include "Node.h"
+#include "can/Node.h"
 #include "can/CANMapping.h"
 #include "can/CANDriver.h"
 
@@ -25,34 +33,6 @@
 //} channelData_t;
 //
 //channelData_t sensorBuffer[];
-
-typedef struct
-{
-    double value;
-    uint64_t timestamp;
-} SensorData_t;
-
-typedef struct
-{
-    union
-    {
-        struct
-        {
-            uint8_t nodeId;
-            uint8_t channelId;
-        } separate;
-        uint16_t nodeChannelID;
-    };
-    SensorData_t data;
-} Sensor_t;
-
-typedef struct
-{
-    uint8_t priority;
-    uint8_t special_cmd;
-    uint8_t node_id;
-    uint8_t direction;
-} CANID_t;
 
 //TODO: MP guarantee that nodeMap is read only after initialization process
 /**

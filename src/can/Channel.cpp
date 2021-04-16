@@ -6,7 +6,7 @@
 #include "can/Channel.h"
 
 const std::vector<std::string> Channel::states = {};
-const std::map<std::string, std::vector<double>> Channel::scalingMap = {};
+const std::map<std::string, std::vector<double>> Channel::sensorScalingMap = {};
 
 inline int32_t Channel::ScaleAndConvert(double value, double a, double b)
 {

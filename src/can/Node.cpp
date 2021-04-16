@@ -1,6 +1,7 @@
 #include "can/Node.h"
 
 #include <map>
+#include <cstring>
 #include <string>
 #include <functional>
 #include "can/DigitalOut.h"
@@ -107,9 +108,10 @@ Node::~Node()
 typedef struct __attribute__((__packed__))
 {
 	uint32_t channel_mask;
-	uint8_t channel_types[MAX_CHANNELS];
+	uint8_t *channel_data;
 } SensorMsg_t;
 
+//TODO: adapt to CanMessageData_t type
 //TODO: add buffer writing
 void Node::ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &payloadLength,
                                                  uint64_t &timestamp, RingBuffer<Sensor_t> &buffer)
@@ -121,7 +123,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &pay
     }
 
     SensorMsg_t *sensorMsg = (SensorMsg_t *) &payload[1];
-    uint8_t *valuePtr = sensorMsg->channel_types;
+    uint8_t *valuePtr = sensorMsg->channel_data;
     uint8_t currValueLength = 0;
     double currValue;
     for (uint8_t channelID = 0; channelID < 32; channelID++)

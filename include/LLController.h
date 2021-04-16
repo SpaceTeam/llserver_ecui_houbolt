@@ -7,6 +7,7 @@
 
 #include "common.h"
 
+#include "LLInterface.h"
 #include "utility/Singleton.h"
 
 #include "utility/json.hpp"
@@ -24,8 +25,6 @@ class LLController : public Singleton<LLController>
 private:
 
     LLInterface *llInterface;
-
-    LLController();
 
 
 

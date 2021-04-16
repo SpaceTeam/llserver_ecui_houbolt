@@ -6,7 +6,7 @@
 #define TXV_ECUI_LLSERVER_HCPMANAGER_H
 
 #include "hcp/HcpCommands.h"
-#include "drivers/Serial.h"
+#include "driver/Serial.h"
 #include "hcp/HcpMapping.h"
 #include "utility/Timer.h"
 #include "utility/json.hpp"

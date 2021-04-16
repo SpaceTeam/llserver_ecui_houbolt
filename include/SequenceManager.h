@@ -14,7 +14,7 @@
 //#include "spdlog/sinks/basic_file_sink.h"
 
 #include "utility/Timer.h"
-#include "drivers/I2C.h"
+#include "driver/I2C.h"
 
 using json = nlohmann::json;
 
