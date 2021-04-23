@@ -47,8 +47,10 @@ typedef struct
  */
 class CANManager : public Singleton<CANManager>
 {
-
+    friend class Singleton;
 private:
+    
+
     CANDriver *canDriver;
     CANMapping *mapping;
 
@@ -67,8 +69,8 @@ private:
 	static inline uint8_t GetNodeID(uint32_t &canID);
 	static inline uint16_t MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &channelId);
 
-public:
     ~CANManager();
+public:
 
     CANResult Init();
 

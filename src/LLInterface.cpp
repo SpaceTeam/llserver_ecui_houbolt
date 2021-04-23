@@ -46,7 +46,7 @@ void LLInterface::Init()
         Debug::print("GUIMapping initialized");
 
         Debug::print("Waiting for States to be initialized...");
-        stateController->WaitUntilStatesInitialized();
+        // stateController->WaitUntilStatesInitialized(); //TODO: uncomment when can interface works
         Debug::print("All States initialized\n");
 
         Debug::print("Initializing DataFilter...");
@@ -94,8 +94,9 @@ LLInterface::~LLInterface()
 
         Debug::print("Stopping State transmission...");
         StopStateTransmission();
+        delete stateTimer;
         Debug::print("Stopping Sensor State Timer...");
-        sensorTimer->stop();
+        delete sensorTimer;
 
         Debug::print("Deleting Data Filter...");
         delete dataFilter;
@@ -104,13 +105,13 @@ LLInterface::~LLInterface()
         delete guiMapping;
 
         Debug::print("Shutting down CANManager...");
-        delete canManager;
+        CANManager::Destroy();
 
         Debug::print("Shutting down StateController...");
-        delete stateController;
+        StateController::Destroy();
 
         Debug::print("Shutting down EventManager...");
-        delete eventManager;
+        EventManager::Destroy();
     }
 }
 
@@ -195,7 +196,7 @@ void LLInterface::StopStateTransmission()
 
 void LLInterface::StopGetStates()
 {
-
+    Debug::print("Stopped State Timer...");
 }
 
 void LLInterface::GetStates(int64_t microTime)
@@ -220,7 +221,7 @@ void LLInterface::FilterSensors(int64_t microTime)
 
 void LLInterface::StopFilterSensors()
 {
-
+    Debug::print("Stopped Sensor State Timer...");
 }
 
 nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states)

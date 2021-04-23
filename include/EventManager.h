@@ -21,6 +21,7 @@
 
 class EventManager : public Singleton<EventManager>
 {
+    friend class Singleton;
 private:
 
     bool initialized = false;
@@ -35,8 +36,8 @@ private:
 
     bool CheckEvents();
 
-public:
     ~EventManager();
+public:
 
     void Init();
 

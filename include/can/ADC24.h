@@ -12,7 +12,7 @@
 class ADC24 : public Channel
 {
 public:
-    using Channel::Channel;
+    ADC24(uint8_t channelID, std::string channelName, double sensorScaling, Channel *parent) : Channel(channelID, channelName, sensorScaling, parent, 3) {};
 
 public:
 };

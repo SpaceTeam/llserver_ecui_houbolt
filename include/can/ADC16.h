@@ -15,7 +15,7 @@ class ADC16 : public Channel
 {
 
 public:
-    using Channel::Channel;
+    ADC16(uint8_t channelID, std::string channelName, double sensorScaling, Channel *parent) : Channel(channelID, channelName, sensorScaling, parent, 2) {};
 
     std::vector<std::string> GetStates() override;
 };

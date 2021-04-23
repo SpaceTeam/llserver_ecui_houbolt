@@ -91,7 +91,7 @@ LLController::~LLController()
     Debug::print("Shutting down ECUISocket...");
     EcuiSocket::Destroy();
     Debug::print("Shutting down LLInterface...");
-    delete llInterface;
+    LLInterface::Destroy();
     Debug::print("Shutting down Debug...");
     Debug::close();
 }

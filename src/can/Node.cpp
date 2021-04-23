@@ -117,12 +117,17 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &pay
                                                  uint64_t &timestamp, RingBuffer<Sensor_t> &buffer)
 {
     //TODO: make this more efficient
-    if (payloadLength < (sizeof(SensorMsg_t)+1) || ((payloadLength > 0) && payload[0] != GENERIC_RES_NODE_INFO))
+    if (payloadLength < 2)
     {
-        throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: payload length is 0, not allowed");
+        throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: payload length is smaller than 2, invalid can msg");
+    }
+    Can_MessageData_t *canMsg = (Can_MessageData_t *) payload;
+    if (canMsg->bit.info.channel_id == GENERIC_CHANNEL_ID && canMsg->bit.cmd_id == GENERIC_RES_DATA)
+    {
+        throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: not a sensor data message, ignored...");
     }
 
-    SensorMsg_t *sensorMsg = (SensorMsg_t *) &payload[1];
+    SensorMsg_t *sensorMsg = (SensorMsg_t *) canMsg->bit.data.uint8;
     uint8_t *valuePtr = sensorMsg->channel_data;
     uint8_t currValueLength = 0;
     double currValue;
@@ -131,17 +136,12 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &pay
         uint32_t mask = 0x00000001 & (sensorMsg->channel_mask >> channelID);
         if (mask == 1)
         {
-            if (payloadLength <= ((sizeof(NodeInfoMsg_t)+1) + channelID))
-            {
-                throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: payload length is shorter than channel mask says, ignoring whole node...");
-            }
-
             Channel *ch;
             try
             {
-                 ch = channelMap[channelID];
+                ch = channelMap[channelID];
 
-                 ch->GetSensorValue(valuePtr, currValueLength, currValue);
+                ch->GetSensorValue(valuePtr, currValueLength, currValue);
                 if (currValueLength <= 0)
                 {
                     throw std::logic_error("Node - ProcessSensorDataAndWriteToRingBuffer: value length from channel is 0");

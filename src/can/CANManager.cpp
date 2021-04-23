@@ -16,7 +16,8 @@
 
 CANManager::~CANManager()
 {
-    delete &nodeMap;
+    delete mapping;
+    delete canDriver;
 }
 
 //TODO: MP maybe move to node class
@@ -87,7 +88,7 @@ CANResult CANManager::Init()
         }
         catch (std::exception& e)
         {
-            Debug::error("Initializing CANManager failed: %s", e.what());
+            throw std::runtime_error("Initializing CANManager failed: " + std::string(e.what()));
         }
 
     }
@@ -141,8 +142,6 @@ std::map<std::string, std::tuple<double, uint64_t>> CANManager::GetLatestSensorD
         currNode = it.second;
         currentMap = currNode->GetLatestSensorData();
         latestSensorDataMap.insert(currentMap.begin(), currentMap.end());
-        //TODO: MP check if this delete is correct
-        delete &currentMap;
     }
     return latestSensorDataMap;
 }
@@ -164,7 +163,7 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
             uint8_t nodeID = CANManager::GetNodeID(canID);
             CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
 
-            NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *)&payload[1];
+            NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *) canMsg->bit.data.uint8;
 
             std::map<uint8_t, std::tuple<std::string, double>> nodeChannelInfo;
             for (uint8_t channelID = 0; channelID < 32; channelID++)
@@ -172,11 +171,6 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
                 uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
                 if (mask == 1)
                 {
-                    if (payloadLength <= ((sizeof(NodeInfoMsg_t)+1) + channelID))
-                    {
-                        throw std::runtime_error("CANManager - OnCANInit: payload length is shorter than channel mask says, ignoring whole node...");
-                    }
-
                     CANMappingObj channelMappingObj = mapping->GetChannelObj(nodeID, channelID);
                     nodeChannelInfo[channelID] = {channelMappingObj.stringID, channelMappingObj.scaling};
 
@@ -207,9 +201,17 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
             eventManager->AddCommands(node->GetCommands());
         }
     }
+    catch (std::runtime_error &e)
+    {
+        throw std::runtime_error("runtime error " + std::string(e.what()));
+    }
+    catch (std::logic_error &e)
+    {
+        throw std::logic_error("logic error " + std::string(e.what()));
+    }
     catch (std::exception &e)
     {
-        Debug::error("%s", e.what());
+        throw std::runtime_error("other error  " + std::string(e.what()));
     }
 
 

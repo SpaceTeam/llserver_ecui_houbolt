@@ -91,7 +91,7 @@ void CANDriver::OnCANCallback(int handle, void *driver, unsigned int event)
     
     // As the callback only gets entered when the receive queue was empty, empty it in here
 
-    stat = canRead(handle, &id, data, &dlc, &flags, &timestamp);
+    stat = canRead(handle, &id, data, &dlc, &flags, &timestamp); //TODO: is dlc the length code or the actual length?
 
     switch(event) {
         case canNOTIFY_ERROR:
@@ -153,7 +153,7 @@ canStatus CANDriver::InitializeCANChannel(uint32_t canBusChannelID) {
     // TODO: Might want to remove canOPEN_ACCEPT_VIRTUAL later (DB)
     canHandles[canBusChannelID] = canOpenChannel(canBusChannelID, canOPEN_CAN_FD | canOPEN_ACCEPT_LARGE_DLC | canOPEN_ACCEPT_VIRTUAL);
     if(canHandles[canBusChannelID] < 0){
-        return stat;
+        return (canStatus)canHandles[canBusChannelID];
     }
 
     stat = canSetBusParams(canHandles[canBusChannelID],

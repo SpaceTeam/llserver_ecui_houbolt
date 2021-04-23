@@ -21,7 +21,7 @@ enum ServerMode
 
 class LLController : public Singleton<LLController>
 {
-
+    friend class Singleton;
 private:
 
     LLInterface *llInterface;
@@ -30,9 +30,8 @@ private:
 
     static void PrintLogo();
 
-public:
-
     ~LLController();
+public:
 
     void Init(ServerMode serverMode);
 

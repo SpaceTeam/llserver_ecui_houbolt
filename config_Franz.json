@@ -1,5 +1,5 @@
 {
-  "version": "1.2.4@Large Teststand",
+  "version": "1.2.4@Franz",
   "autoabort": false,
   "DEBUG": {
       "printWarnings": false,
@@ -19,18 +19,18 @@
     {
         "ARBITRATION":
         {
-          "bitrate" : 200000,
-          "time_segment_1" : 7,
+          "bitrate" : 1000000,
+          "time_segment_1" : 77,
           "time_segment_2" : 2,
-          "sync_jump_width" : 1,
+          "sync_jump_width" : 2,
           "no_sampling_points" : 1
         },
         "DATA":
         {
-          "bitrate" : 800000,
+          "bitrate" : 8000000,
           "time_segment_1" : 7,
           "time_segment_2" : 2,
-          "sync_jump_width" : 1
+          "sync_jump_width" : 2
         }
     }
   },
@@ -40,7 +40,7 @@
   },
   "WEBSERVER":
   {
-    "ip": "192.168.1.101",
+    "ip": "192.168.0.213",
     "port": 5555,
     "sensor_transmission_interval": 100000,
     "timer_sync_interval": 100000,

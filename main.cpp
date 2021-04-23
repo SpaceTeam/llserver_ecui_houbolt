@@ -14,6 +14,9 @@
 #include "LLController.h"
 #include "utility/Config.h"
 
+sig_atomic_t running = 1;
+sig_atomic_t signum = 0;
+
 #define TEST_LLSERVER
 
 #ifdef TEST_LLSERVER
@@ -24,11 +27,11 @@
 
 std::thread *testThread = nullptr;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
-    uint8_t msgType;
-    NodeInfoMsg_t info;
-} InfoMsgDummy_t;
+	uint32_t channel_mask;
+	uint8_t *channel_data;
+} SensorMsg_t;
 
 void testFnc()
 {
@@ -36,19 +39,45 @@ void testFnc()
     using namespace std::chrono_literals;
     std::this_thread::sleep_for(1000ms);
 
-    InfoMsgDummy_t msg;
-    msg.msgType = GENERIC_RES_NODE_INFO;
-    NodeInfoMsg_t *info = &msg.info;
-    info->firmware_version = 10000;
-    info->channel_mask = 0x000B;
-    info->channel_type[0] = CHANNEL_TYPE_ADC24;
-    info->channel_type[1] = CHANNEL_TYPE_ADC16;
-    info->channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
-    info->channel_type[3] = CHANNEL_TYPE_SERVO;
+    Can_MessageData_t msg;
+    msg.bit.info.buffer = DIRECT_BUFFER;
+    msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
+    msg.bit.cmd_id = GENERIC_RES_NODE_INFO;
+    NodeInfoMsg_t info = {0};
+    info.firmware_version = 10000;
+    info.channel_mask = 0x0000000B;
+    info.channel_type[0] = CHANNEL_TYPE_ADC24;
+    info.channel_type[1] = CHANNEL_TYPE_ADC16;
+    info.channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
+    info.channel_type[3] = CHANNEL_TYPE_SERVO;
+    msg.bit.data.uint8 = (uint8_t *)&info;
     uint16_t canID = 0b00000000010;
 
     CANManager *manager = CANManager::Instance();
-    manager->OnCANInit(0, canID, (uint8_t *)&msg, sizeof(msg), 0x1);
+    manager->OnCANInit(0, canID, msg.uint8, sizeof(msg), 0x1);
+
+    std::this_thread::sleep_for(1000ms);
+
+    msg = {0};
+    msg.bit.info.buffer = DIRECT_BUFFER;
+    msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
+    msg.bit.cmd_id = GENERIC_RES_NODE_INFO;
+    SensorMsg_t sensorMsg = {0};
+    sensorMsg.channel_mask = 0x00000003;
+    sensorMsg.channel_data = new uint8_t[3+2];
+    while(running)
+    {
+        //adc24
+        sensorMsg.channel_data[0] = 0x20;
+        sensorMsg.channel_data[1] = 0x00;
+        sensorMsg.channel_data[2] = 0x00;
+        //adc 16
+        sensorMsg.channel_data[3] = 0x00;
+        sensorMsg.channel_data[4] = 0x04;
+
+         manager->OnCANRecv(0, canID, msg.uint8, sizeof(msg), 0x1);
+        std::this_thread::sleep_for(1000ms);
+    }
 }
 
 #endif
@@ -87,28 +116,8 @@ static void set_latency_target(void)
 
 void signalHandler(int signum)
 {
-
-#ifdef TEST_LLSERVER
-    if (testThread != nullptr && testThread->joinable())
-    {
-        testThread->join();
-        delete testThread;
-    }
-
-#endif
-    Debug::error("posix signal fired: %d, shutting down...", signum);
-
-    try
-    {
-        delete LLController::Instance();
-    }
-    catch (std::exception &e)
-    {
-        Debug::error("signal handler: failed to shutdown LLController, %s", e.what());
-    }
-
-
-    exit(signum);
+    running = 0;
+    signum = signum;
 }
 
 int main(int argc, char const *argv[])
@@ -155,11 +164,32 @@ int main(int argc, char const *argv[])
     llController->Init(serverMode);
 
     std::string inputStr;
-    while (true)
+    while (running)
     {
 	    sleep(1);
     }
 
-    return 0;
+    #ifdef TEST_LLSERVER
+        if (testThread != nullptr && testThread->joinable())
+        {
+            testThread->join();
+            delete testThread;
+        }
+
+    #endif
+
+    Debug::error("posix signal fired: %d, shutting down...", signum);
+
+    try
+    {
+        LLController::Destroy();
+    }
+    catch (std::exception &e)
+    {
+        Debug::error("signal handler: failed to shutdown LLController, %s", e.what());
+    }
+
+
+    exit(signum);
 }
 

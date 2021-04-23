@@ -9,20 +9,16 @@ template <class T>
 class Singleton
 {
 protected:
+    //TODO: MP make friend for all template classes here
+    // template <class> friend class Singleton; // this does not compile when destructor is private of child class for some reason
+
     static T *instance;    // elements
 
     Singleton(const Singleton& copy) {};
     Singleton() {};
-public:
 
-    virtual ~Singleton()
-    {
-        if (instance != nullptr)
-        {
-            delete instance;
-            instance = nullptr;
-        }
-    }
+    virtual ~Singleton() {};
+public:
 
     static T* Instance() {
         if (instance == nullptr)
@@ -30,6 +26,14 @@ public:
             instance = new T();
         }
         return instance;
+    }
+
+    static void Destroy() {
+        if (instance != nullptr)
+        {
+            delete instance;
+            instance = nullptr;
+        }
     }
 
 };

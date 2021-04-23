@@ -17,6 +17,7 @@
 
 class StateController : public Singleton<StateController>
 {
+    friend class Singleton;
 private:
     std::map<std::string, std::tuple<double, uint64_t, bool>> states;
     std::function<void(std::string, double)> onStateChangeCallback;
@@ -25,8 +26,8 @@ private:
 
 	std::mutex stateMtx;
 
-public:
     ~StateController();
+public:
 
     //TODO: MP Maybe add timestamp to callback argument as well
     void Init(std::function<void(std::string, double)> onStateChangeCallback);

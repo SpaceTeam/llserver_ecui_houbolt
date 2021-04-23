@@ -25,18 +25,18 @@
 
 class LLInterface : public Singleton<LLInterface>
 {
-
+    friend class Singleton;
 private:
 
-    I2C* i2cDevice;
-    WarnLight* warnLight;
-    TMPoE *tmPoE;
+    I2C* i2cDevice = nullptr;
+    WarnLight* warnLight = nullptr;
+    TMPoE *tmPoE = nullptr;
 
-    JSONMapping *guiMapping;
-    CANManager *canManager;
-    EventManager *eventManager;
-    StateController *stateController;
-    DataFilter *dataFilter;
+    JSONMapping *guiMapping = nullptr;
+    CANManager *canManager = nullptr;
+    EventManager *eventManager = nullptr;
+    StateController *stateController = nullptr;
+    DataFilter *dataFilter = nullptr;
 
     bool isInitialized;
 
@@ -59,11 +59,10 @@ private:
 	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states);
 	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t, bool>> &states);
 
-
+    ~LLInterface();
 public:
 
     void Init();
-    ~LLInterface();
 
     nlohmann::json GetGUIMapping();
 
