@@ -118,6 +118,29 @@ void signalHandler(int signum)
 {
     running = 0;
     signum = signum;
+
+    #ifdef TEST_LLSERVER
+        if (testThread != nullptr && testThread->joinable())
+        {
+            testThread->join();
+            delete testThread;
+        }
+
+    #endif
+
+    Debug::error("posix signal fired: %d, shutting down...", signum);
+
+    try
+    {
+        LLController::Destroy();
+    }
+    catch (std::exception &e)
+    {
+        Debug::error("signal handler: failed to shutdown LLController, %s", e.what());
+    }
+
+
+    exit(signum);
 }
 
 int main(int argc, char const *argv[])
@@ -164,32 +187,9 @@ int main(int argc, char const *argv[])
     llController->Init(serverMode);
 
     std::string inputStr;
-    while (running)
+    while (1)
     {
 	    sleep(1);
     }
-
-    #ifdef TEST_LLSERVER
-        if (testThread != nullptr && testThread->joinable())
-        {
-            testThread->join();
-            delete testThread;
-        }
-
-    #endif
-
-    Debug::error("posix signal fired: %d, shutting down...", signum);
-
-    try
-    {
-        LLController::Destroy();
-    }
-    catch (std::exception &e)
-    {
-        Debug::error("signal handler: failed to shutdown LLController, %s", e.what());
-    }
-
-
-    exit(signum);
 }
 
