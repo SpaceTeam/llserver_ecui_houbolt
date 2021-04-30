@@ -6,10 +6,10 @@
         },
         "02_loadingTankPressure": {
             "map": {
-                "d": -8.74088,
-                "k": 0.023497
+                "d": -14.98,
+                "k": 0.02014
             },
-            "port": 0
+            "port": 1
         },
         "03_loadingTankVentFeedback": {
             "port": 13,
@@ -43,6 +43,13 @@
         "08_pressurantTankVentValveFeedback": {
             "port": 15,
             "servo": "pressurantTankVentValve"
+        },
+        "09_pressurantPressure": {
+            "map": {
+                "d": -49.95,
+                "k": 0.13427
+            },
+            "port": 2
         }
     },
     "digital": {},
