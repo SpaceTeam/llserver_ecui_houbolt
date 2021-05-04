@@ -6,7 +6,7 @@
         },
         "02_loadingTankPressure": {
             "map": {
-                "d": -14.98,
+                "d": -15.90,
                 "k": 0.02014
             },
             "port": 1
@@ -46,10 +46,10 @@
         },
         "09_pressurantPressure": {
             "map": {
-                "d": -49.95,
+                "d": -137.0,
                 "k": 0.13427
             },
-            "port": 2
+            "port": 0
         }
     },
     "digital": {},
@@ -95,25 +95,25 @@
         },
         "pressurantTankLoadValve": {
             "endpoints": [
-                1025,
-                2050
+                1000,
+                2000
             ],
             "feedbackAnalog": "07_pressurantTankLoadValveFeedback",
             "feedbackEndpoints": [
-                1443,
-                575
+                0,
+                100
             ],
             "port": 2
         },
         "pressurantTankVentValve": {
             "endpoints": [
                 1000,
-                1900
+                2000
             ],
             "feedbackAnalog": "08_pressurantTankVentValveFeedback",
             "feedbackEndpoints": [
-                1421,
-                679
+                0,
+                100
             ],
             "port": 3
         }
