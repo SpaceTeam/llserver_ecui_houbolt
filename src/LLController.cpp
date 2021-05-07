@@ -111,7 +111,7 @@ void LLController::OnECUISocketRecv(json msg)
                 value = servo["value"];
                 HcpManager::SetServo(name, value);
                 json client_msg = servo;
-                EcuiSocket::SendJson("servos-sync", client_msg);
+                // EcuiSocket::SendJson("servos-sync", client_msg);
             }
         }
         else if (type.compare("servos-set-raw") == 0)
@@ -149,62 +149,50 @@ void LLController::OnECUISocketRecv(json msg)
         }
 		else if (type.compare("parameter-set") == 0)
 		{
-			json parameter = msg["content"][0];
-			string id = parameter["id"];
-			//int8 value = parameter["value"];
+            for (auto &parameter : msg["content"])
+            {
+                string id = parameter["id"];
 
-			if (id.compare("wlRed") == 0)
-			{
-				LLInterface::TurnRed();
-			}
-			else if (id.compare("wlYellow") == 0)
-			{
-				LLInterface::TurnYellow();
-			}
-			else if (id.compare("wlGreen") == 0)
-			{
-				LLInterface::TurnGreen();
-			}
-			else if (id.compare("supercharge") == 0)
-			{
-                json value = parameter["value"];
-                int8 setpoint;
-			    uint8 hysteresis;
-			    setpoint = value["setpoint"];
-			    hysteresis = value["hysteresis"];
-			    HcpManager::SetSupercharge(setpoint,hysteresis);
-			}
-			else
-			{
-				Debug::error("ECUISocket: parameter id not supported");
-			}
+                if (id.compare("warninglight") == 0)
+                {
+                    WarningLightStatus status = parameter["value"];
+                    LLInterface::SetWarningLightStatus(status);
+                }
+                else if (id.compare("supercharge") == 0)
+                {
+                    json value = parameter["value"];
+                    int8 setpoint;
+                    uint8 hysteresis;
+                    setpoint = value["setpoint"];
+                    hysteresis = value["hysteresis"];
+                    HcpManager::SetSupercharge(setpoint,hysteresis);
+                }
+                else
+                {
+                    Debug::error("ECUISocket: parameter id not supported");
+                }
+            }
 		}
 		else if (type.compare("parameter-get") == 0)
 		{
-			json parameter = msg["content"][0];
-			string id = parameter["id"];
+            for (auto &parameter : msg["content"])
+            {
+                string id = parameter["id"];
 
-			if (id.compare("wlRed") == 0)
-			{
-				if (LLInterface::GetWarninglightStatus() == 2) parameter["value"] = 1;
-			}
-			else if (id.compare("wlYellow") == 0)
-			{
-				if (LLInterface::GetWarninglightStatus() == 1) parameter["value"] = 1;
-			}
-			else if (id.compare("wlGreen") == 0)
-			{
-				if (LLInterface::GetWarninglightStatus() == 0) parameter["value"] = 1;
-			}
-			else if (id.compare("supercharge") == 0)
-			{
-                parameter["value"] = LLInterface::GetSupercharge();
-			}
-			else
-			{
-				Debug::error("ECUISocket: parameter id not supported");
-			}
-            EcuiSocket::SendJson("parameter-load", parameter);
+                if (id.compare("warninglight") == 0)
+                {
+                    parameter["value"] = LLInterface::GetWarninglightStatus();
+                }
+                else if (id.compare("supercharge") == 0)
+                {
+                    parameter["value"] = LLInterface::GetSupercharge();
+                }
+                else
+                {
+                    Debug::error("ECUISocket: parameter id not supported");
+                }
+                EcuiSocket::SendJson("parameter-load", parameter);
+            }
 		}
         else if (type.compare("digital-outs-set") == 0)
         {

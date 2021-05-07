@@ -249,11 +249,8 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
         {
             SetupLogging();
 
-            json parameter;
-            parameter["id"] = "wlRed";
-            parameter["value"] = 1;
             LLInterface::BeepRed();
-            EcuiSocket::SendJson("parameter-load", parameter);
+            LLInterface::SetWarningLightStatus(WarningLightStatus::CRITICAL, false);
 
             //get sensor names
             vector<string> sensorNames = LLInterface::GetAllSensorNames();
@@ -459,7 +456,7 @@ void SequenceManager::Tick(int64 microTime)
     }
     if (microTime == 0)
     {
-        LLInterface::TurnRed();
+        LLInterface::SetWarningLightStatus(WarningLightStatus::CRITICAL);
     }
 
     std::chrono::time_point<std::chrono::high_resolution_clock> beforeLogging;
