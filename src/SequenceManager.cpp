@@ -108,7 +108,7 @@ void SequenceManager::StopSequence()
 {
     Debug::flush();
     Debug::print("Sequence Done");
-    LLInterface::UpdateWarningLight();
+    LLInterface::SetWarningLightStatus(WarningLightStatus::CRITICAL);
     isRunning = false;
     if (!isAbort)
     {
@@ -250,6 +250,7 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
             SetupLogging();
 
             LLInterface::BeepRed();
+            LLInterface::SetWarningLightStatus(WarningLightStatus::CRITICAL, false);
 
             //get sensor names
             vector<string> sensorNames = LLInterface::GetAllSensorNames();
@@ -452,10 +453,6 @@ void SequenceManager::Tick(int64 microTime)
     if (microTime % timerSyncInterval == 0)
     {
         EcuiSocket::SendJson("timer-sync", ((microTime/1000) / 1000.0));
-    }
-    if (microTime == 0)
-    {
-        LLInterface::TurnRed();
     }
 
     std::chrono::time_point<std::chrono::high_resolution_clock> beforeLogging;

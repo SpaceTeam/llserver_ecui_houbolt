@@ -111,7 +111,7 @@ void LLController::OnECUISocketRecv(json msg)
                 value = servo["value"];
                 HcpManager::SetServo(name, value);
                 json client_msg = servo;
-                EcuiSocket::SendJson("servos-sync", client_msg);
+                // EcuiSocket::SendJson("servos-sync", client_msg);
             }
         }
         else if (type.compare("servos-set-raw") == 0)
@@ -147,20 +147,53 @@ void LLController::OnECUISocketRecv(json msg)
             EcuiSocket::SendJson("servos-load", servosData);
 
         }
-        else if (type.compare("supercharge-set") == 0)
-        {
-			int8 setpoint;
-			uint8 hysteresis;
-			json supercharge = msg["content"][0];
-			setpoint = supercharge["setpoint"];
-			hysteresis = supercharge["hysteresis"];
-			HcpManager::SetSupercharge(setpoint,hysteresis);
-        }
-        else if (type.compare("supercharge-get") == 0)
-        {
-			json superchargeData = LLInterface::GetSupercharge();
-            EcuiSocket::SendJson("supercharge-load", superchargeData);
-        }
+		else if (type.compare("parameter-set") == 0)
+		{
+            for (auto &parameter : msg["content"])
+            {
+                string id = parameter["id"];
+
+                if (id.compare("warninglight") == 0)
+                {
+                    WarningLightStatus status = parameter["value"];
+                    LLInterface::SetWarningLightStatus(status);
+                }
+                else if (id.compare("supercharge") == 0)
+                {
+                    json value = parameter["value"];
+                    int8 setpoint;
+                    uint8 hysteresis;
+                    setpoint = value["setpoint"];
+                    hysteresis = value["hysteresis"];
+                    HcpManager::SetSupercharge(setpoint,hysteresis);
+                }
+                else
+                {
+                    Debug::error("ECUISocket: parameter id not supported");
+                }
+            }
+		}
+		else if (type.compare("parameter-get") == 0)
+		{
+            for (auto &parameter : msg["content"])
+            {
+                string id = parameter["id"];
+
+                if (id.compare("warninglight") == 0)
+                {
+                    parameter["value"] = LLInterface::GetWarningLightStatus();
+                }
+                else if (id.compare("supercharge") == 0)
+                {
+                    parameter["value"] = LLInterface::GetSupercharge();
+                }
+                else
+                {
+                    Debug::error("ECUISocket: parameter id not supported");
+                }
+                EcuiSocket::SendJson("parameter-load", parameter);
+            }
+		}
         else if (type.compare("digital-outs-set") == 0)
         {
             string name;
@@ -186,7 +219,7 @@ void LLController::OnECUISocketRecv(json msg)
         }
         else
         {
-            Debug::error("ECUISocket: message not supported");
+            Debug::error("ECUISocket: %s message not supported", type.c_str());
         }
     }
 }

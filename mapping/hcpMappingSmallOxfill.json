@@ -1,19 +1,19 @@
 {
     "analog": {
-        "01_loadingTankFeedback": {
+        "01_oxfillMainValveFb": {
             "port": 12,
-            "servo": "loadingTankValve"
+            "servo": "oxfillMainValve"
         },
-        "02_loadingTankPressure": {
+        "02_P_oxBottle": {
             "map": {
                 "d": -15.90,
                 "k": 0.02014
             },
             "port": 1
         },
-        "03_loadingTankVentFeedback": {
+        "03_oxfillVentValveFb": {
             "port": 13,
-            "servo": "loadingTankVentValve"
+            "servo": "oxfillVentValve"
         },
         "04_T_coldContainer": {
             "map": {
@@ -69,24 +69,24 @@
     },
     "motor": {},
     "servo": {
-        "loadingTankValve": {
+        "oxfillMainValve": {
             "endpoints": [
                 1025,
                 2050
             ],
-            "feedbackAnalog": "01_loadingTankFeedback",
+            "feedbackAnalog": "01_oxfillMainValveFb",
             "feedbackEndpoints": [
                 1443,
                 575
             ],
             "port": 0
         },
-        "loadingTankVentValve": {
+        "oxfillVentValve": {
             "endpoints": [
                 1000,
                 1900
             ],
-            "feedbackAnalog": "02_loadingTankPressure",
+            "feedbackAnalog": "03_oxfillVentValveFb",
             "feedbackEndpoints": [
                 1421,
                 679
