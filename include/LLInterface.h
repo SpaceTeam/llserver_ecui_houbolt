@@ -13,6 +13,13 @@
 #include "WarnLight.h"
 #include "TmPoE.h"
 
+enum class WarningLightStatus
+{
+    SAFE,
+    RESTRICTED,
+    CRITICAL
+};
+
 class LLInterface
 {
 
@@ -30,7 +37,7 @@ private:
     static bool useTMPoE;
 
     static bool isTransmittingSensors;
-    static int32 warnlightStatus;
+    static WarningLightStatus warningLightStatus;
     static Timer* sensorTimer;
 
 	static double sensorsSmoothingFactor;
@@ -68,8 +75,8 @@ public:
     static void TurnGreen();
     static void TurnYellow();
     static void BeepRed();
-    static void UpdateWarningLight(std::map<std::string, double> sensors={});
-	static int32 GetWarninglightStatus();
+	static WarningLightStatus GetWarningLightStatus();
+    static void SetWarningLightStatus(WarningLightStatus status, bool sendState=true);
 
     static bool ExecCommand(std::string name, json value);
 

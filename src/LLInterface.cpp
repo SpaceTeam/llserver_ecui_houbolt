@@ -22,7 +22,7 @@ bool LLInterface::isInitialized = false;
 bool LLInterface::useTMPoE = false;
 
 bool LLInterface::isTransmittingSensors = false;
-int32 LLInterface::warnlightStatus = -1;
+WarningLightStatus LLInterface::warningLightStatus = WarningLightStatus::SAFE;
 Timer* LLInterface::sensorTimer;
 
 double LLInterface::sensorsSmoothingFactor = 0.0;
@@ -56,10 +56,10 @@ void LLInterface::Init()
 		//update warninglight after initialization but wait 1 sec to 
 		//guarantee all sensors have already been fetched
 		std::thread updateWarnlightThread([](){
-					usleep(1000000);
-			UpdateWarningLight();
+					sleep(1);
+			        SetWarningLightStatus(WarningLightStatus::SAFE);
 				});
-				updateWarnlightThread.detach();
+		updateWarnlightThread.detach();
     }
 }
 
@@ -181,8 +181,6 @@ void LLInterface::GetSensors(int64 microTime)
 
     TransmitSensors(microTime, sensors);
 
-    UpdateWarningLight(sensors);
-
 }
 
 void LLInterface::FilterSensors(std::map<std::string, double> rawSensors)
@@ -217,44 +215,11 @@ void LLInterface::TransmitSensors(int64 microTime, std::map<std::string, double>
     EcuiSocket::SendJson("sensors", content);
 }
 
-void LLInterface::UpdateWarningLight(std::map<std::string, double> sensors)
-{
-    if (sensors.size() < 1)
-    {
-        sensors = GetAllSensors();
-    }
-
-
-    if (sensors.find("igniter feedback") != sensors.end())
-    {
-        if (sensors["igniter feedback"] == 0)
-        {
-            TurnRed();
-        }
-    }
-    if (warnlightStatus != 2)
-    {
-        if (sensors.find("fuelTankPressure") != sensors.end() && sensors.find("oxTankPressure") != sensors.end())
-        {
-            if (sensors["fuelTankPressure"] >= 5.0 || sensors["oxTankPressure"] >= 5.0)
-            {
-                TurnYellow();
-            }
-            else if (sensors["fuelTankPressure"] < 5.0 && sensors["oxTankPressure"] < 5.0)
-            {
-                TurnGreen();
-            }
-        }
-    }
-
-}
-
 void LLInterface::TurnRed()
 {
     warnLight->SetColor(255, 0, 0);
     warnLight->SetMode("default");
     warnLight->StopBuzzer();
-	warnlightStatus = 2;
 }
 
 void LLInterface::TurnGreen()
@@ -262,7 +227,6 @@ void LLInterface::TurnGreen()
     warnLight->SetColor(0, 255, 0);
     warnLight->SetMode("spin");
     warnLight->StopBuzzer();
-	warnlightStatus = 0;
 }
 
 void LLInterface::TurnYellow()
@@ -270,7 +234,6 @@ void LLInterface::TurnYellow()
     warnLight->SetColor(255, 255, 0);
     warnLight->SetMode("spin");
     warnLight->StopBuzzer();
-	warnlightStatus = 1;
 }
 
 void LLInterface::BeepRed()
@@ -278,10 +241,32 @@ void LLInterface::BeepRed()
     warnLight->SetColor(255, 0, 0);
     warnLight->SetMode("blink");
     warnLight->StartBuzzerBeep(500);
-    warnlightStatus = 2;
 }
 
-int32 LLInterface::GetWarninglightStatus()
+WarningLightStatus LLInterface::GetWarningLightStatus()
 {
-	return warnlightStatus;
+	return warningLightStatus;
+}
+
+void LLInterface::SetWarningLightStatus(WarningLightStatus status, bool sendState)
+{
+    warningLightStatus = status;
+
+    if (sendState)
+    {
+        switch (status)
+        {
+            case WarningLightStatus::SAFE:
+                TurnGreen();
+                break;
+            case WarningLightStatus::RESTRICTED:
+                TurnYellow();
+                break;
+            case WarningLightStatus::CRITICAL:
+                TurnRed();
+                break;
+            default:
+                Debug::error("Warning Light Status not implemented");
+        }
+    }
 }
