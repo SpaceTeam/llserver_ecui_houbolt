@@ -620,6 +620,11 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
             //fprintf(stderr, "set servo %d to %d\n", port, onTime);
             hcpSerial->Write(msg);
             HCP_MSG* rep = hcpSerial->ReadSync();
+            if (rep != nullptr && rep->optcode != HCP_OK) 
+            {
+                Debug::error("unexpected opcode: expected 0x%02x, actual 0x%02x, waiting 100ms to try to recover...", HCP_OK, rep->optcode);
+                usleep(100000); //wait 100us to recover
+            }
             serialMtx.unlock();
 
             if (rep != nullptr)
@@ -630,7 +635,7 @@ bool HcpManager::SetServoRaw(uint8 port, uint16 onTime)
                 }
                 else
                 {
-                    Debug::error("REP yields optcode %x", rep->optcode);
+                    Debug::error("REP yields optcode 0x%02x", rep->optcode);
                 }
                 delete rep->payload;
                 delete rep;
@@ -739,6 +744,11 @@ bool HcpManager::SetSupercharge(int8 setpoint, uint8 hysteresis)
     serialMtx.lock();
     hcpSerial->Write(msg);
     HCP_MSG* rep = hcpSerial->ReadSync();
+    if (rep != nullptr && rep->optcode != HCP_OK) 
+    {
+        Debug::error("unexpected opcode: expected 0x%02x, actual 0x%02x, waiting 100ms to try to recover...", HCP_OK, rep->optcode);
+        usleep(100000); //wait 100us to recover
+    }
     serialMtx.unlock();
 
     if (rep != nullptr)
@@ -749,7 +759,7 @@ bool HcpManager::SetSupercharge(int8 setpoint, uint8 hysteresis)
 		}
 		else
 		{
-			printf("REP yields optcode %x", rep->optcode);
+			Debug::error("REP yields optcode 0x%02x", rep->optcode);
 		}
 		delete rep->payload;
 		delete rep;
@@ -783,6 +793,11 @@ json HcpManager::GetSupercharge()
 	//fprintf(stderr, "get analog %d\n", port);
 	hcpSerial->Write(msg);
 	HCP_MSG* rep = hcpSerial->ReadSync();
+    if (rep != nullptr && rep->optcode != HCP_ST_SUPERCHARGE_REP) 
+    {
+        Debug::error("unexpected opcode: expected 0x%02x, actual 0x%02x, waiting 100ms to try to recover...", HCP_ST_SUPERCHARGE_REP, rep->optcode);
+        usleep(100000); //wait 100us to recover
+    }
 	serialMtx.unlock();
 
 	if (rep != nullptr)
@@ -794,7 +809,7 @@ json HcpManager::GetSupercharge()
 		}
 		else
 		{
-			printf("REP yields optcode %x", rep->optcode);
+			Debug::error("REP yields optcode 0x%02x", rep->optcode);
 		}
 		delete rep->payload;
 		delete rep;
@@ -861,6 +876,11 @@ bool HcpManager::SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount)
         //fprintf(stderr, "set motor %d to %d\n", port, amount);
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
+        if (rep != nullptr && rep->optcode != HCP_OK) 
+        {
+            Debug::error("unexpected opcode: expected 0x%02x, actual 0x%02x, waiting 100ms to try to recover...", HCP_OK, rep->optcode);
+            usleep(100000); //wait 100us to recover
+        }
         serialMtx.unlock();
 
         if (rep != nullptr)
@@ -871,7 +891,7 @@ bool HcpManager::SetMotorRaw(uint8 port, Motor_Mode mode, int16 amount)
             }
             else
             {
-                printf("REP yields optcode %x", rep->optcode);
+                Debug::error("REP yields optcode 0x%02x", rep->optcode);
             }
             delete rep->payload;
             delete rep;
@@ -955,6 +975,11 @@ int32 *HcpManager::GetLoadCells()
     //fprintf(stderr, "get load cells\n");
     hcpSerial->Write(msg);
     HCP_MSG* rep = hcpSerial->ReadSync();
+    if (rep != nullptr && rep->optcode != HCP_ST_THRUST_REP) 
+    {
+        Debug::error("unexpected opcode: expected 0x%02x, actual 0x%02x, waiting 100ms to try to recover...", HCP_ST_THRUST_REP, rep->optcode);
+        usleep(100000); //wait 100us to recover
+    }
     serialMtx.unlock();
 
     if (rep != nullptr)
@@ -976,7 +1001,7 @@ int32 *HcpManager::GetLoadCells()
         }
         else
         {
-            Debug::info("Other REP opcode than expected: %x", rep->optcode);
+            Debug::info("Other REP opcode than expected: 0x%02x", rep->optcode);
         }
         delete rep->payload;
         delete rep;
@@ -1131,6 +1156,11 @@ int32 HcpManager::GetAnalog(uint8 port)
         //fprintf(stderr, "get analog %d\n", port);
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
+        if (rep != nullptr && rep->optcode != HCP_ANALOG_REP) 
+        {
+            Debug::error("unexpected opcode: expected 0x%02x, actual 0x%02x, waiting 100ms to try to recover...", HCP_ANALOG_REP, rep->optcode);
+            usleep(100000); //wait 100us to recover
+        }
         serialMtx.unlock();
 
         if (rep != nullptr)
@@ -1152,7 +1182,7 @@ int32 HcpManager::GetAnalog(uint8 port)
             }
             else
             {
-                Debug::info("Other REP opcode than expected: %x", rep->optcode);
+                Debug::info("Other REP opcode than expected: 0x%02x", rep->optcode);
             }
             delete rep->payload;
             delete rep;
@@ -1210,6 +1240,11 @@ uint8 HcpManager::GetDigital(uint8 port)
         serialMtx.lock();
         hcpSerial->Write(msg);
         HCP_MSG* rep = hcpSerial->ReadSync();
+        if (rep != nullptr && rep->optcode != HCP_DIGITAL_REP) 
+        {
+            Debug::error("unexpected opcode: expected 0x%02x, actual 0x%02x, waiting 100ms to try to recover...", HCP_DIGITAL_REP, rep->optcode);
+            usleep(100000); //wait 100us to recover
+        }
         serialMtx.unlock();
 
         if (rep != nullptr)
@@ -1231,7 +1266,7 @@ uint8 HcpManager::GetDigital(uint8 port)
             }
 	    else
 	    {
-		Debug::info("Other REP opcode than expected: %x", rep->optcode); 
+		Debug::info("Other REP opcode than expected: 0x%02x", rep->optcode); 
 	    }
 
             delete rep->payload;
