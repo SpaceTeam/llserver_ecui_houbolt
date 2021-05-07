@@ -249,7 +249,11 @@ void SequenceManager::StartSequence(json jsonSeq, json jsonAbortSeq, std::string
         {
             SetupLogging();
 
+            json parameter;
+            parameter["id"] = "wlRed";
+            parameter["value"] = 1;
             LLInterface::BeepRed();
+            EcuiSocket::SendJson("parameter-load", parameter);
 
             //get sensor names
             vector<string> sensorNames = LLInterface::GetAllSensorNames();

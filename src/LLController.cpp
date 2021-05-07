@@ -147,25 +147,11 @@ void LLController::OnECUISocketRecv(json msg)
             EcuiSocket::SendJson("servos-load", servosData);
 
         }
-        else if (type.compare("supercharge-set") == 0)
-        {
-			int8 setpoint;
-			uint8 hysteresis;
-			json supercharge = msg["content"][0];
-			setpoint = supercharge["setpoint"];
-			hysteresis = supercharge["hysteresis"];
-			HcpManager::SetSupercharge(setpoint,hysteresis);
-        }
-        else if (type.compare("supercharge-get") == 0)
-        {
-			json superchargeData = LLInterface::GetSupercharge();
-            EcuiSocket::SendJson("supercharge-load", superchargeData);
-        }
 		else if (type.compare("parameter-set") == 0)
 		{
 			json parameter = msg["content"][0];
 			string id = parameter["id"];
-			int8 value = parameter["value"];
+			//int8 value = parameter["value"];
 
 			if (id.compare("wlRed") == 0)
 			{
@@ -179,9 +165,14 @@ void LLController::OnECUISocketRecv(json msg)
 			{
 				LLInterface::TurnGreen();
 			}
-			else if (id.compare("superchargeSetpoint") == 0)
+			else if (id.compare("supercharge") == 0)
 			{
-				Debug::error("Supercharge Setpoint");	
+                json value = parameter["value"];
+                int8 setpoint;
+			    uint8 hysteresis;
+			    setpoint = value["setpoint"];
+			    hysteresis = value["hysteresis"];
+			    HcpManager::SetSupercharge(setpoint,hysteresis);
 			}
 			else
 			{
@@ -205,9 +196,9 @@ void LLController::OnECUISocketRecv(json msg)
 			{
 				if (LLInterface::GetWarninglightStatus() == 0) parameter["value"] = 1;
 			}
-			else if (id.compare("superchargeSetpoint") == 0)
+			else if (id.compare("supercharge") == 0)
 			{
-				Debug::error("Supercharge Setpoint");	
+                parameter["value"] = LLInterface::GetSupercharge();
 			}
 			else
 			{

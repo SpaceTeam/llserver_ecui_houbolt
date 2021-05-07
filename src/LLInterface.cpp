@@ -278,6 +278,7 @@ void LLInterface::BeepRed()
     warnLight->SetColor(255, 0, 0);
     warnLight->SetMode("blink");
     warnLight->StartBuzzerBeep(500);
+    warnlightStatus = 2;
 }
 
 int32 LLInterface::GetWarninglightStatus()
