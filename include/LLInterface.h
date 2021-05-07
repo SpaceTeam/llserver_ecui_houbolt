@@ -75,7 +75,7 @@ public:
     static void TurnGreen();
     static void TurnYellow();
     static void BeepRed();
-	static int32 GetWarningLightStatus();
+	static WarningLightStatus GetWarningLightStatus();
     static void SetWarningLightStatus(WarningLightStatus status, bool sendState=true);
 
     static bool ExecCommand(std::string name, json value);

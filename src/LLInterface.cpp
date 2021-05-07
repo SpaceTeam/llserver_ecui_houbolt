@@ -22,7 +22,7 @@ bool LLInterface::isInitialized = false;
 bool LLInterface::useTMPoE = false;
 
 bool LLInterface::isTransmittingSensors = false;
-int32 LLInterface::warningLightStatus = -1;
+WarningLightStatus LLInterface::warningLightStatus = WarningLightStatus::SAFE;
 Timer* LLInterface::sensorTimer;
 
 double LLInterface::sensorsSmoothingFactor = 0.0;
@@ -56,10 +56,10 @@ void LLInterface::Init()
 		//update warninglight after initialization but wait 1 sec to 
 		//guarantee all sensors have already been fetched
 		std::thread updateWarnlightThread([](){
-					usleep(1000000);
-			UpdateWarningLight();
+					sleep(1);
+			        SetWarningLightStatus(WarningLightStatus::SAFE);
 				});
-				updateWarnlightThread.detach();
+		updateWarnlightThread.detach();
     }
 }
 
@@ -243,7 +243,7 @@ void LLInterface::BeepRed()
     warnLight->StartBuzzerBeep(500);
 }
 
-int32 LLInterface::GetWarninglightStatus()
+WarningLightStatus LLInterface::GetWarningLightStatus()
 {
 	return warningLightStatus;
 }

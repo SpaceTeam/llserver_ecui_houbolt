@@ -181,7 +181,7 @@ void LLController::OnECUISocketRecv(json msg)
 
                 if (id.compare("warninglight") == 0)
                 {
-                    parameter["value"] = LLInterface::GetWarninglightStatus();
+                    parameter["value"] = LLInterface::GetWarningLightStatus();
                 }
                 else if (id.compare("supercharge") == 0)
                 {
