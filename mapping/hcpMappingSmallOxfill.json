@@ -6,7 +6,7 @@
         },
         "02_P_oxBottle": {
             "map": {
-                "d": -15.90,
+                "d": -15.9,
                 "k": 0.02014
             },
             "port": 1
@@ -95,25 +95,25 @@
         },
         "pressurantTankLoadValve": {
             "endpoints": [
-                1000,
-                2000
+                1140,
+                1550
             ],
             "feedbackAnalog": "07_pressurantTankLoadValveFeedback",
             "feedbackEndpoints": [
-                0,
-                100
+                4,
+                3
             ],
             "port": 2
         },
         "pressurantTankVentValve": {
             "endpoints": [
-                1000,
-                2000
+                1090,
+                1450
             ],
             "feedbackAnalog": "08_pressurantTankVentValveFeedback",
             "feedbackEndpoints": [
-                0,
-                100
+                4,
+                4
             ],
             "port": 3
         }
