@@ -46,7 +46,7 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
         {"GetRefreshTime", std::bind(&Node::GetRefreshRate, this, std::placeholders::_1, std::placeholders::_2)}
     };
 
-    canBusChannelID = canBusChannelID;
+    this->canBusChannelID = canBusChannelID;
     InitChannels(nodeInfo, channelInfo);
     //init latest sensor buffer with largest channel id
     latestSensorBufferLength = channelMap.end()->first + 1;

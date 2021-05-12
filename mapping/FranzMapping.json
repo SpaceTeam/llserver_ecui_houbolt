@@ -37,8 +37,18 @@
         }
     },
     "EventMapping" : {
-        "testNode" : {
+        "testNodeVoltage" : {
             "command" : "GetBus1Voltage",
+            "==" : 1,
+            "parameters" : []
+        },
+        "testNodeSetDiv" : {
+            "command" : "SetRefreshDivider",
+            "==" : 1,
+            "parameters" : [69]
+        },
+        "testNodeGetDiv" : {
+            "command" : "GetRefreshDivider",
             "==" : 1,
             "parameters" : []
         }

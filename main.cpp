@@ -40,9 +40,9 @@ void testFnc()
 {
     LLController *controller = LLController::Instance();
     CANManager *manager = CANManager::Instance();
+    using namespace std::chrono_literals;
 #ifdef TEST_NODE_INIT
     //wait a sec before executing function
-    using namespace std::chrono_literals;
     std::this_thread::sleep_for(1000ms);
 
     Can_MessageData_t msg;
@@ -90,10 +90,13 @@ void testFnc()
     {
         std::this_thread::sleep_for(1000ms);
     }
+    Debug::error("setting test node state...");
     StateController *stateController = StateController::Instance();
-    std::vector<std::string> states = {"testNode"};
+    std::vector<std::string> states = {"testNode", "testNodeGetDiv", "testNodeSetDiv"};
     stateController->AddUninitializedStates(states);
     stateController->SetState("testNode", 1, std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    stateController->SetState("testNodeGetDiv", 1, std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    stateController->SetState("testNodeSetDiv", 1, std::chrono::high_resolution_clock::now().time_since_epoch().count());
 #endif
 }
 

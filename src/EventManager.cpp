@@ -146,7 +146,8 @@ void EventManager::OnStateChange(const std::string& stateName, double value)
         }
         nlohmann::json command = eventJSON["command"];
         //trigger command
-        commandMap[command](argumentList, false);
+        auto commandFunc = commandMap[command];
+        commandFunc(argumentList, false);
     }
     catch (const std::exception& e)
     {

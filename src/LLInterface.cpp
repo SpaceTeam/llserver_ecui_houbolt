@@ -58,9 +58,9 @@ void LLInterface::Init()
         stateTimer = new Timer(40, "stateTimer");
         sensorTimer = new Timer(40, "sensorTimer");
         uint64_t sensorSamplingRate = std::get<int>(Config::getData("LLSERVER/sensor_sampling_rate"));
-        sensorTimer->startContinous(0, sensorSamplingRate,
-                std::bind(&LLInterface::FilterSensors, this, std::placeholders::_1),
-                std::bind(&LLInterface::StopFilterSensors, this));
+        // sensorTimer->startContinous(0, sensorSamplingRate,
+        //         std::bind(&LLInterface::FilterSensors, this, std::placeholders::_1),
+        //         std::bind(&LLInterface::StopFilterSensors, this));
         Debug::print("Connecting to warning light...");
         warnLight = new WarnLight(0);
 
