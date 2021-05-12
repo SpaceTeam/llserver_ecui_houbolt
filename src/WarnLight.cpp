@@ -12,7 +12,7 @@ WarnLight::WarnLight(uint16 id)
     this->id = id;
     std::string ip = std::get<std::string>(Config::getData("WARNLIGHT/ip"));
     int32 port = std::get<int>(Config::getData("WARNLIGHT/port"));
-    socket = new Socket(OnClose, ip, port, 1);
+    socket = new Socket(OnClose, ip, port, 5);
     Reset();
 }
 
