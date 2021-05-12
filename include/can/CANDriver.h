@@ -14,7 +14,7 @@
 #include <canlib.h>
 #include <bus_params_tq.h>
 
-#define CAN_CHANNELS 4
+#define CAN_CHANNELS 3
 
 typedef struct
 {

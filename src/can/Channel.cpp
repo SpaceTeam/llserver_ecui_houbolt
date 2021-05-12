@@ -2,8 +2,11 @@
 // Created by Markus on 10.04.21.
 //
 
-#include <can_houbolt/can_cmds.h>
 #include "can/Channel.h"
+
+#include <algorithm>
+
+#include <can_houbolt/can_cmds.h>
 
 const std::vector<std::string> Channel::states = {};
 const std::map<std::string, std::vector<double>> Channel::sensorScalingMap = {};
@@ -63,7 +66,7 @@ void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *comman
     msg.bit.info.buffer = DIRECT_BUFFER;
     msg.bit.info.channel_id = this->channelID;
     msg.bit.cmd_id = cmdID;
-    msg.bit.data.uint8 = command;
+    std::copy_n(command, commandLength, msg.bit.data.uint8);
 
     uint32_t msgLength = CAN_MSG_LENGTH(commandLength);
 

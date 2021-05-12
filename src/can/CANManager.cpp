@@ -117,7 +117,6 @@ CANResult CANManager::RequestCANInfo()
     msg.bit.info.buffer = DIRECT_BUFFER;
     msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
     msg.bit.cmd_id = GENERIC_REQ_NODE_INFO;
-    msg.bit.data.uint8 = NULL;
 
     uint32_t msgLength = sizeof(Can_MessageDataInfo_t) + sizeof(uint8_t);
 
@@ -125,7 +124,7 @@ CANResult CANManager::RequestCANInfo()
     canDriver->SendCANMessage(0, canID.uint32, msg.uint8, msgLength);
     canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength);
     canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength);
-    canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength);
+    //canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength);
 }
 
 /**
@@ -156,14 +155,15 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 {
     //TODO: only accept node info messages in this stage
     Can_MessageData_t *canMsg = (Can_MessageData_t *) payload;
+    Can_MessageId_t *canIDStruct = (Can_MessageId_t *)(&canID);
     try
     {
         if (canMsg->bit.info.channel_id == GENERIC_CHANNEL_ID && canMsg->bit.cmd_id == GENERIC_RES_NODE_INFO)
         {
-            uint8_t nodeID = CANManager::GetNodeID(canID);
+            uint8_t nodeID = canIDStruct->info.node_id;
             CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
 
-            NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *) canMsg->bit.data.uint8;
+            NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *) &canMsg->bit.data.uint8;
 
             std::map<uint8_t, std::tuple<std::string, double>> nodeChannelInfo;
             for (uint8_t channelID = 0; channelID < 32; channelID++)

@@ -127,7 +127,7 @@ void Debug::close()
     }
     else
     {
-        error("in Debug close: log output file is not open yet, try Debug::changeOutputFile");
+        info("in Debug close: log output file is not open yet, try Debug::changeOutputFile");
     }
 }
 

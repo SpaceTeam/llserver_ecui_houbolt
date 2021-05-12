@@ -28,6 +28,7 @@ CANMappingObj CANMapping::GetNodeObj(uint8_t &nodeID)
     catch(std::exception& e)
     {
         Debug::error("Node id %d or stringID do not exist: %s", nodeID, e.what());
+        throw std::runtime_error("CANMapping - GetNodeObj: failed");
     }
     return mappingObj;
 }
@@ -46,6 +47,7 @@ CANMappingObj CANMapping::GetChannelObj(uint8_t &nodeID, uint8_t &channelID)
     catch(std::exception& e)
     {
         Debug::error("Node id %d, channel id %d or stringID do not exist: %s", nodeID, channelID, e.what());
+        throw std::runtime_error("CANMapping - GetChannelObj: failed");
     }
     return mappingObj;
 }
