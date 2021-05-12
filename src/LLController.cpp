@@ -74,6 +74,8 @@ void LLController::Init(ServerMode serverMode)
 
         Debug::printNoTime("----------------------");
         Debug::print("Low-Level Server started!\n");
+
+        initialized = true;
     }
     catch (std::exception &e)
     {
@@ -83,6 +85,11 @@ void LLController::Init(ServerMode serverMode)
 
 
 
+}
+
+bool LLController::IsInitialized()
+{
+    return initialized;
 }
 
 LLController::~LLController()

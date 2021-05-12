@@ -6,6 +6,7 @@
 #define TXV_ECUI_LLSERVER_LLCONTROLLER_H
 
 #include "common.h"
+#include <atomic>
 
 #include "LLInterface.h"
 #include "utility/Singleton.h"
@@ -26,7 +27,7 @@ private:
 
     LLInterface *llInterface;
 
-
+    std::atomic_bool initialized = false;
 
     static void PrintLogo();
 
@@ -34,6 +35,8 @@ private:
 public:
 
     void Init(ServerMode serverMode);
+
+    bool IsInitialized();
 
     void Abort(std::string &abortMsg);
 

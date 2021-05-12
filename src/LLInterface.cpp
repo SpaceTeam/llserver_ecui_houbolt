@@ -78,6 +78,8 @@ void LLInterface::Init()
     }
 }
 
+
+
 LLInterface::~LLInterface()
 {
     if (isInitialized)

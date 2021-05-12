@@ -67,7 +67,7 @@ bool EventManager::CheckEvents()
         {
             Debug::error("EventManager - CheckEvents: Command '%s' not found in available commands", event.first);
 
-            //TODO: MP call command but with argument to only check parameters
+            //TODO: MP call command but with argument flag to only check parameters
             return false;
         }
     }
@@ -104,7 +104,20 @@ void EventManager::OnStateChange(const std::string& stateName, double value)
 {
     try
     {
+        if (!mappingJSON.contains(stateName)){
+            //state name not in mapping, shall not trigger anything
+            Debug::info("EventManager - OnStateChange: state name not in event mapping, ignored...");
+            return;
+        }
         nlohmann::json eventJSON = mappingJSON[stateName];
+        if (eventJSON.contains("=="))
+        {
+            if (value != eventJSON["=="])
+            {
+                Debug::info("EventManager - OnStateChange: state value %d unequal to event mapping value %d, ignored...", value, (double)eventJSON["=="]);
+                return;
+            }
+        }
         std::vector<double> argumentList;
         for (nlohmann::json &param : eventJSON["parameters"])
         {
@@ -131,7 +144,9 @@ void EventManager::OnStateChange(const std::string& stateName, double value)
                 throw std::invalid_argument( "parameter not string or number" );
             }
         }
-
+        nlohmann::json command = eventJSON["command"];
+        //trigger command
+        commandMap[command](argumentList, false);
     }
     catch (const std::exception& e)
     {

@@ -192,6 +192,7 @@ std::map<std::string, std::tuple<double, uint64_t>> Node::GetLatestSensorData()
     return sensorData;
 }
 
+//TODO: add node name and channel names as prefix
 std::vector<std::string> Node::GetStates()
 {
     std::vector<std::string> states;
@@ -204,6 +205,7 @@ std::vector<std::string> Node::GetStates()
     return states;
 }
 
+//TODO: add node name and channel names as prefix
 std::map<std::string, std::function<void(std::vector<double> &, bool)>> Node::GetCommands()
 {
     std::map<std::string, std::function<void(std::vector<double> &, bool)>> commands;

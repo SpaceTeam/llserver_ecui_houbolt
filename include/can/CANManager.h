@@ -7,6 +7,8 @@
 
 #include "common.h"
 
+#include <atomic>
+
 typedef struct
 {
     uint8_t priority;
@@ -63,7 +65,7 @@ private:
      */
     std::map<uint16_t, std::tuple<std::string, double>> sensorInfoMap;
 
-	bool initialized = false;
+	std::atomic_bool initialized = false;
 
 	CANResult RequestCANInfo();
 	static inline uint8_t GetNodeID(uint32_t &canID);
@@ -73,6 +75,8 @@ private:
 public:
 
     CANResult Init();
+
+    bool IsInitialized();
 
 //	std::vector<std::string> GetChannelStates();
 //	std::map<std::string, std::function<CANResult(...)>> GetChannelCommands();

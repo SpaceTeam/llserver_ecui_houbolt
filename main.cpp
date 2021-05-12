@@ -17,7 +17,10 @@
 sig_atomic_t running = 1;
 sig_atomic_t signum = 0;
 
-//#define TEST_LLSERVER
+#define TEST_LLSERVER
+
+//#define TEST_NODE_INIT
+#define TEST_SPEAKER
 
 #ifdef TEST_LLSERVER
 #include <thread>
@@ -35,6 +38,9 @@ typedef struct __attribute__((__packed__))
 
 void testFnc()
 {
+    LLController *controller = LLController::Instance();
+    CANManager *manager = CANManager::Instance();
+#ifdef TEST_NODE_INIT
     //wait a sec before executing function
     using namespace std::chrono_literals;
     std::this_thread::sleep_for(1000ms);
@@ -53,7 +59,6 @@ void testFnc()
     msg.bit.data.uint8 = (uint8_t *)&info;
     uint16_t canID = 0b00000000010;
 
-    CANManager *manager = CANManager::Instance();
     manager->OnCANInit(0, canID, msg.uint8, sizeof(msg), 0x1);
 
     std::this_thread::sleep_for(1000ms);
@@ -78,6 +83,18 @@ void testFnc()
          manager->OnCANRecv(0, canID, msg.uint8, sizeof(msg), 0x1);
         std::this_thread::sleep_for(1000ms);
     }
+#endif
+
+#ifdef TEST_SPEAKER
+    while (!controller->IsInitialized())
+    {
+        std::this_thread::sleep_for(1000ms);
+    }
+    StateController *stateController = StateController::Instance();
+    std::vector<std::string> states = {"testNode"};
+    stateController->AddUninitializedStates(states);
+    stateController->SetState("testNode", 1, std::chrono::high_resolution_clock::now().time_since_epoch().count());
+#endif
 }
 
 #endif
@@ -178,13 +195,13 @@ int main(int argc, char const *argv[])
         }
     }
 
+    LLController *llController = LLController::Instance();
+    llController->Init(serverMode);
+
 #ifdef TEST_LLSERVER
     testThread = new std::thread(testFnc);
 
 #endif
-
-    LLController *llController = LLController::Instance();
-    llController->Init(serverMode);
 
     std::string inputStr;
     while (1)

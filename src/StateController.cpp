@@ -55,6 +55,10 @@ void StateController::AddUninitializedStates(std::vector<std::string> &states)
     }
 }
 
+/**
+ * add states to the state controller, currently does not trigger on change event
+ * @param states
+ */
 void StateController::AddStates(std::map<std::string, std::tuple<double, uint64_t>> &states)
 {
     std::lock_guard<std::mutex> lock(stateMtx);

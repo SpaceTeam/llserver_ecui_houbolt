@@ -37,7 +37,11 @@
         }
     },
     "EventMapping" : {
-
+        "testNode" : {
+            "command" : "GetBus1Voltage",
+            "==" : 1,
+            "parameters" : []
+        }
     },
     "GUIMapping" :
     {

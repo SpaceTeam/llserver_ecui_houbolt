@@ -20,6 +20,11 @@ CANManager::~CANManager()
     delete canDriver;
 }
 
+bool CANManager::IsInitialized()
+{
+    return initialized;
+}
+
 //TODO: MP maybe move to node class
 inline uint8_t CANManager::GetNodeID(uint32_t &canID)
 {
