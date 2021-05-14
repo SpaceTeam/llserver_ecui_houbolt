@@ -6,20 +6,75 @@
 
 #include <algorithm>
 
-#include <can_houbolt/can_cmds.h>
+#include "can_houbolt/can_cmds.h"
 
 const std::vector<std::string> Channel::states = {};
 const std::map<std::string, std::vector<double>> Channel::sensorScalingMap = {};
 
-inline int32_t Channel::ScaleAndConvert(double value, double a, double b)
+//---------------------------------------------------------------------------------------//
+//-------------------------------GETTER & SETTER Functions-------------------------------//
+//---------------------------------------------------------------------------------------//
+
+/**
+ * returns of the channel and combines it with channelName to a map
+ * @return states of channel, sends a can command for each state, process can command writes the result to the
+ * state controller
+ */
+std::vector<std::string> Channel::GetStates()
 {
-    double result = a * value + b;
-    if (result < INT32_MIN || result > INT32_MAX)
+    std::vector<std::string> states;
+    states.insert(states.end(), Channel::states.begin(), Channel::states.end());
+
+    //add node prefix to node specific states
+    std::string prefix = GetStatePrefix();
+    for (auto &state : states)
     {
-        throw std::runtime_error("ScaleAndConvert: result exceeds int32_t value range, actual value: " + std::to_string(result));
+        state.insert(0, prefix);
     }
-    return (int32_t) result;
+
+    return states;
 };
+
+std::map<std::string, std::function<void(std::vector<double> &, bool)>> Channel::GetCommands()
+{
+    std::map<std::string, std::function<void(std::vector<double> &, bool)>> commands;
+    commands.insert(Channel::commandMap.begin(), Channel::commandMap.end());
+
+    //add node prefix to node specific commands
+    std::string prefix = GetStatePrefix();
+    for (auto &command : commands)
+    {
+        auto nodeHandle = commands.extract(command.first);
+        nodeHandle.key().insert(0, prefix);
+        commands.insert(std::move(nodeHandle));
+    }
+
+    return commands;
+};
+
+//-------------------------------------------------------------------------------//
+//-------------------------------RECEIVE Functions-------------------------------//
+//-------------------------------------------------------------------------------//
+
+void Channel::StatusResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
+{
+    throw std::logic_error("Channel - StatusResponse: not implemented");
+}
+
+/**
+ * requires state to be added to state controller of subclass
+ * @param canMsg
+ * @param canMsgLength
+ * @param timestamp
+ */
+void Channel::ResetSettingsResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
+{
+    SetState("ResetSettings", 1, timestamp);
+}
+
+//----------------------------------------------------------------------------//
+//-------------------------------SEND Functions-------------------------------//
+//----------------------------------------------------------------------------//
 
 /**
  * assumes pointer has valid data!!!
@@ -66,7 +121,18 @@ void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *comman
     msg.bit.info.buffer = DIRECT_BUFFER;
     msg.bit.info.channel_id = this->channelID;
     msg.bit.cmd_id = cmdID;
-    std::copy_n(command, commandLength, msg.bit.data.uint8);
+    if (command != nullptr)
+    {
+        std::copy_n(command, commandLength, msg.bit.data.uint8);
+    }
+    else
+    {
+        if (commandLength != 0)
+        {
+            throw std::runtime_error("SendStandardCommand: command is nullptr but commandLength != 0");
+        }
+    }
+
 
     uint32_t msgLength = CAN_MSG_LENGTH(commandLength);
 
@@ -86,7 +152,7 @@ void Channel::SetVariable(uint8_t cmdID, uint8_t nodeID, uint8_t variableID, std
 
     if (params.size() == 1)
     {
-        int32_t scaledValue = ScaleAndConvert(params[0], scalingParams[0], scalingParams[1]);
+        int32_t scaledValue = ScaleAndConvertInt32(params[0], scalingParams[0], scalingParams[1]);
         SetMsg_t setMsg = {0};
         setMsg.variable_id = variableID;
         setMsg.value = scaledValue;
@@ -106,6 +172,20 @@ void Channel::GetVariable(uint8_t cmdID, uint8_t nodeID, uint8_t variableID,
         GetMsg_t getMsg = {0};
         getMsg.variable_id = variableID;
         SendStandardCommand(nodeID, cmdID, (uint8_t *) &getMsg, sizeof(getMsg), canBusChannelID, driver, testOnly);
+    }
+    else
+    {
+        throw std::runtime_error("no parameter expected, but " + std::to_string(params.size()) + " were provided");
+    }
+}
+
+void Channel::SendNoPayloadCommand(std::vector<double> &params, uint8_t nodeID, uint8_t cmdID, uint8_t canBusChannelID,
+                                   CANDriver *driver, bool testOnly)
+{
+    if (params.empty())
+    {
+        SendStandardCommand(nodeID, cmdID, nullptr,
+                            0, canBusChannelID, driver, testOnly);
     }
     else
     {

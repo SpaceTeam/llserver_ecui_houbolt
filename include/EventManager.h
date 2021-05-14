@@ -36,6 +36,8 @@ private:
 
     bool CheckEvents();
 
+    void ExecuteCommand(const std::string &stateName, double value, bool testOnly);
+
     ~EventManager();
 public:
 

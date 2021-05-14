@@ -30,12 +30,6 @@ sig_atomic_t signum = 0;
 
 std::thread *testThread = nullptr;
 
-typedef struct __attribute__((__packed__))
-{
-	uint32_t channel_mask;
-	uint8_t *channel_data;
-} SensorMsg_t;
-
 void testFnc()
 {
     LLController *controller = LLController::Instance();

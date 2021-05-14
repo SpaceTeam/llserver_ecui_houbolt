@@ -1,7 +1,7 @@
 {
     "CANMapping": {
         "12" : {
-            "stringID" : "node2String",
+            "stringID" : "TestNode",
             "0" : {
                 "stringID" : "ch0String",
                 "scaling" : 0
@@ -39,17 +39,20 @@
     "EventMapping" : {
         "testNodeVoltage" : {
             "command" : "GetBus1Voltage",
-            "==" : 1,
+            "triggerType" : "==",
+            "triggerValue" : 1,
             "parameters" : []
         },
         "testNodeSetDiv" : {
             "command" : "SetRefreshDivider",
-            "==" : 1,
+            "triggerType" : "==",
+            "triggerValue" : 1,
             "parameters" : [69]
         },
         "testNodeGetDiv" : {
             "command" : "GetRefreshDivider",
-            "==" : 1,
+            "triggerType" : "==",
+            "triggerValue" : 1,
             "parameters" : []
         }
     },

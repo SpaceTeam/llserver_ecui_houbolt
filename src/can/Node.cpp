@@ -4,13 +4,25 @@
 #include <cstring>
 #include <string>
 #include <functional>
+#include <utility>
 #include "can/DigitalOut.h"
 #include "can/ADC16.h"
 #include "can/ADC24.h"
 #include "can/Servo.h"
+#include "StateController.h"
 
+const std::vector<std::string> Node::states =
+        {
+            "Bus1Voltage",
+            "Bus2Voltage",
+            "PowerVoltage",
+            "PowerCurrent",
+            "RefreshDivider",
+            "RefreshRate",
+            "UARTEnabled",
+            "ResetAllSettings"
+        };
 
-const std::vector<std::string> Node::states = {"Bus1Voltage", "Bus2Voltage", "PowerVoltage", "PowerCurrent", "RefreshDivider", "RefreshRate"};
 const std::map<std::string, std::vector<double>> Node::scalingMap =
         {
             {"Bus1Voltage", {1.0, 0.0}},
@@ -18,7 +30,23 @@ const std::map<std::string, std::vector<double>> Node::scalingMap =
             {"PowerVoltage", {1.0, 0.0}},
             {"PowerCurrent", {1.0, 0.0}},
             {"RefreshDivider", {1.0, 0.0}},
-            {"RefreshRate", {1.0, 0.0}}
+            {"RefreshRate", {1.0, 0.0}},
+            {"UARTEnabled", {1.0, 0.0}},
+            {"SpeakerToneFrequency", {1.0, 0.0}},
+            {"SpeakerOnTime", {1.0, 0.0}},
+            {"SpeakerOffTime", {1.0, 0.0}},
+            {"SpeakerCount", {1.0, 0.0}}
+        };
+
+const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
+        {
+            {GENERIC_BUS1_VOLTAGE, "Bus1Voltage"},
+            {GENERIC_BUS2_VOLTAGE, "Bus2Voltage"},
+            {GENERIC_PWR_VOLTAGE, "PowerVoltage"},
+            {GENERIC_PWR_CURRENT, "PowerCurrent"},
+            {GENERIC_REFRESH_DIVIDER, "RefreshDivider"},
+            {GENERIC_REFRESH_RATE, "RefreshRate"},
+            {GENERIC_UART_ENABLED, "UARTEnabled"}
         };
 
 /**
@@ -29,7 +57,7 @@ const std::map<std::string, std::vector<double>> Node::scalingMap =
  */
 
 Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
-    : nodeID(nodeID), driver(driver), Channel::Channel(0xFF, nodeChannelName, 1.0, this)
+    : nodeID(nodeID), driver(driver), Channel::Channel(0xFF, std::move(nodeChannelName), 1.0, this)
 {
     commandMap = {
         {"SetBus1Voltage", std::bind(&Node::SetBus1Voltage, this, std::placeholders::_1, std::placeholders::_2)},
@@ -43,7 +71,13 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
         {"SetRefreshDivider", std::bind(&Node::SetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2)},
         {"GetRefreshDivider", std::bind(&Node::GetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2)},
         {"SetRefreshTime", std::bind(&Node::SetRefreshRate, this, std::placeholders::_1, std::placeholders::_2)},
-        {"GetRefreshTime", std::bind(&Node::GetRefreshRate, this, std::placeholders::_1, std::placeholders::_2)}
+        {"GetRefreshTime", std::bind(&Node::GetRefreshRate, this, std::placeholders::_1, std::placeholders::_2)},
+        {"SetUARTEnabled", std::bind(&Node::SetUARTEnabled, this, std::placeholders::_1, std::placeholders::_2)},
+        {"GetUARTEnabled", std::bind(&Node::GetUARTEnabled, this, std::placeholders::_1, std::placeholders::_2)},
+        {"RequestSetSpeaker", std::bind(&Node::RequestSetSpeaker, this, std::placeholders::_1, std::placeholders::_2)},
+        {"RequestData", std::bind(&Node::RequestData, this, std::placeholders::_1, std::placeholders::_2)},
+        {"RequestNodeStatus", std::bind(&Node::RequestNodeStatus, this, std::placeholders::_1, std::placeholders::_2)},
+        {"RequestResetAllSettings", std::bind(&Node::RequestResetAllSettings, this, std::placeholders::_1, std::placeholders::_2)},
     };
 
     this->canBusChannelID = canBusChannelID;
@@ -72,19 +106,18 @@ void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<st
             {
                 case CHANNEL_TYPE_ADC16:
                     ch = new ADC16(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
-                break;
+                    break;
     //			case CHANNEL_TYPE_ADC16_SINGLE:
     //				ch = new Adc16_single_t;
-    //			break;
+    //			    break;
                 case CHANNEL_TYPE_ADC24:
                     ch = new ADC24(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
-                break;
+                    break;
                 case CHANNEL_TYPE_DIGITAL_OUT:
                     ch = new DigitalOut(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
-                break;
+                    break;
                 case CHANNEL_TYPE_SERVO:
-                    ch = new Servo(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
-                break;
+                    throw std::invalid_argument("servo channel not implemented");
                 default:
                     throw std::runtime_error("channel type not recognized");
                     // TODO: default case for unknown channel types that logs (DB)
@@ -104,24 +137,110 @@ Node::~Node()
     delete &channelMap;
 }
 
-//TODO: move to can_houbolt headers
-typedef struct __attribute__((__packed__))
+//---------------------------------------------------------------------------------------//
+//-------------------------------GETTER & SETTER Functions-------------------------------//
+//---------------------------------------------------------------------------------------//
+
+std::map<std::string, std::tuple<double, uint64_t>> Node::GetLatestSensorData()
 {
-	uint32_t channel_mask;
-	uint8_t *channel_data;
-} SensorMsg_t;
+    std::map<std::string, std::tuple<double, uint64_t>> sensorData;
+    SensorData_t *copy = new SensorData_t[latestSensorBufferLength];
+    size_t bytes = latestSensorBufferLength * sizeof(SensorData_t);
+
+    bufferMtx.lock();
+    std::memcpy(copy, latestSensorBuffer, bytes);
+    bufferMtx.unlock();
+
+    for (int32_t i = 0; i < latestSensorBufferLength; i++)
+    {
+        if (channelMap.find(i) != channelMap.end())
+        {
+
+            sensorData[channelMap[i]->GetSensorName()] = {copy[i].value, copy[i].timestamp};
+        }
+
+    }
+    return sensorData;
+}
+
+//TODO: add node name and channel names as prefix
+std::vector<std::string> Node::GetStates()
+{
+    std::vector<std::string> states;
+    states.insert(states.end(), Node::states.begin(), Node::states.end());
+
+    //add node prefix to node specific states
+    std::string prefix = GetStatePrefix();
+    for (auto &state : states)
+    {
+        state.insert(0, prefix);
+    }
+
+    for (auto &channel : channelMap)
+    {
+        std::vector<std::string> chStates = channel.second->GetStates();
+
+        states.insert(states.end(), chStates.begin(), chStates.end());
+    }
+
+
+
+    return states;
+}
+
+//TODO: add node name and channel names as prefix
+std::map<std::string, std::function<void(std::vector<double> &, bool)>> Node::GetCommands()
+{
+    std::map<std::string, std::function<void(std::vector<double> &, bool)>> commands;
+    commands.insert(Node::commandMap.begin(), Node::commandMap.end());
+
+    //add node prefix to node specific commands
+    std::string prefix = GetStatePrefix();
+    for (auto &command : commands)
+    {
+        auto nodeHandle = commands.extract(command.first);
+        nodeHandle.key().insert(0, prefix);
+        commands.insert(std::move(nodeHandle));
+    }
+
+    for (auto &channel : channelMap)
+    {
+        std::map<std::string, std::function<void(std::vector<double> &, bool)>> chCommands = channel.second->GetCommands();
+        commands.insert(chCommands.begin(), chCommands.end());
+    }
+
+    return commands;
+}
+
+uint8_t Node::GetNodeID()
+{
+    return nodeID;
+}
+
+CANDriver *Node::GetCANDriver()
+{
+    return driver;
+}
+
+uint8_t Node::GetCANBusChannelID()
+{
+    return canBusChannelID;
+}
+
+//-------------------------------------------------------------------------------//
+//-------------------------------RECEIVE Functions-------------------------------//
+//-------------------------------------------------------------------------------//
 
 //TODO: adapt to CanMessageData_t type
 //TODO: add buffer writing
-void Node::ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &payloadLength,
+void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint32_t &canMsgLength,
                                                  uint64_t &timestamp, RingBuffer<Sensor_t> &buffer)
 {
     //TODO: make this more efficient
-    if (payloadLength < 2)
+    if (canMsgLength < 2)
     {
         throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: payload length is smaller than 2, invalid can msg");
     }
-    Can_MessageData_t *canMsg = (Can_MessageData_t *) payload;
     if (canMsg->bit.info.channel_id == GENERIC_CHANNEL_ID && canMsg->bit.cmd_id == GENERIC_RES_DATA)
     {
         throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: not a sensor data message, ignored...");
@@ -170,53 +289,68 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &pay
     }
 }
 
-std::map<std::string, std::tuple<double, uint64_t>> Node::GetLatestSensorData()
+void Node::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
 {
-    std::map<std::string, std::tuple<double, uint64_t>> sensorData;
-    SensorData_t *copy = new SensorData_t[latestSensorBufferLength];
-    size_t bytes = latestSensorBufferLength * sizeof(SensorData_t);
-
-    bufferMtx.lock();
-    std::memcpy(copy, latestSensorBuffer, bytes);
-    bufferMtx.unlock();
-
-    for (int32_t i = 0; i < latestSensorBufferLength; i++)
+    try
     {
-        if (channelMap.find(i) != channelMap.end())
+        if (canMsg->bit.info.channel_id != GENERIC_CHANNEL_ID)
         {
-
-            sensorData[channelMap[i]->GetSensorName()] = {copy[i].value, copy[i].timestamp};
+            Channel *channel = channelMap[canMsg->bit.info.channel_id];
+            channel->ProcessCANCommand(canMsg, canMsgLength, timestamp);
         }
-
+        else
+        {
+            switch (canMsg->bit.cmd_id)
+            {
+                case GENERIC_RES_GET_VARIABLE:
+                case GENERIC_RES_SET_VARIABLE:
+                    GetSetVariableResponse<GENERIC_VARIABLES>(canMsg, canMsgLength, timestamp, variableMap, scalingMap);
+                    break;
+                case GENERIC_RES_NODE_STATUS:
+                    NodeStatusResponse(canMsg, canMsgLength, timestamp);
+                    break;
+                case GENERIC_RES_RESET_ALL_SETTINGS:
+                    ResetAllSettingsResponse(canMsg, canMsgLength, timestamp);
+                    break;
+                case GENERIC_RES_SYNC_CLOCK:
+                    throw std::runtime_error("GENERIC_RES_SYNC_CLOCK: not implemented");
+                    break;
+                case GENERIC_REQ_SET_VARIABLE:
+                case GENERIC_REQ_GET_VARIABLE:
+                case GENERIC_REQ_NODE_STATUS:
+                case GENERIC_REQ_DATA:
+                case GENERIC_REQ_SPEAKER:
+                case GENERIC_REQ_NODE_INFO:
+                case GENERIC_REQ_RESET_ALL_SETTINGS:
+                case GENERIC_REQ_SYNC_CLOCK:
+                    throw std::runtime_error("request message type has been received, major fault in protocol");
+                    break;
+                default:
+                    throw std::runtime_error("node specific command with command id not supported: " + std::to_string(canMsg->bit.cmd_id));
+            }
+        }
     }
-    return sensorData;
-}
-
-//TODO: add node name and channel names as prefix
-std::vector<std::string> Node::GetStates()
-{
-    std::vector<std::string> states;
-    states.insert(states.end(), Node::states.begin(), Node::states.end());
-    for (auto &channel : channelMap)
+    catch (std::exception &e)
     {
-        std::vector<std::string> chStates = channel.second->GetStates();
-        states.insert(states.end(), chStates.begin(), chStates.end());
+        throw std::runtime_error("Node '" + this->channelName + "' - ProcessCANCommand: " + std::string(e.what()));
     }
-    return states;
 }
 
-//TODO: add node name and channel names as prefix
-std::map<std::string, std::function<void(std::vector<double> &, bool)>> Node::GetCommands()
+void Node::NodeStatusResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
 {
-    std::map<std::string, std::function<void(std::vector<double> &, bool)>> commands;
-    commands.insert(Node::commandMap.begin(), Node::commandMap.end());
-    for (auto &channel : channelMap)
-    {
-        std::map<std::string, std::function<void(std::vector<double> &, bool)>> chCommands = channel.second->GetCommands();
-        commands.insert(chCommands.begin(), chCommands.end());
-    }
-    return commands;
+    NodeStatusMsg_t *statusMsg = (NodeStatusMsg_t *) canMsg->bit.data.uint8;
+
+    throw std::logic_error("Node - NodeStatusResponse: not implemented");
 }
+
+void Node::ResetAllSettingsResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
+{
+    SetState("ResetAllSettings", 1, timestamp);
+}
+
+//----------------------------------------------------------------------------//
+//-------------------------------SEND Functions-------------------------------//
+//----------------------------------------------------------------------------//
 
 void Node::SetBus1Voltage(std::vector<double> &params, bool testOnly)
 {
@@ -365,5 +499,92 @@ void Node::GetRefreshRate(std::vector<double> &params, bool testOnly)
     catch (std::exception &e)
     {
         throw std::runtime_error("Node - GetRefreshRate: " + std::string(e.what()));
+    }
+}
+
+void Node::SetUARTEnabled(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(GENERIC_REQ_GET_VARIABLE, this->nodeID, GENERIC_UART_ENABLED, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - SetUARTEnabled: " + std::string(e.what()));
+    }
+}
+
+void Node::GetUARTEnabled(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(GENERIC_REQ_GET_VARIABLE, this->nodeID, GENERIC_UART_ENABLED, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - GetUARTEnabled: " + std::string(e.what()));
+    }
+}
+
+void Node::RequestSetSpeaker(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        if (params.size() != 4) //number of required parameters
+        {
+            throw std::runtime_error("4 parameters expected, but " + std::to_string(params.size()) + " were provided");
+        }
+        std::vector<double> scalingSpeakerToneFrequency = scalingMap.at("SpeakerToneFrequency");
+        std::vector<double> scalingSpeakerOnTime = scalingMap.at("SpeakerOnTime");
+        std::vector<double> scalingSpeakerOffTime = scalingMap.at("SpeakerOffTime");
+        std::vector<double> scalingSpeakerCount = scalingMap.at("SpeakerCount");
+
+        SpeakerMsg_t speakerMsg = {0};
+        speakerMsg.tone_frequency = Channel::ScaleAndConvertInt16(params[0],scalingSpeakerToneFrequency[0],scalingSpeakerToneFrequency[1]);
+        speakerMsg.on_time = Channel::ScaleAndConvertInt16(params[1],scalingSpeakerOnTime[0],scalingSpeakerOnTime[1]);
+        speakerMsg.off_time = Channel::ScaleAndConvertInt16(params[2],scalingSpeakerOffTime[0],scalingSpeakerOffTime[1]);
+        speakerMsg.count = Channel::ScaleAndConvertInt8(params[3],scalingSpeakerCount[0],scalingSpeakerCount[1]);
+
+        SendStandardCommand(this->nodeID, GENERIC_REQ_SPEAKER, (uint8_t *) &speakerMsg, sizeof(speakerMsg), this->canBusChannelID, this->driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - SetSpeaker: " + std::string(e.what()));
+    }
+}
+
+void Node::RequestData(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        SendNoPayloadCommand(params, nodeID, GENERIC_REQ_DATA, canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - RequestData: " + std::string(e.what()));
+    }
+}
+
+void Node::RequestNodeStatus(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        SendNoPayloadCommand(params, nodeID, GENERIC_REQ_NODE_STATUS, canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - RequestData: " + std::string(e.what()));
+    }
+}
+
+void Node::RequestResetAllSettings(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        SendNoPayloadCommand(params, nodeID, GENERIC_REQ_RESET_ALL_SETTINGS, canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - RequestData: " + std::string(e.what()));
     }
 }

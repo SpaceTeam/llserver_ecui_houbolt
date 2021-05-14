@@ -160,7 +160,7 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 {
     //TODO: only accept node info messages in this stage
     Can_MessageData_t *canMsg = (Can_MessageData_t *) payload;
-    Can_MessageId_t *canIDStruct = (Can_MessageId_t *)(&canID);
+    Can_MessageId_t *canIDStruct = (Can_MessageId_t *) (&canID);
     try
     {
         if (canMsg->bit.info.channel_id == GENERIC_CHANNEL_ID && canMsg->bit.cmd_id == GENERIC_RES_NODE_INFO)
@@ -208,15 +208,15 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
     }
     catch (std::runtime_error &e)
     {
-        throw std::runtime_error("runtime error " + std::string(e.what()));
+        throw std::runtime_error("CANManager - OnCANInit: runtime error " + std::string(e.what()));
     }
     catch (std::logic_error &e)
     {
-        throw std::logic_error("logic error " + std::string(e.what()));
+        throw std::logic_error("CANManager - OnCANInit: logic error " + std::string(e.what()));
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("other error  " + std::string(e.what()));
+        throw std::runtime_error("CANManager - OnCANInit: other error  " + std::string(e.what()));
     }
 
 
@@ -225,7 +225,9 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
 {
     Can_MessageData_t *canMsg = (Can_MessageData_t *) payload;
-    uint8_t nodeID = CANManager::GetNodeID(canID);
+    Can_MessageId_t *canIDStruct = (Can_MessageId_t *) (&canID);
+    uint8_t nodeID = canIDStruct->info.node_id;
+
     try
     {
         //Don't require mutex at this point, since it is read only after initialization
@@ -239,13 +241,24 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
         {
             //TODO: remove when ringbuffer implemented
             RingBuffer<Sensor_t> buffer;
-            node->ProcessSensorDataAndWriteToRingBuffer(payload, payloadLength, timestamp, buffer);
+            node->ProcessSensorDataAndWriteToRingBuffer(canMsg, payloadLength, timestamp, buffer);
         }
-        //TODO: process can command inside node
+        else
+        {
+            node->ProcessCANCommand(canMsg, payloadLength, timestamp);
+        }
     }
-    catch(std::exception& e)
+    catch (std::runtime_error &e)
     {
-        Debug::error("Node id or hlid do not exist: %s", e.what());
+        throw std::runtime_error("CANManager - OnCANRecv: runtime error " + std::string(e.what()));
+    }
+    catch (std::logic_error &e)
+    {
+        throw std::logic_error("CANManager - OnCANRecv: logic error " + std::string(e.what()));
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("CANManager - OnCANRecv: other error  " + std::string(e.what()));
     }
 
 
