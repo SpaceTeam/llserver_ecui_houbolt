@@ -46,7 +46,7 @@ private:
     int32_t warnlightStatus;
 
     Timer* stateTimer;
-    Timer* sensorTimer;
+    Timer* sensorStateTimer;
 
     void GetStates(int64_t microTime);
     void StopGetStates();
@@ -73,6 +73,9 @@ public:
 
     nlohmann::json GetAllStates();
     void SetState(std::string stateName, double value, uint64_t timestamp);
+
+    void ExecuteCommand(std::string &commandName, std::vector<double> &params, bool testOnly);
+    std::map<std::string, command_t> GetCommands();
 
     void TurnRed();
     void TurnGreen();

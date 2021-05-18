@@ -15,6 +15,13 @@ typedef struct
     uint64_t timestamp;
 } SensorData_t;
 
+//TODO: move to can_houbolt headers
+typedef struct __attribute__((__packed__))
+{
+	uint32_t channel_mask;
+	uint8_t *channel_data;
+} SensorMsg_t;
+
 typedef struct
 {
     union
@@ -40,6 +47,7 @@ private:
     //TODO: MP check if this is the only and correct way to implement static const with inheritation
     static const std::vector<std::string> states;
     static const std::map<std::string, std::vector<double>> scalingMap;
+    static const std::map<GENERIC_VARIABLES, std::string> variableMap;
 
 private:
     uint8_t canBusChannelID;
@@ -52,39 +60,69 @@ private:
 
 	void InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo);
 
+	//-------------------------------RECEIVE Functions-------------------------------//
+
+    void NodeStatusResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
+    void ResetAllSettingsResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
+
 public:
     //TODO: MP consider if putting channelid as parameter is necessary adapt initializer list if so
 	Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver);
 	~Node();
 
+	//-------------------------------GETTER & SETTER Functions-------------------------------//
+
 	uint8_t GetNodeID();
+	CANDriver *GetCANDriver();
+	uint8_t GetCANBusChannelID();
 
     std::vector<std::string> GetStates() override;
-	std::map<std::string, std::function<void(std::vector<double> &, bool)>> GetCommands() override;
-
-    void ProcessSensorDataAndWriteToRingBuffer(uint8_t *payload, uint32_t &payloadLength, uint64_t &timestamp, RingBuffer<Sensor_t> &buffer);
+	std::map<std::string, command_t> GetCommands() override;
     std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
 
+    //-------------------------------RECEIVE Functions-------------------------------//
 
+    void ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp, RingBuffer<Sensor_t> &buffer);
 
-	void SetBus1Voltage(std::vector<double> &params, bool testOnly=false);
-	void GetBus1Voltage(std::vector<double> &params, bool testOnly=false);
+    void ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp) override;
 
-	void SetBus2Voltage(std::vector<double> &params, bool testOnly=false);
-	void GetBus2Voltage(std::vector<double> &params, bool testOnly=false);
+    //-------------------------------SEND Functions-------------------------------//
 
-	void SetPowerVoltage(std::vector<double> &params, bool testOnly=false);
-	void GetPowerVoltage(std::vector<double> &params, bool testOnly=false);
+	void SetBus1Voltage(std::vector<double> &params, bool testOnly);
+	void GetBus1Voltage(std::vector<double> &params, bool testOnly);
 
-	void SetPowerCurrent(std::vector<double> &params, bool testOnly=false);
-	void GetPowerCurrent(std::vector<double> &params, bool testOnly=false);
+	void SetBus2Voltage(std::vector<double> &params, bool testOnly);
+	void GetBus2Voltage(std::vector<double> &params, bool testOnly);
 
-	void SetRefreshDivider(std::vector<double> &params, bool testOnly=false);
-	void GetRefreshDivider(std::vector<double> &params, bool testOnly=false);
+	void SetPowerVoltage(std::vector<double> &params, bool testOnly);
+	void GetPowerVoltage(std::vector<double> &params, bool testOnly);
 
-	void SetRefreshRate(std::vector<double> &params, bool testOnly=false);
-	void GetRefreshRate(std::vector<double> &params, bool testOnly=false);
+	void SetPowerCurrent(std::vector<double> &params, bool testOnly);
+	void GetPowerCurrent(std::vector<double> &params, bool testOnly);
 
+	void SetRefreshDivider(std::vector<double> &params, bool testOnly);
+	void GetRefreshDivider(std::vector<double> &params, bool testOnly);
+
+	void SetRefreshRate(std::vector<double> &params, bool testOnly);
+	void GetRefreshRate(std::vector<double> &params, bool testOnly);
+
+	void SetUARTEnabled(std::vector<double> &params, bool testOnly);
+	void GetUARTEnabled(std::vector<double> &params, bool testOnly);
+
+	void RequestSetSpeaker(std::vector<double> &params, bool testOnly);
+
+	void RequestData(std::vector<double> &params, bool testOnly);
+	void RequestNodeStatus(std::vector<double> &params, bool testOnly);
+	void RequestResetAllSettings(std::vector<double> &params, bool testOnly);
+};
+
+class NonNodeChannel
+{
+protected:
+    Node *parent;
+
+public:
+    NonNodeChannel(Node *parent) : parent(parent) {};
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_NODE_H

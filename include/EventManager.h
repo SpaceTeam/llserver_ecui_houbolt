@@ -17,6 +17,12 @@
 #include "utility/Singleton.h"
 #include "utility/JSONMapping.h"
 
+/**
+ * std::function pointer to function for command expects double parameter list and bool (testOnly)
+ * std::vector<std::string> list of parameter names in its order
+ */
+typedef std::tuple<std::function<void(std::vector<double> &, bool)>, std::vector<std::string>> command_t;
+
 //change event mapping when sequence is running to still be able to throw events when sequence is running (or just disable)
 
 class EventManager : public Singleton<EventManager>
@@ -28,13 +34,15 @@ private:
     bool started = false;
     //TODO: write channel cmds as method in each channel class
     //<stateName, <callback, pointer to state>
-    std::map<std::string, std::function<void(std::vector<double> &, bool)>> eventMap;
-    std::map<std::string, std::function<void(std::vector<double> &, bool)>> commandMap;
+    std::map<std::string, command_t> eventMap;
+    std::map<std::string, command_t> commandMap;
 
     JSONMapping *mapping;
     nlohmann::json mappingJSON;
 
     bool CheckEvents();
+
+    void ExecuteCommand(const std::string &stateName, double value, bool testOnly);
 
     ~EventManager();
 public:
@@ -47,8 +55,11 @@ public:
      */
     void Start();
 
-    void AddCommands(std::map<std::string, std::function<void(std::vector<double> &, bool)>> commands);
+    void AddCommands(std::map<std::string, command_t> commands);
+    std::map<std::string, command_t> GetCommands();
     void OnStateChange(const std::string& stateName, double value);
+
+    void ExecuteCommand(const std::string &commandName, std::vector<double> &params, bool testOnly);
 
 
 };

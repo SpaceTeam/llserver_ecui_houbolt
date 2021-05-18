@@ -19,8 +19,8 @@ sig_atomic_t signum = 0;
 
 #define TEST_LLSERVER
 
-//#define TEST_NODE_INIT
-#define TEST_SPEAKER
+#define TEST_NODE_INIT
+//#define TEST_SPEAKER
 
 #ifdef TEST_LLSERVER
 #include <thread>
@@ -30,59 +30,57 @@ sig_atomic_t signum = 0;
 
 std::thread *testThread = nullptr;
 
-typedef struct __attribute__((__packed__))
-{
-	uint32_t channel_mask;
-	uint8_t *channel_data;
-} SensorMsg_t;
-
 void testFnc()
 {
+    //wait a sec before executing function
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(2000ms);
+
     LLController *controller = LLController::Instance();
     CANManager *manager = CANManager::Instance();
-    using namespace std::chrono_literals;
+    
 #ifdef TEST_NODE_INIT
-    //wait a sec before executing function
-    std::this_thread::sleep_for(1000ms);
 
-    Can_MessageData_t msg;
+    Can_MessageData_t msg = {0};
     msg.bit.info.buffer = DIRECT_BUFFER;
     msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
     msg.bit.cmd_id = GENERIC_RES_NODE_INFO;
-    NodeInfoMsg_t info = {0};
-    info.firmware_version = 10000;
-    info.channel_mask = 0x0000000B;
-    info.channel_type[0] = CHANNEL_TYPE_ADC24;
-    info.channel_type[1] = CHANNEL_TYPE_ADC16;
-    info.channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
-    info.channel_type[3] = CHANNEL_TYPE_SERVO;
-    msg.bit.data.uint8 = (uint8_t *)&info;
-    uint16_t canID = 0b00000000010;
+    NodeInfoMsg_t *info = (NodeInfoMsg_t *)msg.bit.data.uint8;
+    info->firmware_version = 10000;
+    info->channel_mask = 0x0000000A;
+    info->channel_type[0] = CHANNEL_TYPE_ADC24;
+    info->channel_type[1] = CHANNEL_TYPE_ADC16;
+    info->channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
+    Can_MessageId_t canID = {0};
+    canID.info.direction = 0;
+    canID.info.priority = STANDARD_PRIORITY;
+    canID.info.special_cmd = STANDARD_SPECIAL_CMD;
+    canID.info.node_id = 12;
 
-    manager->OnCANInit(0, canID, msg.uint8, sizeof(msg), 0x1);
+    manager->OnCANInit(0, canID.uint32, msg.uint8, sizeof(msg), 0x1);
 
-    std::this_thread::sleep_for(1000ms);
-
-    msg = {0};
-    msg.bit.info.buffer = DIRECT_BUFFER;
-    msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
-    msg.bit.cmd_id = GENERIC_RES_NODE_INFO;
-    SensorMsg_t sensorMsg = {0};
-    sensorMsg.channel_mask = 0x00000003;
-    sensorMsg.channel_data = new uint8_t[3+2];
-    while(running)
-    {
-        //adc24
-        sensorMsg.channel_data[0] = 0x20;
-        sensorMsg.channel_data[1] = 0x00;
-        sensorMsg.channel_data[2] = 0x00;
-        //adc 16
-        sensorMsg.channel_data[3] = 0x00;
-        sensorMsg.channel_data[4] = 0x04;
-
-         manager->OnCANRecv(0, canID, msg.uint8, sizeof(msg), 0x1);
-        std::this_thread::sleep_for(1000ms);
-    }
+//    std::this_thread::sleep_for(1000ms);
+//
+//    msg = {0};
+//    msg.bit.info.buffer = DIRECT_BUFFER;
+//    msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
+//    msg.bit.cmd_id = GENERIC_RES_NODE_INFO;
+//    SensorMsg_t sensorMsg = {0};
+//    sensorMsg.channel_mask = 0x00000003;
+//    sensorMsg.channel_data = new uint8_t[3+2];
+//    while(running)
+//    {
+//        //adc24
+//        sensorMsg.channel_data[0] = 0x20;
+//        sensorMsg.channel_data[1] = 0x00;
+//        sensorMsg.channel_data[2] = 0x00;
+//        //adc 16
+//        sensorMsg.channel_data[3] = 0x00;
+//        sensorMsg.channel_data[4] = 0x04;
+//
+//         manager->OnCANRecv(0, canID, msg.uint8, sizeof(msg), 0x1);
+//        std::this_thread::sleep_for(1000ms);
+//    }
 #endif
 
 #ifdef TEST_SPEAKER
@@ -198,11 +196,12 @@ int main(int argc, char const *argv[])
         }
     }
 
+    #ifdef TEST_LLSERVER
+    testThread = new std::thread(testFnc);
+
+
     LLController *llController = LLController::Instance();
     llController->Init(serverMode);
-
-#ifdef TEST_LLSERVER
-    testThread = new std::thread(testFnc);
 
 #endif
 

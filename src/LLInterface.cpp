@@ -56,9 +56,10 @@ void LLInterface::Init()
 
         Debug::print("Starting Sensor State Timer...");
         stateTimer = new Timer(40, "stateTimer");
-        sensorTimer = new Timer(40, "sensorTimer");
-        uint64_t sensorSamplingRate = std::get<int>(Config::getData("LLSERVER/sensor_sampling_rate"));
-        // sensorTimer->startContinous(0, sensorSamplingRate,
+        sensorStateTimer = new Timer(40, "sensorTimer");
+        uint64_t sensorStateSamplingRate = std::get<int>(Config::getData("LLSERVER/sensor_state_sampling_rate"));
+        uint64_t sensorStateSamplingInterval = 1000000.0/sensorStateSamplingRate;
+        // sensorStateTimer->startContinous(0, sensorStateSamplingInterval,
         //         std::bind(&LLInterface::FilterSensors, this, std::placeholders::_1),
         //         std::bind(&LLInterface::StopFilterSensors, this));
         Debug::print("Connecting to warning light...");
@@ -98,7 +99,7 @@ LLInterface::~LLInterface()
         StopStateTransmission();
         delete stateTimer;
         Debug::print("Stopping Sensor State Timer...");
-        delete sensorTimer;
+        delete sensorStateTimer;
 
         Debug::print("Deleting Data Filter...");
         delete dataFilter;
@@ -178,11 +179,13 @@ void LLInterface::StartStateTransmission()
 {
     if (!isTransmittingStates)
     {
-        uint64_t stateSamplingRate = std::get<int>(Config::getData("LLSERVER/state_sampling_rate"));
-        isTransmittingStates = true;
-        stateTimer->startContinous(0, stateSamplingRate,
+        uint64_t stateTransmissionRate = std::get<int>(Config::getData("WEBSERVER/state_transmission_rate"));
+        uint64_t stateTransmissionInterval = 1000000/stateTransmissionRate;
+
+        stateTimer->startContinous(0, stateTransmissionInterval,
                 std::bind(&LLInterface::GetStates, this, std::placeholders::_1),
                 std::bind(&LLInterface::StopGetStates, this));
+        isTransmittingStates = true;
     }
 }
 
@@ -207,6 +210,16 @@ void LLInterface::GetStates(int64_t microTime)
 
     TransmitStates(microTime, states);
 
+}
+
+void LLInterface::ExecuteCommand(std::string &commandName, std::vector<double> &params, bool testOnly)
+{
+    eventManager->ExecuteCommand(commandName, params, testOnly);
+}
+
+std::map<std::string, command_t> LLInterface::GetCommands()
+{
+    return eventManager->GetCommands();
 }
 
 void LLInterface::FilterSensors(int64_t microTime)

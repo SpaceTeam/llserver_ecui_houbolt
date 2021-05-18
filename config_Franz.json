@@ -36,14 +36,14 @@
   },
   "LLSERVER" :
   {
-    "sensor_sampling_rate": 100
+    "sensor_state_sampling_rate": 100
   },
   "WEBSERVER":
   {
-    "ip": "127.0.0.1",
+    "ip": "192.168.0.213",
     "port": 5555,
-    "sensor_transmission_interval": 100000,
-    "timer_sync_interval": 100000,
+    "state_transmission_rate": 10,
+    "timer_sync_rate": 10,
     "sensors_smoothing_factor": 0.3
   },
   "WARNLIGHT": {

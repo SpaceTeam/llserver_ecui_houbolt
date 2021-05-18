@@ -103,14 +103,14 @@ void Socket::Send(std::string msg)
             header[1] = msgLen & 0x00FF;
             Debug::info("msb: 0x%02x, lsb: 0x%02x", header[0], header[1]);
             int sentHeaderBytes = send(socketfd, header, HEADER_SIZE, 0);
-            if (sentHeaderBytes < 0)
+            if (sentHeaderBytes < 0 || sentHeaderBytes != HEADER_SIZE)
             {
                 Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
                 Close();
                 return;
             }
             int sentBytes = send(socketfd, msg.c_str(), msg.size(), 0);
-            if (sentBytes < 0)
+            if (sentBytes < 0 || sentBytes != msg.size())
             {
                 Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
                 Close();
@@ -138,8 +138,9 @@ std::string Socket::Recv()
         nBytes = recv(socketfd, header, HEADER_SIZE, MSG_WAITALL);
         if(nBytes < HEADER_SIZE){
             Debug::error("Socket - %s: error at recv occured (Could not read header), closing socket...", name.c_str());
-            Close();
-            return std::string("");
+            this->connectionActive = false;
+            //TODO: write better exception
+            throw std::runtime_error("Socket error");
         }
 
         //Prepare to receive the payload
@@ -156,15 +157,17 @@ std::string Socket::Recv()
         Debug::info("First Message Byte: %d", newBuffer[0]);
         if(nBytes < msgLen){
             Debug::error("Socket - %s: error at recv occured (Could not read entire packet), closing socket...", name.c_str());
-            Close();
-            return std::string("");
+            this->connectionActive = false;
+            //TODO: write better exception
+            throw std::runtime_error("Socket error");
         }
 
         return std::string((char *)newBuffer);
     }else{
         Debug::error("Socket - %s: no connection active", name.c_str());
-        Close();
-        return std::string("");
+        this->connectionActive = false;
+        //TODO: write better exception
+        throw std::runtime_error("Socket error");
     }
 }
 

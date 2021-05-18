@@ -12,6 +12,7 @@
 #include "SequenceManager.h"
 #include "LLInterface.h"
 #include "EcuiSocket.h"
+#include "EventManager.h"
 
 #include "LLController.h"
 
@@ -169,6 +170,55 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             {
                 nlohmann::json mapping = llInterface->GetGUIMapping();
                 EcuiSocket::SendJson("gui-mapping-load", mapping);
+            }
+            else if (type.compare("commands-load") == 0)
+            {
+                auto commandMap = llInterface->GetCommands();
+                nlohmann::json commandsJson = nlohmann::json::array();
+                nlohmann::json commandJson;
+                for (auto &command : commandMap)
+                {
+                    commandJson = nlohmann::json::object();
+                    commandJson["commandName"] = command.first;
+                    std::vector<std::string> parameterNames = std::get<1>(command.second);
+                    commandJson["parameterNames"] = nlohmann::json::array();
+                    for (auto &paramName : parameterNames)
+                    {
+                        commandJson["parameterNames"].push_back(paramName);
+                    }
+                    commandsJson.push_back(commandJson);
+                }
+                std::cout << commandsJson.dump(4) << std::endl;
+                EcuiSocket::SendJson("commands-load", commandsJson);
+            }
+            else if (type.compare("commands-set") == 0)
+            {
+                nlohmann::json commandsErrorJson = nlohmann::json::array();
+                for (auto &command : msg["content"])
+                {
+                    try
+                    {
+                        std::string commandName = command["commandName"];
+                        std::vector<double> params = command["value"];
+                        bool testOnly = command["testOnly"];
+                        llInterface->ExecuteCommand(commandName, params, testOnly);
+                    }
+                    catch (std::exception &e)
+                    {
+                        nlohmann::json errorObj = nlohmann::json::object();
+                        errorObj["commandName"] = command["commandName"];
+                        errorObj["command"] = command;
+                        errorObj["errorMessage"] = e.what();
+
+                        commandsErrorJson.push_back(errorObj);
+                    }
+
+                }
+                if (!commandsErrorJson.empty())
+                {
+                    EcuiSocket::SendJson("commands-error", commandsErrorJson);
+                }
+
             }
             else
             {
