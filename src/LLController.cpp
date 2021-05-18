@@ -188,7 +188,6 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                     }
                     commandsJson.push_back(commandJson);
                 }
-                std::cout << commandsJson.dump(4) << std::endl;
                 EcuiSocket::SendJson("commands-load", commandsJson);
             }
             else if (type.compare("commands-set") == 0)
@@ -199,7 +198,7 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                     try
                     {
                         std::string commandName = command["commandName"];
-                        std::vector<double> params = command["value"];
+                        std::vector<double> params = command["params"];
                         bool testOnly = command["testOnly"];
                         llInterface->ExecuteCommand(commandName, params, testOnly);
                     }

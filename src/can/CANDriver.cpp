@@ -54,7 +54,7 @@ void CANDriver::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *p
     canStatus stat = canWrite(canHandles[canChannelID], canID, (void *) payload, payloadLength, canFDMSG_FDF | canFDMSG_BRS);
 
     if(stat < 0) {
-        throw std::runtime_error(CANError(stat));
+        throw std::runtime_error("CANDriver - SendCANMessage: " + CANError(stat));
     }
 }
 

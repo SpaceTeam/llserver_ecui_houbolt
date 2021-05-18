@@ -47,7 +47,6 @@ std::map<std::string, command_t> Channel::GetCommands()
     {
         auto nodeHandle = commandsTmp.extract(commandsTmp.begin()->first);
         nodeHandle.key().insert(0, prefix);
-        Debug::error("new key %s", nodeHandle.key().c_str());
         commands.insert(std::move(nodeHandle));
     }
 
@@ -123,6 +122,7 @@ void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *comman
     msg.bit.info.buffer = DIRECT_BUFFER;
     msg.bit.info.channel_id = this->channelID;
     msg.bit.cmd_id = cmdID;
+    //TODO: expand to supported data length code for canlib if needed
     if (command != nullptr)
     {
         std::copy_n(command, commandLength, msg.bit.data.uint8);

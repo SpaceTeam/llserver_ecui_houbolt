@@ -204,7 +204,6 @@ std::map<std::string, command_t> Node::GetCommands()
     {
         auto nodeHandle = commandsTmp.extract(commandsTmp.begin()->first);
         nodeHandle.key().insert(0, prefix);
-        Debug::error("new key %s", nodeHandle.key().c_str());
         commands.insert(std::move(nodeHandle));
     }
 
@@ -328,7 +327,8 @@ void Node::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, 
                 case GENERIC_REQ_NODE_INFO:
                 case GENERIC_REQ_RESET_ALL_SETTINGS:
                 case GENERIC_REQ_SYNC_CLOCK:
-                    throw std::runtime_error("request message type has been received, major fault in protocol");
+                    //TODO: uncomment after testing
+                    //throw std::runtime_error("request message type has been received, major fault in protocol");
                     break;
                 default:
                     throw std::runtime_error("node specific command with command id not supported: " + std::to_string(canMsg->bit.cmd_id));
