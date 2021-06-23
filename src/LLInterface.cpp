@@ -208,8 +208,10 @@ void LLInterface::GetStates(int64_t microTime)
 {
     std::map<std::string, std::tuple<double, uint64_t>> states = stateController->GetDirtyStates();
 
-    TransmitStates(microTime, states);
-
+    if (states.size() > 0)
+    {
+        TransmitStates(microTime, states);
+    }
 }
 
 void LLInterface::ExecuteCommand(std::string &commandName, std::vector<double> &params, bool testOnly)
@@ -241,8 +243,7 @@ void LLInterface::StopFilterSensors()
 
 nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states)
 {
-    nlohmann::json content = nlohmann::json::array();
-    nlohmann::json statesJson;
+    nlohmann::json statesJson = nlohmann::json::array();
     for (const auto& state : states)
     {
         nlohmann::json stateJson = nlohmann::json::object();
@@ -251,7 +252,7 @@ nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double
         stateJson["value"] = std::get<0>(state.second);
         stateJson["timestamp"] = (double(std::get<1>(state.second))/1000.0);
 
-        content.push_back(stateJson);
+        statesJson.push_back(stateJson);
     }
 
     return statesJson;
@@ -259,8 +260,7 @@ nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double
 
 nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double, uint64_t, bool>> &states)
 {
-    nlohmann::json content = nlohmann::json::array();
-    nlohmann::json statesJson;
+    nlohmann::json statesJson = nlohmann::json::array();
     for (const auto& state : states)
     {
         nlohmann::json stateJson = nlohmann::json::object();
@@ -269,7 +269,7 @@ nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double
         stateJson["value"] = std::get<0>(state.second);
         stateJson["timestamp"] = (double(std::get<1>(state.second))/1000.0);
 
-        content.push_back(stateJson);
+        statesJson.push_back(stateJson);
     }
 
     return statesJson;

@@ -74,7 +74,7 @@ void CANDriver::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *p
         throw std::runtime_error("CANDriver - SendCANMessage: correct dlc couldn't be found");
     }
     // Flags mean that the message is a FD message (FDF, BRS) and that an extended id is used (EXT)
-    uint32_t *msg = new uint32_t[dlcBytes]{0};
+    uint8_t msg[64] = {0};
     std::copy_n(payload, payloadLength, msg);
     canStatus stat = canWrite(canHandles[canChannelID], canID, (void *) msg, dlcBytes, canFDMSG_FDF | canFDMSG_BRS);
 

@@ -33,6 +33,26 @@
             "7" : {
                 "stringID" : "ch7String",
                 "scaling" : 7
+            },
+            "8" : {
+                "stringID" : "ch8String",
+                "scaling" : 8
+            },
+            "9" : {
+                "stringID" : "ch9String",
+                "scaling" : 9
+            },
+            "10" : {
+                "stringID" : "ch10String",
+                "scaling" : 10
+            },
+            "11" : {
+                "stringID" : "ch11String",
+                "scaling" : 11
+            },
+            "12" : {
+                "stringID" : "ch12String",
+                "scaling" : 12
             }
         }
     },

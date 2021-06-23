@@ -17,16 +17,16 @@
 sig_atomic_t running = 1;
 sig_atomic_t signum = 0;
 
-#define TEST_LLSERVER
-
-#define TEST_NODE_INIT
-//#define TEST_SPEAKER
+//#define TEST_LLSERVER
 
 #ifdef TEST_LLSERVER
 #include <thread>
 #include "can/CANManager.h"
 #include "can_houbolt/can_cmds.h"
 #include "can_houbolt/channels/generic_channel_def.h"
+
+#define TEST_NODE_INIT
+#define TEST_SPEAKER
 
 std::thread *testThread = nullptr;
 
@@ -198,12 +198,11 @@ int main(int argc, char const *argv[])
 
     #ifdef TEST_LLSERVER
     testThread = new std::thread(testFnc);
-
+    #endif
 
     LLController *llController = LLController::Instance();
     llController->Init(serverMode);
 
-#endif
 
     std::string inputStr;
     while (1)
