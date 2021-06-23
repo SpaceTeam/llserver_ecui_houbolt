@@ -25,6 +25,25 @@ typedef struct
     int32_t noSamplingPoints; //unused for can fd data params
 } CANParams;
 
+const std::map<uint32_t, uint32_t> dlcToCANFDMsgLength = {
+        {0, 0},
+        {1, 1},
+        {2, 2},
+        {3, 3},
+        {4, 4},
+        {5, 5},
+        {6, 6},
+        {7, 7},
+        {8, 8},
+        {9, 12},
+        {10, 16},
+        {11, 20},
+        {12, 24},
+        {13, 32},
+        {14, 48},
+        {15, 64}
+};
+
 class CANDriver
 {
     private:
