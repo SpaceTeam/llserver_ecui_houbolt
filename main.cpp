@@ -17,26 +17,34 @@
 sig_atomic_t running = 1;
 sig_atomic_t signum = 0;
 
-//#define TEST_LLSERVER
+#define TEST_LLSERVER
 
 #ifdef TEST_LLSERVER
 #include <thread>
 #include "can/CANManager.h"
 #include "can_houbolt/can_cmds.h"
 #include "can_houbolt/channels/generic_channel_def.h"
+#include <utility>
+#include <string>
+#include "utility/utils.h"
+
+#define CAN_TEST_NODE_ID 12
 
 #define TEST_NODE_INIT
-#define TEST_SPEAKER
+//#define TEST_SPEAKER
+#define TEST_DATA
 
 std::thread *testThread = nullptr;
 
 void testFnc()
 {
+    try{
+
+    
     //wait a sec before executing function
     using namespace std::chrono_literals;
     std::this_thread::sleep_for(2000ms);
 
-    LLController *controller = LLController::Instance();
     CANManager *manager = CANManager::Instance();
     
 #ifdef TEST_NODE_INIT
@@ -55,32 +63,44 @@ void testFnc()
     canID.info.direction = 0;
     canID.info.priority = STANDARD_PRIORITY;
     canID.info.special_cmd = STANDARD_SPECIAL_CMD;
-    canID.info.node_id = 12;
+    canID.info.node_id = CAN_TEST_NODE_ID;
 
-    manager->OnCANInit(0, canID.uint32, msg.uint8, sizeof(msg), 0x1);
+    manager->OnCANInit(0, canID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
 
-//    std::this_thread::sleep_for(1000ms);
-//
-//    msg = {0};
-//    msg.bit.info.buffer = DIRECT_BUFFER;
-//    msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
-//    msg.bit.cmd_id = GENERIC_RES_NODE_INFO;
-//    SensorMsg_t sensorMsg = {0};
-//    sensorMsg.channel_mask = 0x00000003;
-//    sensorMsg.channel_data = new uint8_t[3+2];
-//    while(running)
-//    {
-//        //adc24
-//        sensorMsg.channel_data[0] = 0x20;
-//        sensorMsg.channel_data[1] = 0x00;
-//        sensorMsg.channel_data[2] = 0x00;
-//        //adc 16
-//        sensorMsg.channel_data[3] = 0x00;
-//        sensorMsg.channel_data[4] = 0x04;
-//
-//         manager->OnCANRecv(0, canID, msg.uint8, sizeof(msg), 0x1);
-//        std::this_thread::sleep_for(1000ms);
-//    }
+   std::this_thread::sleep_for(1000ms);
+
+#endif
+
+#ifdef TEST_DATA
+
+    msg = {0};
+    msg.bit.info.buffer = DIRECT_BUFFER;
+    msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
+    msg.bit.cmd_id = GENERIC_RES_DATA;
+    SensorMsg_t sensorMsg = {0};
+    sensorMsg.channel_mask = 0x0000000A;
+
+    Can_MessageId_t dataCanID = {0};
+    dataCanID.info.direction = 0;
+    dataCanID.info.priority = STANDARD_PRIORITY;
+    dataCanID.info.special_cmd = STANDARD_SPECIAL_CMD;
+    dataCanID.info.node_id = CAN_TEST_NODE_ID;
+
+    while(running)
+    {
+        //adc24
+        sensorMsg.channel_data[0] = 0x20;
+        sensorMsg.channel_data[1] = 0x00;
+        sensorMsg.channel_data[2] = 0x00;
+        //adc 16
+        sensorMsg.channel_data[3] = 0x00;
+        sensorMsg.channel_data[4] = 0x04;
+        std::copy_n((uint8_t*)&sensorMsg.channel_mask, 4, msg.bit.data.uint8);
+        std::copy_n(sensorMsg.channel_data, 5, &msg.bit.data.uint8[4]);
+
+        manager->OnCANRecv(0, dataCanID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
+        std::this_thread::sleep_for(1000ms);
+    }
 #endif
 
 #ifdef TEST_SPEAKER
@@ -96,6 +116,13 @@ void testFnc()
     stateController->SetState("testNodeGetDiv", 1, std::chrono::high_resolution_clock::now().time_since_epoch().count());
     stateController->SetState("testNodeSetDiv", 1, std::chrono::high_resolution_clock::now().time_since_epoch().count());
 #endif
+    }
+    catch (std::exception &e)
+    {
+        Debug::print("error: %s", e.what());
+        testThread = nullptr;
+        raise(SIGTERM);
+    }
 }
 
 #endif

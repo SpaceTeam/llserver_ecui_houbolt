@@ -67,6 +67,7 @@ void LLController::Init(ServerMode serverMode)
         Debug::print("Initializing ECUISocket...");
         EcuiSocket::Init(std::bind(&LLController::OnECUISocketRecv, this, std::placeholders::_1),
                 std::bind(&LLController::OnECUISocketClose, this));
+        //TODO: new thread with periodic keep alive messages
         Debug::print("Initializing ECUISocket done\n");
 
     //    Debug::print("Initializing Sequence Manager...");
@@ -160,6 +161,7 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             }
             else if (type.compare("states-start") == 0)
             {
+                Debug::print("state transmission started");
                 llInterface->StartStateTransmission();
             }
             else if (type.compare("states-stop") == 0)

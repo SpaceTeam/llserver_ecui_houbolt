@@ -19,7 +19,7 @@ typedef struct
 typedef struct __attribute__((__packed__))
 {
 	uint32_t channel_mask;
-	uint8_t *channel_data;
+	uint8_t channel_data[60];
 } SensorMsg_t;
 
 typedef struct

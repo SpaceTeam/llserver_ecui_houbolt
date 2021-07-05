@@ -148,6 +148,8 @@ void CANDriver::OnCANCallback(int handle, void *driver, unsigned int event)
                     Debug::error("CANDriver - OnCANCallback: can handle not found");
                     return;
                 }
+                //TODO: wrap a try except around
+                //TODO: switch timestamp to current unix time
                 canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, timestamp);
                 stat = canRead(handle, &id, data, &dlc, &flags, &timestamp);
             }

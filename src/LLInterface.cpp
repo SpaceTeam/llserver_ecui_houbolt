@@ -59,9 +59,9 @@ void LLInterface::Init()
         sensorStateTimer = new Timer(40, "sensorTimer");
         uint64_t sensorStateSamplingRate = std::get<int>(Config::getData("LLSERVER/sensor_state_sampling_rate"));
         uint64_t sensorStateSamplingInterval = 1000000.0/sensorStateSamplingRate;
-        // sensorStateTimer->startContinous(0, sensorStateSamplingInterval,
-        //         std::bind(&LLInterface::FilterSensors, this, std::placeholders::_1),
-        //         std::bind(&LLInterface::StopFilterSensors, this));
+        sensorStateTimer->startContinous(0, sensorStateSamplingInterval,
+                std::bind(&LLInterface::FilterSensors, this, std::placeholders::_1),
+                std::bind(&LLInterface::StopFilterSensors, this));
         Debug::print("Connecting to warning light...");
         warnLight = new WarnLight(0);
 
@@ -232,7 +232,12 @@ void LLInterface::FilterSensors(int64_t microTime)
     std::map<std::string, std::tuple<double, uint64_t>> filteredSensors;
     filteredSensors = dataFilter->FilterData(rawSensors);
 
-
+    //TODO: reconsider if states should be iterated here or 
+    //sent directly to a new setStates of the state controller
+    for (auto &sensor : filteredSensors)
+    {
+        stateController->SetState(sensor.first, std::get<0>(sensor.second), std::get<1>(sensor.second));
+    }
 
 }
 
@@ -250,7 +255,7 @@ nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double
 
         stateJson["name"] = state.first;
         stateJson["value"] = std::get<0>(state.second);
-        stateJson["timestamp"] = (double(std::get<1>(state.second))/1000.0);
+        stateJson["timestamp"] = std::get<1>(state.second);
 
         statesJson.push_back(stateJson);
     }
@@ -267,7 +272,7 @@ nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double
 
         stateJson["name"] = state.first;
         stateJson["value"] = std::get<0>(state.second);
-        stateJson["timestamp"] = (double(std::get<1>(state.second))/1000.0);
+        stateJson["timestamp"] = std::get<1>(state.second);
 
         statesJson.push_back(stateJson);
     }

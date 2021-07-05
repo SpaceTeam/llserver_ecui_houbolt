@@ -83,8 +83,8 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
     this->canBusChannelID = canBusChannelID;
     InitChannels(nodeInfo, channelInfo);
     //init latest sensor buffer with largest channel id
-    latestSensorBufferLength = channelMap.end()->first + 1;
-    latestSensorBuffer = new SensorData_t[latestSensorBufferLength];
+    latestSensorBufferLength = channelMap.rbegin()->first + 1;
+    latestSensorBuffer = new SensorData_t[latestSensorBufferLength]{{0}};
 }
 
 /**
@@ -245,7 +245,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
     {
         throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: payload length is smaller than 2, invalid can msg");
     }
-    if (canMsg->bit.info.channel_id == GENERIC_CHANNEL_ID && canMsg->bit.cmd_id == GENERIC_RES_DATA)
+    if (canMsg->bit.info.channel_id != GENERIC_CHANNEL_ID || canMsg->bit.cmd_id != GENERIC_RES_DATA)
     {
         throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: not a sensor data message, ignored...");
     }
@@ -253,7 +253,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
     SensorMsg_t *sensorMsg = (SensorMsg_t *) canMsg->bit.data.uint8;
     uint8_t *valuePtr = sensorMsg->channel_data;
     uint8_t currValueLength = 0;
-    double currValue;
+    double currValue = 0;
     for (uint8_t channelID = 0; channelID < 32; channelID++)
     {
         uint32_t mask = 0x00000001 & (sensorMsg->channel_mask >> channelID);
@@ -262,6 +262,10 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
             Channel *ch;
             try
             {
+                if (channelMap.find(channelID) == channelMap.end())
+                {
+                    throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: Channel not found");
+                }
                 ch = channelMap[channelID];
 
                 ch->GetSensorValue(valuePtr, currValueLength, currValue);
@@ -299,6 +303,10 @@ void Node::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, 
     {
         if (canMsg->bit.info.channel_id != GENERIC_CHANNEL_ID)
         {
+            if (channelMap.find(canMsg->bit.info.channel_id) == channelMap.end())
+            {
+                throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: Channel not found");
+            }
             Channel *channel = channelMap[canMsg->bit.info.channel_id];
             channel->ProcessCANCommand(canMsg, canMsgLength, timestamp);
         }
