@@ -17,6 +17,8 @@
 #include "utility/Singleton.h"
 #include "utility/JSONMapping.h"
 
+#include "logging/InfluxDbLogger.h"
+
 /**
  * std::function pointer to function for command expects double parameter list and bool (testOnly)
  * std::vector<std::string> list of parameter names in its order
@@ -43,6 +45,8 @@ private:
     bool CheckEvents();
 
     void ExecuteCommand(const std::string &stateName, double value, bool testOnly);
+
+    InfluxDbLogger *logger = nullptr;
 
     ~EventManager();
 public:
