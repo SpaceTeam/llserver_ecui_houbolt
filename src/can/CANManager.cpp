@@ -114,7 +114,7 @@ CANResult CANManager::RequestCANInfo()
     //TODO: MP change to correct broadcasting id
     Can_MessageId_t canID = {0};
     canID.info.direction = MASTER2NODE_DIRECTION;
-    canID.info.node_id = 12;
+    canID.info.node_id = 0;
     canID.info.special_cmd = STANDARD_SPECIAL_CMD;
     canID.info.priority = STANDARD_PRIORITY;
 
@@ -125,6 +125,8 @@ CANResult CANManager::RequestCANInfo()
 
     uint32_t msgLength = sizeof(Can_MessageDataInfo_t) + sizeof(uint8_t);
 
+    Debug::print("---Press enter to send node request---");
+    std::cin.get();
     //TODO: MP be careful if one channel is used for backup
     canDriver->SendCANMessage(0, canID.uint32, msg.uint8, msgLength);
     canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength);

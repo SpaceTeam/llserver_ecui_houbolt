@@ -1,7 +1,7 @@
 {
     "CANMapping": {
         "12" : {
-            "stringID" : "TestNode",
+            "stringID" : "IOB12",
             "0" : {
                 "stringID" : "ch0String",
                 "scaling" : 0
@@ -54,8 +54,63 @@
                 "stringID" : "ch12String",
                 "scaling" : 12
             }
+        },
+    "5" : {
+        "stringID" : "IOB5",
+        "0" : {
+            "stringID" : "5ch0String",
+            "scaling" : 0
+        },
+        "1" : {
+            "stringID" : "5ch1String",
+            "scaling" : 1
+        },
+        "2" : {
+            "stringID" : "5ch2String",
+            "scaling" : 2
+        },
+        "3" : {
+            "stringID" : "5ch3String",
+            "scaling" : 3
+        },
+        "4" : {
+            "stringID" : "5ch4String",
+            "scaling" : 4
+        },
+        "5" : {
+            "stringID" : "5ch5String",
+            "scaling" : 5
+        },
+        "6" : {
+            "stringID" : "5ch6String",
+            "scaling" : 6
+        },
+        "7" : {
+            "stringID" : "5ch7String",
+            "scaling" : 7
+        },
+        "8" : {
+            "stringID" : "5ch8String",
+            "scaling" : 8
+        },
+        "9" : {
+            "stringID" : "5ch9String",
+            "scaling" : 9
+        },
+        "10" : {
+            "stringID" : "5ch10String",
+            "scaling" : 10
+        },
+        "11" : {
+            "stringID" : "5ch11String",
+            "scaling" : 11
+        },
+        "12" : {
+            "stringID" : "5ch12String",
+            "scaling" : 12
         }
-    },
+    }
+},
     "EventMapping" : {
         "testNodeVoltage" : {
             "command" : "GetBus1Voltage",

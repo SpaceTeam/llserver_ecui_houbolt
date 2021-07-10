@@ -108,9 +108,9 @@ void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<st
                 case CHANNEL_TYPE_ADC16:
                     ch = new ADC16(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                     break;
-    //			case CHANNEL_TYPE_ADC16_SINGLE:
-    //				ch = new Adc16_single_t;
-    //			    break;
+    			case CHANNEL_TYPE_ADC16_SINGLE:
+    				ch = new ADC16(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
+    			    break;
                 case CHANNEL_TYPE_ADC24:
                     ch = new ADC24(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                     break;
