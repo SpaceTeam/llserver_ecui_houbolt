@@ -20,10 +20,16 @@ void set_timestamp_precision(influxDbContext *cntxt, timestamp_precision_t preci
             strncpy(cntxt->ts_precision, "&precision=u", SETTINGS_LENGTH);
         break;
         case MILLISECONDS: 
-            strncpy(cntxt->ts_precision, "&precision=m", SETTINGS_LENGTH);
+            strncpy(cntxt->ts_precision, "&precision=ms", SETTINGS_LENGTH);
         break;
         case SECONDS:
             strncpy(cntxt->ts_precision, "&precision=s", SETTINGS_LENGTH);
+        break;
+        case MINUTES:
+            strncpy(cntxt->ts_precision, "&precision=m", SETTINGS_LENGTH);
+        break;
+        case HOURS:
+            strncpy(cntxt->ts_precision, "&precision=h", SETTINGS_LENGTH);
         break;
         default: 
             strncpy(cntxt->ts_precision, "", SETTINGS_LENGTH);

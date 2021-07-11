@@ -10,7 +10,9 @@ extern "C" {
         NANOSECONDS,
         MICROSECONDS,
         MILLISECONDS,
-        SECONDS
+        SECONDS,
+        MINUTES,
+        HOURS
     } timestamp_precision_t;
 
     typedef struct {
