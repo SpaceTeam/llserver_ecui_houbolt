@@ -7,7 +7,7 @@
 #include <vector>
 
 extern "C" {
-    #include "influxDb.h"
+    #include "logging/influxDb.h"
 }
 
 class InfluxDbWriter {

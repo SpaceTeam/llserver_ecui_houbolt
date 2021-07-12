@@ -7,6 +7,10 @@
 StateController::~StateController()
 {
     initialized = false;
+
+    if (logger != nullptr) {
+        delete logger;
+    }
 }
 
 void StateController::Init(std::function<void(std::string, double)> onStateChangeCallback)
@@ -14,6 +18,9 @@ void StateController::Init(std::function<void(std::string, double)> onStateChang
     if (!initialized)
     {
         this->onStateChangeCallback = std::move(onStateChangeCallback);
+        // Change timestamp precision to provided precision (DB)
+        logger = new InfluxDbLogger();
+        logger->Init("127.0.0.1", 8086, "testDb", "states", SECONDS);
         initialized = true;
     }
 }
@@ -79,6 +86,7 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
         std::get<2>(*state) = true;
         stateMtx.unlock();
         this->onStateChangeCallback(stateName, value);
+        logger->log(stateName, value, timestamp);
     }
     catch (const std::exception& e)
     {

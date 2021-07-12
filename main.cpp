@@ -17,7 +17,7 @@
 sig_atomic_t running = 1;
 sig_atomic_t signum = 0;
 
-//#define TEST_LLSERVER
+#define TEST_LLSERVER
 
 #ifdef TEST_LLSERVER
 #include <thread>
@@ -86,20 +86,22 @@ void testFnc()
     dataCanID.info.special_cmd = STANDARD_SPECIAL_CMD;
     dataCanID.info.node_id = CAN_TEST_NODE_ID;
 
+    uint8_t counter = 0;
     while(running)
     {
         //adc24
         sensorMsg.channel_data[0] = 0x20;
         sensorMsg.channel_data[1] = 0x00;
-        sensorMsg.channel_data[2] = 0x00;
+        sensorMsg.channel_data[2] = counter;
         //adc 16
-        sensorMsg.channel_data[3] = 0x00;
+        sensorMsg.channel_data[3] = counter;
         sensorMsg.channel_data[4] = 0x04;
         std::copy_n((uint8_t*)&sensorMsg.channel_mask, 4, msg.bit.data.uint8);
         std::copy_n(sensorMsg.channel_data, 5, &msg.bit.data.uint8[4]);
 
         manager->OnCANRecv(0, dataCanID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
-        std::this_thread::sleep_for(1000ms);
+        std::this_thread::sleep_for(100ms);
+        counter++;
     }
 #endif
 

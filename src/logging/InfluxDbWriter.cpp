@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "InfluxDbWriter.h"
-#include "influxDb.h"
+#include "logging/InfluxDbWriter.h"
+#include "logging/influxDb.h"
 
 InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string dbName) {
     host = hostname;

@@ -17,10 +17,6 @@ EventManager::~EventManager()
         started = false;
         initialized = false;
     }
-
-    if (logger != nullptr) {
-        delete logger;
-    }
 }
 
 void EventManager::Init()
@@ -33,9 +29,6 @@ void EventManager::Init()
             std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
             mapping = new JSONMapping(mappingPath, "EventMapping");
             mappingJSON = *mapping->GetJSONMapping();
-            // Change timestamp precision to provided precision (DB)
-            logger = new InfluxDbLogger();
-            logger->Init("127.0.0.1", 8086, "testDb", "states", SECONDS);
             Debug::print("EventMapping initialized");
             initialized = true;
         }
@@ -239,7 +232,6 @@ void EventManager::OnStateChange(const std::string& stateName, double value)
     try
     {
         ExecuteCommand(stateName, value, false);
-        logger->log(stateName, value, std::time(nullptr));
     }
     catch (const std::exception& e)
     {

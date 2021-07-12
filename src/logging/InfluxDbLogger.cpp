@@ -1,4 +1,4 @@
-#include "InfluxDbLogger.h"
+#include "logging/InfluxDbLogger.h"
 #include <iostream>
 
 InfluxDbLogger::InfluxDbLogger() {

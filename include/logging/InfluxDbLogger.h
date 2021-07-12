@@ -1,9 +1,9 @@
 #ifndef INFLUXDBLOGGER_H
 #define INFLUXDBLOGGER_H
 
-#include "InfluxDbWriter.h"
-#include "MessageLogger.h"
-#include "DataLogger.h"
+#include "logging/InfluxDbWriter.h"
+#include "logging/MessageLogger.h"
+#include "logging/DataLogger.h"
 
 class InfluxDbLogger
     : public MessageLogger, public DataLogger{

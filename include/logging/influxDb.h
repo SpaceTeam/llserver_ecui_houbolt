@@ -5,7 +5,9 @@
 
 #include <stdlib.h>
 
+#ifdef __cplusplus
 extern "C" {
+#endif
     typedef enum {
         NANOSECONDS,
         MICROSECONDS,
@@ -30,5 +32,7 @@ extern "C" {
     int deInitDbContext(influxDbContext *cntxt);
 
     int sendData(influxDbContext *cntxt, char *data, size_t length);
+#ifdef __cplusplus
 }
+#endif
 #endif

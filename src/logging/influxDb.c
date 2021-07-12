@@ -68,7 +68,7 @@ int initDbContext(influxDbContext *cntxt, const char *hostname, const char *port
             cntxt->sock_fd = -1;
         }
     }
-    while (false);
+    while (0);
 
     freeaddrinfo(ai);
 
