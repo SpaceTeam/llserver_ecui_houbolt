@@ -236,7 +236,7 @@ void LLInterface::FilterSensors(int64_t microTime)
     //sent directly to a new setStates of the state controller
     for (auto &sensor : filteredSensors)
     {
-        // stateController->SetState(sensor.first, std::get<0>(sensor.second), std::get<1>(sensor.second));
+        stateController->SetState(sensor.first, std::get<0>(sensor.second), std::get<1>(sensor.second));
     }
 
 }
