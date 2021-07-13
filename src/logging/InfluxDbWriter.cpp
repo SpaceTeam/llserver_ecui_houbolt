@@ -15,7 +15,7 @@ void InfluxDbWriter::Init() {
     }
 }
 
-InfluxDbWriter::~InfluxDbWriter() {
+InfluxDbWriter::~InfluxDbWriter() { 
     push();
     joinThreads();
     (void) deInitDbContext(&cntxt);
@@ -105,7 +105,7 @@ void InfluxDbWriter::endDataPoint(std::size_t timestamp) {
     last_measurement = buffer_pos-1;
 }
 
-void InfluxDbWriter::push() {
+void InfluxDbWriter::push() { 
     // Might throw an exception if last measurement = 0 as this equals a too long entry (DB)
     if (last_measurement > 0) {
         joinThreads();

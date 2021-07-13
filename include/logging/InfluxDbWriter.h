@@ -1,6 +1,6 @@
 #ifndef INFLUXDBWRITER_H
 #define INFLUXDBWRITER_H
-#define BUFFER_SIZE 1024 * 64
+#define BUFFER_SIZE 1024 * 2
 
 #include <string>
 #include <thread>
