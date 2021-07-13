@@ -30,7 +30,11 @@ void Debug::Init()
         printWarnings = std::get<bool>(Config::getData("DEBUG/printWarnings"));
         printInfos = std::get<bool>(Config::getData("DEBUG/printInfos"));
         logger.reset(new InfluxDbLogger());
-        logger->Init("127.0.0.1", 8086, "testDb", "debug", MILLISECONDS);
+        logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
+                     std::get<unsigned>(Config::getData("INFLUXDB/database_port")),
+                     std::get<std::string>(Config::getData("INFLUXDB/database_name")),
+                     std::get<std::string>(Config::getData("INFLUXDB/debug_measurement")), MILLISECONDS,
+                     std::get<std::size_t>(Config::getData("INFLUX/buffer_size")));
         initialized = true;
     }
 }

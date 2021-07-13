@@ -11,7 +11,7 @@ class InfluxDbLogger
             InfluxDbLogger();
             InfluxDbLogger(const InfluxDbLogger&) = delete;
             ~InfluxDbLogger();
-            void Init(std::string db_hostname, unsigned db_port, std::string db_name, std::string measurement, timestamp_precision_t precision);
+            void Init(std::string db_hostname, unsigned db_port, std::string db_name, std::string measurement, timestamp_precision_t precision, std::size_t buffer_size);
 
             void log(std::string source, std::string msg, std::size_t timestamp, Severity severity);
             void log(std::string key, std::size_t value, std::size_t timestamp);

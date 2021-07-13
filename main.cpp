@@ -186,6 +186,7 @@ void signalHandler(int signum)
         Debug::error("signal handler: failed to shutdown LLController, %s", e.what());
     }
 
+    Debug::close();
 
     exit(signum);
 }

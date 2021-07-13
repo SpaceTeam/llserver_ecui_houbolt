@@ -3,13 +3,19 @@
 #include "logging/InfluxDbWriter.h"
 #include "logging/influxDb.h"
 
-InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string dbName) {
+InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string dbName, std::size_t bufferSize) : buffer_size(bufferSize) {
     host = hostname;
     db = dbName;
     portStr = std::to_string(port);
 }
 
 void InfluxDbWriter::Init() {
+    buffer = new char*[buffer_amount];
+    for (size_t i = 0; i < buffer_amount; i++)
+    {
+        buffer[i] = new char[buffer_size];
+    }
+
     if(initDbContext(&cntxt, host.c_str(), portStr.c_str(), db.c_str()) < 0) {
         throw new std::runtime_error("Couldn't initialize influxDbWriter (bad context)");
     }
@@ -18,6 +24,15 @@ void InfluxDbWriter::Init() {
 InfluxDbWriter::~InfluxDbWriter() { 
     push();
     joinThreads();
+
+    if(buffer != nullptr) {
+        for (size_t i = 0; i < buffer_amount; i++)
+        {
+            delete buffer[i];
+        }
+        delete buffer;
+    }
+    
     (void) deInitDbContext(&cntxt);
 }
 
@@ -36,7 +51,7 @@ void InfluxDbWriter::setMeasurement(std::string measurement) {
 }
 
 void InfluxDbWriter::startDataPoint() {
-    if((BUFFER_SIZE - buffer_pos) < (measurement.length())) {
+    if((buffer_size - buffer_pos) < (measurement.length())) {
         push();
     }
     
@@ -44,14 +59,14 @@ void InfluxDbWriter::startDataPoint() {
 }
 
 void InfluxDbWriter::addTag(std::string key, std::string value) {
-    if((BUFFER_SIZE - buffer_pos) < (key.length() + value.length() + 2)) {
+    if((buffer_size - buffer_pos) < (key.length() + value.length() + 2)) {
         push();
     }
     buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], ",%s=%s", key.c_str(), value.c_str());
 }
 
 void InfluxDbWriter::tagsDone() {
-    if((BUFFER_SIZE - buffer_pos) < 1) {
+    if((buffer_size - buffer_pos) < 1) {
         push();
     }
     buffer[buffer_sel][buffer_pos] = ' ';
@@ -60,7 +75,7 @@ void InfluxDbWriter::tagsDone() {
 
 // Properly sanitize strings if needed, neglected so far because of the overhead (DB)
 void InfluxDbWriter::addField(std::string key, std::string value) {
-    if((BUFFER_SIZE - buffer_pos) < (key.length() + value.length() + 4)) {
+    if((buffer_size - buffer_pos) < (key.length() + value.length() + 4)) {
         push();
     }
     buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], "%s=\"%s\",", key.c_str(), value.c_str());
@@ -69,7 +84,7 @@ void InfluxDbWriter::addField(std::string key, std::string value) {
 
 void InfluxDbWriter::addField(std::string key, std::size_t value) {
     std::string str = std::to_string(value);
-    if((BUFFER_SIZE - buffer_pos) < (key.length() + str.length() + 3)) {
+    if((buffer_size - buffer_pos) < (key.length() + str.length() + 3)) {
         push();
     }
     buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], "%s=%si,", key.c_str(), str.c_str());
@@ -79,7 +94,7 @@ void InfluxDbWriter::addField(std::string key, std::size_t value) {
 void InfluxDbWriter::addField(std::string key, double value) {
     std::string str = std::to_string(value);
 
-    if((BUFFER_SIZE - buffer_pos) < (key.length() + str.length() + 2)) {
+    if((buffer_size - buffer_pos) < (key.length() + str.length() + 2)) {
         push();
     }
     buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], "%s=%s,", key.c_str(), str.c_str());
@@ -88,7 +103,7 @@ void InfluxDbWriter::addField(std::string key, double value) {
 void InfluxDbWriter::addField(std::string key, bool value) {
     char c = value ? 't' : 'f';
 
-    if((BUFFER_SIZE - buffer_pos) < (key.length() + 2)) {
+    if((buffer_size - buffer_pos) < (key.length() + 2)) {
         push();
     }
     buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], "%s=%c,", key.c_str(), c);
@@ -97,7 +112,7 @@ void InfluxDbWriter::addField(std::string key, bool value) {
 void InfluxDbWriter::endDataPoint(std::size_t timestamp) {
     std::string ts_str = std::to_string(timestamp);
     
-    if((BUFFER_SIZE - buffer_pos) < (ts_str.length() + 1)) {
+    if((buffer_size - buffer_pos) < (ts_str.length() + 1)) {
         push();
     }
     buffer[buffer_sel][buffer_pos-1] = ' ';

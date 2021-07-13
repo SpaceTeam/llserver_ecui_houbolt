@@ -1,6 +1,5 @@
 #ifndef INFLUXDBWRITER_H
 #define INFLUXDBWRITER_H
-#define BUFFER_SIZE 1024 * 2
 
 #include <string>
 #include <thread>
@@ -13,7 +12,7 @@ extern "C" {
 class InfluxDbWriter {
     public:
         // Might want to make the buffer size and concurrency configurable (DB)
-        InfluxDbWriter(std::string hostname, unsigned port, std::string dbName);
+        InfluxDbWriter(std::string hostname, unsigned port, std::string dbName, std::size_t buffer_size);
         InfluxDbWriter(const InfluxDbWriter&) = delete;
         ~InfluxDbWriter();
         void Init();
@@ -32,7 +31,9 @@ class InfluxDbWriter {
 
         void flush();
     private:
-        char buffer[2][BUFFER_SIZE];
+        const std::size_t buffer_size = 1024;
+        const std::size_t buffer_amount = 2;
+        char **buffer = nullptr;
         influxDbContext cntxt;
         uint8_t buffer_sel = 0;
         std::size_t buffer_pos = 0;
