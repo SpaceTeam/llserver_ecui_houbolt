@@ -22,14 +22,15 @@ bool Debug::isLogFileOpen = false;
 bool Debug::printWarnings = false;
 bool Debug::printInfos = false;
 bool Debug::initialized = false;
+std::unique_ptr<InfluxDbLogger> Debug::logger = nullptr;
 
 void Debug::Init()
 {
     if (!initialized) {
         printWarnings = std::get<bool>(Config::getData("DEBUG/printWarnings"));
         printInfos = std::get<bool>(Config::getData("DEBUG/printInfos"));
-        logger = new InfluxDbLogger();
-        logger->Init("127.0.0.1", 8086, "testDb", "states", MILLISECONDS);
+        logger.reset(new InfluxDbLogger());
+        logger->Init("127.0.0.1", 8086, "testDb", "debug", MILLISECONDS);
         initialized = true;
     }
 }
@@ -51,9 +52,9 @@ std::string Debug::getTimeString()
 
 std::size_t Debug::getTime() {
     struct timespec curr_time_struct;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &curr_time_struct);
+    clock_gettime(CLOCK_REALTIME, &curr_time_struct);
 
-    return curr_time_struct.tv_nsec/1000000;
+    return curr_time_struct.tv_sec * 1000 + curr_time_struct.tv_nsec / 1000000;
 }
 
 int32_t Debug::printNoTime(std::string fmt, ...)
@@ -142,7 +143,7 @@ int32_t Debug::warning(std::string fmt, ...)
             logger->log("Class:Debug", msg, time_ms, WARNING);
         }
 
-        printed = fprintf(stderr, "%warning: %s\n", time_str.c_str(), msg);
+        printed = fprintf(stderr, "%swarning: %s\n", time_str.c_str(), msg);
 
         return printed;
     }
@@ -164,8 +165,7 @@ void Debug::close()
         info("in Debug close: log output file is not open yet, try Debug::changeOutputFile");
     }
     if (initialized) {
-        delete logger;
-        initialized = false;
+        logger->flush();
     }
 }
 

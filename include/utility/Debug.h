@@ -38,7 +38,7 @@ private:
 
 	static bool initialized;
 
-    static InfluxDbLogger *logger;
+    static std::unique_ptr<InfluxDbLogger> logger;
 
 public:
     static void Init();
