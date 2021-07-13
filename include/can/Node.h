@@ -67,7 +67,7 @@ private:
 
 public:
     //TODO: MP consider if putting channelid as parameter is necessary adapt initializer list if so
-	Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver);
+	Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver);
 	~Node();
 
 	//-------------------------------GETTER & SETTER Functions-------------------------------//

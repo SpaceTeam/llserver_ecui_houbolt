@@ -56,8 +56,8 @@ const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
  * @param driver
  */
 
-Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
-    : nodeID(nodeID), driver(driver), Channel::Channel(0xFF, std::move(nodeChannelName), 1.0, this)
+Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
+    : nodeID(nodeID), driver(driver), Channel::Channel(0xFF, std::move(nodeChannelName), {1.0, 0.0}, this)
 {
     commandMap = {
         {"SetBus1Voltage", {std::bind(&Node::SetBus1Voltage, this, std::placeholders::_1, std::placeholders::_2),{"Value"}}},

@@ -63,7 +63,7 @@ private:
      * key: nodeId << 8 | channelId
      * value: sensorName, scaling
      */
-    std::map<uint16_t, std::tuple<std::string, double>> sensorInfoMap;
+    std::map<uint16_t, std::tuple<std::string, std::vector<double>>> sensorInfoMap;
 
 	std::atomic_bool initialized = false;
 

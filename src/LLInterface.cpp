@@ -300,8 +300,8 @@ nlohmann::json LLInterface::GetAllStateLabels()
     
     nlohmann::json statesJson = nlohmann::json::array();
 
-    nlohmann::json guiMappingJson = guiMapping->GetJSONMapping();
-    for (const auto& elem : guiMappingJson)
+    nlohmann::json *guiMappingJson = guiMapping->GetJSONMapping();
+    for (const auto& elem : *guiMappingJson)
     {
         nlohmann::json stateJson = nlohmann::json::object();
         if (states.find(elem["name"]) != states.end())

@@ -4,19 +4,23 @@
             "stringID" : "IOB12",
             "0" : {
                 "stringID" : "ch0String",
-                "scaling" : 0
+                "slope" : 1.0,
+                "offset" : 0
             },
             "1" : {
                 "stringID" : "ch1String",
-                "scaling" : 1
+                "slope" : 1.0,
+                "offset" : 0
             },
             "2" : {
                 "stringID" : "ch2String",
-                "scaling" : 2
+                "slope" : 1.0,
+                "offset" : 0
             },
             "3" : {
                 "stringID" : "ch3String",
-                "scaling" : 3
+                "slope" : 1.0,
+                "offset" : 0
             },
             "4" : {
                 "stringID" : "ch4String",
@@ -137,7 +141,7 @@
             "state" : "5ch11String",
             "label" : "ch 124"
         }
-    ]
+    ],
     "GUIMappingAdvanced" :
     {
         "group1":
