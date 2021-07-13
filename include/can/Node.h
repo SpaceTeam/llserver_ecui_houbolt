@@ -58,7 +58,7 @@ private:
     size_t latestSensorBufferLength;
     std::mutex bufferMtx;
 
-	void InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo);
+	void InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo);
 
 	//-------------------------------RECEIVE Functions-------------------------------//
 

@@ -11,7 +11,8 @@ class CANMappingObj
 {
 public:
     std::string stringID;
-    double scaling;
+    double slope;
+    double offset;
 };
 
 class CANMapping : JSONMapping

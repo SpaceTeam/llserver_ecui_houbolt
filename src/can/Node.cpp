@@ -92,7 +92,7 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
  * @param nodeInfo
  * @param channelInfo
  */
-void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, double>> &channelInfo)
+void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo)
 {
     uint8_t indexCounter = 0;
 	for (uint8_t channelID = 0; channelID < 32; channelID++)

@@ -30,7 +30,7 @@ const std::map<DIGITAL_OUT_VARIABLES , std::string> DigitalOut::variableMap =
             {DIGITAL_OUT_SENSOR_REFRESH_DIVIDER, "RefreshDivider"},
         };
 
-DigitalOut::DigitalOut(uint8_t channelID, std::string channelName, double sensorScaling, Node *parent)
+DigitalOut::DigitalOut(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
         : Channel(channelID, std::move(channelName), sensorScaling, parent, DIGITAL_OUT_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {

@@ -72,6 +72,7 @@ public:
     void StopStateTransmission();
 
     nlohmann::json GetAllStates();
+    nlohmann::json GetAllStateLabels();
     void SetState(std::string stateName, double value, uint64_t timestamp);
 
     void ExecuteCommand(std::string &commandName, std::vector<double> &params, bool testOnly);

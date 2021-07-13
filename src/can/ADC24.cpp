@@ -28,7 +28,7 @@ const std::map<ADC24_VARIABLES , std::string> ADC24::variableMap =
             {ADC24_UPPER_THRESHOLD, "UpperThreshold"},
         };
 
-ADC24::ADC24(uint8_t channelID, std::string channelName, double sensorScaling, Node *parent)
+ADC24::ADC24(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
         : Channel(channelID, std::move(channelName), sensorScaling, parent, ADC24_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {

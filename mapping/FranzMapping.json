@@ -132,6 +132,13 @@
         }
     },
     "GUIMapping" :
+    [
+        {
+            "state" : "5ch11String",
+            "label" : "ch 124"
+        }
+    ]
+    "GUIMappingAdvanced" :
     {
         "group1":
         {

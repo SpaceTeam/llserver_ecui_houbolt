@@ -143,7 +143,7 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             //TODO: MP probably not even needed
             else if (type.compare("states-load") == 0)
             {
-                nlohmann::json states = llInterface->GetAllStates();
+                nlohmann::json states = llInterface->GetAllStateLabels();
                 EcuiSocket::SendJson("states-load", states);
             }
             else if (type.compare("states-set") == 0)
