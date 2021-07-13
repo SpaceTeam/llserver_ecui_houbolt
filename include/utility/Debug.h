@@ -16,6 +16,7 @@
 #include <sstream>
 
 #include "common.h"
+#include "logging/InfluxDbLogger.h"
 
 class Debug {
 
@@ -33,6 +34,11 @@ private:
     static void writeToFile();
 
     static std::string getTimeString();
+    static std::size_t getTime();
+
+	static bool initialized;
+
+    static InfluxDbLogger *logger;
 
 public:
     static void Init();

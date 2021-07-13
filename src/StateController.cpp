@@ -18,7 +18,6 @@ void StateController::Init(std::function<void(std::string, double)> onStateChang
     if (!initialized)
     {
         this->onStateChangeCallback = std::move(onStateChangeCallback);
-        // Change timestamp precision to provided precision (DB)
         logger = new InfluxDbLogger();
         logger->Init("127.0.0.1", 8086, "testDb", "states", MICROSECONDS);
         initialized = true;

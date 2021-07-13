@@ -7,7 +7,7 @@ enum Severity {
     TRACE,
     DEBUG,
     INFO,
-    WARN,
+    WARNING,
     ERROR,
     FATAL
 };
@@ -22,7 +22,7 @@ class MessageLogger {
                 case TRACE: return "TRACE"; break;
                 case DEBUG: return "DEBUG"; break;
                 case INFO: return "INFO"; break;
-                case WARN: return "WARN"; break;
+                case WARNING: return "WARNING"; break;
                 case ERROR: return "ERROR"; break;
                 case FATAL: return "FATAL"; break;
                 default: return "UNKNOWN"; break;
