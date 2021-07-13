@@ -63,12 +63,12 @@
     "low_threshold": 9900,
     "voltage_hysterisis": 100
   },
-  "INLFUXDB":{
+  "INFLUXDB":{
     "database_ip": "127.0.0.1",
     "database_port": 8086,
     "database_name": "testDb",
     "debug_measurement": "debug",
     "state_measurement": "states",
-    "buffer_size": 65536
+    "buffer_size": 2048
   }
 }

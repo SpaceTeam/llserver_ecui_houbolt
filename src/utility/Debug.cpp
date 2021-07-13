@@ -24,17 +24,17 @@ bool Debug::printInfos = false;
 bool Debug::initialized = false;
 std::unique_ptr<InfluxDbLogger> Debug::logger = nullptr;
 
-void Debug::Init()
+void Debug::Init()  
 {
     if (!initialized) {
         printWarnings = std::get<bool>(Config::getData("DEBUG/printWarnings"));
         printInfos = std::get<bool>(Config::getData("DEBUG/printInfos"));
         logger.reset(new InfluxDbLogger());
         logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
-                     std::get<unsigned>(Config::getData("INFLUXDB/database_port")),
+                     std::get<int>(Config::getData("INFLUXDB/database_port")),
                      std::get<std::string>(Config::getData("INFLUXDB/database_name")),
                      std::get<std::string>(Config::getData("INFLUXDB/debug_measurement")), MILLISECONDS,
-                     std::get<std::size_t>(Config::getData("INFLUX/buffer_size")));
+                     std::get<int>(Config::getData("INFLUXDB/buffer_size")));
         initialized = true;
     }
 }
@@ -89,7 +89,8 @@ int32_t Debug::print(std::string fmt, ...)
 
     va_start(args, fmt);
     printed = snprintf(msg, 1024, fmt.c_str(), args);
-    msg[printed-1] = '\0';
+    if(printed == 1024) msg[printed-1] = '\0';
+    else msg[printed] = '\0';
     va_end(args);
 
     if(initialized) {
@@ -113,7 +114,8 @@ int32_t Debug::info(std::string fmt, ...)
 
         va_start(args, fmt);
         printed = snprintf(msg, 1024, fmt.c_str(), args);
-        msg[printed-1] = '\0';
+        if(printed == 1024) msg[printed-1] = '\0';
+        else msg[printed] = '\0';
         va_end(args);
 
         if(initialized) {
@@ -140,7 +142,8 @@ int32_t Debug::warning(std::string fmt, ...)
 
         va_start(args, fmt);
         printed = snprintf(msg, 1024, fmt.c_str(), args);
-        msg[printed-1] = '\0';
+        if(printed == 1024) msg[printed-1] = '\0';
+        else msg[printed] = '\0';
         va_end(args);
 
         if(initialized) {
@@ -270,7 +273,8 @@ int32_t Debug::error(std::string fmt, ...)
 
     va_start(args, fmt);
     printed = snprintf(msg, 1024, fmt.c_str(), args);
-    msg[printed-1] = '\0';
+    if(printed == 1024) msg[printed-1] = '\0';
+    else msg[printed] = '\0';
     va_end(args);
 
     if(initialized) {

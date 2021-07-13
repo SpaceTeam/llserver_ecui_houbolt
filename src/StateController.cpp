@@ -3,6 +3,7 @@
 //
 
 #include "StateController.h"
+#include "utility/Config.h"
 
 StateController::~StateController()
 {
@@ -20,10 +21,11 @@ void StateController::Init(std::function<void(std::string, double)> onStateChang
         this->onStateChangeCallback = std::move(onStateChangeCallback);
         logger = new InfluxDbLogger();
         logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
-                     std::get<unsigned>(Config::getData("INFLUXDB/database_port")),
+                     std::get<int>(Config::getData("INFLUXDB/database_port")),
                      std::get<std::string>(Config::getData("INFLUXDB/database_name")),
                      std::get<std::string>(Config::getData("INFLUXDB/state_measurement")), MICROSECONDS,
-                     std::get<std::size_t>(Config::getData("INFLUX/buffer_size")));
+                     std::get<int>(Config::getData("INFLUXDB/buffer_size")));
+        //logger->Init("127.0.0.1", 8086, "testDb", "states", MICROSECONDS, 65536);
         initialized = true;
     }
 }
