@@ -88,7 +88,7 @@ int32_t Debug::print(std::string fmt, ...)
     std::string time_str = getTimeString();
 
     va_start(args, fmt);
-    printed = snprintf(msg, 1024, fmt.c_str(), args);
+    printed = vsnprintf(msg, 1024, fmt.c_str(), args);
     if(printed == 1024) msg[printed-1] = '\0';
     else msg[printed] = '\0';
     va_end(args);
@@ -113,7 +113,7 @@ int32_t Debug::info(std::string fmt, ...)
         std::string time_str = getTimeString();
 
         va_start(args, fmt);
-        printed = snprintf(msg, 1024, fmt.c_str(), args);
+        printed = vsnprintf(msg, 1024, fmt.c_str(), args);
         if(printed == 1024) msg[printed-1] = '\0';
         else msg[printed] = '\0';
         va_end(args);
@@ -141,7 +141,7 @@ int32_t Debug::warning(std::string fmt, ...)
         std::string time_str = getTimeString();
 
         va_start(args, fmt);
-        printed = snprintf(msg, 1024, fmt.c_str(), args);
+        printed = vsnprintf(msg, 1024, fmt.c_str(), args);
         if(printed == 1024) msg[printed-1] = '\0';
         else msg[printed] = '\0';
         va_end(args);
@@ -272,7 +272,7 @@ int32_t Debug::error(std::string fmt, ...)
     std::string time_str = getTimeString();
 
     va_start(args, fmt);
-    printed = snprintf(msg, 1024, fmt.c_str(), args);
+    printed = vsnprintf(msg, 1024, fmt.c_str(), args);
     if(printed == 1024) msg[printed-1] = '\0';
     else msg[printed] = '\0';
     va_end(args);
