@@ -40,7 +40,7 @@
   },
   "WEBSERVER":
   {
-    "ip": "127.0.0.1",
+    "ip": "192.168.0.213",
     "port": 5555,
     "state_transmission_rate": 10,
     "timer_sync_rate": 10,

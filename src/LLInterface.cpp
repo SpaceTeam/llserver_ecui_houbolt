@@ -301,20 +301,20 @@ nlohmann::json LLInterface::GetAllStateLabels()
     nlohmann::json statesJson = nlohmann::json::array();
 
     nlohmann::json *guiMappingJson = guiMapping->GetJSONMapping();
-    for (const auto& elem : *guiMappingJson)
+    for (const auto& state : states)
     {
         nlohmann::json stateJson = nlohmann::json::object();
-        if (states.find(elem["name"]) != states.end())
+        stateJson["name"] = state.first;
+        stateJson["label"] = state.first;
+        for (const auto& elem : *guiMappingJson)
         {
-            stateJson["name"] = elem["name"];
-            stateJson["label"] = elem["label"];
+            if (state.first.compare(elem["state"]) == 0)
+            {
+                stateJson["label"] = elem["label"];
+                break;
+            }
         }
-        else
-        {
-            stateJson["name"] = elem["name"];
-            stateJson["label"] = elem["name"];
-        }
-
+        
         statesJson.push_back(stateJson);
     }
 
