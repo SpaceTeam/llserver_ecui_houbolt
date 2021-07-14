@@ -43,7 +43,12 @@ ADC16::ADC16(uint8_t channelID, std::string channelName, std::vector<double> sen
 
 std::vector<std::string> ADC16::GetStates()
 {
-    return ADC16::states;
+    std::vector<std::string> states = ADC16::states;
+    for (auto &state : states)
+    {
+        state = GetStatePrefix() + state;
+    }
+    return states;
 }
 
 //-------------------------------------------------------------------------------//

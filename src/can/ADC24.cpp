@@ -50,7 +50,12 @@ ADC24::ADC24(uint8_t channelID, std::string channelName, std::vector<double> sen
 
 std::vector<std::string> ADC24::GetStates()
 {
-    return ADC24::states;
+    std::vector<std::string> states = ADC24::states;
+    for (auto &state : states)
+    {
+        state = GetStatePrefix() + state;
+    }
+    return states;
 }
 
 //-------------------------------------------------------------------------------//

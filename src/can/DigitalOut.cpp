@@ -53,7 +53,12 @@ DigitalOut::DigitalOut(uint8_t channelID, std::string channelName, std::vector<d
 
 std::vector<std::string> DigitalOut::GetStates()
 {
-    return DigitalOut::states;
+    std::vector<std::string> states = DigitalOut::states;
+    for (auto &state : states)
+    {
+        state = GetStatePrefix() + state;
+    }
+    return states;
 }
 
 //-------------------------------------------------------------------------------//
