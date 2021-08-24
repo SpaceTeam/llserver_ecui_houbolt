@@ -26,7 +26,7 @@ public:
     void CalibrateResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
 
 public:
-    ADC24(uint8_t channelID, std::string channelName, double sensorScaling, Node *parent);
+    ADC24(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
 
     std::vector<std::string> GetStates() override;
 

@@ -172,18 +172,18 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
             NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *) &canMsg->bit.data.uint8;
 
-            std::map<uint8_t, std::tuple<std::string, double>> nodeChannelInfo;
+            std::map<uint8_t, std::tuple<std::string, std::vector<double>>> nodeChannelInfo;
             for (uint8_t channelID = 0; channelID < 32; channelID++)
             {
                 uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
                 if (mask == 1)
                 {
                     CANMappingObj channelMappingObj = mapping->GetChannelObj(nodeID, channelID);
-                    nodeChannelInfo[channelID] = {channelMappingObj.stringID, channelMappingObj.scaling};
+                    nodeChannelInfo[channelID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
 
                     //add sensor names and scaling to array for fast sensor processing
                     uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
-                    sensorInfoMap[mergedID] = {channelMappingObj.stringID, channelMappingObj.scaling};
+                    sensorInfoMap[mergedID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
 
                 }
                 else if (mask > 1)

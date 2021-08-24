@@ -104,9 +104,8 @@ void Channel::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &va
         default:
             throw std::logic_error("Channel - GetSensorValue: channel type has more than 4 bytes\n\tgood luck if this exception happens");
     }
-
     value = (double)(intValue);
-
+    value = Scale(value, sensorScaling[0], sensorScaling[1]);
 }
 
 void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *command, uint32_t commandLength,

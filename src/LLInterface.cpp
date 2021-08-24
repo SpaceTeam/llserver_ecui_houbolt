@@ -294,6 +294,33 @@ nlohmann::json LLInterface::GetAllStates()
     return statesJson;
 }
 
+nlohmann::json LLInterface::GetAllStateLabels()
+{
+    std::map<std::string, std::tuple<double, uint64_t, bool>> states = stateController->GetAllStates();
+    
+    nlohmann::json statesJson = nlohmann::json::array();
+
+    nlohmann::json *guiMappingJson = guiMapping->GetJSONMapping();
+    for (const auto& state : states)
+    {
+        nlohmann::json stateJson = nlohmann::json::object();
+        stateJson["name"] = state.first;
+        stateJson["label"] = state.first;
+        for (const auto& elem : *guiMappingJson)
+        {
+            if (state.first.compare(elem["state"]) == 0)
+            {
+                stateJson["label"] = elem["label"];
+                break;
+            }
+        }
+        
+        statesJson.push_back(stateJson);
+    }
+
+    return statesJson;
+}
+
 void LLInterface::SetState(std::string stateName, double value, uint64_t timestamp)
 {
     stateController->SetState(stateName, value, timestamp);

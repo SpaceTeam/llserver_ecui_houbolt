@@ -25,7 +25,7 @@ const std::map<ADC16_VARIABLES , std::string> ADC16::variableMap =
             {ADC16_REFRESH_DIVIDER, "RefreshDivider"},
         };
 
-ADC16::ADC16(uint8_t channelID, std::string channelName, double sensorScaling, Node *parent)
+ADC16::ADC16(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
         : Channel(channelID, std::move(channelName), sensorScaling, parent, ADC16_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {
@@ -43,7 +43,12 @@ ADC16::ADC16(uint8_t channelID, std::string channelName, double sensorScaling, N
 
 std::vector<std::string> ADC16::GetStates()
 {
-    return ADC16::states;
+    std::vector<std::string> states = ADC16::states;
+    for (auto &state : states)
+    {
+        state = GetStatePrefix() + state;
+    }
+    return states;
 }
 
 //-------------------------------------------------------------------------------//

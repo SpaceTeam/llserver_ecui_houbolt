@@ -22,7 +22,7 @@ public:
     //-------------------------------RECEIVE Functions-------------------------------//
 
 public:
-    DigitalOut(uint8_t channelID, std::string channelName, double sensorScaling, Node *parent);
+    DigitalOut(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
 
     std::vector<std::string> GetStates() override;
 
