@@ -39,6 +39,7 @@ CMakeCache.txt
 Makefile
 logs/
 .idea/
+.vscode/
 cmake-build-debug/
 *.cmake
 
