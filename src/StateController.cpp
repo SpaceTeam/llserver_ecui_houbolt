@@ -89,9 +89,9 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
         std::get<0>(*state) = value;
         std::get<1>(*state) = timestamp;
         std::get<2>(*state) = true;
+        logger->log(stateName, value, timestamp);
         stateMtx.unlock();
         this->onStateChangeCallback(stateName, value);
-        logger->log(stateName, value, timestamp);
     }
     catch (const std::exception& e)
     {
