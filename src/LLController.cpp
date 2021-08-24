@@ -151,11 +151,12 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                 std::string stateName;
                 double value;
                 uint64_t timestamp;
-                for (auto servo : msg["content"])
+                for (auto state : msg["content"])
                 {
-                    stateName = servo["state"];
-                    value = servo["value"];
-                    timestamp = servo["timestamp"];
+                    stateName = state["name"];
+                    value = state["value"];
+                    timestamp = state["timestamp"];
+                    Debug::print("%s, %f, %d", stateName.c_str(), value, timestamp);
                     llInterface->SetState(stateName, value, timestamp);
                 }
             }

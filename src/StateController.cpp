@@ -85,6 +85,7 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
     try
     {
         stateMtx.lock();
+        //TODO: I don't understand how that works when state is not in map, but it's magic appearently
         auto *state = &this->states[stateName];
         std::get<0>(*state) = value;
         std::get<1>(*state) = timestamp;
