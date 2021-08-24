@@ -15,6 +15,8 @@
 
 #include "utility/Singleton.h"
 
+#include "logging/InfluxDbLogger.h"
+
 class StateController : public Singleton<StateController>
 {
     friend class Singleton;
@@ -25,6 +27,8 @@ private:
 	bool initialized = false;
 
 	std::mutex stateMtx;
+
+    InfluxDbLogger *logger = nullptr;
 
     ~StateController();
 public:

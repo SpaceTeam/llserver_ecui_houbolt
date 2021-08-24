@@ -21,11 +21,22 @@ std::ofstream Debug::logFile;
 bool Debug::isLogFileOpen = false;
 bool Debug::printWarnings = false;
 bool Debug::printInfos = false;
+bool Debug::initialized = false;
+std::unique_ptr<InfluxDbLogger> Debug::logger = nullptr;
 
-void Debug::Init()
+void Debug::Init()  
 {
-    printWarnings = std::get<bool>(Config::getData("DEBUG/printWarnings"));
-    printInfos = std::get<bool>(Config::getData("DEBUG/printInfos"));
+    if (!initialized) {
+        printWarnings = std::get<bool>(Config::getData("DEBUG/printWarnings"));
+        printInfos = std::get<bool>(Config::getData("DEBUG/printInfos"));
+        logger.reset(new InfluxDbLogger());
+        logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
+                     std::get<int>(Config::getData("INFLUXDB/database_port")),
+                     std::get<std::string>(Config::getData("INFLUXDB/database_name")),
+                     std::get<std::string>(Config::getData("INFLUXDB/debug_measurement")), MILLISECONDS,
+                     std::get<int>(Config::getData("INFLUXDB/buffer_size")));
+        initialized = true;
+    }
 }
 
 std::string Debug::getTimeString()
@@ -41,6 +52,13 @@ std::string Debug::getTimeString()
     strftime(time_string, 100, "%T.", curr_tm);
 
     return "<" + std::string(time_string) + std::to_string(curr_time_struct.tv_nsec/1000000) + ">\t";
+}
+
+std::size_t Debug::getTime() {
+    struct timespec curr_time_struct;
+    clock_gettime(CLOCK_REALTIME, &curr_time_struct);
+
+    return curr_time_struct.tv_sec * 1000 + curr_time_struct.tv_nsec / 1000000;
 }
 
 int32_t Debug::printNoTime(std::string fmt, ...)
@@ -65,13 +83,21 @@ int32_t Debug::print(std::string fmt, ...)
 
     int printed;
     va_list args;
-
-    fmt = fmt.insert(0, getTimeString());
-    fmt.append("\n");
+    char msg[1024];
+    std::size_t time_ms = getTime();
+    std::string time_str = getTimeString();
 
     va_start(args, fmt);
-    printed = vprintf(fmt.c_str(), args);
+    printed = vsnprintf(msg, 1024, fmt.c_str(), args);
+    if(printed == 1024) msg[printed-1] = '\0';
+    else msg[printed] = '\0';
     va_end(args);
+
+    if(initialized) {
+        logger->log("Class:Debug", msg, time_ms, DEBUG);
+    }
+
+    printed = fprintf(stderr, "%s %s\n", time_str.c_str(), msg);
 
     return printed;
 }
@@ -82,13 +108,21 @@ int32_t Debug::info(std::string fmt, ...)
     {
         int printed;
         va_list args;
-
-        fmt = getTimeString() + "info: " + fmt;
-        fmt.append("\n");
+        char msg[1024];
+        std::size_t time_ms = getTime();
+        std::string time_str = getTimeString();
 
         va_start(args, fmt);
-        printed = vprintf(fmt.c_str(), args);
+        printed = vsnprintf(msg, 1024, fmt.c_str(), args);
+        if(printed == 1024) msg[printed-1] = '\0';
+        else msg[printed] = '\0';
         va_end(args);
+
+        if(initialized) {
+            logger->log("Class:Debug", msg, time_ms, INFO);
+        }
+
+        printed = fprintf(stderr, "%sinfo: %s\n", time_str.c_str(), msg);
 
         return printed;
     }
@@ -102,13 +136,21 @@ int32_t Debug::warning(std::string fmt, ...)
     {
         int printed;
         va_list args;
-
-        fmt = getTimeString() + "warning: " + fmt;
-        fmt.append("\n");
+        char msg[1024];
+        std::size_t time_ms = getTime();
+        std::string time_str = getTimeString();
 
         va_start(args, fmt);
-        printed = vfprintf(stderr, fmt.c_str(), args);
+        printed = vsnprintf(msg, 1024, fmt.c_str(), args);
+        if(printed == 1024) msg[printed-1] = '\0';
+        else msg[printed] = '\0';
         va_end(args);
+
+        if(initialized) {
+            logger->log("Class:Debug", msg, time_ms, WARNING);
+        }
+
+        printed = fprintf(stderr, "%swarning: %s\n", time_str.c_str(), msg);
 
         return printed;
     }
@@ -129,6 +171,9 @@ void Debug::close()
     {
         info("in Debug close: log output file is not open yet, try Debug::changeOutputFile");
     }
+    if (initialized) {
+        logger->flush();
+    }
 }
 
 void Debug::flush()
@@ -142,6 +187,10 @@ void Debug::flush()
     else
     {
         error("in Debug flush: log output file is not open yet, try Debug::changeOutputFile");
+    }
+
+    if (initialized) {
+        logger->flush();
     }
 }
 
@@ -171,6 +220,9 @@ void Debug::log(std::string msg)
 {
     std::lock_guard<std::mutex> lock(outFileMutex);
     logStream << msg;
+    if(initialized) {
+        logger->log("Class:Debug", msg, getTime(), DEBUG);
+    }
 
 }
 
@@ -215,13 +267,21 @@ int32_t Debug::error(std::string fmt, ...)
 {
     int printed;
     va_list args;
-
-    fmt = getTimeString() + "error: " + fmt;
-    fmt.append("\n");
+    char msg[1024];
+    std::size_t time_ms = getTime();
+    std::string time_str = getTimeString();
 
     va_start(args, fmt);
-    printed = vfprintf(stderr, fmt.c_str(), args);
+    printed = vsnprintf(msg, 1024, fmt.c_str(), args);
+    if(printed == 1024) msg[printed-1] = '\0';
+    else msg[printed] = '\0';
     va_end(args);
 
+    if(initialized) {
+        logger->log("Class:Debug", msg, time_ms, ERROR);
+    }
+
+    printed = fprintf(stderr, "%serror: %s\n", time_str.c_str(), msg);
+    
     return printed;
 }

@@ -2,6 +2,8 @@
 // Created by Markus on 05.04.21.
 //
 
+#include <chrono>
+
 #include "EventManager.h"
 
 #include "StateController.h"
@@ -34,8 +36,6 @@ void EventManager::Init()
         {
             Debug::error("Initializing EventdManager failed: %s", e.what());
         }
-
-
     }
     else
     {
