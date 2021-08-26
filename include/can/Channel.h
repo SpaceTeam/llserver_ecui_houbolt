@@ -40,7 +40,7 @@ protected:
     static inline double Scale(double value, double a, double b)
     {
         double result = value;
-        if (a != 1 && b != 0)
+        if (a != 1 || b != 0)
         {
             result = a * value + b;
         }

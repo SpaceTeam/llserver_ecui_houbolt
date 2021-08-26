@@ -93,13 +93,13 @@ void Channel::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &va
             intValue = (valuePtr[0]);
             break;
         case 2:
-            intValue = (valuePtr[0] << 8 | valuePtr[1]);
+            intValue = (valuePtr[1] << 8 | valuePtr[0]);
             break;
         case 3:
-            intValue = (valuePtr[0] << 16 | valuePtr[1] << 8 | valuePtr[2]);
+            intValue = (valuePtr[2] << 16 | valuePtr[1] << 8 | valuePtr[0]);
             break;
         case 4:
-            intValue = (valuePtr[0] << 24 | valuePtr[1] << 16 | valuePtr[2] << 8 | valuePtr[3]);
+            intValue = (valuePtr[3] << 24 | valuePtr[2] << 16 | valuePtr[1] << 8 | valuePtr[0]);
             break;
         default:
             throw std::logic_error("Channel - GetSensorValue: channel type has more than 4 bytes\n\tgood luck if this exception happens");

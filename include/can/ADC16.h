@@ -37,6 +37,10 @@ public:
 
     //-------------------------------SEND Functions-------------------------------//
 
+    
+    void SetMeasurement(std::vector<double> &params, bool testOnly);
+	void GetMeasurement(std::vector<double> &params, bool testOnly);
+
     void SetRefreshDivider(std::vector<double> &params, bool testOnly);
 	void GetRefreshDivider(std::vector<double> &params, bool testOnly);
 

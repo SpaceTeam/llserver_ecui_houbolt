@@ -14,7 +14,7 @@
   },
   "CAN" :
   {
-    "node_count" : 1,
+    "node_count" : 3,
     "BUS" :
     {
         "ARBITRATION":
@@ -40,7 +40,8 @@
   },
   "WEBSERVER":
   {
-    "ip": "10.32.7.120",
+    "ip": "127.0.0.1",
+    "ip@hq": "10.32.7.120",
     "ip@home": "192.168.0.213",
     "port": 5555,
     "state_transmission_rate": 10,

@@ -9,7 +9,7 @@
             },
             "1" : {
                 "stringID" : "fuel_main_valve_pos",
-                "slope" : 1.0,
+                "slope" : 0.001525902,
                 "offset" : 0
             },
             "2" : {
@@ -29,7 +29,7 @@
             },
             "5" : {
                 "stringID" : "ox_main_valve_pos",
-                "slope" : 1.0,
+                "slope" : 0.001525902,
                 "offset" : 0
             },
             "6" : {
@@ -96,12 +96,12 @@
                 "offset" : 0
             },
             "6" : {
-                "stringID" : "fuel_top_temp",
+                "stringID" : "fuel_top_tank_temp",
                 "slope" : 1.0,
                 "offset" : 0
             },
             "7" : {
-                "stringID" : "fuel_mid_top_temp",
+                "stringID" : "fuel_mid_top_tank_temp",
                 "slope" : 1.0,
                 "offset" : 0
             },
@@ -116,12 +116,12 @@
                 "offset" : 0
             },
             "10" : {
-                "stringID" : "fuel_bottom_temp",
+                "stringID" : "fuel_bottom_tank_temp",
                 "slope" : 1.0,
                 "offset" : 0
             },
             "11" : {
-                "stringID" : "fuel_mid_bottom_temp",
+                "stringID" : "fuel_mid_bottom_tank_temp",
                 "slope" : 1.0,
                 "offset" : 0
             }
@@ -159,12 +159,12 @@
                 "offset" : 0
             },
             "6" : {
-                "stringID" : "ox_top_temp",
+                "stringID" : "ox_top_tank_temp",
                 "slope" : 1.0,
                 "offset" : 0
             },
             "7" : {
-                "stringID" : "ox_mid_top_temp",
+                "stringID" : "ox_mid_top_tank_temp",
                 "slope" : 1.0,
                 "offset" : 0
             },
@@ -179,12 +179,12 @@
                 "offset" : 0
             },
             "10" : {
-                "stringID" : "ox_bottom_temp",
+                "stringID" : "ox_bottom_tank_temp",
                 "slope" : 1.0,
                 "offset" : 0
             },
             "11" : {
-                "stringID" : "ox_mid_bottom_temp",
+                "stringID" : "ox_mid_bottom_tank_temp",
                 "slope" : 1.0,
                 "offset" : 0
             }
@@ -294,6 +294,22 @@
             "triggerType" : "==",
             "triggerValue" : 1,
             "parameters" : []
+        },
+        "gui:ox_pressurize_solenoid" : {
+            "command" : "ox_pressurize_solenoid:SetState",
+            "parameters" : ["gui:ox_pressurize_solenoid"]
+        },
+        "gui:ox_depressurize_solenoid" : {
+            "command" : "ox_depressurize_solenoid:SetState",
+            "parameters" : ["gui:ox_depressurize_solenoid"]
+        },
+        "gui:igniter_fuel_solenoid" : {
+            "command" : "igniter_fuel_solenoid:SetState",
+            "parameters" : ["gui:igniter_fuel_solenoid"]
+        },
+        "gui:igniter_ox_solenoid" : {
+            "command" : "igniter_ox_solenoid:SetState",
+            "parameters" : ["gui:igniter_ox_solenoid"]
         }
     },
     "GUIMapping" :

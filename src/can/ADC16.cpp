@@ -9,6 +9,7 @@
 
 const std::vector<std::string> ADC16::states =
         {
+            "Measurement",
             "RefreshDivider",
             "Calibrate",
             "RequestStatus",
@@ -17,11 +18,13 @@ const std::vector<std::string> ADC16::states =
 
 const std::map<std::string, std::vector<double>> ADC16::scalingMap =
         {
+            {"Measurement", {1.0, 0.0}},
             {"RefreshDivider", {1.0, 0.0}},
         };
 
 const std::map<ADC16_VARIABLES , std::string> ADC16::variableMap =
         {
+            {ADC16_MEASUREMENT, "Measurement"},
             {ADC16_REFRESH_DIVIDER, "RefreshDivider"},
         };
 
@@ -29,6 +32,8 @@ ADC16::ADC16(uint8_t channelID, std::string channelName, std::vector<double> sen
         : Channel(channelID, std::move(channelName), sensorScaling, parent, ADC16_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {
+        {"SetMeasurement", {std::bind(&ADC16::SetMeasurement, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetMeasurement", {std::bind(&ADC16::GetMeasurement, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetRefreshDivider", {std::bind(&ADC16::SetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetRefreshDivider", {std::bind(&ADC16::GetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"RequestCalibrate", {std::bind(&ADC16::RequestCalibrate, this, std::placeholders::_1, std::placeholders::_2), {}}},
@@ -99,6 +104,34 @@ void ADC16::CalibrateResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength,
 //----------------------------------------------------------------------------//
 //-------------------------------SEND Functions-------------------------------//
 //----------------------------------------------------------------------------//
+
+void ADC16::SetMeasurement(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("Measurement");
+
+    try
+    {
+        SetVariable(ADC16_REQ_SET_VARIABLE, parent->GetNodeID(), ADC16_MEASUREMENT,
+                    scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("ADC16 - SetMeasurement: " + std::string(e.what()));
+    }
+}
+
+void ADC16::GetMeasurement(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(ADC16_REQ_GET_VARIABLE, parent->GetNodeID(), ADC16_MEASUREMENT,
+                    params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("ADC16 - GetMeasurement: " + std::string(e.what()));
+    }
+}
 
 void ADC16::SetRefreshDivider(std::vector<double> &params, bool testOnly)
 {

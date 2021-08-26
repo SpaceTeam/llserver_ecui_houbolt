@@ -7,6 +7,7 @@
 #include <utility>
 #include "can/DigitalOut.h"
 #include "can/ADC16.h"
+#include "can/ADC16Single.h"
 #include "can/ADC24.h"
 #include "can/Servo.h"
 #include "StateController.h"
@@ -109,7 +110,7 @@ void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<st
                     ch = new ADC16(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                     break;
     			case CHANNEL_TYPE_ADC16_SINGLE:
-    				ch = new ADC16(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
+    				ch = new ADC16Single(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
     			    break;
                 case CHANNEL_TYPE_ADC24:
                     ch = new ADC24(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);

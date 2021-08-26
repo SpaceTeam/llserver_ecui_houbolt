@@ -11,6 +11,7 @@ const std::vector<std::string> DigitalOut::states =
             "Frequency",
             "RefreshDivider",
             "RequestStatus",
+            "Measurement",
             "ResetAllSettings"
         };
 
@@ -19,6 +20,7 @@ const std::map<std::string, std::vector<double>> DigitalOut::scalingMap =
             {"State", {1.0, 0.0}},
             {"DutyCycle", {1.0, 0.0}},
             {"Frequency", {1.0, 0.0}},
+            {"Measurement", {1.0, 0.0}},
             {"RefreshDivider", {1.0, 0.0}},
         };
 
@@ -27,6 +29,7 @@ const std::map<DIGITAL_OUT_VARIABLES , std::string> DigitalOut::variableMap =
             {DIGITAL_OUT_STATE, "State"},
             {DIGITAL_OUT_DUTY_CYCLE, "DutyCycle"},
             {DIGITAL_OUT_FREQUENCY, "Frequency"},
+            {DIGITAL_OUT_MEASUREMENT, "Measurement"},
             {DIGITAL_OUT_SENSOR_REFRESH_DIVIDER, "RefreshDivider"},
         };
 
@@ -42,6 +45,8 @@ DigitalOut::DigitalOut(uint8_t channelID, std::string channelName, std::vector<d
         {"GetFrequency", {std::bind(&DigitalOut::GetFrequency, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetRefreshDivider", {std::bind(&DigitalOut::SetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetRefreshDivider", {std::bind(&DigitalOut::GetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetMeasurement", {std::bind(&DigitalOut::SetMeasurement, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetMeasurement", {std::bind(&DigitalOut::GetMeasurement, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"RequestStatus", {std::bind(&DigitalOut::RequestStatus, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"RequestResetSettings", {std::bind(&DigitalOut::RequestResetSettings, this, std::placeholders::_1, std::placeholders::_2), {}}},
     };
@@ -182,6 +187,34 @@ void DigitalOut::GetFrequency(std::vector<double> &params, bool testOnly)
     catch (std::exception &e)
     {
         throw std::runtime_error("DigitalOut - GetFrequency: " + std::string(e.what()));
+    }
+}
+
+void DigitalOut::SetMeasurement(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("Measurement");
+
+    try
+    {
+        SetVariable(DIGITAL_OUT_REQ_SET_VARIABLE, parent->GetNodeID(), DIGITAL_OUT_MEASUREMENT,
+                    scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("ADC16 - SetMeasurement: " + std::string(e.what()));
+    }
+}
+
+void DigitalOut::GetMeasurement(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(DIGITAL_OUT_REQ_GET_VARIABLE, parent->GetNodeID(), DIGITAL_OUT_MEASUREMENT,
+                    params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("ADC16 - GetMeasurement: " + std::string(e.what()));
     }
 }
 
