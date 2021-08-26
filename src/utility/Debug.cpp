@@ -221,7 +221,8 @@ void Debug::log(std::string msg)
     std::lock_guard<std::mutex> lock(outFileMutex);
     logStream << msg;
     if(initialized) {
-        logger->log("Class:Debug", msg, getTime(), DEBUG);
+        //TODO: MP this makes no sense here, since it is only used to write to files in csv format
+        // logger->log("Class:Debug", msg, getTime(), DEBUG);
     }
 
 }
