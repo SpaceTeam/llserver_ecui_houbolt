@@ -9,6 +9,7 @@
 #include <atomic>
 
 #include "LLInterface.h"
+#include "SequenceManager.h"
 #include "utility/Singleton.h"
 
 #include "utility/json.hpp"
@@ -26,6 +27,7 @@ class LLController : public Singleton<LLController>
 private:
 
     LLInterface *llInterface;
+    SequenceManager *seqManager;
 
     std::atomic_bool initialized = false;
 

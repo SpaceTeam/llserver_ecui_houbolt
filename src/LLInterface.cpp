@@ -241,6 +241,11 @@ void LLInterface::FilterSensors(int64_t microTime)
 
 }
 
+std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData()
+{
+    return canManager->GetLatestSensorData();
+}
+
 void LLInterface::StopFilterSensors()
 {
     Debug::print("Stopped Sensor State Timer...");

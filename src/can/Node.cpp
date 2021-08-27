@@ -239,7 +239,7 @@ uint8_t Node::GetCANBusChannelID()
 //TODO: adapt to CanMessageData_t type
 //TODO: add buffer writing
 void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint32_t &canMsgLength,
-                                                 uint64_t &timestamp, RingBuffer<Sensor_t> &buffer)
+                                                 uint64_t &timestamp, bool logSensorData, RingBuffer<Sensor_t> &buffer)
 {
     //TODO: make this more efficient
     if (canMsgLength < 2)

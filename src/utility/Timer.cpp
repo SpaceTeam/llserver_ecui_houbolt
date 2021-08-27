@@ -203,7 +203,15 @@ void Timer::internalContinousLoop(void){
 
         /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
         int64_t sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
-        tickCallback(sequence_time);
+        try
+        {
+            tickCallback(sequence_time);
+        }
+        catch (std::exception &e)
+        {
+            Debug::error("Timer - internalContinousLoop: %s", e.what());
+            break;
+        }
 
 #ifdef ENABLE_TIMER_DIAGNOSTICS
         struct timespec end;
@@ -256,7 +264,23 @@ void Timer::internalLoop(void){
         int64_t sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
 //        printf("SEQTIME: %lld\n", sequence_time);
 
-        tickCallback(sequence_time);
+        try
+        {
+            tickCallback(sequence_time);
+        }
+        catch (std::exception &e)
+        {
+            Debug::error("Timer - internalContinousLoop: %s, aborting Timer...", e.what());
+            try 
+            {
+                stop();
+            }
+            catch (std::exception &e)
+            {
+                Debug::error("Timer - internalContinousLoop: %s, stop callback failed", e.what());
+            }
+            break;
+        }
 
         //get time after callback finished
         clock_gettime(CLOCK_MONOTONIC, &ts_after_callback);

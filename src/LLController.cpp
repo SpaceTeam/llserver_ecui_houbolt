@@ -70,9 +70,11 @@ void LLController::Init(ServerMode serverMode)
         //TODO: new thread with periodic keep alive messages
         Debug::print("Initializing ECUISocket done\n");
 
-    //    Debug::print("Initializing Sequence Manager...");
-    //    SequenceManager::init();
-    //    Debug::print("Initializing Sequence Manager done\n");
+        //TODO: MP maybe move to llInterface
+        Debug::print("Initializing Sequence Manager...");
+        seqManager = SequenceManager::Instance();
+        seqManager->Init();
+        Debug::print("Initializing Sequence Manager done\n");
 
         Debug::printNoTime("----------------------");
         Debug::print("Low-Level Server started!\n");
@@ -123,22 +125,22 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
 
             if (type.compare("sequence-start") == 0)
             {
-                //stop Transmission first
-                llInterface->StopStateTransmission();
+                //TODO: stop Transmission first (from old version, still needed?)
+                // llInterface->StopStateTransmission();
 
                 //send(sock, strmsg.c_str(), strmsg.size(), 0);
                 nlohmann::json seq = msg["content"][0];
                 nlohmann::json abortSeq = msg["content"][1];
-    //            SequenceManager::StartSequence(msg["content"][0], msg["content"][1], msg["content"][2]);
+                seqManager->StartSequence(msg["content"][0], msg["content"][1], msg["content"][2]);
             }
             else if (type.compare("send-postseq-comment") == 0)
             {
-    //            SequenceManager::WritePostSeqComment(msg["content"][0]);
+               seqManager->WritePostSeqComment(msg["content"][0]);
             }
             //TODO: MP Move this logic to state and event manager
             else if (type.compare("abort") == 0)
             {
-    //            SequenceManager::AbortSequence("manual abort");
+               seqManager->AbortSequence("manual abort");
             }
             //TODO: MP probably not even needed
             else if (type.compare("states-load") == 0)
@@ -148,6 +150,11 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             }
             else if (type.compare("states-set") == 0)
             {
+                if (seqManager->IsSequenceRunning())
+                {
+                    //TODO: send error, states-set not allowed when sequence is running
+                    throw std::runtime_error("states-set not allowed when sequence is running");
+                }
                 std::string stateName;
                 double value;
                 uint64_t timestamp;

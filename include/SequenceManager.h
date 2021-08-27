@@ -6,17 +6,14 @@
 #define TXV_ECUI_LLSERVER_SEQUENCEMANAGER_H
 
 #include "common.h"
+
 #include "utility/json.hpp"
-
 #include "utility/Logging.h"
-
-//#include "spdlog/async.h"
-//#include "spdlog/sinks/basic_file_sink.h"
-
 #include "utility/Timer.h"
-#include "driver/I2C.h"
 
-using json = nlohmann::json;
+#include "EventManager.h"
+
+#include "StateController.h"
 
 typedef struct point_s
 {
@@ -30,66 +27,70 @@ typedef enum class interpolation_e
     LINEAR
 } Interpolation;
 
-class SequenceManager
+class SequenceManager : public Singleton<LLInterface>
 {
+    friend class Singleton;
 
 private:
-    static bool isRunning;
-    static bool isAutoAbort;
-    static bool isAbort;
-    static bool isAbortRunning;
-    static Timer* timer;
-    static Timer* sensorTimer;
-    static std::mutex syncMtx;
+    bool isRunning = false;
+    bool isAutoAbort = true;
+    bool isAbort = false;
+    bool isAbortRunning = false;
+
+    std::mutex syncMtx;
+    Timer* timer;
+
+    nlohmann::json jsonSequence = nlohmann::json::object();
+    nlohmann::json jsonAbortSequence = nlohmann::json::object();
+    string comments = "";
+    string currentDirPath = "";
+    string logFileName = "";
+    string lastDir = "";
+
+    std::atomic_bool initialized = false;
 
     //config variables
-    static int32_t sensorTransmissionInterval;
-    static int32_t sensorSampleRate;
-    static int32_t timerSyncInterval;
+    int32_t timerSyncInterval = 0;
     //----
 
-    static nlohmann::json jsonSequence;
-    static nlohmann::json jsonAbortSequence;
-    static std::string comments;
-    static std::string currentDirPath;
-    static std::string logFileName;
-    static std::string lastDir;
+    std::map<std::string, Interpolation> interpolationMap;
+    std::map<int64_t, std::map<std::string, double[2]>> sensorsNominalRangeTimeMap;
+    std::map<std::string, std::map<int64_t, double[2]>> sensorsNominalRangeMap;
+    std::map<std::string, std::map<int64_t, std::vector<double>>> deviceMap;
 
-    static std::map<std::string, Interpolation> interpolationMap;
-    static std::map<int64_t, std::map<std::string, double[2]>> sensorsNominalRangeTimeMap;
-    static std::map<std::string, std::map<int64_t, double[2]>> sensorsNominalRangeMap;
-    static std::map<std::string, std::map<int64_t, double>> deviceMap;
+    LLInterface *llInterface = LLInterface::Instance();
+    EventManager *eventManager = EventManager::Instance();
 
-    static void SetupLogging();
+    void SetupLogging();
 
-    static void LoadInterpolationMap();
-    static bool LoadSequence(nlohmann::json jsonSeq);
+    void LoadInterpolationMap();
+    bool LoadSequence(nlohmann::json jsonSeq);
 
-    static void LogSensors(int64_t microTime, std::vector<double > sensors);
-    static void StopGetSensors();
-    static void GetSensors(int64_t microTime);
+    // void LogSensors(int64_t microTime, std::vector<double > sensors);
+    // void StopGetSensors();
+    void CheckSensors(int64_t microTime);
 
-    static double GetTimestamp(nlohmann::json obj);
-    static void Tick(int64_t microTime);
+    double GetTimestamp(nlohmann::json obj);
+    void Tick(int64_t microTime);
 
-    static void StopAbortSequence();
-    static void StartAbortSequence();
+    void StopAbortSequence();
+    void StartAbortSequence();
 
 
-    static void plotMaps(uint8_t option);
-
-    SequenceManager();
+    void plotMaps(uint8_t option);
 
     ~SequenceManager();
 
 public:
 
-    static void init();
+    void Init();
 
-    static void AbortSequence(std::string abortMsg="abort");
-    static void StopSequence();
-    static void StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments);
-    static void WritePostSeqComment(std::string msg);
+    void AbortSequence(std::string abortMsg="abort");
+    void StopSequence();
+    void StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments);
+    void WritePostSeqComment(std::string msg);
+
+    bool IsSequenceRunning();
 
 };
 

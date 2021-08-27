@@ -11,6 +11,7 @@
 
 #include "driver/Socket.h"
 
+//TODO: turn into singleton
 class EcuiSocket
 {
 

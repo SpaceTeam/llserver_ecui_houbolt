@@ -54,6 +54,8 @@ private:
 	void FilterSensors(int64_t microTime);
 	void StopFilterSensors();
 
+    std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
+
 	void LoadGUIStates();
 
 	static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states);
