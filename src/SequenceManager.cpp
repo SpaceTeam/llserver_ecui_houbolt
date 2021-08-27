@@ -484,7 +484,7 @@ void SequenceManager::Tick(int64_t microTime)
         CheckSensors(microTime);
 
         syncMtx.unlock();
-        Debug::log(msg);
+        Debug::log(msg + "\n");
     }
 }
 
