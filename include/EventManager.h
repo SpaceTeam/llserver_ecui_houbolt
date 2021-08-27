@@ -42,8 +42,6 @@ private:
 
     bool CheckEvents();
 
-    void ExecuteCommand(const std::string &stateName, double value, bool testOnly);
-
     ~EventManager();
 public:
 
@@ -59,6 +57,7 @@ public:
     std::map<std::string, command_t> GetCommands();
     void OnStateChange(const std::string& stateName, double value);
 
+    void ExecuteCommand(const std::string &stateName, double value, bool testOnly);
     void ExecuteCommand(const std::string &commandName, std::vector<double> &params, bool testOnly);
 
 

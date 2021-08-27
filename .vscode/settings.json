@@ -79,6 +79,8 @@
         "complex": "cpp",
         "ios": "cpp",
         "locale": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "codecvt": "cpp",
+        "filesystem": "cpp"
     }
 }

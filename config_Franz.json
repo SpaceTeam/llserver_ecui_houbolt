@@ -40,9 +40,10 @@
   },
   "WEBSERVER":
   {
-    "ip": "127.0.0.1",
+    "ip@local": "127.0.0.1",
     "ip@hq": "10.32.7.120",
     "ip@home": "192.168.0.213",
+    "ip": "10.0.0.6",
     "port": 5555,
     "state_transmission_rate": 10,
     "timer_sync_rate": 10,

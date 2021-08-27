@@ -5,13 +5,24 @@
 // #include <filesystem>
 #include <experimental/filesystem>
 
-#include "SequenceManager.h"
-#include "json.hpp"
-#include "EcuiSocket.h"
+#include "utility/json.hpp"
+#include "utility/utils.h"
+#include "utility/Config.h"
 
-#include "utils.h"
-#include "LLInterface.h"
-#include "Config.h"
+#include "EcuiSocket.h"
+#include "SequenceManager.h"
+
+SequenceManager::~SequenceManager()
+{
+    if (isInitialized)
+    {
+        while (isRunning || isAbortRunning)
+        {
+            Debug::print("wating for sequence to finish...");
+            usleep(100000);
+        }
+    }
+}
 
 void SequenceManager::plotMaps(uint8_t option=2)
 {
@@ -67,11 +78,16 @@ void SequenceManager::plotMaps(uint8_t option=2)
 
 void SequenceManager::Init()
 {
+    llInterface = LLInterface::Instance();
+    eventManager = EventManager::Instance();
+
     timer = new Timer(40, "SequenceTimer");
 
     isAutoAbort = std::get<bool>(Config::getData("autoabort"));
 
     timerSyncInterval = 1000000/std::get<int>(Config::getData("WEBSERVER/timer_sync_rate"));
+
+    isInitialized = true;
 }
 
 
@@ -121,18 +137,18 @@ void SequenceManager::SetupLogging()
 
     strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
 
-    currentDirPath = "logs/" + string(dateTime_string);
+    currentDirPath = "logs/" + std::string(dateTime_string);
     this->lastDir = currentDirPath;
-    logFileName = string(dateTime_string) + ".csv";
-    filesystem::create_directory(currentDirPath);
-    Debug::changeOutputFile(currentDirPath + "/" + string(dateTime_string) + ".csv");
+    logFileName = std::string(dateTime_string) + ".csv";
+    std::experimental::filesystem::create_directory(currentDirPath);
+    Debug::changeOutputFile(currentDirPath + "/" + std::string(dateTime_string) + ".csv");
 
     //save Sequence files
     utils::saveFile(currentDirPath + "/Sequence.json", jsonSequence.dump(4));
     utils::saveFile(currentDirPath + "/AbortSequence.json", jsonAbortSequence.dump(4));
     utils::saveFile(currentDirPath + "/comments.txt", comments);
 
-    filesystem::copy("config_Franz.json", currentDirPath + "/");
+    std::experimental::filesystem::copy("config_Franz.json", currentDirPath + "/");
 
 }
 
@@ -195,7 +211,8 @@ bool SequenceManager::LoadSequence(nlohmann::json jsonSeq)
                 }
                 else
                 {
-                    deviceMap[it.key()][timestampMicros] = it.value();
+                    std::vector<double> parameters = it.value();
+                    deviceMap[it.key()][timestampMicros] = parameters;
                 }
             }
 
@@ -219,6 +236,7 @@ void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonA
 
             //TODO: MP Set warning light here or insert into sequence
 
+            std::string msg;
             //get sensor names
             // std::map<std::string, std::tuple<double, uint64_t>> sensorData = LLInterface::GetLatestSensorData();
             // string msg;
@@ -230,11 +248,11 @@ void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonA
             msg += "SequenceTime;";
             for (auto rangeName : jsonSeq["globals"]["ranges"])
             {
-                Debug::info("Sensor nominal range found: %s", ((string) rangeName).c_str());
+                Debug::info("Sensor nominal range found: %s", ((std::string) rangeName).c_str());
                 if (rangeName.type() == nlohmann::json::value_t::string)
                 {
-                    msg += (string) rangeName + "Min;";
-                    msg += (string) rangeName + "Max;";
+                    msg += (std::string) rangeName + "Min;";
+                    msg += (std::string) rangeName + "Max;";
                 }
                 else
                 {
@@ -273,7 +291,7 @@ void SequenceManager::LoadInterpolationMap()
 {
     for (auto it = jsonSequence["globals"]["interpolation"].begin(); it != jsonSequence["globals"]["interpolation"].end(); ++it)
     {
-        string mode = it.value();
+        std::string mode = it.value();
         if (mode.compare("none") == 0)
         {
             interpolationMap[it.key()] = Interpolation::NONE;
@@ -291,14 +309,6 @@ void SequenceManager::LoadInterpolationMap()
 
 }
 
-void SequenceManager::StopGetSensors()
-{
-    Debug::flush();
-    // execute gnuplot script
-    std::string scriptPath = std::get<std::string>(Config::getData("LOGGING/post_sequence_script"));
-    system((scriptPath + " " + currentDirPath + " " + logFileName).c_str());
-}
-
 void SequenceManager::CheckSensors(int64_t microTime)
 {
     std::map<std::string, std::tuple<double, uint64_t>> sensors = llInterface->GetLatestSensorData();
@@ -308,22 +318,22 @@ void SequenceManager::CheckSensors(int64_t microTime)
         if (isAutoAbort && (sensorsNominalRangeMap.find(sensor.first) != sensorsNominalRangeMap.end()))
         {
             auto currInterval = sensorsNominalRangeMap[sensor.first].begin();
-            double currValue = std::get<0>(sensor.second)
+            double currValue = std::get<0>(sensor.second);
             if (currInterval->second[0] > currValue)
             {
                 std::stringstream stream;
-                stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(currValue) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
-                string abortMsg = stream.str();
+                stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + std::to_string(currValue) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
+                std::string abortMsg = stream.str();
                 if (isRunning)
                 {
                     AbortSequence(abortMsg);
                 }
             }
-            else if (sensor.second > currInterval->second[1])
+            else if (std::get<0>(sensor.second) > currInterval->second[1])
             {
                 std::stringstream stream;
-                stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + to_string(currValue) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
-                string abortMsg = stream.str();
+                stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + std::to_string(currValue) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
+                std::string abortMsg = stream.str();
                 if (isRunning)
                 {
                     AbortSequence(abortMsg);
@@ -342,7 +352,7 @@ double SequenceManager::GetTimestamp(nlohmann::json obj)
     {
         if (obj["timestamp"].type() == nlohmann::json::value_t::string)
         {
-            string timeStr = obj["timestamp"];
+            std::string timeStr = obj["timestamp"];
             if (timeStr.compare("START") == 0)
             {
                 time = jsonSequence["globals"]["startTime"];
@@ -383,19 +393,19 @@ void SequenceManager::Tick(int64_t microTime)
     std::chrono::time_point<std::chrono::high_resolution_clock> beforeLogging;
     if (isRunning)
     {
-        string msg = to_string(microTime / 1000000.0) + ";";
+        std::string msg = std::to_string(microTime / 1000000.0) + ";";
         syncMtx.lock();
         if (isRunning)
         {
             //log nominal ranges
             for (const auto sensor : sensorsNominalRangeMap)
             {
-                msg += to_string(sensor.second.begin()->second[0]) + ";";
-                msg += to_string(sensor.second.begin()->second[1]) + ";";
+                msg += std::to_string(sensor.second.begin()->second[0]) + ";";
+                msg += std::to_string(sensor.second.begin()->second[1]) + ";";
             }
 
             bool shallExec;
-            std::vector<double> &nextValue = {0};
+            std::vector<double> nextValue = {0};
 
             for (const auto &devItem : deviceMap)
             {
@@ -427,13 +437,14 @@ void SequenceManager::Tick(int64_t microTime)
                         {
                             case Interpolation::LINEAR:
                             {
+                                nextValue = prevIt->second;
                                 double scale = ((nextIt->second[0] - prevIt->second[0]) * 1.0) / (nextIt->first - prevIt->first);
-                                nextValue = (scale * (microTime - prevIt->first)) + prevIt->second[0];
+                                nextValue[0] = (scale * (microTime - prevIt->first)) + prevIt->second[0];
                                 break;
                             }
                             case Interpolation::NONE:
                             default:
-                                nextValue = prevIt->second[0];
+                                nextValue = prevIt->second;
                                 shallExec = false;
                         }
                     }
@@ -470,7 +481,7 @@ void SequenceManager::Tick(int64_t microTime)
             }
         }
 
-        CheckSensors(microTime)
+        CheckSensors(microTime);
 
         syncMtx.unlock();
         Debug::log(msg);

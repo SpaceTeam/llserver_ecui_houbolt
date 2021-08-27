@@ -241,7 +241,7 @@ void LLInterface::FilterSensors(int64_t microTime)
 
 }
 
-std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData()
+std::map<std::string, std::tuple<double, uint64_t>> LLInterface::GetLatestSensorData()
 {
     return canManager->GetLatestSensorData();
 }

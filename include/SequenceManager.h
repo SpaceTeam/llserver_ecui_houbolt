@@ -6,11 +6,13 @@
 #define TXV_ECUI_LLSERVER_SEQUENCEMANAGER_H
 
 #include "common.h"
+#include <atomic>
 
 #include "utility/json.hpp"
 #include "utility/Logging.h"
 #include "utility/Timer.h"
 
+#include "LLInterface.h"
 #include "EventManager.h"
 
 #include "StateController.h"
@@ -27,7 +29,7 @@ typedef enum class interpolation_e
     LINEAR
 } Interpolation;
 
-class SequenceManager : public Singleton<LLInterface>
+class SequenceManager : public Singleton<SequenceManager>
 {
     friend class Singleton;
 
@@ -42,12 +44,13 @@ private:
 
     nlohmann::json jsonSequence = nlohmann::json::object();
     nlohmann::json jsonAbortSequence = nlohmann::json::object();
-    string comments = "";
-    string currentDirPath = "";
-    string logFileName = "";
-    string lastDir = "";
 
-    std::atomic_bool initialized = false;
+    std::string comments = "";
+    std::string currentDirPath = "";
+    std::string logFileName = "";
+    std::string lastDir = "";
+
+    std::atomic_bool isInitialized = false;
 
     //config variables
     int32_t timerSyncInterval = 0;
@@ -58,16 +61,14 @@ private:
     std::map<std::string, std::map<int64_t, double[2]>> sensorsNominalRangeMap;
     std::map<std::string, std::map<int64_t, std::vector<double>>> deviceMap;
 
-    LLInterface *llInterface = LLInterface::Instance();
-    EventManager *eventManager = EventManager::Instance();
+    LLInterface *llInterface = nullptr;
+    EventManager *eventManager = nullptr;
 
     void SetupLogging();
 
     void LoadInterpolationMap();
     bool LoadSequence(nlohmann::json jsonSeq);
 
-    // void LogSensors(int64_t microTime, std::vector<double > sensors);
-    // void StopGetSensors();
     void CheckSensors(int64_t microTime);
 
     double GetTimestamp(nlohmann::json obj);
