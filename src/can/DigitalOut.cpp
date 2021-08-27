@@ -90,7 +90,8 @@ void DigitalOut::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLe
             case DIGITAL_OUT_REQ_STATUS:
             case DIGITAL_OUT_REQ_SET_VARIABLE:
             case DIGITAL_OUT_REQ_GET_VARIABLE:
-                throw std::runtime_error("request message type has been received, major fault in protocol");
+                //TODO: comment out after testing
+                //throw std::runtime_error("request message type has been received, major fault in protocol");
                 break;
             default:
                 throw std::runtime_error("DigitalOut specific command with command id not supported: " + std::to_string(canMsg->bit.cmd_id));

@@ -17,7 +17,7 @@
 sig_atomic_t running = 1;
 sig_atomic_t signum = 0;
 
-//#define TEST_LLSERVER
+// #define TEST_LLSERVER
 
 #ifdef TEST_LLSERVER
 #include <thread>
@@ -55,9 +55,10 @@ void testFnc()
     msg.bit.cmd_id = GENERIC_RES_NODE_INFO;
     NodeInfoMsg_t *info = (NodeInfoMsg_t *)msg.bit.data.uint8;
     info->firmware_version = 10000;
-    info->channel_mask = 0x0000000A;
+    info->channel_mask = 0x0000000D;
     info->channel_type[0] = CHANNEL_TYPE_ADC24;
-    info->channel_type[1] = CHANNEL_TYPE_ADC16;
+    // info->channel_type[1] = CHANNEL_TYPE_ADC16;
+    info->channel_type[1] = CHANNEL_TYPE_DIGITAL_OUT;
     info->channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
     Can_MessageId_t canID = {0};
     canID.info.direction = 0;
@@ -78,7 +79,7 @@ void testFnc()
     msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
     msg.bit.cmd_id = GENERIC_RES_DATA;
     SensorMsg_t sensorMsg = {0};
-    sensorMsg.channel_mask = 0x0000000A;
+    sensorMsg.channel_mask = 0x0000000D;
 
     Can_MessageId_t dataCanID = {0};
     dataCanID.info.direction = 0;
@@ -93,11 +94,13 @@ void testFnc()
         sensorMsg.channel_data[0] = 0x20;
         sensorMsg.channel_data[1] = 0x00;
         sensorMsg.channel_data[2] = counter;
-        //adc 16
+        //digital out
         sensorMsg.channel_data[3] = counter;
         sensorMsg.channel_data[4] = 0x04;
+        sensorMsg.channel_data[3] = counter;
+        sensorMsg.channel_data[4] = 0x00;
         std::copy_n((uint8_t*)&sensorMsg.channel_mask, 4, msg.bit.data.uint8);
-        std::copy_n(sensorMsg.channel_data, 5, &msg.bit.data.uint8[4]);
+        std::copy_n(sensorMsg.channel_data, 7, &msg.bit.data.uint8[4]);
 
         manager->OnCANRecv(0, dataCanID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
         std::this_thread::sleep_for(100ms);
@@ -219,6 +222,11 @@ int main(int argc, char const *argv[])
         {
             serverMode = ServerMode::SMALL_OXFILL;
             printf("Using Small Oxfill Profile...\n");
+        }
+        else if (strcmp(argv[1],"--test") == 0)
+        {
+            serverMode = ServerMode::TEST;
+            printf("Using Franz test Profile...\n");
         }
         else
         {

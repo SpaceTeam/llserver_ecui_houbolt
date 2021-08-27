@@ -40,6 +40,9 @@ void LLController::Init(ServerMode serverMode)
             case ServerMode::SMALL_OXFILL:
                 configPath = "config_small_oxfill.json";
                 break;
+            case ServerMode::TEST:
+                configPath = "config_Franz_test.json";
+                break;
             case ServerMode::LARGE_TESTSTAND:
                 configPath = "config_Franz.json";
                 break;

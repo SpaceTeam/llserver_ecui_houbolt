@@ -18,7 +18,8 @@ enum ServerMode
 {
 	LARGE_TESTSTAND,
 	SMALL_TESTSTAND,
-	SMALL_OXFILL
+	SMALL_OXFILL,
+    TEST
 };
 
 class LLController : public Singleton<LLController>
