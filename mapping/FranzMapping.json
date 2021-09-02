@@ -23,7 +23,7 @@
                 "offset" : 0
             },
             "4" : {
-                "stringID" : "ox_main_pressure",
+                "stringID" : "pneumatic_switch",
                 "slope" : 1.0,
                 "offset" : 0
             },
@@ -43,12 +43,12 @@
                 "offset" : 0
             },
             "8" : {
-                "stringID" : "pneumatic_switch",
+                "stringID" : "purge_ox_solenoid",
                 "slope" : 1.0,
                 "offset" : 0
             },
             "9" : {
-                "stringID" : "igniter_fuel_solenoid",
+                "stringID" : "purge_fuel_solenoid",
                 "slope" : 1.0,
                 "offset" : 0
             },
@@ -58,7 +58,7 @@
                 "offset" : 0
             },
             "11" : {
-                "stringID" : "purge_solenoid",
+                "stringID" : "igniter_fuel_solenoid",
                 "slope" : 1.0,
                 "offset" : 0
             }
@@ -303,6 +303,14 @@
             "command" : "ox_depressurize_solenoid:SetState",
             "parameters" : ["gui:ox_depressurize_solenoid"]
         },
+        "gui:fuel_pressurize_solenoid" : {
+            "command" : "fuel_pressurize_solenoid:SetState",
+            "parameters" : ["gui:fuel_pressurize_solenoid"]
+        },
+        "gui:fuel_depressurize_solenoid" : {
+            "command" : "fuel_depressurize_solenoid:SetState",
+            "parameters" : ["gui:fuel_depressurize_solenoid"]
+        },
         "gui:igniter_fuel_solenoid" : {
             "command" : "igniter_fuel_solenoid:SetState",
             "parameters" : ["gui:igniter_fuel_solenoid"]
@@ -327,11 +335,11 @@
             "label" : "Fuel Main Pos"
 		},
         {
-            "state" : "fuel_main_valve_off:state",
+            "state" : "fuel_main_valve_off:sensor",
             "label" : "Fuel Main Off"
 		},
         {
-            "state" : "fuel_main_valve_on:state",
+            "state" : "fuel_main_valve_on:sensor",
             "label" : "Fuel Main On"
 		},
         {
@@ -343,28 +351,32 @@
             "label" : "Ox Main Pos"
 		},
         {
-            "state" : "ox_main_valve_off:state",
+            "state" : "ox_main_valve_off:sensor",
             "label" : "Ox Main Off"
 		},
         {
-            "state" : "ox_main_valve_on:state",
+            "state" : "ox_main_valve_on:sensor",
             "label" : "Ox Main On"
 		},
         {
-            "state" : "pneumatic_switch:state",
+            "state" : "pneumatic_switch:sensor",
             "label" : "Pneumatic On/Off"
 		},
         {
-            "state" : "igniter_fuel_solenoid:state",
+            "state" : "igniter_fuel_solenoid:sensor",
             "label" : "Igniter Fuel"
 		},
         {
-            "state" : "igniter_ox_solenoid:state",
+            "state" : "igniter_ox_solenoid:sensor",
             "label" : "Igniter Ox"
 		},
         {
-            "state" : "purge_solenoid:state",
-            "label" : "Purge"
+            "state" : "purge_ox_solenoid:sensor",
+            "label" : "Purge Ox"
+		},
+        {
+            "state" : "purge_fuel_solenoid:sensor",
+            "label" : "Purge Fuel"
 		},
         {
             "state" : "fuel_top_tank_pressure:sensor",
@@ -375,11 +387,11 @@
             "label" : "Fuel Press Bottle"
 		},
         {
-            "state" : "fuel_depressurize_solenoid:state",
+            "state" : "fuel_depressurize_solenoid:sensor",
             "label" : "Fuel Depress"
 		},
         {
-            "state" : "fuel_pressurize_solenoid:state",
+            "state" : "fuel_pressurize_solenoid:sensor",
             "label" : "Fuel Press"
 		},
         {
@@ -423,11 +435,11 @@
             "label" : "Ox Press Bottle"
 		},
         {
-            "state" : "ox_depressurize_solenoid:state",
+            "state" : "ox_depressurize_solenoid:sensor",
             "label" : "Ox Depress"
 		},
         {
-            "state" : "ox_pressurize_solenoid:state",
+            "state" : "ox_pressurize_solenoid:sensor",
             "label" : "Ox Press"
 		},
         {
