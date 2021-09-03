@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <thread>
+#include <future>
 #include <utility>
 #include <bus_params_tq.h>
 
@@ -77,15 +78,23 @@ CANResult CANManager::Init()
             //TODO: wait for user input or expected node count to continue
             int32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
             uint32_t currNodeCount = 0;
+
+            bool canceled = false;
+            bool abort = false;
+            std::future<bool> future = std::async([](){
+                    std::cin.get();
+                    return true;
+                });
             do {
-                std::this_thread::sleep_for(100ms);
+                Debug::print("Waiting for nodes %d of %d, press enter to continue...", currNodeCount, nodeCount);
+                if (future.wait_for(100ms) == std::future_status::ready)
+                    canceled = true;
                 nodeMapMtx.lock();
                 currNodeCount = nodeMap.size();
                 nodeMapMtx.unlock();
-                Debug::print("Waiting for nodes... %d of %d", currNodeCount, nodeCount);
             }
-            while(currNodeCount < nodeCount);
-            Debug::print("Initialized all nodes\n");
+            while((currNodeCount < nodeCount) && !canceled);
+            Debug::print("Initialized all nodes, press enter to continue...\n");
             canDriver->InitDone();
 
 
@@ -168,6 +177,12 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
         if (canMsg->bit.info.channel_id == GENERIC_CHANNEL_ID && canMsg->bit.cmd_id == GENERIC_RES_NODE_INFO)
         {
             uint8_t nodeID = canIDStruct->info.node_id;
+
+            if (nodeMap.find(nodeID) != nodeMap.end())
+            {
+                std::runtime_error("Node already initialized, possible logic error on hardware or in software, ignoring node info msg...");
+            }
+
             CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
 
             NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *) &canMsg->bit.data.uint8;
@@ -206,6 +221,8 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
             //add available commands to event manager
             EventManager *eventManager = EventManager::Instance();
             eventManager->AddCommands(node->GetCommands());
+
+            Debug::print("Node %s with ID %d on CAN Bus %d detected", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID);
         }
     }
     catch (std::runtime_error &e)

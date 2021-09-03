@@ -21,7 +21,7 @@ CANMappingObj CANMapping::GetNodeObj(uint8_t &nodeID)
     try
     {
         nodeObj = this->mapping[std::to_string(nodeID)];
-        Debug::print(nodeObj.dump(4));
+        Debug::info(nodeObj.dump(4));
         mappingObj.stringID = nodeObj["stringID"];
         mappingObj.slope = 1;
         mappingObj.offset = 0;
@@ -41,7 +41,7 @@ CANMappingObj CANMapping::GetChannelObj(uint8_t &nodeID, uint8_t &channelID)
     try
     {
         channelObj = this->mapping[std::to_string(nodeID)][std::to_string(channelID)];
-        Debug::print(channelObj.dump(4));
+        Debug::info(channelObj.dump(4));
         mappingObj.stringID = channelObj["stringID"];
         mappingObj.slope = channelObj["slope"];
         mappingObj.offset = channelObj["offset"];
