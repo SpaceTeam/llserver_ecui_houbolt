@@ -80,7 +80,6 @@ CANResult CANManager::Init()
             uint32_t currNodeCount = 0;
 
             bool canceled = false;
-            bool abort = false;
             std::future<bool> future = std::async([](){
                     std::cin.get();
                     return true;
@@ -94,6 +93,23 @@ CANResult CANManager::Init()
                 nodeMapMtx.unlock();
             }
             while((currNodeCount < nodeCount) && !canceled);
+            Debug::print("Check for version differences...\n");
+            std::vector<uint32_t> versions;
+            nodeMapMtx.lock();
+            for (auto& node : nodeMap)
+            {
+                uint32_t currFirmwareVersion = node.second->GetFirmwareVersion();
+                if (std::find(versions.begin(), versions.end(), currFirmwareVersion) == versions.end())
+                {
+                    Debug::print("Version: 0x%08x", currFirmwareVersion);
+                    versions.push_back(currFirmwareVersion);
+                }
+            }
+            if (versions.size() > 1)
+            {
+                std::runtime_error("Multiple Versions Found!");
+            }
+            nodeMapMtx.unlock();
             Debug::print("Initialized all nodes, press enter to continue...\n");
             canDriver->InitDone();
 
@@ -222,7 +238,7 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
             EventManager *eventManager = EventManager::Instance();
             eventManager->AddCommands(node->GetCommands());
 
-            Debug::print("Node %s with ID %d on CAN Bus %d detected", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID);
+            Debug::print("Node %s with ID %d on CAN Bus %d detected\n\t\t\tfirmware version 0x%08x", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID, node->GetFirmwareVersion());
         }
     }
     catch (std::runtime_error &e)

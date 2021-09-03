@@ -59,7 +59,7 @@ const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
  */
 
 Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
-    : nodeID(nodeID), driver(driver), Channel::Channel(0xFF, std::move(nodeChannelName), {1.0, 0.0}, this)
+    : nodeID(nodeID), firwareVersion(nodeInfo.firmware_version), canBusChannelID(canBusChannelID), driver(driver), Channel::Channel(0xFF, std::move(nodeChannelName), {1.0, 0.0}, this)
 {
     commandMap = {
         {"SetBus1Voltage", {std::bind(&Node::SetBus1Voltage, this, std::placeholders::_1, std::placeholders::_2),{"Value"}}},
@@ -82,7 +82,6 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
         {"RequestResetAllSettings", {std::bind(&Node::RequestResetAllSettings, this, std::placeholders::_1, std::placeholders::_2),{}}},
     };
 
-    this->canBusChannelID = canBusChannelID;
     InitChannels(nodeInfo, channelInfo);
     //init latest sensor buffer with largest channel id
     latestSensorBufferLength = channelMap.rbegin()->first + 1;
@@ -225,6 +224,11 @@ std::map<std::string, command_t> Node::GetCommands()
 uint8_t Node::GetNodeID()
 {
     return nodeID;
+}
+
+uint32_t Node::GetFirmwareVersion()
+{
+    return firwareVersion;
 }
 
 CANDriver *Node::GetCANDriver()

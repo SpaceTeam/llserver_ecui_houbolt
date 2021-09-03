@@ -52,6 +52,7 @@ private:
 private:
     uint8_t canBusChannelID;
 	uint8_t nodeID;
+    uint32_t firwareVersion;
 	std::map<uint8_t, Channel *> channelMap;
     CANDriver* driver;
     SensorData_t *latestSensorBuffer;
@@ -73,6 +74,7 @@ public:
 	//-------------------------------GETTER & SETTER Functions-------------------------------//
 
 	uint8_t GetNodeID();
+    uint32_t GetFirmwareVersion();
 	CANDriver *GetCANDriver();
 	uint8_t GetCANBusChannelID();
 

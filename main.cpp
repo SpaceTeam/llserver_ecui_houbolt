@@ -54,7 +54,7 @@ void testFnc()
     msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
     msg.bit.cmd_id = GENERIC_RES_NODE_INFO;
     NodeInfoMsg_t *info = (NodeInfoMsg_t *)msg.bit.data.uint8;
-    info->firmware_version = 10000;
+    info->firmware_version = 0xafb32dac;
     info->channel_mask = 0x0000001F;
     info->channel_type[0] = CHANNEL_TYPE_ADC24;
     // info->channel_type[1] = CHANNEL_TYPE_ADC16;
