@@ -17,7 +17,7 @@
 sig_atomic_t running = 1;
 sig_atomic_t signum = 0;
 
-#define TEST_LLSERVER
+//#define TEST_LLSERVER
 
 #ifdef TEST_LLSERVER
 #include <thread>
@@ -55,12 +55,13 @@ void testFnc()
     msg.bit.cmd_id = GENERIC_RES_NODE_INFO;
     NodeInfoMsg_t *info = (NodeInfoMsg_t *)msg.bit.data.uint8;
     info->firmware_version = 10000;
-    info->channel_mask = 0x0000000F;
+    info->channel_mask = 0x0000001F;
     info->channel_type[0] = CHANNEL_TYPE_ADC24;
     // info->channel_type[1] = CHANNEL_TYPE_ADC16;
     info->channel_type[1] = CHANNEL_TYPE_DIGITAL_OUT;
     info->channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
     info->channel_type[3] = CHANNEL_TYPE_SERVO;
+    info->channel_type[4] = CHANNEL_TYPE_PNEUMATIC_VALVE;
     Can_MessageId_t canID = {0};
     canID.info.direction = 0;
     canID.info.priority = STANDARD_PRIORITY;
@@ -80,7 +81,7 @@ void testFnc()
     msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
     msg.bit.cmd_id = GENERIC_RES_DATA;
     SensorMsg_t sensorMsg = {0};
-    sensorMsg.channel_mask = 0x0000000D;
+    sensorMsg.channel_mask = 0x0000001D;
 
     Can_MessageId_t dataCanID = {0};
     dataCanID.info.direction = 0;
@@ -98,10 +99,14 @@ void testFnc()
         //digital out
         sensorMsg.channel_data[3] = counter;
         sensorMsg.channel_data[4] = 0x04;
-        sensorMsg.channel_data[3] = counter;
-        sensorMsg.channel_data[4] = 0x00;
+        sensorMsg.channel_data[5] = counter;
+        sensorMsg.channel_data[6] = 0x00;
+        sensorMsg.channel_data[7] = 0x00;
+        sensorMsg.channel_data[8] = 0x00;
+        sensorMsg.channel_data[9] = counter;
+        sensorMsg.channel_data[10] = 0xA0;
         std::copy_n((uint8_t*)&sensorMsg.channel_mask, 4, msg.bit.data.uint8);
-        std::copy_n(sensorMsg.channel_data, 7, &msg.bit.data.uint8[4]);
+        std::copy_n(sensorMsg.channel_data, 11, &msg.bit.data.uint8[4]);
 
         manager->OnCANRecv(0, dataCanID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
         std::this_thread::sleep_for(100ms);

@@ -40,10 +40,10 @@
   },
   "WEBSERVER":
   {
-    "ip@home": "192.168.0.213",
-    "ip": "10.0.0.29",
+    "ip": "192.168.0.213",
+    "ip@liwoe": "10.0.0.29",
     "port": 5555,
-    "state_transmission_rate": 10,
+    "state_transmission_rate": 2,
     "timer_sync_rate": 10,
     "sensors_smoothing_factor": 0.3
   },
