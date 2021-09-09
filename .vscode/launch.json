@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/llserver_ecui_houbolt",
-            "args": [],
+            "args": ["--test"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

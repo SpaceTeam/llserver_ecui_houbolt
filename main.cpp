@@ -17,7 +17,7 @@
 sig_atomic_t running = 1;
 sig_atomic_t signum = 0;
 
-#define TEST_LLSERVER
+//#define TEST_LLSERVER
 
 #ifdef TEST_LLSERVER
 #include <thread>
@@ -60,7 +60,7 @@ void testFnc()
     // info->channel_type[1] = CHANNEL_TYPE_ADC16;
     info->channel_type[1] = CHANNEL_TYPE_DIGITAL_OUT;
     info->channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
-    info->channel_type[3] = CHANNEL_TYPE_SERVO;
+    info->channel_type[3] = CHANNEL_TYPE_DIGITAL_OUT;
     info->channel_type[4] = CHANNEL_TYPE_PNEUMATIC_VALVE;
     Can_MessageId_t canID = {0};
     canID.info.direction = 0;

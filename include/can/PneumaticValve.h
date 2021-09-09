@@ -30,20 +30,20 @@ public:
 
     //-------------------------------SEND Functions-------------------------------//
 
+    void SetEnabled(std::vector<double> &params, bool testOnly);
+	void GetEnabled(std::vector<double> &params, bool testOnly);
+
 	void SetPosition(std::vector<double> &params, bool testOnly);
 	void GetPosition(std::vector<double> &params, bool testOnly);
 
     void SetTargetPosition(std::vector<double> &params, bool testOnly);
 	void GetTargetPosition(std::vector<double> &params, bool testOnly);
 
-    void SetP(std::vector<double> &params, bool testOnly);
-	void GetP(std::vector<double> &params, bool testOnly);
+    void SetThreshold(std::vector<double> &params, bool testOnly);
+	void GetThreshold(std::vector<double> &params, bool testOnly);
 
-    void SetI(std::vector<double> &params, bool testOnly);
-	void GetI(std::vector<double> &params, bool testOnly);
-
-    void SetD(std::vector<double> &params, bool testOnly);
-	void GetD(std::vector<double> &params, bool testOnly);
+    void SetHysteresis(std::vector<double> &params, bool testOnly);
+	void GetHysteresis(std::vector<double> &params, bool testOnly);
 
     void SetOnChannelID(std::vector<double> &params, bool testOnly);
 	void GetOnChannelID(std::vector<double> &params, bool testOnly);
@@ -59,8 +59,6 @@ public:
 
 	void RequestStatus(std::vector<double> &params, bool testOnly) override;
 	void RequestResetSettings(std::vector<double> &params, bool testOnly) override;
-
-    void RequestMove(std::vector<double> &params, bool testOnly);
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_PNEUMATIC_VALVE_H
