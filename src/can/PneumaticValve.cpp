@@ -6,11 +6,11 @@
 
 const std::vector<std::string> PneumaticValve::states =
         {
+            "Enabled",
             "Position",
             "TargetPosition",
-            "P",
-            "I",
-            "D",
+            "Threshold",
+            "Hysteresis",
             "OnChannelID",
             "OffChannelID",
             "PosChannelID",
@@ -21,11 +21,11 @@ const std::vector<std::string> PneumaticValve::states =
 
 const std::map<std::string, std::vector<double>> PneumaticValve::scalingMap =
         {
+            {"Enabled", {1.0, 0.0}},
             {"Position", {1.0, 0.0}},
             {"TargetPosition", {1.0, 0.0}},
-            {"P", {1.0, 0.0}},
-            {"I", {1.0, 0.0}},
-            {"D", {1.0, 0.0}},
+            {"Threshold", {1.0, 0.0}},
+            {"Hysteresis", {1.0, 0.0}},
             {"OnChannelID", {1.0, 0.0}},
             {"OffChannelID", {1.0, 0.0}},
             {"PosChannelID", {1.0, 0.0}},
@@ -36,11 +36,11 @@ const std::map<std::string, std::vector<double>> PneumaticValve::scalingMap =
 
 const std::map<PNEUMATIC_VALVE_VARIABLES , std::string> PneumaticValve::variableMap =
         {
+            {PNEUMATIC_VALVE_ENABLED, "Enabled"},
             {PNEUMATIC_VALVE_POSITION, "Position"},
             {PNEUMATIC_VALVE_TARGET_POSITION, "TargetPosition"},
-            {PNEUMATIC_VALVE_P_PARAM, "P"},
-            {PNEUMATIC_VALVE_I_PARAM, "I"},
-            {PNEUMATIC_VALVE_D_PARAM, "D"},
+            {PNEUMATIC_VALVE_THRESHOLD, "Threshold"},
+            {PNEUMATIC_VALVE_HYSTERESIS, "Hysteresis"},
             {PNEUMATIC_VALVE_ON_CHANNEL_ID, "OnChannelID"},
             {PNEUMATIC_VALVE_OFF_CHANNEL_ID, "OffChannelID"},
             {PNEUMATIC_VALVE_POS_CHANNEL_ID, "PosChannelID"},
@@ -51,16 +51,16 @@ PneumaticValve::PneumaticValve(uint8_t channelID, std::string channelName, std::
         : Channel(channelID, std::move(channelName), sensorScaling, parent, PNEUMATIC_VALVE_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {
+        {"SetEnabled", {std::bind(&PneumaticValve::SetEnabled, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetEnabled", {std::bind(&PneumaticValve::GetEnabled, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetPosition", {std::bind(&PneumaticValve::SetPosition, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetPosition", {std::bind(&PneumaticValve::GetPosition, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetTargetPosition", {std::bind(&PneumaticValve::SetTargetPosition, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetTargetPosition", {std::bind(&PneumaticValve::GetTargetPosition, this, std::placeholders::_1, std::placeholders::_2), {}}},
-        {"SetP", {std::bind(&PneumaticValve::SetP, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
-        {"GetP", {std::bind(&PneumaticValve::GetP, this, std::placeholders::_1, std::placeholders::_2), {}}},
-        {"SetI", {std::bind(&PneumaticValve::SetI, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
-        {"GetI", {std::bind(&PneumaticValve::GetI, this, std::placeholders::_1, std::placeholders::_2), {}}},
-        {"SetD", {std::bind(&PneumaticValve::SetD, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
-        {"GetD", {std::bind(&PneumaticValve::GetD, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetThreshold", {std::bind(&PneumaticValve::SetThreshold, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetThreshold", {std::bind(&PneumaticValve::GetThreshold, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetHysteresis", {std::bind(&PneumaticValve::SetHysteresis, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetHysteresis", {std::bind(&PneumaticValve::GetHysteresis, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetOnChannelID", {std::bind(&PneumaticValve::SetOnChannelID, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetOnChannelID", {std::bind(&PneumaticValve::GetOnChannelID, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetOffChannelID", {std::bind(&PneumaticValve::SetOffChannelID, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
@@ -130,6 +130,34 @@ void PneumaticValve::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canM
 //-------------------------------SEND Functions-------------------------------//
 //----------------------------------------------------------------------------//
 
+void PneumaticValve::SetEnabled(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("Enabled");
+
+    try
+    {
+        SetVariable(PNEUMATIC_VALVE_REQ_SET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_ENABLED,
+                    scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("PneumaticValve - SetEnabled: " + std::string(e.what()));
+    }
+}
+
+void PneumaticValve::GetEnabled(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(PNEUMATIC_VALVE_REQ_GET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_ENABLED,
+                    params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("PneumaticValve - GetEnabled: " + std::string(e.what()));
+    }
+}
+
 void PneumaticValve::SetPosition(std::vector<double> &params, bool testOnly)
 {
     std::vector<double> scalingParams = scalingMap.at("Position");
@@ -186,87 +214,59 @@ void PneumaticValve::GetTargetPosition(std::vector<double> &params, bool testOnl
     }
 }
 
-void PneumaticValve::SetP(std::vector<double> &params, bool testOnly)
+void PneumaticValve::SetThreshold(std::vector<double> &params, bool testOnly)
 {
-    std::vector<double> scalingParams = scalingMap.at("P");
+    std::vector<double> scalingParams = scalingMap.at("Threshold");
 
     try
     {
-        SetVariable(PNEUMATIC_VALVE_REQ_SET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_P_PARAM,
+        SetVariable(PNEUMATIC_VALVE_REQ_SET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_THRESHOLD,
                     scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("PneumaticValve - SetP: " + std::string(e.what()));
+        throw std::runtime_error("PneumaticValve - SetThreshold: " + std::string(e.what()));
     }
 }
 
-void PneumaticValve::GetP(std::vector<double> &params, bool testOnly)
+void PneumaticValve::GetThreshold(std::vector<double> &params, bool testOnly)
 {
     try
     {
-        GetVariable(PNEUMATIC_VALVE_REQ_GET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_P_PARAM,
+        GetVariable(PNEUMATIC_VALVE_REQ_GET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_THRESHOLD,
                     params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("PneumaticValve - GetP: " + std::string(e.what()));
+        throw std::runtime_error("PneumaticValve - GetThreshold: " + std::string(e.what()));
     }
 }
 
-void PneumaticValve::SetI(std::vector<double> &params, bool testOnly)
+void PneumaticValve::SetHysteresis(std::vector<double> &params, bool testOnly)
 {
-    std::vector<double> scalingParams = scalingMap.at("I");
+    std::vector<double> scalingParams = scalingMap.at("Hysteresis");
 
     try
     {
-        SetVariable(PNEUMATIC_VALVE_REQ_SET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_I_PARAM,
+        SetVariable(PNEUMATIC_VALVE_REQ_SET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_HYSTERESIS,
                     scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("PneumaticValve - SetI: " + std::string(e.what()));
+        throw std::runtime_error("PneumaticValve - SetHysteresis: " + std::string(e.what()));
     }
 }
 
-void PneumaticValve::GetI(std::vector<double> &params, bool testOnly)
+void PneumaticValve::GetHysteresis(std::vector<double> &params, bool testOnly)
 {
     try
     {
-        GetVariable(PNEUMATIC_VALVE_REQ_GET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_I_PARAM,
+        GetVariable(PNEUMATIC_VALVE_REQ_GET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_HYSTERESIS,
                     params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("PneumaticValve - GetI: " + std::string(e.what()));
-    }
-}
-
-void PneumaticValve::SetD(std::vector<double> &params, bool testOnly)
-{
-    std::vector<double> scalingParams = scalingMap.at("D");
-
-    try
-    {
-        SetVariable(PNEUMATIC_VALVE_REQ_SET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_D_PARAM,
-                    scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
-    }
-    catch (std::exception &e)
-    {
-        throw std::runtime_error("PneumaticValve - SetD: " + std::string(e.what()));
-    }
-}
-
-void PneumaticValve::GetD(std::vector<double> &params, bool testOnly)
-{
-    try
-    {
-        GetVariable(PNEUMATIC_VALVE_REQ_GET_VARIABLE, parent->GetNodeID(), PNEUMATIC_VALVE_D_PARAM,
-                    params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
-    }
-    catch (std::exception &e)
-    {
-        throw std::runtime_error("PneumaticValve - GetD: " + std::string(e.what()));
+        throw std::runtime_error("PneumaticValve - GetHysteresis: " + std::string(e.what()));
     }
 }
 
@@ -379,29 +379,6 @@ void PneumaticValve::GetRefreshDivider(std::vector<double> &params, bool testOnl
     catch (std::exception &e)
     {
         throw std::runtime_error("PneumaticValve - GetRefreshDivider: " + std::string(e.what()));
-    }
-}
-
-void PneumaticValve::RequestMove(std::vector<double> &params, bool testOnly)
-{
-    try
-    {
-        if (params.size() != 2) //number of required parameters
-        {
-            throw std::runtime_error("2 parameters expected, but " + std::to_string(params.size()) + " were provided");
-        }
-        std::vector<double> scalingPosition = scalingMap.at("MovePosition");
-        std::vector<double> scalingInterval = scalingMap.at("MoveInterval");
-
-        PneumaticValveMoveMsg_t moveMsg = {0};
-        moveMsg.position = Channel::ScaleAndConvertInt32(params[0],scalingPosition[0],scalingPosition[1]);
-        moveMsg.interval = Channel::ScaleAndConvertInt32(params[1],scalingInterval[0],scalingInterval[1]);
-
-        SendStandardCommand(parent->GetNodeID(), PNEUMATIC_VALVE_REQ_MOVE, (uint8_t *) &moveMsg, sizeof(moveMsg), parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
-    }
-    catch (std::exception &e)
-    {
-        throw std::runtime_error("PneumaticValve - RequestMove: " + std::string(e.what()));
     }
 }
 
