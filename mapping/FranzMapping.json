@@ -287,48 +287,52 @@
         }
     },
     "EventMapping" : {
-        "testNodeVoltage" : {
+        "testNodeVoltage" : [{
             "command" : "GetBus1Voltage",
             "triggerType" : "==",
             "triggerValue" : 1,
             "parameters" : []
-        },
-        "testNodeSetDiv" : {
+        }],
+        "testNodeSetDiv" : [{
             "command" : "SetRefreshDivider",
             "triggerType" : "==",
             "triggerValue" : 1,
             "parameters" : [69]
-        },
-        "testNodeGetDiv" : {
+        }],
+        "testNodeGetDiv" : [{
             "command" : "GetRefreshDivider",
             "triggerType" : "==",
             "triggerValue" : 1,
             "parameters" : []
-        },
-        "gui:ox_pressurize_solenoid" : {
+        }],
+        "gui:ox_pressurize_solenoid" : [{
             "command" : "ox_pressurize_solenoid:SetState",
             "parameters" : ["gui:ox_pressurize_solenoid"]
-        },
-        "gui:ox_depressurize_solenoid" : {
+        }],
+        "gui:ox_depressurize_solenoid" : [{
             "command" : "ox_depressurize_solenoid:SetState",
             "parameters" : ["gui:ox_depressurize_solenoid"]
-        },
-        "gui:fuel_pressurize_solenoid" : {
+        }],
+        "gui:fuel_pressurize_solenoid" : [{
             "command" : "fuel_pressurize_solenoid:SetState",
             "parameters" : ["gui:fuel_pressurize_solenoid"]
         },
-        "gui:fuel_depressurize_solenoid" : {
+        {
+            "command" : "fuel_pressurize_solenoid:GetState",
+            "parameters" : []
+        }],
+        "gui:fuel_depressurize_solenoid" : [{
             "command" : "fuel_depressurize_solenoid:SetState",
             "parameters" : ["gui:fuel_depressurize_solenoid"]
-        },
-        "gui:igniter_fuel_solenoid" : {
+        }],
+        "gui:igniter_fuel_solenoid" : [{
             "command" : "igniter_fuel_solenoid:SetState",
             "parameters" : ["gui:igniter_fuel_solenoid"]
-        },
-        "gui:igniter_ox_solenoid" : {
+        }],
+        "gui:igniter_ox_solenoid" : [{
             "command" : "igniter_ox_solenoid:SetState",
             "parameters" : ["gui:igniter_ox_solenoid"]
-        }
+        }]
     },
     "GUIMapping" :
     [

@@ -108,118 +108,121 @@ void EventManager::ExecuteCommand(const std::string &stateName, double value, bo
         Debug::info("EventManager - OnStateChange: state name not in event mapping, ignored...");
         return;
     }
-    nlohmann::json eventJSON = mappingJSON[stateName];
-    if (eventJSON.contains("triggerType"))
+    nlohmann::json events = mappingJSON[stateName];
+    for (auto& eventJSON : events)
     {
-        std::string triggerType = eventJSON["triggerType"];
-        double triggerValue = eventJSON["triggerValue"];
+        if (eventJSON.contains("triggerType"))
+        {
+            std::string triggerType = eventJSON["triggerType"];
+            double triggerValue = eventJSON["triggerValue"];
 
-        //Lo and Behold, this actually works! Why you ask my friend... well
-        //https://www.cplusplus.com/reference/string/string/operators/ says relational operators
-        //use operator overloading to compare two strings using the compare method.
-        //C++ is a mighty language right? What do you think?
-        if (triggerType == "==")
-        {
-            if (value != triggerValue)
+            //Lo and Behold, this actually works! Why you ask my friend... well
+            //https://www.cplusplus.com/reference/string/string/operators/ says relational operators
+            //use operator overloading to compare two strings using the compare method.
+            //C++ is a mighty language right? What do you think?
+            if (triggerType == "==")
             {
-                Debug::info("EventManager - OnStateChange: trigger type %s | "
-                            "state value %d unequal to event mapping value %d, ignored...",
-                            triggerType.c_str(), value, triggerValue);
-                return;
+                if (value != triggerValue)
+                {
+                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                                "state value %d unequal to event mapping value %d, ignored...",
+                                triggerType.c_str(), value, triggerValue);
+                    return;
+                }
             }
-        }
-        else if (triggerType == "!=")
-        {
-            if (value == triggerValue)
+            else if (triggerType == "!=")
             {
-                Debug::info("EventManager - OnStateChange: trigger type %s | "
-                            "state value %d equal to event mapping value %d, ignored...",
-                            triggerType.c_str(), value, triggerValue);
-                return;
+                if (value == triggerValue)
+                {
+                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                                "state value %d equal to event mapping value %d, ignored...",
+                                triggerType.c_str(), value, triggerValue);
+                    return;
+                }
             }
-        }
-        else if (triggerType == ">=")
-        {
-            if (value < triggerValue)
+            else if (triggerType == ">=")
             {
-                Debug::info("EventManager - OnStateChange: trigger type %s | "
-                            "state value %d smaller than event mapping value %d, ignored...",
-                            triggerType.c_str(), value, triggerValue);
-                return;
+                if (value < triggerValue)
+                {
+                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                                "state value %d smaller than event mapping value %d, ignored...",
+                                triggerType.c_str(), value, triggerValue);
+                    return;
+                }
             }
-        }
-        else if (triggerType == "<=")
-        {
-            if (value > triggerValue)
+            else if (triggerType == "<=")
             {
-                Debug::info("EventManager - OnStateChange: trigger type %s | "
-                            "state value %d greater than event mapping value %d, ignored...",
-                            triggerType.c_str(), value, triggerValue);
-                return;
+                if (value > triggerValue)
+                {
+                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                                "state value %d greater than event mapping value %d, ignored...",
+                                triggerType.c_str(), value, triggerValue);
+                    return;
+                }
             }
-        }
-        else if (triggerType == ">")
-        {
-            if (value <= triggerValue)
+            else if (triggerType == ">")
             {
-                Debug::info("EventManager - OnStateChange: trigger type %s | "
-                            "state value %d smaller or equal than event mapping value %d, ignored...",
-                            triggerType.c_str(), value, triggerValue);
-                return;
+                if (value <= triggerValue)
+                {
+                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                                "state value %d smaller or equal than event mapping value %d, ignored...",
+                                triggerType.c_str(), value, triggerValue);
+                    return;
+                }
             }
-        }
-        else if (triggerType == "<")
-        {
-            if (value >= triggerValue)
+            else if (triggerType == "<")
             {
-                Debug::info("EventManager - OnStateChange: trigger type %s | "
-                            "state value %d greater or equal than event mapping value %d, ignored...",
-                            triggerType.c_str(), value, triggerValue);
-                return;
+                if (value >= triggerValue)
+                {
+                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                                "state value %d greater or equal than event mapping value %d, ignored...",
+                                triggerType.c_str(), value, triggerValue);
+                    return;
+                }
             }
-        }
-    }
-    else
-    {
-        Debug::info("EventManager - OnStateChange: no trigger type found, always triggering...");
-    }
-
-    std::vector<double> argumentList;
-    for (nlohmann::json &param : eventJSON["parameters"])
-    {
-
-        if (param.is_string())
-        {
-            if (stateName.compare(param) == 0)
-            {
-                argumentList.push_back(value);
-            }
-            else
-            {
-                StateController *controller = StateController::Instance();
-                double val = controller->GetStateValue(param);
-                argumentList.push_back(val);
-            }
-        }
-        else if (param.is_number())
-        {
-            argumentList.push_back(param);
         }
         else
         {
-            throw std::invalid_argument( "parameter not string or number" );
+            Debug::info("EventManager - OnStateChange: no trigger type found, always triggering...");
         }
-    }
 
-    std::string commandName = eventJSON["command"];
-    //trigger command
-    if (commandMap.find(commandName) == commandMap.end()){
-        //state name not in mapping, shall not trigger anything
-        throw std::runtime_error("command " + commandName + " not implemented");
-        return;
+        std::vector<double> argumentList;
+        for (nlohmann::json &param : eventJSON["parameters"])
+        {
+
+            if (param.is_string())
+            {
+                if (stateName.compare(param) == 0)
+                {
+                    argumentList.push_back(value);
+                }
+                else
+                {
+                    StateController *controller = StateController::Instance();
+                    double val = controller->GetStateValue(param);
+                    argumentList.push_back(val);
+                }
+            }
+            else if (param.is_number())
+            {
+                argumentList.push_back(param);
+            }
+            else
+            {
+                throw std::invalid_argument( "parameter not string or number" );
+            }
+        }
+
+        std::string commandName = eventJSON["command"];
+        //trigger command
+        if (commandMap.find(commandName) == commandMap.end()){
+            //state name not in mapping, shall not trigger anything
+            throw std::runtime_error("command " + commandName + " not implemented");
+            return;
+        }
+        auto commandFunc = std::get<0>(commandMap[commandName]);
+        commandFunc(argumentList, testOnly);
     }
-    auto commandFunc = std::get<0>(commandMap[commandName]);
-    commandFunc(argumentList, testOnly);
 }
 
 /**
