@@ -1,5 +1,29 @@
 {
     "CANMapping": {
+        "2" : {
+            "stringID" : "blmb_vent_backup",
+            "0" : {
+                "stringID" : "ox_tank_vent_valve_backup",
+                "slope" : 1.0,
+                "offset" : 0
+            }
+        },
+        "3" : {
+            "stringID" : "blmb_supercharge",
+            "0" : {
+                "stringID" : "supercharge_valve",
+                "slope" : 1.0,
+                "offset" : 0
+            }
+        },
+        "4" : {
+            "stringID" : "blmb_oxfill_vent",
+            "0" : {
+                "stringID" : "oxfill_vent_valve",
+                "slope" : 1.0,
+                "offset" : 0
+            }
+        },
         "5" : {
             "stringID" : "iob_engine",
             "0" : {
@@ -8,17 +32,17 @@
                 "offset" : 0
             },
             "1" : {
-                "stringID" : "fuel_main_valve_pos",
+                "stringID" : "ox_main_valve_pos",
                 "slope" : 0.001525902,
                 "offset" : 0
             },
             "2" : {
-                "stringID" : "fuel_main_valve_off",
+                "stringID" : "ox_main_valve_closing",
                 "slope" : 1.0,
                 "offset" : 0
             },
             "3" : {
-                "stringID" : "fuel_main_valve_on",
+                "stringID" : "ox_main_valve_opening",
                 "slope" : 1.0,
                 "offset" : 0
             },
@@ -28,17 +52,17 @@
                 "offset" : 0
             },
             "5" : {
-                "stringID" : "ox_main_valve_pos",
+                "stringID" : "fuel_main_valve_pos",
                 "slope" : 0.001525902,
                 "offset" : 0
             },
             "6" : {
-                "stringID" : "ox_main_valve_off",
+                "stringID" : "fuel_main_valve_closing",
                 "slope" : 1.0,
                 "offset" : 0
             },
             "7" : {
-                "stringID" : "ox_main_valve_on",
+                "stringID" : "fuel_main_valve_opening",
                 "slope" : 1.0,
                 "offset" : 0
             },
@@ -81,7 +105,7 @@
                 "offset" : 0
             },
             "1" : {
-                "stringID" : "fuel_pressurant_bottle_pressure",
+                "stringID" : "fuel_pressurant_regulator_pressure",
                 "slope" : 1.0,
                 "offset" : 0
             },
@@ -144,7 +168,7 @@
                 "offset" : 0
             },
             "1" : {
-                "stringID" : "ox_pressurant_bottle_pressure",
+                "stringID" : "ox_pressurant_regulator_pressure",
                 "slope" : 1.0,
                 "offset" : 0
             },
@@ -332,14 +356,67 @@
         "gui:igniter_ox_solenoid" : [{
             "command" : "igniter_ox_solenoid:SetState",
             "parameters" : ["gui:igniter_ox_solenoid"]
+        }],
+        "gui:fuel_main_valve" : [{
+            "command" : "fuel_main_valve:SetTargetPosition",
+            "parameters" : ["gui:fuel_main_valve"]
+        }],
+        "gui:ox_main_valve" : [{
+            "command" : "ox_main_valve:SetTargetPosition",
+            "parameters" : ["gui:ox_main_valve"]
+        }],
+        "gui:supercharge_valve" : [{
+            "command" : "supercharge_valve:SetTargetPosition",
+            "parameters" : ["gui:supercharge_valve"]
+        }],
+        "gui:ox_tank_vent_valve_backup" : [{
+            "command" : "ox_tank_vent_valve_backup:SetTargetPosition",
+            "parameters" : ["gui:ox_tank_vent_valve_backup"]
+        }],
+        "gui:oxfill_vent_valve" : [{
+            "command" : "oxfill_vent_valve:SetTargetPosition",
+            "parameters" : ["gui:oxfill_vent_valve"]
+        }],
+        "fuel_depressurize_solenoid:sensor" : [{
+            "triggerType" : ">=",
+            "triggerValue" : 1024,
+            "command" : "fuel_pressurize_solenoid:SetState",
+            "parameters" : [1]
+        }],
+        "fuel_pressurize_solenoid:sensor" : [{
+            "triggerType" : "<=",
+            "triggerValue" : 1024,
+            "command" : "fuel_depressurize_solenoid:SetState",
+            "parameters" : [0]
+        }],
+        "gui:fuel_press_depress" : [{
+            "triggerType" : "==",
+            "triggerValue" : 1,
+            "command" : "fuel_depressurize_solenoid:SetState",
+            "parameters" : [1]
+        },
+        {
+            "triggerType" : "==",
+            "triggerValue" : 0,
+            "command" : "fuel_pressurize_solenoid:SetState",
+            "parameters" : [0]
         }]
+
     },
     "GUIMapping" :
     [
         {
-            "state" : "ch1String:sensor",
-            "label" : "ch 124"
-        },
+            "state" : "ox_tank_vent_valve_backup:sensor",
+            "label" : "Backup Vent"
+		},
+        {
+            "state" : "supercharge_valve:sensor",
+            "label" : "Supercharge"
+		},
+        {
+            "state" : "oxfill_vent_valve:sensor",
+            "label" : "Oxfill Vent"
+		},
         {
             "state" : "fuel_main_pressure:sensor",
             "label" : "Fuel Main"
@@ -349,12 +426,16 @@
             "label" : "Fuel Main Pos"
 		},
         {
-            "state" : "fuel_main_valve_off:sensor",
-            "label" : "Fuel Main Off"
+            "state" : "fuel_main_valve_closing:sensor",
+            "label" : "Closing"
 		},
         {
-            "state" : "fuel_main_valve_on:sensor",
-            "label" : "Fuel Main On"
+            "state" : "fuel_main_valve_opening:sensor",
+            "label" : "Opening"
+		},
+        {
+            "state" : "fuel_main_valve:sensor",
+            "label" : "Fuel Main"
 		},
         {
             "state" : "ox_main_pressure:sensor",
@@ -365,12 +446,16 @@
             "label" : "Ox Main Pos"
 		},
         {
-            "state" : "ox_main_valve_off:sensor",
-            "label" : "Ox Main Off"
+            "state" : "ox_main_valve_closing:sensor",
+            "label" : "Closing"
 		},
         {
-            "state" : "ox_main_valve_on:sensor",
-            "label" : "Ox Main On"
+            "state" : "ox_main_valve_opening:sensor",
+            "label" : "Opening"
+		},
+        {
+            "state" : "ox_main_valve:sensor",
+            "label" : "Ox Main"
 		},
         {
             "state" : "pneumatic_switch:sensor",

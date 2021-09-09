@@ -511,7 +511,8 @@ void SequenceManager::StartAbortSequence()
             if (it.key().compare("timestamp") != 0)
             {
                 Debug::info(it.key() + " | %d", (uint8_t)it.value());
-                eventManager->ExecuteCommand(it.key(), it.value(), false);
+                std::vector<double> valueList = it.value();
+                eventManager->ExecuteCommand(it.key(), valueList, false);
             }
         }
         syncMtx.unlock();

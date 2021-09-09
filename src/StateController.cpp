@@ -14,7 +14,7 @@ StateController::~StateController()
     }
 }
 
-void StateController::Init(std::function<void(std::string, double)> onStateChangeCallback)
+void StateController::Init(std::function<void(std::string, double, double)> onStateChangeCallback)
 {
     if (!initialized)
     {
@@ -87,12 +87,13 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
         stateMtx.lock();
         //TODO: I don't understand how that works when state is not in map, but it's magic appearently
         auto *state = &this->states[stateName];
+        double oldValue = std::get<0>(*state);
         std::get<0>(*state) = value;
         std::get<1>(*state) = timestamp;
         std::get<2>(*state) = true;
         logger->log(stateName, value, timestamp);
         stateMtx.unlock();
-        this->onStateChangeCallback(stateName, value);
+        this->onStateChangeCallback(stateName, oldValue, value);
     }
     catch (const std::exception& e)
     {

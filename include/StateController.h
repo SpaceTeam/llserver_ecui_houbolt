@@ -22,7 +22,7 @@ class StateController : public Singleton<StateController>
     friend class Singleton;
 private:
     std::map<std::string, std::tuple<double, uint64_t, bool>> states;
-    std::function<void(std::string, double)> onStateChangeCallback;
+    std::function<void(std::string, double, double)> onStateChangeCallback;
 
 	bool initialized = false;
 
@@ -34,7 +34,7 @@ private:
 public:
 
     //TODO: MP Maybe add timestamp to callback argument as well
-    void Init(std::function<void(std::string, double)> onStateChangeCallback);
+    void Init(std::function<void(std::string, double, double)> onStateChangeCallback);
 
     /**
      * blocks until all map entries have a timestamp != 0

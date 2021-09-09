@@ -101,7 +101,7 @@ std::map<std::string, command_t> EventManager::GetCommands()
     return commandMap;
 }
 
-void EventManager::ExecuteCommand(const std::string &stateName, double value, bool testOnly)
+void EventManager::ExecuteCommand(const std::string &stateName, double oldValue, double newValue, bool testOnly)
 {
     if (!mappingJSON.contains(stateName)){
         //state name not in mapping, shall not trigger anything
@@ -122,62 +122,110 @@ void EventManager::ExecuteCommand(const std::string &stateName, double value, bo
             //C++ is a mighty language right? What do you think?
             if (triggerType == "==")
             {
-                if (value != triggerValue)
+                if (newValue != triggerValue)
                 {
                     Debug::info("EventManager - OnStateChange: trigger type %s | "
                                 "state value %d unequal to event mapping value %d, ignored...",
-                                triggerType.c_str(), value, triggerValue);
-                    return;
+                                triggerType.c_str(), newValue, triggerValue);
+                    continue;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue == triggerValue)
+                    {
+                        continue;
+                    }
                 }
             }
             else if (triggerType == "!=")
             {
-                if (value == triggerValue)
+                if (newValue == triggerValue)
                 {
                     Debug::info("EventManager - OnStateChange: trigger type %s | "
                                 "state value %d equal to event mapping value %d, ignored...",
-                                triggerType.c_str(), value, triggerValue);
-                    return;
+                                triggerType.c_str(), newValue, triggerValue);
+                    continue;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue != triggerValue)
+                    {
+                        continue;
+                    }
                 }
             }
             else if (triggerType == ">=")
             {
-                if (value < triggerValue)
+                if (newValue < triggerValue)
                 {
                     Debug::info("EventManager - OnStateChange: trigger type %s | "
                                 "state value %d smaller than event mapping value %d, ignored...",
-                                triggerType.c_str(), value, triggerValue);
-                    return;
+                                triggerType.c_str(), newValue, triggerValue);
+                    continue;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue >= triggerValue)
+                    {
+                        continue;
+                    }
                 }
             }
             else if (triggerType == "<=")
             {
-                if (value > triggerValue)
+                if (newValue > triggerValue)
                 {
                     Debug::info("EventManager - OnStateChange: trigger type %s | "
                                 "state value %d greater than event mapping value %d, ignored...",
-                                triggerType.c_str(), value, triggerValue);
-                    return;
+                                triggerType.c_str(), newValue, triggerValue);
+                    continue;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue <= triggerValue)
+                    {
+                        continue;
+                    }
                 }
             }
             else if (triggerType == ">")
             {
-                if (value <= triggerValue)
+                if (newValue <= triggerValue)
                 {
                     Debug::info("EventManager - OnStateChange: trigger type %s | "
                                 "state value %d smaller or equal than event mapping value %d, ignored...",
-                                triggerType.c_str(), value, triggerValue);
-                    return;
+                                triggerType.c_str(), newValue, triggerValue);
+                    continue;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue > triggerValue)
+                    {
+                        continue;
+                    }
                 }
             }
             else if (triggerType == "<")
             {
-                if (value >= triggerValue)
+                if (newValue >= triggerValue)
                 {
                     Debug::info("EventManager - OnStateChange: trigger type %s | "
                                 "state value %d greater or equal than event mapping value %d, ignored...",
-                                triggerType.c_str(), value, triggerValue);
-                    return;
+                                triggerType.c_str(), newValue, triggerValue);
+                    continue;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue < triggerValue)
+                    {
+                        continue;
+                    }
                 }
             }
         }
@@ -194,7 +242,7 @@ void EventManager::ExecuteCommand(const std::string &stateName, double value, bo
             {
                 if (stateName.compare(param) == 0)
                 {
-                    argumentList.push_back(value);
+                    argumentList.push_back(newValue);
                 }
                 else
                 {
@@ -218,7 +266,7 @@ void EventManager::ExecuteCommand(const std::string &stateName, double value, bo
         if (commandMap.find(commandName) == commandMap.end()){
             //state name not in mapping, shall not trigger anything
             throw std::runtime_error("command " + commandName + " not implemented");
-            return;
+            continue;
         }
         auto commandFunc = std::get<0>(commandMap[commandName]);
         commandFunc(argumentList, testOnly);
@@ -230,11 +278,11 @@ void EventManager::ExecuteCommand(const std::string &stateName, double value, bo
  * @param stateName
  * @param value
  */
-void EventManager::OnStateChange(const std::string& stateName, double value)
+void EventManager::OnStateChange(const std::string& stateName, double oldValue, double newValue)
 {
     try
     {
-        ExecuteCommand(stateName, value, false);
+        ExecuteCommand(stateName, oldValue, newValue, false);
     }
     catch (const std::exception& e)
     {

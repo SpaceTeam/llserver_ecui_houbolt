@@ -31,7 +31,7 @@ void LLInterface::Init()
 
         Debug::print("Initializing StateController...");
         stateController = StateController::Instance();
-        stateController->Init(std::bind(&EventManager::OnStateChange, eventManager, std::placeholders::_1, std::placeholders::_2));
+        stateController->Init(std::bind(&EventManager::OnStateChange, eventManager, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
         Debug::print("Initializing StateController done\n");
 
         Debug::print("Initializing CANManager...");
