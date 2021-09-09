@@ -61,6 +61,16 @@
                 "stringID" : "igniter_fuel_solenoid",
                 "slope" : 1.0,
                 "offset" : 0
+            },
+            "12" : {
+                "stringID" : "ox_main_valve",
+                "slope" : 0.001525902,
+                "offset" : 0
+            },
+            "13" : {
+                "stringID" : "fuel_main_valve",
+                "slope" : 0.001525902,
+                "offset" : 0
             }
         },
         "12" : {

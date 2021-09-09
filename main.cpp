@@ -17,7 +17,7 @@
 sig_atomic_t running = 1;
 sig_atomic_t signum = 0;
 
-#define TEST_LLSERVER
+//#define TEST_LLSERVER
 
 #ifdef TEST_LLSERVER
 #include <thread>

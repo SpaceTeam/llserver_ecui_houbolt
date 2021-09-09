@@ -107,7 +107,7 @@ CANResult CANManager::Init()
             }
             if (versions.size() > 1)
             {
-                std::runtime_error("Multiple Versions Found!");
+                Debug::error("Multiple Versions Found!");
             }
             nodeMapMtx.unlock();
             Debug::print("Initialized all nodes, press enter to continue...\n");
@@ -194,10 +194,14 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
         {
             uint8_t nodeID = canIDStruct->info.node_id;
 
-            if (nodeMap.find(nodeID) != nodeMap.end())
+            nodeMapMtx.lock();   
+            bool found = nodeMap.find(nodeID) != nodeMap.end();
+            nodeMapMtx.unlock();         
+            if (found)
             {
                 std::runtime_error("Node already initialized, possible logic error on hardware or in software, ignoring node info msg...");
             }
+            
 
             CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
 
