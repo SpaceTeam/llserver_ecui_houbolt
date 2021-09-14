@@ -91,7 +91,11 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
         std::get<0>(*state) = value;
         std::get<1>(*state) = timestamp;
         std::get<2>(*state) = true;
+        //Debug::print("%zd: %s, %zd", count, stateName.c_str(), count);
         logger->log(stateName, value, timestamp);
+        if(timestamp != 0) {
+            count++;
+        }
         stateMtx.unlock();
         this->onStateChangeCallback(stateName, oldValue, value);
     }

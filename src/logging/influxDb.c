@@ -114,7 +114,7 @@ int sendData(influxDbContext *cntxt, char *data, size_t length) {
 
     // If needed -> extract response code (DB)
     read(cntxt->sock_fd, result, sizeof(result));
-    //fprintf(stdout, "Result %s\n", result);
+    // fprintf(stdout, "Result %s\n", result);
 
     return 0;
 }

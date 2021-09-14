@@ -167,6 +167,8 @@ std::map<std::string, std::tuple<double, uint64_t>> Node::GetLatestSensorData()
         }
 
     }
+    //Debug::print("NodeID %d, %zd sensor data transmissions", nodeID, uint64_t(count));
+    count = 0;
     return sensorData;
 }
 
@@ -259,6 +261,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
     {
         throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: not a sensor data message, ignored...");
     }
+    count++;
 
     SensorMsg_t *sensorMsg = (SensorMsg_t *) canMsg->bit.data.uint8;
     uint8_t *valuePtr = sensorMsg->channel_data;

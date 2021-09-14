@@ -33,6 +33,7 @@ private:
     ~StateController();
 public:
 
+    std::size_t count = 0;
     //TODO: MP Maybe add timestamp to callback argument as well
     void Init(std::function<void(std::string, double, double)> onStateChangeCallback);
 

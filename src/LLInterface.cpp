@@ -107,6 +107,8 @@ LLInterface::~LLInterface()
         Debug::print("Deleting GUI Mapping Manager...");
         delete guiMapping;
 
+        Debug::print("Logged: %zd", StateController::Instance()->count);
+
         Debug::print("Shutting down CANManager...");
         CANManager::Destroy();
 

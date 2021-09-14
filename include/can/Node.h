@@ -6,6 +6,7 @@
 #define LLSERVER_ECUI_HOUBOLT_NODE_H
 
 #include <mutex>
+#include <atomic>
 
 #include "common.h"
 
@@ -67,6 +68,8 @@ private:
     void ResetAllSettingsResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
 
 public:
+    std::atomic_uint64_t count = 0;
+
     //TODO: MP consider if putting channelid as parameter is necessary adapt initializer list if so
 	Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver);
 	~Node();
