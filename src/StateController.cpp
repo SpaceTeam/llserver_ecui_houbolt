@@ -25,7 +25,7 @@ void StateController::Init(std::function<void(std::string, double, double)> onSt
                      std::get<std::string>(Config::getData("INFLUXDB/database_name")),
                      std::get<std::string>(Config::getData("INFLUXDB/state_measurement")), MICROSECONDS,
                      std::get<int>(Config::getData("INFLUXDB/buffer_size")));
-        //logger->Init("127.0.0.1", 8086, "testDb", "states", MICROSECONDS, 65536);
+        // logger->Init("127.0.0.1", 8086, "testDb", "states", MICROSECONDS, 65536);
         initialized = true;
     }
 }

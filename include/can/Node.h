@@ -56,7 +56,7 @@ private:
 	std::map<uint8_t, Channel *> channelMap;
     CANDriver* driver;
     SensorData_t *latestSensorBuffer;
-    size_t latestSensorBufferLength;
+    size_t latestSensorBufferLength = 0;
     std::mutex bufferMtx;
 
 	void InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo);

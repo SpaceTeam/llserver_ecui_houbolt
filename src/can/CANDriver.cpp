@@ -4,6 +4,7 @@
 
 #include "can/CANDriver.h"
 #include "can_houbolt/can_cmds.h"
+#include "utility/utils.h"
 
 #include <utility>
 #include <string>
@@ -150,7 +151,8 @@ void CANDriver::OnCANCallback(int handle, void *driver, unsigned int event)
                 }
                 //TODO: wrap a try except around
                 //TODO: switch timestamp to current unix time
-                canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, timestamp);
+                uint64_t softwareTime = utils::getCurrentTimestamp();
+                canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, softwareTime);
                 stat = canRead(handle, &id, data, &dlc, &flags, &timestamp);
             }
             // stat is either canERR_NOMSG or any different error code
@@ -177,10 +179,18 @@ std::string CANDriver::CANError(canStatus status) {
 canStatus CANDriver::InitializeCANChannel(uint32_t canBusChannelID) {
     canStatus stat;
     canInitializeLibrary();
+
     // TODO: Might want to remove canOPEN_ACCEPT_VIRTUAL later (DB)
     canHandles[canBusChannelID] = canOpenChannel(canBusChannelID, canOPEN_CAN_FD | canOPEN_ACCEPT_LARGE_DLC | canOPEN_ACCEPT_VIRTUAL);
     if(canHandles[canBusChannelID] < 0){
         return (canStatus)canHandles[canBusChannelID];
+    }
+
+    int timeScale = 1; //1us precision
+    stat = canIoCtl(canHandles[canBusChannelID], canIOCTL_SET_TIMER_SCALE, &timeScale, sizeof(timeScale));
+    if (stat != canOK)
+    {
+        return stat;
     }
 
     stat = canSetBusParams(canHandles[canBusChannelID],

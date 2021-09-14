@@ -57,7 +57,7 @@ void LLInterface::Init()
         Debug::print("Starting Sensor State Timer...");
         stateTimer = new Timer(40, "stateTimer");
         sensorStateTimer = new Timer(40, "sensorTimer");
-        uint64_t sensorStateSamplingRate = std::get<int>(Config::getData("LLSERVER/sensor_state_sampling_rate"));
+        uint64_t sensorStateSamplingRate = std::get<double>(Config::getData("LLSERVER/sensor_state_sampling_rate"));
         uint64_t sensorStateSamplingInterval = 1000000.0/sensorStateSamplingRate;
         sensorStateTimer->startContinous(0, sensorStateSamplingInterval,
                 std::bind(&LLInterface::FilterSensors, this, std::placeholders::_1),
@@ -179,8 +179,8 @@ void LLInterface::StartStateTransmission()
 {
     if (!isTransmittingStates)
     {
-        uint64_t stateTransmissionRate = std::get<int>(Config::getData("WEBSERVER/state_transmission_rate"));
-        uint64_t stateTransmissionInterval = 1000000/stateTransmissionRate;
+        uint64_t stateTransmissionRate = std::get<double>(Config::getData("WEBSERVER/state_transmission_rate"));
+        uint64_t stateTransmissionInterval = 1000000.0/stateTransmissionRate;
 
         stateTimer->startContinous(0, stateTransmissionInterval,
                 std::bind(&LLInterface::GetStates, this, std::placeholders::_1),

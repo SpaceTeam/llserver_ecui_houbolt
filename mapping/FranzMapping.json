@@ -17,9 +17,9 @@
             }
         },
         "4" : {
-            "stringID" : "blmb_oxfill_vent",
+            "stringID" : "blmb_oxfill",
             "0" : {
-                "stringID" : "oxfill_vent_valve",
+                "stringID" : "oxfill_valve",
                 "slope" : 1.0,
                 "offset" : 0
             }
@@ -67,12 +67,12 @@
                 "offset" : 0
             },
             "8" : {
-                "stringID" : "purge_ox_solenoid",
+                "stringID" : "ox_purge_solenoid",
                 "slope" : 1.0,
                 "offset" : 0
             },
             "9" : {
-                "stringID" : "purge_fuel_solenoid",
+                "stringID" : "fuel_purge_solenoid",
                 "slope" : 1.0,
                 "offset" : 0
             },
@@ -101,13 +101,13 @@
             "stringID" : "iob_fuel",
             "0" : {
                 "stringID" : "fuel_top_tank_pressure",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00119984,
+                "offset" : -16.25
             },
             "1" : {
                 "stringID" : "fuel_pressurant_regulator_pressure",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00119984,
+                "offset" : -16.25
             },
             "2" : {
                 "stringID" : "fuel_depressurize_solenoid",
@@ -126,18 +126,18 @@
             },
             "5" : {
                 "stringID" : "fuel_bottom_tank_pressure",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00119984,
+                "offset" : -16.25
             },
             "6" : {
                 "stringID" : "fuel_top_tank_temp",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00638577,
+                "offset" : -251.7
             },
             "7" : {
                 "stringID" : "fuel_mid_top_tank_temp",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00638577,
+                "offset" : -251.7
             },
             "8" : {
                 "stringID" : "iob_fuel_unused_ch8",
@@ -146,17 +146,27 @@
             },
             "9" : {
                 "stringID" : "igniter_fuel_bottle_pressure",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00119984,
+                "offset" : -16.25
             },
             "10" : {
                 "stringID" : "fuel_bottom_tank_temp",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00638577,
+                "offset" : -251.7
             },
             "11" : {
                 "stringID" : "fuel_mid_bottom_tank_temp",
-                "slope" : 1.0,
+                "slope" : 0.00638577,
+                "offset" : -251.7
+            },
+            "12" : {
+                "stringID" : "iob_fuel_unused_pneumatic_ch12",
+                "slope" : 0.001525902,
+                "offset" : 0
+            },
+            "13" : {
+                "stringID" : "iob_fuel_unused_pneumatic_ch13",
+                "slope" : 0.001525902,
                 "offset" : 0
             }
         },
@@ -164,13 +174,13 @@
             "stringID" : "iob_ox",
             "0" : {
                 "stringID" : "ox_top_tank_pressure",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00119984,
+                "offset" : -16.25
             },
             "1" : {
                 "stringID" : "ox_pressurant_regulator_pressure",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00119984,
+                "offset" : -16.25
             },
             "2" : {
                 "stringID" : "ox_depressurize_solenoid",
@@ -184,23 +194,23 @@
             },
             "4" : {
                 "stringID" : "purge_bottle_pressure",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00118,
+                "offset" : -15.0
             },
             "5" : {
                 "stringID" : "ox_bottom_tank_pressure",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00119984,
+                "offset" : -16.25
             },
             "6" : {
                 "stringID" : "ox_top_tank_temp",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00638577,
+                "offset" : -251.7
             },
             "7" : {
                 "stringID" : "ox_mid_top_tank_temp",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00638577,
+                "offset" : -251.7
             },
             "8" : {
                 "stringID" : "iob_ox_unused_ch8",
@@ -209,17 +219,27 @@
             },
             "9" : {
                 "stringID" : "igniter_ox_bottle_pressure",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00119984,
+                "offset" : -16.25
             },
             "10" : {
                 "stringID" : "ox_bottom_tank_temp",
-                "slope" : 1.0,
-                "offset" : 0
+                "slope" : 0.00638577,
+                "offset" : -251.7
             },
             "11" : {
                 "stringID" : "ox_mid_bottom_tank_temp",
-                "slope" : 1.0,
+                "slope" : 0.00638577,
+                "offset" : -251.7
+            },
+            "12" : {
+                "stringID" : "iob_ox_unused_pneumatic_ch12",
+                "slope" : 0.001525902,
+                "offset" : 0
+            },
+            "13" : {
+                "stringID" : "iob_ox_unused_pneumatic_ch13",
+                "slope" : 0.001525902,
                 "offset" : 0
             }
         },
@@ -373,9 +393,9 @@
             "command" : "ox_tank_vent_valve_backup:SetTargetPosition",
             "parameters" : ["gui:ox_tank_vent_valve_backup"]
         }],
-        "gui:oxfill_vent_valve" : [{
-            "command" : "oxfill_vent_valve:SetTargetPosition",
-            "parameters" : ["gui:oxfill_vent_valve"]
+        "gui:oxfill_valve" : [{
+            "command" : "oxfill_valve:SetTargetPosition",
+            "parameters" : ["gui:oxfill_valve"]
         }],
         "fuel_depressurize_solenoid:sensor" : [{
             "triggerType" : ">=",
@@ -389,6 +409,18 @@
             "command" : "fuel_depressurize_solenoid:SetState",
             "parameters" : [0]
         }],
+        "ox_depressurize_solenoid:sensor" : [{
+            "triggerType" : ">=",
+            "triggerValue" : 1024,
+            "command" : "ox_pressurize_solenoid:SetState",
+            "parameters" : [1]
+        }],
+        "ox_pressurize_solenoid:sensor" : [{
+            "triggerType" : "<=",
+            "triggerValue" : 1024,
+            "command" : "ox_depressurize_solenoid:SetState",
+            "parameters" : [0]
+        }],
         "gui:fuel_press_depress" : [{
             "triggerType" : "==",
             "triggerValue" : 1,
@@ -399,6 +431,18 @@
             "triggerType" : "==",
             "triggerValue" : 0,
             "command" : "fuel_pressurize_solenoid:SetState",
+            "parameters" : [0]
+        }],
+        "gui:ox_press_depress" : [{
+            "triggerType" : "==",
+            "triggerValue" : 1,
+            "command" : "ox_depressurize_solenoid:SetState",
+            "parameters" : [1]
+        },
+        {
+            "triggerType" : "==",
+            "triggerValue" : 0,
+            "command" : "ox_pressurize_solenoid:SetState",
             "parameters" : [0]
         }]
 
@@ -414,8 +458,8 @@
             "label" : "Supercharge"
 		},
         {
-            "state" : "oxfill_vent_valve:sensor",
-            "label" : "Oxfill Vent"
+            "state" : "oxfill_valve:sensor",
+            "label" : "Oxfill"
 		},
         {
             "state" : "fuel_main_pressure:sensor",
@@ -470,11 +514,11 @@
             "label" : "Igniter Ox"
 		},
         {
-            "state" : "purge_ox_solenoid:sensor",
+            "state" : "ox_purge_solenoid:sensor",
             "label" : "Purge Ox"
 		},
         {
-            "state" : "purge_fuel_solenoid:sensor",
+            "state" : "fuel_purge_solenoid:sensor",
             "label" : "Purge Fuel"
 		},
         {
@@ -502,11 +546,11 @@
             "label" : "Fuel Bottom Tank"
 		},
         {
-            "state" : "fuel_top_temp:sensor",
+            "state" : "fuel_top_tank_temp:sensor",
             "label" : "Fuel Top"
 		},
         {
-            "state" : "fuel_mid_top_temp:sensor",
+            "state" : "fuel_mid_top_tank_temp:sensor",
             "label" : "Fuel Midtop"
 		},
         {
@@ -518,11 +562,11 @@
             "label" : "Igniter Fuel Bottle"
 		},
         {
-            "state" : "fuel_bottom_temp:sensor",
+            "state" : "fuel_bottom_tank_temp:sensor",
             "label" : "Fuel Bottom"
 		},
         {
-            "state" : "fuel_mid_bottom_temp:sensor",
+            "state" : "fuel_mid_bottom_tank_temp:sensor",
             "label" : "Fuel Midbottom"
 		},
         {
@@ -550,11 +594,11 @@
             "label" : "Ox Bottom Tank"
 		},
         {
-            "state" : "ox_top_temp:sensor",
+            "state" : "ox_top_tank_temp:sensor",
             "label" : "Ox Top"
 		},
         {
-            "state" : "ox_mid_top_temp:sensor",
+            "state" : "ox_mid_top_tank_temp:sensor",
             "label" : "Ox Midtop"
 		},
         {
@@ -566,11 +610,11 @@
             "label" : "Igniter Ox Bottle"
 		},
         {
-            "state" : "ox_bottom_temp:sensor",
+            "state" : "ox_bottom_tank_temp:sensor",
             "label" : "Ox Bottom"
 		},
         {
-            "state" : "ox_mid_bottom_temp:sensor",
+            "state" : "ox_mid_bottom_tank_temp:sensor",
             "label" : "Ox Midbottom"
 		},
         {
