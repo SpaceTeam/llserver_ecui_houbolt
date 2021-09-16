@@ -145,7 +145,7 @@
                 "offset" : 0
             },
             "9" : {
-                "stringID" : "igniter_fuel_bottle_pressure",
+                "stringID" : "igniter_fuel_regulator_pressure",
                 "slope" : 0.00119984,
                 "offset" : -16.25
             },
@@ -193,7 +193,7 @@
                 "offset" : 0
             },
             "4" : {
-                "stringID" : "purge_bottle_pressure",
+                "stringID" : "purge_regulator_pressure",
                 "slope" : 0.00118,
                 "offset" : -15.0
             },
@@ -218,7 +218,7 @@
                 "offset" : 0
             },
             "9" : {
-                "stringID" : "igniter_ox_bottle_pressure",
+                "stringID" : "igniter_ox_regulator_pressure",
                 "slope" : 0.00119984,
                 "offset" : -16.25
             },
@@ -526,8 +526,8 @@
             "label" : "Fuel Top Tank"
 		},
         {
-            "state" : "fuel_pressurant_bottle_pressure:sensor",
-            "label" : "Fuel Press Bottle"
+            "state" : "fuel_pressurant_regulator_pressure:sensor",
+            "label" : "Fuel Press Regulator"
 		},
         {
             "state" : "fuel_depressurize_solenoid:sensor",
@@ -558,8 +558,8 @@
             "label" : "iob fuel unused ch8"
 		},
         {
-            "state" : "igniter_fuel_bottle_pressure:sensor",
-            "label" : "Igniter Fuel Bottle"
+            "state" : "igniter_fuel_regulator_pressure:sensor",
+            "label" : "Igniter Fuel Regulator"
 		},
         {
             "state" : "fuel_bottom_tank_temp:sensor",
@@ -574,8 +574,8 @@
             "label" : "Ox Top Tank"
 		},
         {
-            "state" : "ox_pressurant_bottle_pressure:sensor",
-            "label" : "Ox Press Bottle"
+            "state" : "ox_pressurant_regulator_pressure:sensor",
+            "label" : "Ox Press Regulator"
 		},
         {
             "state" : "ox_depressurize_solenoid:sensor",
@@ -586,8 +586,8 @@
             "label" : "Ox Press"
 		},
         {
-            "state" : "purge_bottle_pressure:sensor",
-            "label" : "Purge Bottle"
+            "state" : "purge_regulator_pressure:sensor",
+            "label" : "Purge Regulator"
 		},
         {
             "state" : "ox_bottom_tank_pressure:sensor",
@@ -606,8 +606,8 @@
             "label" : "iob ox unused ch8"
 		},
         {
-            "state" : "igniter_ox_bottle_pressure:sensor",
-            "label" : "Igniter Ox Bottle"
+            "state" : "igniter_ox_regulator_pressure:sensor",
+            "label" : "Igniter Ox Regulator"
 		},
         {
             "state" : "ox_bottom_tank_temp:sensor",

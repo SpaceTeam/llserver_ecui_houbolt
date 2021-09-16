@@ -45,4 +45,18 @@ namespace utils
         return std::chrono::duration_cast<std::chrono::microseconds>(
                     currTime.time_since_epoch()).count();
     }
+
+    void matrixMultiply(std::vector<std::vector<double>> &a, std::vector<std::vector<double>> &b, std::vector<std::vector<double>> &result)
+    {
+        for (size_t i = 0; i < a.size(); i++)
+        {
+            for (size_t j = 0; j < b[0].size(); j++)
+            {
+                for (size_t k = 0; k < a[0].size(); k++)
+                {
+                    result[i][j] = a[i][k] * b[k][j];
+                }
+            }
+        }
+    }
 }

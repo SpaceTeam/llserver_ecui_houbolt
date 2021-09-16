@@ -71,5 +71,12 @@
     "debug_measurement": "debug",
     "state_measurement": "states",
     "buffer_size": 2048
+  },
+  "THRUST":{
+    "alpha": 0.785398,
+    "beta": 0.785398,
+    "gamma": 0.785398,
+    "d": 0.28,
+    "r": 0.14
   }
 }

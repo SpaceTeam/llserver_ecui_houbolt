@@ -48,6 +48,11 @@ private:
     Timer* stateTimer;
     Timer* sensorStateTimer;
 
+    std::map<std::string, double> thrustVariables;
+    std::vector<std::vector<double>> *thrustTransformMatrix;
+
+    void CalcThrustTransformMatrix();
+
     void GetStates(int64_t microTime);
     void StopGetStates();
 

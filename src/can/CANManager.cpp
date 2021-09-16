@@ -269,11 +269,15 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
     try
     {
+        if (canIDStruct->info.direction == 0)
+        {
+            throw std::runtime_error("Direction bit master to node, ignoring msg...");
+        }
         //Don't require mutex at this point, since it is read only after initialization
         bool found = nodeMap.find(nodeID) != nodeMap.end();    
         if (!found)
         {
-            std::runtime_error("Node not found, ignoring msg...");
+            throw std::runtime_error("Node not found, ignoring msg...");
         }
         Node *node = nodeMap[nodeID];
         if (payloadLength <= 0)

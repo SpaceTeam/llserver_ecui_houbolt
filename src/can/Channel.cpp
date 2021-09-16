@@ -97,6 +97,11 @@ void Channel::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &va
             break;
         case 3:
             intValue = (valuePtr[2] << 16 | valuePtr[1] << 8 | valuePtr[0]);
+            //signed check for 24 bit adc
+            if (valuePtr[2]>>7)
+            {
+                intValue |= 0xFF << 24;
+            }
             break;
         case 4:
             intValue = (valuePtr[3] << 24 | valuePtr[2] << 16 | valuePtr[1] << 8 | valuePtr[0]);

@@ -27,6 +27,8 @@ namespace utils
      **/
     uint64_t getCurrentTimestamp();
 
+    void matrixMultiply(std::vector<std::vector<double>> &a, std::vector<std::vector<double>> &b, std::vector<std::vector<double>> &result);
+
 }
 
 #endif //TXV_ECUI_LLSERVER_UTILS_H

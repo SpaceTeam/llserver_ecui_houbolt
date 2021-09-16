@@ -123,14 +123,14 @@ void CANDriver::OnCANCallback(int handle, void *driver, unsigned int event)
         case canNOTIFY_ERROR:
         {
             if(stat != canOK) {
-                std::string errorMsg = canDriver->CANError(stat);
+                std::string errorMsg = "canNOTIFY_ERROR: " + canDriver->CANError(stat);
                 canDriver->onErrorCallback(&errorMsg);
             }
             break;   
         }
         case canNOTIFY_RX:
         {
-            while (stat != canERR_NOMSG) {
+            while (stat == canOK) {
                 if (id < 0)
                 {
                     Debug::error("CANDriver - OnCANCallback: id negative");
@@ -152,12 +152,22 @@ void CANDriver::OnCANCallback(int handle, void *driver, unsigned int event)
                 //TODO: wrap a try except around
                 //TODO: switch timestamp to current unix time
                 uint64_t softwareTime = utils::getCurrentTimestamp();
-                canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, softwareTime);
+                //TODO: MP flag is canok but it seems that its actuall canERR_NOMSG, further debugging needed to remove this dlc check
+                if (dlc > 0)
+                {
+                    canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, softwareTime);
+                }
+                else
+                {
+                    Debug::error("CANDriver - OnCANCallback: invalid msg detected, ignoring...");
+                }
+                
                 stat = canRead(handle, &id, data, &dlc, &flags, &timestamp);
             }
             // stat is either canERR_NOMSG or any different error code
-            if(stat != canERR_NOMSG) {
-                throw std::runtime_error(canDriver->CANError(stat));
+            if(stat != canOK && stat != canERR_NOMSG) {
+                std::string errorMsg = "canNOTIFY_RX: " +  canDriver->CANError(stat);
+                canDriver->onErrorCallback(&errorMsg);
             }
             break;
         }

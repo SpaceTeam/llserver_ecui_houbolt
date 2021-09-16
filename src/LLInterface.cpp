@@ -3,6 +3,7 @@
 //
 
 #include <regex>
+#include <math.h>
 #include <utility/utils.h>
 
 //#include "hcp/HcpManager.h"
@@ -12,6 +13,25 @@
 
 #include "LLInterface.h"
 
+#define PI 3.14159265
+
+void LLInterface::CalcThrustTransformMatrix()
+{
+    double deg60 = 60*PI/180;
+    double beta = thrustVariables["beta"];
+    double gamma = thrustVariables["gamma"];
+    double alpha = thrustVariables["alpha"];
+    double r = thrustVariables["r"];
+    double d = thrustVariables["d"];
+    thrustTransformMatrix = new std::vector<std::vector<double>> {
+    {-sin(deg60-beta)*sin(gamma), -sin(deg60+beta)*sin(gamma), -sin(beta)*sin(gamma), sin(beta)*sin(gamma), sin(deg60+beta)*sin(gamma), sin(deg60-beta)*sin(gamma)},
+    {-cos(deg60-beta)*sin(gamma), cos(deg60+beta)*sin(gamma), cos(beta)*sin(gamma), cos(beta)*sin(gamma), cos(deg60+beta)*sin(gamma), -cos(deg60-beta)*sin(gamma)},
+    {cos(gamma), cos(gamma), cos(gamma), cos(gamma), cos(gamma), cos(gamma)},
+    {r*cos(deg60-alpha)*cos(gamma)-d*cos(deg60-beta)*sin(gamma), r*cos(deg60+alpha)*cos(gamma)-d*cos(deg60+beta)*sin(gamma), -r*cos(alpha)*cos(gamma)+d*cos(beta)*sin(gamma), -r*cos(alpha)*cos(gamma)+d*cos(beta)*sin(gamma), r*cos(deg60+alpha)*cos(gamma)-d*cos(deg60+beta)*sin(gamma), r*cos(deg60-alpha)*cos(gamma)-d*cos(deg60-beta)*sin(gamma)},
+    {r*sin(deg60-alpha)*cos(gamma)-d*sin(deg60-beta)*sin(gamma), r*sin(deg60+alpha)*cos(gamma)-d*sin(deg60+beta)*sin(gamma), r*sin(alpha)*cos(gamma)-d*sin(beta)*sin(gamma), -r*sin(alpha)*cos(gamma)+d*sin(beta)*sin(gamma), -r*sin(deg60+alpha)*cos(gamma)+d*sin(deg60+beta)*sin(gamma), -r*sin(deg60-alpha)*cos(gamma)+d*sin(deg60-beta)*sin(gamma)},
+    {-r*sin(beta-alpha), r*sin(beta-alpha), -r*sin(beta-alpha), r*sin(beta-alpha), -r*sin(beta-alpha), r*sin(beta-alpha)}
+    };
+}
 
 void LLInterface::Init()
 {
@@ -48,6 +68,15 @@ void LLInterface::Init()
         Debug::print("Waiting for States to be initialized...");
         // stateController->WaitUntilStatesInitialized(); //TODO: uncomment when can interface works
         Debug::print("All States initialized\n");
+
+        Debug::print("Initializing Thrust Matrix...");
+        thrustVariables["alpha"] = std::get<double>(Config::getData("THRUST/alpha"));
+        thrustVariables["beta"] = std::get<double>(Config::getData("THRUST/beta"));
+        thrustVariables["gamma"] = std::get<double>(Config::getData("THRUST/gamma"));
+        thrustVariables["d"] = std::get<double>(Config::getData("THRUST/d"));
+        thrustVariables["r"] = std::get<double>(Config::getData("THRUST/r"));
+        CalcThrustTransformMatrix();
+        Debug::print("Initializing Thrust Matrix done");
 
         Debug::print("Initializing DataFilter...");
         double sensorsSmoothingFactor = std::get<double>(Config::getData("WEBSERVER/sensors_smoothing_factor"));
@@ -233,6 +262,35 @@ void LLInterface::FilterSensors(int64_t microTime)
 
     std::map<std::string, std::tuple<double, uint64_t>> filteredSensors;
     filteredSensors = dataFilter->FilterData(rawSensors);
+
+    //TODO: remove hotfix
+    std::vector<std::vector<double>> sensorMatrix = {{0},{0},{0},{0},{0},{0}};
+    std::vector<std::vector<double>> resultMatrix = {{0},{0},{0},{0},{0},{0}};
+    std::string thrustState;
+    double thrustSum = 0;
+    for (int32_t i = 1; i < 7; i++)
+    {
+        thrustState = "engine_thrust_"+std::to_string(i)+":sensor";
+        if (filteredSensors.find(thrustState) == filteredSensors.end())
+        {
+            break;
+        }
+        sensorMatrix[i-1][0] = std::get<0>(filteredSensors[thrustState]);
+        thrustSum += sensorMatrix[i-1][0];
+        if (i==6)
+        {
+            std::vector<std::vector<double>> transformMatrix = *thrustTransformMatrix; 
+            utils::matrixMultiply(transformMatrix, sensorMatrix, resultMatrix);
+            uint64_t thrustTimestamp = utils::getCurrentTimestamp();
+            filteredSensors["engine_thrust_x"] = {resultMatrix[0][0], thrustTimestamp};
+            filteredSensors["engine_thrust_y"] = {resultMatrix[1][0], thrustTimestamp};
+            filteredSensors["engine_thrust_z"] = {resultMatrix[2][0], thrustTimestamp};
+            filteredSensors["engine_thrust_mx"] = {resultMatrix[3][0], thrustTimestamp};
+            filteredSensors["engine_thrust_my"] = {resultMatrix[4][0], thrustTimestamp};
+            filteredSensors["engine_thrust_mz"] = {resultMatrix[5][0], thrustTimestamp};
+            filteredSensors["engine_thrust_sum"] = {thrustSum, thrustTimestamp};
+        }
+    }
 
     //TODO: reconsider if states should be iterated here or 
     //sent directly to a new setStates of the state controller
