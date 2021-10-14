@@ -161,6 +161,8 @@ bool SequenceManager::LoadSequence(nlohmann::json jsonSeq)
     deviceMap.clear();
     sensorsNominalRangeMap.clear();
     sensorsNominalRangeTimeMap.clear();
+    sequenceStartTime = INT64_MIN;
+    sequenceStartTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
     for (auto dataItem : jsonSeq["data"])
     {
         double timeCmd = GetTimestamp(dataItem);
@@ -445,13 +447,25 @@ void SequenceManager::Tick(int64_t microTime)
                             case Interpolation::NONE:
                             default:
                                 nextValue = prevIt->second;
-                                shallExec = false;
+                                if (sequenceStartTime != prevIt->first)
+                                {
+                                    shallExec = false;
+                                }
                         }
                     }
 
                     if (shallExec)
                     {
-                        eventManager->ExecuteCommand(devItem.first, nextValue, false);
+                        //TODO: remove try catch if timer catch is used again
+                        try
+                        {
+                            Debug::error("%d: %s, %f", microTime, devItem.first.c_str(), nextValue[0]);
+                            eventManager->ExecuteCommand(devItem.first, nextValue, false);
+                        }
+                        catch(const std::exception& e)
+                        {
+                            
+                        }
                     }
                 }
                 else
@@ -512,7 +526,15 @@ void SequenceManager::StartAbortSequence()
             {
                 Debug::info(it.key() + " | %d", (uint8_t)it.value());
                 std::vector<double> valueList = it.value();
-                eventManager->ExecuteCommand(it.key(), valueList, false);
+                //TODO: potential undefined state when exception is thrown
+                try
+                {
+                    eventManager->ExecuteCommand(it.key(), valueList, false);
+                }
+                catch(const std::exception& e)
+                {
+                    Debug::error("Error in AbortSequence, ignoring command...");
+                }
             }
         }
         syncMtx.unlock();

@@ -60,6 +60,7 @@ private:
     std::map<int64_t, std::map<std::string, double[2]>> sensorsNominalRangeTimeMap;
     std::map<std::string, std::map<int64_t, double[2]>> sensorsNominalRangeMap;
     std::map<std::string, std::map<int64_t, std::vector<double>>> deviceMap;
+    int64_t sequenceStartTime = INT64_MIN;
 
     LLInterface *llInterface = nullptr;
     EventManager *eventManager = nullptr;

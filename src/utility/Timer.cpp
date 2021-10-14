@@ -273,13 +273,14 @@ void Timer::internalLoop(void){
             Debug::error("Timer - internalContinousLoop: %s, aborting Timer...", e.what());
             try 
             {
-                stop();
+                //TODO: stop if teststand is ready
+                //stop();
             }
             catch (std::exception &e)
             {
-                Debug::error("Timer - internalContinousLoop: %s, stop callback failed", e.what());
+                //Debug::error("Timer - internalContinousLoop: %s, stop callback failed", e.what());
             }
-            break;
+            // break;
         }
 
         //get time after callback finished
