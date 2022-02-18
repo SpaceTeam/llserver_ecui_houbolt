@@ -15,6 +15,7 @@
   "CAN" :
   {
     "node_count" : 7,
+    "DRIVER" : "Kvaser",
     "BUS" :
     {
         "ARBITRATION":

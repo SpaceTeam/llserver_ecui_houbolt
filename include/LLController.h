@@ -37,7 +37,7 @@ private:
     ~LLController();
 public:
 
-    void Init(ServerMode serverMode);
+    void Init(std::string _configPath);
 
     bool IsInitialized();
 
