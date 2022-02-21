@@ -16,6 +16,7 @@
   {
     "node_count" : 7,
     "DRIVER" : "SocketCAN",
+    "DEVICE": "vcan0",
     "BUS" :
     {
         "ARBITRATION":
