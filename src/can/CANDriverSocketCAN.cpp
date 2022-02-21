@@ -35,7 +35,8 @@ CANDriverSocketCAN::CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &,
 	strcpy(ifr.ifr_name, canDevice.c_str());
 	ioctl(canSocket, SIOCGIFINDEX, &ifr);
 
-	// TODO: set bit timing
+	// TODO: set bit timing (e.g. using libsocketcan when it starts supporting CAN FD), currently must be set using ip link
+	// TODO: get settings from json here instead of in can manager to avoid needing the same settings for all can driver types
 
 	// add filter to ignore messages with direction=0
 	struct can_filter rfilter[1];

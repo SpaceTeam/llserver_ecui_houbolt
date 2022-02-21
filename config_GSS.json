@@ -14,23 +14,23 @@
   },
   "CAN" :
   {
-    "node_count" : 7,
+    "node_count" : 3,
     "DRIVER" : "SocketCAN",
-    "DEVICE": "vcan0",
+    "DEVICE": "can0",
     "BUS" :
     {
         "ARBITRATION":
         {
           "bitrate" : 1000000,
-          "time_segment_1" : 7,
-          "time_segment_2" : 2,
+          "time_segment_1" : 12,
+          "time_segment_2" : 16,
           "sync_jump_width" : 1,
           "no_sampling_points" : 1
         },
         "DATA":
         {
           "bitrate" : 8000000,
-          "time_segment_1" : 7,
+          "time_segment_1" : 1,
           "time_segment_2" : 2,
           "sync_jump_width" : 1
         }
@@ -43,7 +43,6 @@
   "WEBSERVER":
   {
     "ip": "127.0.0.1",
-    "ip@hq": "10.32.7.120",
     "port": 5555,
     "state_transmission_rate": 15.0,
     "timer_sync_rate": 10,
