@@ -8,11 +8,24 @@
 
 
 CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
-								 std::function<void(std::string *)> onErrorCallback,
-								 CANParams arbitrationParams,
-								 CANParams dataParams) :
-	CANDriver(onRecvCallback, onErrorCallback, arbitrationParams, dataParams)
+								 std::function<void(std::string *)> onErrorCallback) :
+	CANDriver(onRecvCallback, onErrorCallback)
 {
+    //arbitration bus parameters
+    int32_t bitrate = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/bitrate"));
+    int32_t tseg1 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_segment_1"));
+    int32_t tseg2 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_segment_2"));
+    int32_t sjw = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/sync_jump_width"));
+    int32_t noSamp = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/no_sampling_points"));
+    arbitrationParams = {bitrate, tseg1, tseg2, sjw, noSamp};
+
+    //data bus parameters
+    int64_t bitrateData = std::get<int>(Config::getData("CAN/BUS/DATA/bitrate"));
+    int32_t tseg1Data = std::get<int>(Config::getData("CAN/BUS/DATA/time_segment_1"));
+    int32_t tseg2Data = std::get<int>(Config::getData("CAN/BUS/DATA/time_segment_2"));
+    int32_t sjwData = std::get<int>(Config::getData("CAN/BUS/DATA/sync_jump_width"));
+    dataParams = {bitrateData, tseg1Data, tseg2Data, sjwData};
+
     canStatus stat;
     for (size_t i = 0; i < CAN_CHANNELS; i++)
     {

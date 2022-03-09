@@ -20,15 +20,16 @@ class CANDriverKvaser : public CANDriver
     private:
         canHandle canHandles[CAN_CHANNELS];
 
+		CANParams arbitrationParams;
+		CANParams dataParams;
+
         static void OnCANCallback(int handle, void *driver, unsigned int event);
         std::string CANError(canStatus status);
         canStatus InitializeCANChannel(uint32_t canChannelID);
 
     public:
         CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
-						std::function<void(std::string *)> onErrorCallback,
-						CANParams arbitrationParams,
-						CANParams dataParams);
+						std::function<void(std::string *)> onErrorCallback);
         ~CANDriverKvaser();
 
         void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength);

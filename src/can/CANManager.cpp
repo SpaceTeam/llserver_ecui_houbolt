@@ -52,22 +52,6 @@ CANResult CANManager::Init()
             Debug::print("CANMapping initialized");
 
             Debug::print("Initializing CANDriver...");
-            //arbitration bus parameters
-            int32_t bitrate = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/bitrate"));
-            int32_t tseg1 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_segment_1"));
-            int32_t tseg2 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_segment_2"));
-            int32_t sjw = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/sync_jump_width"));
-            int32_t noSamp = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/no_sampling_points"));
-
-            CANParams arbitrationParams = {bitrate, tseg1, tseg2, sjw, noSamp};
-
-            //data bus parameters
-            int64_t bitrateData = std::get<int>(Config::getData("CAN/BUS/DATA/bitrate"));
-            int32_t tseg1Data = std::get<int>(Config::getData("CAN/BUS/DATA/time_segment_1"));
-            int32_t tseg2Data = std::get<int>(Config::getData("CAN/BUS/DATA/time_segment_2"));
-            int32_t sjwData = std::get<int>(Config::getData("CAN/BUS/DATA/sync_jump_width"));
-
-            CANParams dataParams = {bitrateData, tseg1Data, tseg2Data, sjwData};
 
             std::string can_driver = std::get<std::string>(Config::getData("CAN/DRIVER"));
 
@@ -79,16 +63,14 @@ CANResult CANManager::Init()
 				#else
             	Debug::print("Using Kvaser CAN driver");
 				canDriver = new CANDriverKvaser(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
-				                                std::bind(&CANManager::OnCANError, this, std::placeholders::_1),
-				                                arbitrationParams, dataParams);
+				                                std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
 				#endif
             }
             if(can_driver == "SocketCAN")
 			{
             	Debug::print("Using SocketCAN driver");
             	canDriver = new CANDriverSocketCAN(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
-				                                   std::bind(&CANManager::OnCANError, this, std::placeholders::_1),
-				                                   arbitrationParams, dataParams);
+				                                   std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
 			}
             else
             {

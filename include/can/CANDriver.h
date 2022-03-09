@@ -43,14 +43,9 @@ class CANDriver
 		std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback;
 		std::function<void(std::string *)> onErrorCallback;
 
-		CANParams arbitrationParams;
-		CANParams dataParams;
-
     public:
         CANDriver(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
-                  std::function<void(std::string *)> onErrorCallback,
-                  CANParams arbitrationParams,
-                  CANParams dataParams);
+                  std::function<void(std::string *)> onErrorCallback);
         virtual ~CANDriver();
 
         virtual void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength);

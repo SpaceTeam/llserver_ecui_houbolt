@@ -16,25 +16,7 @@
   {
     "node_count" : 3,
     "DRIVER" : "SocketCAN",
-    "DEVICE": ["can0"],
-    "BUS" :
-    {
-        "ARBITRATION":
-        {
-          "bitrate" : 1000000,
-          "time_segment_1" : 12,
-          "time_segment_2" : 16,
-          "sync_jump_width" : 1,
-          "no_sampling_points" : 1
-        },
-        "DATA":
-        {
-          "bitrate" : 8000000,
-          "time_segment_1" : 1,
-          "time_segment_2" : 2,
-          "sync_jump_width" : 1
-        }
-    }
+    "DEVICE": ["can0"]
   },
   "LLSERVER" :
   {

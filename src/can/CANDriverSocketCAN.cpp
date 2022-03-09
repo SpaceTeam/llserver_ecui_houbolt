@@ -14,10 +14,8 @@
 
 
 CANDriverSocketCAN::CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
-									   std::function<void(std::string *)> onErrorCallback,
-									   CANParams arbitrationParams,
-									   CANParams dataParams) :
-	CANDriver(onRecvCallback, onErrorCallback, arbitrationParams, dataParams)
+									   std::function<void(std::string *)> onErrorCallback) :
+	CANDriver(onRecvCallback, onErrorCallback)
 {
 	canDevices = std::get<std::vector<std::string>>(Config::getData("CAN/DEVICE"));
 
@@ -36,7 +34,6 @@ CANDriverSocketCAN::CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &,
 	ioctl(canSocket, SIOCGIFINDEX, &ifr);
 
 	// TODO: set bit timing (e.g. using libsocketcan when it starts supporting CAN FD), currently must be set using ip link
-	// TODO: get settings from json here instead of in can manager to avoid needing the same settings for all can driver types
 
 	// add filter to ignore messages with direction=0
 	struct can_filter rfilter[1];
