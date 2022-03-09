@@ -16,7 +16,7 @@ class CANDriverSocketCAN : public CANDriver
 		bool done = false;
 		std::thread* receiveThread;
 
-		std::string canDevice;
+		std::vector<std::string> canDevices;
 		int canSocket;
 
     public:

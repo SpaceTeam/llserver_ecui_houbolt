@@ -19,7 +19,7 @@ CANDriverSocketCAN::CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &,
 									   CANParams dataParams) :
 	CANDriver(onRecvCallback, onErrorCallback, arbitrationParams, dataParams)
 {
-	canDevice = std::get<std::string>(Config::getData("CAN/DEVICE"));
+	canDevices = std::get<std::vector<std::string>>(Config::getData("CAN/DEVICE"));
 
 	// create can socket
 	canSocket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
@@ -32,7 +32,7 @@ CANDriverSocketCAN::CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &,
 
 	// find interface index of our can device
 	struct ifreq ifr;
-	strcpy(ifr.ifr_name, canDevice.c_str());
+	strcpy(ifr.ifr_name, canDevices[0].c_str());
 	ioctl(canSocket, SIOCGIFINDEX, &ifr);
 
 	// TODO: set bit timing (e.g. using libsocketcan when it starts supporting CAN FD), currently must be set using ip link
@@ -56,7 +56,7 @@ CANDriverSocketCAN::CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &,
 	// start thread that handles incoming messages
 	receiveThread = new std::thread(&CANDriverSocketCAN::receiveLoop, this);
 
-	Debug::print("CANDriverSocketCAN: init with device %s done.", canDevice.c_str());
+	Debug::print("CANDriverSocketCAN: init with device %s done.", canDevices[0].c_str());
 }
 
 CANDriverSocketCAN::~CANDriverSocketCAN()
