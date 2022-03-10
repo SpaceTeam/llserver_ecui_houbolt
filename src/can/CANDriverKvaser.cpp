@@ -5,7 +5,7 @@
 #include <string>
 #include "can_houbolt/can_cmds.h"
 #include "utility/utils.h"
-
+#include "utility/Config.h"
 
 CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
 								 std::function<void(std::string *)> onErrorCallback) :
