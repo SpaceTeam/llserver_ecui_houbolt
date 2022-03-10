@@ -31,21 +31,8 @@
     "timer_sync_interval": 100000,
 	"sensors_smoothing_factor": 0.3
   },
-  "WARNLIGHT": {
-    "ip": "127.0.0.1",
-    "port": 25556
-  },
   "TMPoE": {
     "ip": "127.0.0.1",
     "port": 25557
-  },
-  "I2C": {
-    "address" : 104
-  },
-  "Battery": {
-    "full": 12600,
-    "empty_threshold": 9100,
-    "low_threshold": 9900,
-    "voltage_hysterisis": 100
   }
 }

@@ -8,7 +8,6 @@
 #include "utility/Config.h"
 #include "utility/utils.h"
 #include "driver/SocketOld.h"
-#include "hcp/HcpManager.h"
 #include "SequenceManager.h"
 #include "LLInterface.h"
 #include "EcuiSocket.h"

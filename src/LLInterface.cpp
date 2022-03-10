@@ -6,7 +6,6 @@
 #include <math.h>
 #include <utility/utils.h>
 
-//#include "hcp/HcpManager.h"
 #include "EcuiSocket.h"
 #include "utility/Timer.h"
 #include "utility/Config.h"
@@ -37,13 +36,6 @@ void LLInterface::Init()
 {
     if (!isInitialized)
     {
-//        Debug::print("Initializing HcpManager...");
-//        HcpManager::Init();
-//        Debug::print("Initializing HcpManager done\n");
-//        Debug::print("Starting periodic sensor fetching...");
-//        HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
-//        Debug::print("Periodic sensor fetching started\n");
-
         Debug::print("Initializing EventManager...");
         eventManager = EventManager::Instance();
         eventManager->Init();
@@ -91,8 +83,6 @@ void LLInterface::Init()
         sensorStateTimer->startContinous(0, sensorStateSamplingInterval,
                 std::bind(&LLInterface::FilterSensors, this, std::placeholders::_1),
                 std::bind(&LLInterface::StopFilterSensors, this));
-        Debug::print("Connecting to warning light...");
-        warnLight = new WarnLight(0);
 
         useTMPoE = std::get<bool>(Config::getData("useTMPoE"));
         if (useTMPoE)
@@ -100,9 +90,6 @@ void LLInterface::Init()
             Debug::print("Initializing TMPoE...");
             tmPoE = new TMPoE(0, 50);
         }
-        //i2cDevice = new I2C(0, "someDev"); //not in use right now
-
-
 
         isInitialized = true;
     }
@@ -114,10 +101,7 @@ LLInterface::~LLInterface()
 {
     if (isInitialized)
     {
-        //Debug::print("Shutting down I2C...");
-        //delete i2cDevice;
         Debug::print("Shutting down Debug...");
-        delete warnLight;
         if (useTMPoE)
         {
             Debug::print("Shutting down Debug...");
@@ -393,28 +377,20 @@ void LLInterface::SetState(std::string stateName, double value, uint64_t timesta
 
 void LLInterface::TurnRed()
 {
-    warnLight->SetColor(255, 0, 0);
-    warnLight->SetMode("default");
-    warnLight->StopBuzzer();
+
 }
 
 void LLInterface::TurnGreen()
 {
-    warnLight->SetColor(0, 255, 0);
-    warnLight->SetMode("spin");
-    warnLight->StopBuzzer();
+
 }
 
 void LLInterface::TurnYellow()
 {
-    warnLight->SetColor(255, 255, 0);
-    warnLight->SetMode("spin");
-    warnLight->StopBuzzer();
+
 }
 
 void LLInterface::BeepRed()
 {
-    warnLight->SetColor(255, 0, 0);
-    warnLight->SetMode("blink");
-    warnLight->StartBuzzerBeep(500);
+
 }

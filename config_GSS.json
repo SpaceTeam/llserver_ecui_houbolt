@@ -5,7 +5,6 @@
       "printWarnings": true,
       "printInfos": true
   },
-  "useTMPoE": false,
   "socket_msg_size": 65536,
   "mapping_path": "mapping/GssMapping.json",
   "LOGGING": {
@@ -30,22 +29,10 @@
     "timer_sync_rate": 10,
     "sensors_smoothing_factor": 0.3
   },
-  "WARNLIGHT": {
-    "ip": "127.0.0.1",
-    "port": 25556
-  },
+  "useTMPoE": false,
   "TMPoE": {
     "ip": "127.0.0.1",
     "port": 25557
-  },
-  "I2C": {
-    "address" : 104
-  },
-  "Battery": {
-    "full": 12600,
-    "empty_threshold": 9100,
-    "low_threshold": 9900,
-    "voltage_hysterisis": 100
   },
   "INFLUXDB":{
     "database_ip": "127.0.0.1",
