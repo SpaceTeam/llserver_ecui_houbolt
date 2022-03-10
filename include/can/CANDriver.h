@@ -12,7 +12,7 @@
 #include <functional>
 #include <string>
 #include <canlib.h>
-#include <bus_params_tq.h>
+//#include <bus_params_tq.h>
 
 #define CAN_CHANNELS 3
 

@@ -524,7 +524,7 @@ void SequenceManager::StartAbortSequence()
         {
             if (it.key().compare("timestamp") != 0)
             {
-                Debug::info(it.key() + " | %d", (uint8_t)it.value());
+                // Debug::info(it.key() + " | %d", (uint8_t)it.value());
                 std::vector<double> valueList = it.value();
                 //TODO: potential undefined state when exception is thrown
                 try

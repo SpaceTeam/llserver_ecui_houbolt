@@ -43,7 +43,7 @@
     "ip": "127.0.0.1",
     "ip@hq": "10.32.7.120",
     "port": 5555,
-    "state_transmission_rate": 15.0,
+    "state_transmission_rate": 10.0,
     "timer_sync_rate": 10,
     "sensors_smoothing_factor": 0.3
   },

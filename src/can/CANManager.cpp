@@ -6,7 +6,7 @@
 #include <thread>
 #include <future>
 #include <utility>
-#include <bus_params_tq.h>
+//#include <bus_params_tq.h>
 
 #include "utility/Config.h"
 #include "can/CANManager.h"
