@@ -90,6 +90,19 @@ void SequenceManager::Init()
     isInitialized = true;
 }
 
+bool SequenceManager::GetAutoAbort()
+{
+    return isAutoAbort;
+}
+
+void SequenceManager::SetAutoAbort(bool active)
+{
+    if (!isRunning)
+    {
+        isAutoAbort = active;
+    }
+}
+
 
 void SequenceManager::StopSequence()
 {

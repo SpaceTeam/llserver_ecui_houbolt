@@ -138,12 +138,20 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             }
             else if (type.compare("send-postseq-comment") == 0)
             {
-               seqManager->WritePostSeqComment(msg["content"][0]);
+                seqManager->WritePostSeqComment(msg["content"][0]);
             }
             //TODO: MP Move this logic to state and event manager
             else if (type.compare("abort") == 0)
             {
-               seqManager->AbortSequence("manual abort");
+                seqManager->AbortSequence("manual abort");
+            }
+            else if (type.compare("auto-abort-change") == 0)
+            {
+                bool isAutoAbortActive = msg["content"];
+                seqManager->SetAutoAbort(isAutoAbortActive);
+                //send it to server as acknowledgement
+                isAutoAbortActive = seqManager->GetAutoAbort();
+                EcuiSocket::SendJson("auto-abort-change", isAutoAbortActive);
             }
             //TODO: MP probably not even needed
             else if (type.compare("states-load") == 0)
@@ -154,6 +162,9 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                 //send all states to initialize correctly
                 nlohmann::json states = llInterface->GetAllStates();
                 EcuiSocket::SendJson("states", states);
+
+                bool isAutoAbortActive = seqManager->GetAutoAbort();
+                EcuiSocket::SendJson("auto-abort-change", isAutoAbortActive);
             }
             else if (type.compare("states-set") == 0)
             {
