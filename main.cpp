@@ -84,7 +84,7 @@ void testFnc()
     sensorMsg.channel_mask = 0x0000001D;
 
     Can_MessageId_t dataCanID = {0};
-    dataCanID.info.direction = 0;
+    dataCanID.info.direction = 1;
     dataCanID.info.priority = STANDARD_PRIORITY;
     dataCanID.info.special_cmd = STANDARD_SPECIAL_CMD;
     dataCanID.info.node_id = CAN_TEST_NODE_ID;
@@ -107,6 +107,7 @@ void testFnc()
         sensorMsg.channel_data[10] = 0xA0;
         std::copy_n((uint8_t*)&sensorMsg.channel_mask, 4, msg.bit.data.uint8);
         std::copy_n(sensorMsg.channel_data, 11, &msg.bit.data.uint8[4]);
+
 
         manager->OnCANRecv(0, dataCanID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
         std::this_thread::sleep_for(100ms);
