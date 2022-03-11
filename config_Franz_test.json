@@ -14,7 +14,7 @@
   },
   "CAN" :
   {
-    "node_count" : 1,
+    "node_count" : 7,
     "BUS" :
     {
         "ARBITRATION":
@@ -36,14 +36,14 @@
   },
   "LLSERVER" :
   {
-    "sensor_state_sampling_rate": 100
+    "sensor_state_sampling_rate": 10.0
   },
   "WEBSERVER":
   {
-    "ip": "192.168.0.213",
-    "ip@liwoe": "10.0.0.29",
+    "ip": "127.0.0.1",
+    "ip@hq": "10.32.7.120",
     "port": 5555,
-    "state_transmission_rate": 2,
+    "state_transmission_rate": 0.5,
     "timer_sync_rate": 10,
     "sensors_smoothing_factor": 0.3
   },
@@ -71,5 +71,12 @@
     "debug_measurement": "debug",
     "state_measurement": "states",
     "buffer_size": 2048
+  },
+  "THRUST":{
+    "alpha": 0.785398,
+    "beta": 0.785398,
+    "gamma": 0.785398,
+    "d": 0.28,
+    "r": 0.14
   }
 }

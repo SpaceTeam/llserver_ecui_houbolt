@@ -210,11 +210,11 @@ void LLInterface::StartStateTransmission()
 {
     if (!isTransmittingStates)
     {
-        uint64_t stateTransmissionRate = std::get<double>(Config::getData("WEBSERVER/state_transmission_rate"));
+        double stateTransmissionRate = std::get<double>(Config::getData("WEBSERVER/state_transmission_rate"));
         uint64_t stateTransmissionInterval = 1000000.0/stateTransmissionRate;
 
         stateTimer->startContinous(0, stateTransmissionInterval,
-                std::bind(&LLInterface::GetStates, this, std::placeholders::_1),
+                std::bind(static_cast<void (LLInterface::*)(int64_t)>(&LLInterface::GetStates), this, std::placeholders::_1),
                 std::bind(&LLInterface::StopGetStates, this));
         isTransmittingStates = true;
     }
@@ -384,6 +384,27 @@ nlohmann::json LLInterface::GetAllStateLabels()
     }
 
     return statesJson;
+}
+
+nlohmann::json LLInterface::GetStates(nlohmann::json &stateNames)
+{
+    if (!stateNames.is_array())
+    {
+        throw std::runtime_error("LLInterface - GetStates: stateNames must be json array");
+    }
+    std::map<std::string, std::tuple<double, uint64_t, bool>> states;
+    for (const auto& stateName : stateNames)
+    {
+        if (!stateName.is_string())
+        {
+            throw std::runtime_error("LLInterface - GetStates: stateName must be string");
+        }
+           
+        states[stateName] = stateController->GetState(stateName);
+    }
+    nlohmann::json statesJson = StatesToJson(states);
+    return statesJson;
+    
 }
 
 void LLInterface::SetState(std::string stateName, double value, uint64_t timestamp)

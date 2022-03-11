@@ -166,6 +166,11 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                 bool isAutoAbortActive = seqManager->GetAutoAbort();
                 EcuiSocket::SendJson("auto-abort-change", isAutoAbortActive);
             }
+            else if (type.compare("states-get") == 0)
+            {
+                nlohmann::json states = llInterface->GetStates(msg["content"]);
+                EcuiSocket::SendJson("states", states);
+            }
             else if (type.compare("states-set") == 0)
             {
                 if (seqManager->IsSequenceRunning())

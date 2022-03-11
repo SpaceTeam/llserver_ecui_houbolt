@@ -78,6 +78,8 @@ public:
 
     nlohmann::json GetAllStates();
     nlohmann::json GetAllStateLabels();
+    
+    nlohmann::json GetStates(nlohmann::json &stateNames);
     void SetState(std::string stateName, double value, uint64_t timestamp);
 
     void ExecuteCommand(std::string &commandName, std::vector<double> &params, bool testOnly);
