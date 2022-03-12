@@ -9,12 +9,7 @@
 
 #include "utility/Singleton.h"
 
-#include "driver/I2C.h"
-
 #include "utility/json.hpp"
-
-#include "driver/WarnLight.h"
-#include "driver/TmPoE.h"
 #include "utility/JSONMapping.h"
 #include "utility/Timer.h"
 
@@ -27,10 +22,6 @@ class LLInterface : public Singleton<LLInterface>
 {
     friend class Singleton;
 private:
-
-    I2C* i2cDevice = nullptr;
-    WarnLight* warnLight = nullptr;
-    TMPoE *tmPoE = nullptr;
 
     JSONMapping *guiMapping = nullptr;
     CANManager *canManager = nullptr;

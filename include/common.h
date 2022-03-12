@@ -18,11 +18,4 @@ enum class CANResult
 	NOT_IMPLEMENTED
 };
 
-enum class LLResult
-{
-    SUCCESS,
-    ERROR,
-    NOT_IMPLEMENTED
-};
-
 #endif //TXV_ECUI_LLSERVER_COMMON_H
