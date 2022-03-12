@@ -41,6 +41,7 @@ typedef struct
 #include "can/CANDriver.h"
 #include "can_houbolt/channels/generic_channel_def.h"
 #include "utility/RingBuffer.h"
+#include "logging/InfluxDbLogger.h"
 
 class Node : public Channel
 {
@@ -49,6 +50,8 @@ private:
     static const std::vector<std::string> states;
     static const std::map<std::string, std::vector<double>> scalingMap;
     static const std::map<GENERIC_VARIABLES, std::string> variableMap;
+    static InfluxDbLogger *logger;
+    static std::mutex loggerMtx;
 
 private:
     uint8_t canBusChannelID;

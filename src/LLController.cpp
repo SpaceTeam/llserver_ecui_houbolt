@@ -127,27 +127,9 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             else if (type.compare("auto-abort-change") == 0)
             {
                 bool isAutoAbortActive = msg["content"];
-                Debug::print("msg[content]: %d", msg["content"].is_boolean());
-                if (isAutoAbortActive)
-                {
-                    Debug::print("Auto Abort set to: true");
-                }
-                else
-                {
-                    Debug::print("Auto Abort set to: false");
-                }
-                
                 seqManager->SetAutoAbort(isAutoAbortActive);
                 //send it to server as acknowledgement
                 isAutoAbortActive = seqManager->GetAutoAbort();
-                if (isAutoAbortActive)
-                {
-                    Debug::print("Auto Abort get: true");
-                }
-                else
-                {
-                    Debug::print("Auto Abort get: false");
-                }
                 EcuiSocket::SendJson("auto-abort-change", isAutoAbortActive);
             }
             //TODO: MP probably not even needed

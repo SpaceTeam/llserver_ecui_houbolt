@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include <utility>
+#include "utility/Config.h"
 #include "can/DigitalOut.h"
 #include "can/ADC16.h"
 #include "can/ADC16Single.h"
@@ -51,6 +52,9 @@ const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
             {GENERIC_UART_ENABLED, "UARTEnabled"}
         };
 
+InfluxDbLogger *Node::logger = nullptr;
+std::mutex Node::loggerMtx;
+
 /**
  * consider putting event mapping into llinterface
  * @param id
@@ -61,6 +65,17 @@ const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
 Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
     : nodeID(nodeID), firwareVersion(nodeInfo.firmware_version), canBusChannelID(canBusChannelID), driver(driver), Channel::Channel(0xFF, std::move(nodeChannelName), {1.0, 0.0}, this)
 {
+
+    if (logger == nullptr)
+    {
+        logger = new InfluxDbLogger();
+        logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
+                     std::get<int>(Config::getData("INFLUXDB/database_port")),
+                     std::get<std::string>(Config::getData("INFLUXDB/database_name")),
+                     std::get<std::string>(Config::getData("INFLUXDB/fast_sensor_measurement")), MICROSECONDS,
+                     std::get<int>(Config::getData("INFLUXDB/buffer_size")));
+    }
+
     commandMap = {
         {"SetBus1Voltage", {std::bind(&Node::SetBus1Voltage, this, std::placeholders::_1, std::placeholders::_2),{"Value"}}},
         {"GetBus1Voltage", {std::bind(&Node::GetBus1Voltage, this, std::placeholders::_1, std::placeholders::_2),{}}},
@@ -293,6 +308,11 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                     std::lock_guard<std::mutex> lock(bufferMtx);
 
                     latestSensorBuffer[channelID] = {currValue, timestamp};
+
+                    {
+                        std::lock_guard<std::mutex> lock(loggerMtx);
+                        logger->log(ch->GetSensorName(), currValue, timestamp);
+                    }
                     //buffer.push_back(sensor); //TODO: uncomment if implemented
                 }
 

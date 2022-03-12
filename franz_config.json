@@ -52,6 +52,7 @@
     "database_name": "testDb",
     "debug_measurement": "debug",
     "state_measurement": "states",
+    "fast_sensor_measurement": "sensors",
     "buffer_size": 2048
   },
   "THRUST":{

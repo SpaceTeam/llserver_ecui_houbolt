@@ -7,11 +7,13 @@
 #include "common.h"
 
 nlohmann::json Config::data;
+std::string Config::filePath = "";
 
 void Config::Init(std::string filePath) {
 
 	try
 	{
+        Config::filePath = filePath;
 		data = nlohmann::json::parse(utils::loadFile(filePath));
 	}
 	catch(const std::exception& e)
@@ -20,6 +22,11 @@ void Config::Init(std::string filePath) {
 		exit(1);
 	}
 	
+}
+
+std::string Config::GetConfigFilePath()
+{
+    return Config::filePath;
 }
 
 std::variant<int, double, std::string, bool, nlohmann::json> Config::getData(std::vector<std::string> keyChain) {
