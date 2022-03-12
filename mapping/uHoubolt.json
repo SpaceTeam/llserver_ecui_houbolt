@@ -1,6 +1,6 @@
 {
     "CANMapping": {
-        "12" : {
+        "2" : {
             "stringID" : "ecu_ecu",
             "0" : {
                 "stringID" : "fuel_tank_pressure",
