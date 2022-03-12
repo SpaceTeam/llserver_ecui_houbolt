@@ -27,29 +27,10 @@ void LLController::PrintLogo()
     f.close();
 }
 
-void LLController::Init(ServerMode serverMode)
+void LLController::Init(std::string &configPath)
 {
     try
     {
-        std::string configPath = "";
-        switch (serverMode)
-        {
-            case ServerMode::SMALL_TESTSTAND:
-                configPath = "config_small_teststand.json";
-                break;
-            case ServerMode::SMALL_OXFILL:
-                configPath = "config_small_oxfill.json";
-                break;
-            case ServerMode::TEST:
-                configPath = "config_Franz_test.json";
-                break;
-            case ServerMode::LARGE_TESTSTAND:
-                configPath = "config_Franz.json";
-                break;
-            default:
-                exit(1);
-
-        }
         Config::Init(configPath);
 
         Debug::Init();

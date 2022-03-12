@@ -217,28 +217,16 @@ int main(int argc, char const *argv[])
     signal(SIGTERM, signalHandler);
     signal(SIGABRT, signalHandler);
 
-    ServerMode serverMode = ServerMode::LARGE_TESTSTAND;
+    std::string configPath = "";
     if (argc > 1)
+	{
+    	std::string cfgPath(argv[1]);
+    	configPath = cfgPath;
+	}
+    else
     {
-        if (strcmp(argv[1],"--smallTeststand") == 0)
-        {
-            serverMode = ServerMode::SMALL_TESTSTAND;
-            printf("Using Small Teststand Profile...\n");
-        }
-        else if (strcmp(argv[1],"--smallOxfill") == 0)
-        {
-            serverMode = ServerMode::SMALL_OXFILL;
-            printf("Using Small Oxfill Profile...\n");
-        }
-        else if (strcmp(argv[1],"--test") == 0)
-        {
-            serverMode = ServerMode::TEST;
-            printf("Using Franz test Profile...\n");
-        }
-        else
-        {
-            printf("Defaulting to Franz Profile...\n");
-        }
+        std::cerr << "No config file has been provided! Exiting..." << std::endl;
+		exit(1);
     }
 
     #ifdef TEST_LLSERVER
@@ -246,7 +234,7 @@ int main(int argc, char const *argv[])
     #endif
 
     LLController *llController = LLController::Instance();
-    llController->Init(serverMode);
+    llController->Init(configPath);
 
 
     std::string inputStr;

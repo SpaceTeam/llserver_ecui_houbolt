@@ -14,14 +14,6 @@
 
 #include "utility/json.hpp"
 
-enum ServerMode
-{
-	LARGE_TESTSTAND,
-	SMALL_TESTSTAND,
-	SMALL_OXFILL,
-    TEST
-};
-
 class LLController : public Singleton<LLController>
 {
     friend class Singleton;
@@ -37,7 +29,7 @@ private:
     ~LLController();
 public:
 
-    void Init(ServerMode serverMode);
+    void Init(std::string &configPath);
 
     bool IsInitialized();
 
