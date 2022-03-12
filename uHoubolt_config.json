@@ -5,9 +5,8 @@
       "printWarnings": false,
       "printInfos": false
   },
-  "useTMPoE": false,
   "socket_msg_size": 65536,
-  "mapping_path": "mapping/FranzMapping.json",
+  "mapping_path": "mapping/uHoubolt.json",
   "LOGGING": {
     "sensor_log_rate": 100,
     "post_sequence_script": "scripts/plot.sh"
@@ -43,26 +42,9 @@
     "ip": "127.0.0.1",
     "ip@hq": "10.32.7.120",
     "port": 5555,
-    "state_transmission_rate": 15.0,
+    "state_transmission_rate": 10.0,
     "timer_sync_rate": 10,
     "sensors_smoothing_factor": 0.3
-  },
-  "WARNLIGHT": {
-    "ip": "127.0.0.1",
-    "port": 25556
-  },
-  "TMPoE": {
-    "ip": "127.0.0.1",
-    "port": 25557
-  },
-  "I2C": {
-    "address" : 104
-  },
-  "Battery": {
-    "full": 12600,
-    "empty_threshold": 9100,
-    "low_threshold": 9900,
-    "voltage_hysterisis": 100
   },
   "INFLUXDB":{
     "database_ip": "127.0.0.1",
