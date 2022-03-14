@@ -50,6 +50,7 @@ private:
     static const std::vector<std::string> states;
     static const std::map<std::string, std::vector<double>> scalingMap;
     static const std::map<GENERIC_VARIABLES, std::string> variableMap;
+    static bool enableFastLogging;
     static InfluxDbLogger *logger;
     static std::mutex loggerMtx;
 

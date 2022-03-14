@@ -53,6 +53,7 @@ const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
         };
 
 InfluxDbLogger *Node::logger = nullptr;
+bool Node::enableFastLogging;
 std::mutex Node::loggerMtx;
 
 /**
@@ -68,12 +69,21 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
 
     if (logger == nullptr)
     {
-        logger = new InfluxDbLogger();
-        logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
-                     std::get<int>(Config::getData("INFLUXDB/database_port")),
-                     std::get<std::string>(Config::getData("INFLUXDB/database_name")),
-                     std::get<std::string>(Config::getData("INFLUXDB/fast_sensor_measurement")), MICROSECONDS,
-                     std::get<int>(Config::getData("INFLUXDB/buffer_size")));
+        enableFastLogging = std::get<bool>(Config::getData("INFLUXDB/enable_fast_sensor_logging"));
+        if (enableFastLogging)
+        {
+            Debug::print("Fast logging enabled");
+            logger = new InfluxDbLogger();
+            logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
+                        std::get<int>(Config::getData("INFLUXDB/database_port")),
+                        std::get<std::string>(Config::getData("INFLUXDB/database_name")),
+                        std::get<std::string>(Config::getData("INFLUXDB/fast_sensor_measurement")), MICROSECONDS,
+                        std::get<int>(Config::getData("INFLUXDB/buffer_size")));
+        }
+        else
+        {
+            Debug::print("Fast logging disabled");
+        }
     }
 
     commandMap = {
@@ -309,6 +319,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
 
                     latestSensorBuffer[channelID] = {currValue, timestamp};
 
+                    if (enableFastLogging)
                     {
                         std::lock_guard<std::mutex> lock(loggerMtx);
                         logger->log(ch->GetSensorName(), currValue, timestamp);

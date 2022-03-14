@@ -53,7 +53,8 @@
     "debug_measurement": "debug",
     "state_measurement": "states",
     "fast_sensor_measurement": "sensors",
-    "buffer_size": 2048
+    "buffer_size": 2048,
+    "enable_fast_sensor_logging": false
   },
   "THRUST":{
     "alpha": 0.785398,
