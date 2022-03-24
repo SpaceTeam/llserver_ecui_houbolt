@@ -260,6 +260,9 @@ void CANManager::OnCANInit(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
 }
 
+// auto start = std::chrono::high_resolution_clock::now();
+// auto startPrint = start;
+
 void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
 {
     Can_MessageData_t *canMsg = (Can_MessageData_t *) payload;
@@ -287,8 +290,25 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
         else if (canMsg->bit.info.channel_id == GENERIC_CHANNEL_ID && canMsg->bit.cmd_id == GENERIC_RES_DATA)
         {
             //TODO: remove when ringbuffer implemented
+            // Debug::print("Hello chid %d", canMsg->bit.info.channel_id);
+            // Debug::print("");
+            // for (int i=0; i<62; i++)
+            // {
+            //     Debug::print("\b 0x%x",canMsg->bit.data.uint8[i]);
+            // }
+            // Debug::print("");
             RingBuffer<Sensor_t> buffer;
             node->ProcessSensorDataAndWriteToRingBuffer(canMsg, payloadLength, timestamp, buffer);
+
+            // using namespace std::chrono_literals;
+            // auto end = std::chrono::high_resolution_clock::now();
+            // auto delay = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+            // if (end-startPrint > 1s)
+            // {
+            //     Debug::print("last period: %d", delay);
+            //     startPrint = end;
+            // }
+            // start = end;
         }
         else
         {

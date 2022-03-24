@@ -7,7 +7,7 @@
   },
   "useTMPoE": false,
   "socket_msg_size": 65536,
-  "mapping_path": "mapping/FranzMapping.json",
+  "mapping_path": "mapping/Franz.json",
   "LOGGING": {
     "sensor_log_rate": 100,
     "post_sequence_script": "scripts/plot.sh"

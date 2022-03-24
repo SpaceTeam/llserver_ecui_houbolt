@@ -308,6 +308,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                 ch = channelMap[channelID];
 
                 ch->GetSensorValue(valuePtr, currValueLength, currValue);
+                // Debug::print("Hello chid %d, value %f", channelID, currValue);
                 if (currValueLength <= 0)
                 {
                     throw std::logic_error("Node - ProcessSensorDataAndWriteToRingBuffer: value length from channel is 0");

@@ -8,7 +8,6 @@
   "socket_msg_size": 65536,
   "mapping_path": "mapping/uHoubolt.json",
   "LOGGING": {
-    "sensor_log_rate": 100,
     "post_sequence_script": "scripts/plot.sh"
   },
   "CAN" :
@@ -52,7 +51,9 @@
     "database_name": "testDb",
     "debug_measurement": "debug",
     "state_measurement": "states",
-    "buffer_size": 2048
+    "fast_sensor_measurement": "sensors",
+    "buffer_size": 65536,
+    "enable_fast_sensor_logging": true
   },
   "THRUST":{
     "alpha": 0.785398,

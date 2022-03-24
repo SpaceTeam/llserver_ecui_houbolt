@@ -1,6 +1,6 @@
 {
     "CANMapping": {
-        "2" : {
+        "6" : {
             "stringID" : "ecu_ecu",
             "0" : {
                 "stringID" : "fuel_tank_pressure",
@@ -108,7 +108,7 @@
                 "offset" : 0
             }
         },
-        "3" : {
+        "9" : {
             "stringID" : "ecu_tankwagerl",
             "0" : {
                 "stringID" : "pressurant_pressure",
@@ -216,7 +216,7 @@
                 "offset" : 0
             }
         },
-        "4" : {
+        "7" : {
             "stringID" : "ecu_pmu",
             "0" : {
                 "stringID" : "cell_voltage_control",
@@ -320,6 +320,11 @@
             },
             "20" : {
                 "stringID" : "unused_pmu_pressure_control",
+                "slope" : 1.0,
+                "offset" : 0
+            },
+            "21" : {
+                "stringID" : "pmu_imu",
                 "slope" : 1.0,
                 "offset" : 0
             }
