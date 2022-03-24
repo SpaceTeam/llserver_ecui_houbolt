@@ -128,6 +128,16 @@ void CANDriver::OnCANCallback(int handle, void *driver, unsigned int event)
             }
             break;   
         }
+        case canNOTIFY_STATUS:
+        {
+            uint64_t statFlags = 0;
+            stat = canReadStatus(handle, &statFlags);
+            Debug::print("canNOTIFY_STATUS changed");
+            if(statFlags & canSTAT_OVERRUN) {
+                Debug::print("canNOTIFY_STATUS: buffer overflow");
+            }
+            break;
+        }
         case canNOTIFY_RX:
         {
             while (stat == canOK) {
@@ -240,7 +250,7 @@ canStatus CANDriver::InitializeCANChannel(uint32_t canBusChannelID) {
     }
 
     // Register callback for receiving a msg when the rcv buffer has been empty or when an error frame got received
-    stat = kvSetNotifyCallback(canHandles[canBusChannelID], (kvCallback_t) &CANDriver::OnCANCallback, (void *) this, canNOTIFY_RX | canNOTIFY_ERROR);
+    stat = kvSetNotifyCallback(canHandles[canBusChannelID], (kvCallback_t) &CANDriver::OnCANCallback, (void *) this, canNOTIFY_RX | canNOTIFY_ERROR | canNOTIFY_STATUS);
     if(stat < 0) {
         return stat;
     }
