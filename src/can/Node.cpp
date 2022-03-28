@@ -64,7 +64,7 @@ std::mutex Node::loggerMtx;
  */
 
 Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
-    : nodeID(nodeID), firwareVersion(nodeInfo.firmware_version), canBusChannelID(canBusChannelID), driver(driver), Channel::Channel(0xFF, std::move(nodeChannelName), {1.0, 0.0}, this)
+    : Channel::Channel(0xFF, std::move(nodeChannelName), {1.0, 0.0}, this), canBusChannelID(canBusChannelID), nodeID(nodeID), firwareVersion(nodeInfo.firmware_version), driver(driver)
 {
 
     if (logger == nullptr)
@@ -183,7 +183,7 @@ std::map<std::string, std::tuple<double, uint64_t>> Node::GetLatestSensorData()
     std::memcpy(copy, latestSensorBuffer, bytes);
     bufferMtx.unlock();
 
-    for (int32_t i = 0; i < latestSensorBufferLength; i++)
+    for (size_t i = 0; i < latestSensorBufferLength; i++)
     {
         if (channelMap.find(i) != channelMap.end())
         {
@@ -276,7 +276,7 @@ uint8_t Node::GetCANBusChannelID()
 //TODO: adapt to CanMessageData_t type
 //TODO: add buffer writing
 void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint32_t &canMsgLength,
-                                                 uint64_t &timestamp, RingBuffer<Sensor_t> &buffer)
+                                                 uint64_t &timestamp)
 {
     //TODO: make this more efficient
     if (canMsgLength < 2)
@@ -313,7 +313,6 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                 {
                     throw std::logic_error("Node - ProcessSensorDataAndWriteToRingBuffer: value length from channel is 0");
                 }
-                Sensor_t sensor = {{{nodeID, channelID}}, {currValue, timestamp}};
 
                 {
                     std::lock_guard<std::mutex> lock(bufferMtx);
@@ -397,7 +396,7 @@ void Node::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, 
 
 void Node::NodeStatusResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
 {
-    NodeStatusMsg_t *statusMsg = (NodeStatusMsg_t *) canMsg->bit.data.uint8;
+    //NodeStatusMsg_t *statusMsg = (NodeStatusMsg_t *) canMsg->bit.data.uint8;
 
     throw std::logic_error("Node - NodeStatusResponse: not implemented");
 }

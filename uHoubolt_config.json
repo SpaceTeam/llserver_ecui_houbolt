@@ -30,7 +30,9 @@
           "time_segment_2" : 2,
           "sync_jump_width" : 1
         }
-    }
+    },
+    "DRIVER" : "Kvaser",
+    "DEVICE": ["can0"]
   },
   "LLSERVER" :
   {
@@ -53,7 +55,7 @@
     "state_measurement": "states",
     "fast_sensor_measurement": "sensors",
     "buffer_size": 65536,
-    "enable_fast_sensor_logging": false
+    "enable_fast_sensor_logging": true
   },
   "THRUST":{
     "alpha": 0.785398,

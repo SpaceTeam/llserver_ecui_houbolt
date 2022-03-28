@@ -79,7 +79,7 @@ void CANDriverSocketCAN::SendCANMessage(uint32_t canChannelID, uint32_t canID, u
 
 	if(write(canSocket, &frame, sizeof(struct canfd_frame)) != sizeof(struct canfd_frame))
 	{
-		std::cout << errno << std::endl;
+		Debug::print("Errno: 0x%x", errno);
 		throw std::runtime_error("CAN write failed");
 	}
 }

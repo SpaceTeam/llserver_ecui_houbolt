@@ -66,7 +66,7 @@ CANResult CANManager::Init()
 				                                std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
 				#endif
             }
-            if(can_driver == "SocketCAN")
+            else if(can_driver == "SocketCAN")
 			{
             	Debug::print("Using SocketCAN driver");
             	canDriver = new CANDriverSocketCAN(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
@@ -82,7 +82,7 @@ CANResult CANManager::Init()
             RequestCANInfo();
             using namespace std::chrono_literals;
             //TODO: wait for user input or expected node count to continue
-            int32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
+            uint32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
             uint32_t currNodeCount = 0;
 
             bool canceled = false;
@@ -119,7 +119,7 @@ CANResult CANManager::Init()
             nodeMapMtx.unlock();
 
             Debug::print("Initialized all nodes, press enter to continue...\n");
-            std::cin.get();
+            // no need for std::cin.get(); here, since the thread needs an input to quit
 
             initialized = true;
         }
@@ -164,6 +164,8 @@ CANResult CANManager::RequestCANInfo()
     canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength);
     canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength);
     //canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength);
+
+	return CANResult::SUCCESS;
 }
 
 /**
@@ -292,8 +294,7 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 			else if (canMsg->bit.info.channel_id == GENERIC_CHANNEL_ID && canMsg->bit.cmd_id == GENERIC_RES_DATA)
 			{
 				//TODO: remove when ringbuffer implemented
-				RingBuffer<Sensor_t> buffer;
-				node->ProcessSensorDataAndWriteToRingBuffer(canMsg, payloadLength, timestamp, buffer);
+				node->ProcessSensorDataAndWriteToRingBuffer(canMsg, payloadLength, timestamp);
 			}
 			else
 			{

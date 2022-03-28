@@ -72,7 +72,7 @@ void CANDriverKvaser::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint
             break;
         }
     }
-    if (dlc == -1)
+    if (dlc == (uint32_t)(-1))
     {
         throw std::runtime_error("CANDriver - SendCANMessage: correct dlc couldn't be found");
     }
@@ -259,6 +259,7 @@ canStatus CANDriverKvaser::InitializeCANChannel(uint32_t canBusChannelID) {
     if(stat < 0) {
         throw new std::runtime_error(CANError(stat));
     } */
+    return canOK;
 }
 
 

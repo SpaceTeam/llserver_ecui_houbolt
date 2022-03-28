@@ -17,10 +17,11 @@ CANDriver::~CANDriver()
 
 void CANDriver::SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength)
 {
-	std::cerr << "CANDriver::SendCANMessage called, probably in error" << std::endl;
+	std::cerr << "CANDriver::SendCANMessage called, probably an error" << std::endl;
 }
 
 std::map<std::string, bool> CANDriver::GetCANStatusReadable(uint32_t canChannelID)
 {
-	std::cerr << "CANDriver::GetCANStatusReadable called, probably in error" << std::endl;
+	std::cerr << "CANDriver::GetCANStatusReadable called, probably an error" << std::endl;
+	return std::map<std::string, bool>();
 }

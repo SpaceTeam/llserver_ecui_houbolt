@@ -153,7 +153,7 @@ vector<uint8_t> SocketServer::RecvBytes(uint32_t sizeInBytes)
             }
             else
             {
-                if (recvBytes != sizeInBytes)
+                if (recvBytes != (int)(sizeInBytes))
                 {
                     Debug::error("in ServerSocket: requested msg not fully received");
                 }
