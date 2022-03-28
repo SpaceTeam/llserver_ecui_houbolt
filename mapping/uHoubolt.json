@@ -331,53 +331,53 @@
         }
     },
     "EventMapping" : {
-        "gui:igniter0" : [{
+        "gui:igniter0:sensor" : [{
             "command" : "igniter0:SetState",
-            "parameters" : ["gui:igniter0"]
+            "parameters" : ["gui:igniter0:sensor"]
         }],
-        "gui:igniter1" : [{
+        "gui:igniter1:sensor" : [{
             "command" : "igniter1:SetState",
-            "parameters" : ["gui:igniter1"]
+            "parameters" : ["gui:igniter1:sensor"]
         }],
-        "gui:supercharge_valve" : [{
+        "gui:supercharge_valve:sensor" : [{
             "command" : "supercharge_valve:SetState",
-            "parameters" : ["gui:supercharge_valve"]
+            "parameters" : ["gui:supercharge_valve:sensor"]
         }],
-        "gui:camera0" : [{
+        "gui:camera0:sensor" : [{
             "command" : "camera0:SetState",
-            "parameters" : ["gui:camera0"]
+            "parameters" : ["gui:camera0:sensor"]
         }],
-        "gui:camera1" : [{
+        "gui:camera1:sensor" : [{
             "command" : "camera1:SetState",
-            "parameters" : ["gui:camera1"]
+            "parameters" : ["gui:camera1:sensor"]
         }],
-        "gui:pump_cold_water" : [{
+        "gui:pump_cold_water:sensor" : [{
             "command" : "pump_cold_water:SetState",
-            "parameters" : ["gui:pump_cold_water"]
+            "parameters" : ["gui:pump_cold_water:sensor"]
         }],
-        "gui:pump_hot_water" : [{
+        "gui:pump_hot_water:sensor" : [{
             "command" : "pump_hot_water:SetState",
-            "parameters" : ["gui:pump_hot_water"]
+            "parameters" : ["gui:pump_hot_water:sensor"]
         }],
-        "gui:valves" : [{
+        "gui:valves:sensor" : [{
             "command" : "valves:SetState",
-            "parameters" : ["gui:valves"]
+            "parameters" : ["gui:valves:sensor"]
         }],
-        "gui:fuel_main_valve" : [{
+        "gui:fuel_main_valve:sensor" : [{
             "command" : "fuel_main_valve:SetTargetPosition",
-            "parameters" : ["gui:fuel_main_valve"]
+            "parameters" : ["gui:fuel_main_valve:sensor"]
         }],
-        "gui:ox_main_valve" : [{
+        "gui:ox_main_valve:sensor" : [{
             "command" : "ox_main_valve:SetTargetPosition",
-            "parameters" : ["gui:ox_main_valve"]
+            "parameters" : ["gui:ox_main_valve:sensor"]
         }],
-        "gui:ox_tanking_valve" : [{
+        "gui:ox_tanking_valve:sensor" : [{
             "command" : "ox_tanking_valve:SetTargetPosition",
-            "parameters" : ["gui:ox_tanking_valve"]
+            "parameters" : ["gui:ox_tanking_valve:sensor"]
         }],
-        "gui:ox_vent_valve" : [{
+        "gui:ox_vent_valve:sensor" : [{
             "command" : "ox_vent_valve:SetTargetPosition",
-            "parameters" : ["gui:ox_vent_valve"]
+            "parameters" : ["gui:ox_vent_valve:sensor"]
         }]
     },
     "GUIMapping" :

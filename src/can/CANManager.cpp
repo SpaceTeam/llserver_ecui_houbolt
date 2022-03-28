@@ -297,6 +297,7 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
             //     Debug::print("\b 0x%x",canMsg->bit.data.uint8[i]);
             // }
             // Debug::print("");
+
             RingBuffer<Sensor_t> buffer;
             node->ProcessSensorDataAndWriteToRingBuffer(canMsg, payloadLength, timestamp, buffer);
 

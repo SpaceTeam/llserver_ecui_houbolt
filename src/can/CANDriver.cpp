@@ -162,6 +162,7 @@ void CANDriver::OnCANCallback(int handle, void *driver, unsigned int event)
                 //TODO: wrap a try except around
                 //TODO: switch timestamp to current unix time
                 uint64_t softwareTime = utils::getCurrentTimestamp();
+                uint64_t statFlags = 0;
                 //TODO: MP flag is canok but it seems that its actuall canERR_NOMSG, further debugging needed to remove this dlc check
                 if (dlc > 0)
                 {
@@ -169,7 +170,20 @@ void CANDriver::OnCANCallback(int handle, void *driver, unsigned int event)
                 }
                 else
                 {
-                    Debug::error("CANDriver - OnCANCallback: invalid msg detected, ignoring...");
+                    stat = canReadStatus(handle, &statFlags);
+                    if (statFlags & canSTAT_SW_OVERRUN)
+                    {
+                        Debug::error("CANDriver - OnCANCallback: Software Overrun...");
+                    }
+                    else if (statFlags & canSTAT_HW_OVERRUN)
+                    {
+                        Debug::error("CANDriver - OnCANCallback: Hardware Overrun...");
+                    }
+                    else
+                    {
+                        Debug::error("CANDriver - OnCANCallback: canID: %d, dlc: %d, invalid msg detected, ignoring...", id, dlc);
+                    }
+                    Debug::print("\t\tCAN Status Flags: 0x%016x", statFlags);
                 }
                 
                 stat = canRead(handle, &id, data, &dlc, &flags, &timestamp);
