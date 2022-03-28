@@ -38,7 +38,7 @@ typedef struct
 } Sensor_t;
 
 #include "can/Channel.h"
-#include "can/CANDriver.h"
+#include "CANDriverKvaser.h"
 #include "can_houbolt/channels/generic_channel_def.h"
 #include "utility/RingBuffer.h"
 #include "logging/InfluxDbLogger.h"

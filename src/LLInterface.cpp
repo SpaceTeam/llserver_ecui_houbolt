@@ -87,8 +87,6 @@ void LLInterface::Init()
         //WARNING LIGHT init goes here...
         //Debug::print("Connecting to warning light...");
 
-
-
         isInitialized = true;
     }
 }

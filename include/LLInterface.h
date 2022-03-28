@@ -34,7 +34,6 @@ private:
     bool useTMPoE;
 
     bool isTransmittingStates;
-    int32_t warnlightStatus;
 
     Timer* stateTimer;
     Timer* sensorStateTimer;

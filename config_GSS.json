@@ -1,0 +1,52 @@
+{
+  "version": "1.2.4@GSS",
+  "autoabort": false,
+  "DEBUG": {
+      "printWarnings": true,
+      "printInfos": true
+  },
+  "socket_msg_size": 65536,
+  "mapping_path": "mapping/GssMapping.json",
+  "LOGGING": {
+    "sensor_log_rate": 100,
+    "post_sequence_script": "scripts/plot.sh"
+  },
+  "CAN" :
+  {
+    "node_count" : 3,
+    "DRIVER" : "SocketCAN",
+    "DEVICE": ["can0"]
+  },
+  "LLSERVER" :
+  {
+    "sensor_state_sampling_rate": 10.0
+  },
+  "WEBSERVER":
+  {
+    "ip": "127.0.0.1",
+    "port": 5555,
+    "state_transmission_rate": 15.0,
+    "timer_sync_rate": 10,
+    "sensors_smoothing_factor": 0.3
+  },
+  "useTMPoE": false,
+  "TMPoE": {
+    "ip": "127.0.0.1",
+    "port": 25557
+  },
+  "INFLUXDB":{
+    "database_ip": "127.0.0.1",
+    "database_port": 8086,
+    "database_name": "testDb",
+    "debug_measurement": "debug",
+    "state_measurement": "states",
+    "buffer_size": 2048
+  },
+  "THRUST":{
+    "alpha": 0.785398,
+    "beta": 0.785398,
+    "gamma": 0.785398,
+    "d": 0.28,
+    "r": 0.14
+  }
+}

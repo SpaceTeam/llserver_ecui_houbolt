@@ -5,7 +5,7 @@ After=syslog.target network-online.target
 
 [Service]
 Type=simple
-ExecStart=/home/pi/llserver_ecui_houbolt/llserver_ecui_houbolt
+ExecStart=/home/pi/llserver_ecui_houbolt/llserver_ecui_houbolt config_Franz.json
 WorkingDirectory=/home/pi/llserver_ecui_houbolt/
 Restart=always
 RestartSec=10
