@@ -1,33 +1,41 @@
-//
-// Created by luis on 1/12/20.
-//
-
 #include "utility/Config.h"
 #include "utility/utils.h"
 #include "common.h"
 
-nlohmann::json Config::data;
-std::string Config::filePath = "";
 
-void Config::Init(std::string filePath) {
+nlohmann::json Config::data;
+std::string Config::configFilePath = "";
+std::string Config::mappingFilePath = "";
+
+
+void Config::Init(std::string configPath)
+{
+    configFilePath = configPath + "/" + CONFIG_FILE_NAME;
+    mappingFilePath = configPath + "/" + MAPPING_FILE_NAME;
 
 	try
 	{
-        Config::filePath = filePath;
-		data = nlohmann::json::parse(utils::loadFile(filePath));
+		data = nlohmann::json::parse(utils::loadFile(configFilePath));
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << "config file not found" << '\n';
+		std::cerr << "config file not found: " << Config::configFilePath << std::endl;
 		exit(1);
 	}
-	
 }
 
-std::string Config::GetConfigFilePath()
+
+std::string Config::getConfigFilePath()
 {
-    return Config::filePath;
+    return configFilePath;
 }
+
+
+std::string Config::getMappingFilePath()
+{
+    return mappingFilePath;
+}
+
 
 std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>> Config::getData(std::vector<std::string> keyChain) {
     nlohmann::json obj = data;

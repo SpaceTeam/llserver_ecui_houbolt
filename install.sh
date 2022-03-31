@@ -6,11 +6,11 @@ cd "$(dirname "$0")"
 
 sudo apt install -y cmake
 
-sudo cp ecui-llserver-gss.service /etc/systemd/system/
+sudo cp ecui-llserver.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable ecui-llserver-gss.service
-sudo systemctl start ecui-llserver-gss.service
-sudo systemctl status ecui-llserver-gss.service
+sudo systemctl enable ecui-llserver.service
+sudo systemctl start ecui-llserver.service
+sudo systemctl status ecui-llserver.service
 
 sudo chmod +x update.sh
 bash update.sh

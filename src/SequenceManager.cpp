@@ -161,7 +161,7 @@ void SequenceManager::SetupLogging()
     utils::saveFile(currentDirPath + "/AbortSequence.json", jsonAbortSequence.dump(4));
     utils::saveFile(currentDirPath + "/comments.txt", comments);
 
-    std::experimental::filesystem::copy(Config::GetConfigFilePath(), currentDirPath + "/");
+    std::experimental::filesystem::copy(Config::getConfigFilePath(), currentDirPath + "/");
 
 }
 

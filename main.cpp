@@ -2,6 +2,7 @@
 #include <iomanip>      // std::setprecision
 #include <sched.h>
 #include <csignal>
+#include <fstream>
 
 #include <sys/stat.h>
 
@@ -13,6 +14,10 @@
 
 #include "LLController.h"
 #include "utility/Config.h"
+
+
+#define CONFIG_PATH_FILE "configPath.txt"
+
 
 sig_atomic_t running = 1;
 sig_atomic_t signum = 0;
@@ -222,12 +227,21 @@ int main(int argc, char const *argv[])
 	{
     	std::string cfgPath(argv[1]);
     	configPath = cfgPath;
+        std::cout << "Config path given as argument, using this." << std::endl;
 	}
     else
     {
-        std::cerr << "No config file has been provided! Exiting..." << std::endl;
-		exit(1);
+    	std::ifstream configPathFile(CONFIG_PATH_FILE);
+    	if(configPathFile.fail())
+    	{
+            std::cerr << "Config path file " << CONFIG_PATH_FILE << " is missing or could not be read!" << std::endl;
+            exit(EXIT_FAILURE);
+		}
+    	std::getline(configPathFile, configPath);
+        std::cout << "Using config path in " << CONFIG_PATH_FILE << std::endl;
     }
+
+    std::cout << "Config path: " << configPath << std::endl;
 
     #ifdef TEST_LLSERVER
     testThread = new std::thread(testFnc);

@@ -50,3 +50,6 @@ cmake-build-debug/
 .project
 .cproject
 .settings/
+
+# Config Path File
+configPath.txt

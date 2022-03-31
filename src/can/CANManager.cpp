@@ -47,8 +47,7 @@ CANResult CANManager::Init()
 
         try
         {
-            std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
-            mapping = new CANMapping(mappingPath, "CANMapping");
+            mapping = new CANMapping(Config::getMappingFilePath(), "CANMapping");
             Debug::print("CANMapping initialized");
 
             Debug::print("Initializing CANDriver...");

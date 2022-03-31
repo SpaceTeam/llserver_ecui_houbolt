@@ -26,8 +26,7 @@ void EventManager::Init()
         Debug::print("Initializing EventManager...");
         try
         {
-            std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
-            mapping = new JSONMapping(mappingPath, "EventMapping");
+            mapping = new JSONMapping(Config::getMappingFilePath(), "EventMapping");
             mappingJSON = *mapping->GetJSONMapping();
             Debug::print("EventMapping initialized");
             initialized = true;

@@ -52,8 +52,7 @@ void LLInterface::Init()
         Debug::print("Initializing CANManager done\n");
 
         Debug::print("Initializing GUIMapping...");
-        std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
-        guiMapping = new JSONMapping(mappingPath, "GUIMapping");
+        guiMapping = new JSONMapping(Config::getMappingFilePath(), "GUIMapping");
         LoadGUIStates();
         Debug::print("GUIMapping initialized");
 
