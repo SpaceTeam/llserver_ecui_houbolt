@@ -76,7 +76,7 @@ void CANDriverKvaser::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint
     {
         throw std::runtime_error("CANDriver - SendCANMessage: correct dlc couldn't be found");
     }
-    // Flags mean that the message is a FD message (FDF, BRS) and that an extended id is used (EXT)
+    // Flags mean that the message is a FD message with bit rate switching (FDF, BRS)
     uint8_t msg[64] = {0};
     std::copy_n(payload, payloadLength, msg);
     canStatus stat = canWrite(canHandles[canChannelID], canID, (void *) msg, dlcBytes, canFDMSG_FDF | canFDMSG_BRS);
