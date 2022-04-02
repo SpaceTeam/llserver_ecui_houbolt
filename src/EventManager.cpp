@@ -104,7 +104,7 @@ void EventManager::ExecuteCommand(const std::string &stateName, double oldValue,
 {
     if (!mappingJSON.contains(stateName)){
         //state name not in mapping, shall not trigger anything
-        Debug::info("EventManager - OnStateChange: state name not in event mapping, ignored...");
+        Debug::info("EventManager - ExecuteCommand: state name " + stateName + " not in event mapping, ignored...");
         return;
     }
     nlohmann::json events = mappingJSON[stateName];
@@ -123,7 +123,7 @@ void EventManager::ExecuteCommand(const std::string &stateName, double oldValue,
             {
                 if (newValue != triggerValue)
                 {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                    Debug::info("EventManager - ExecuteCommand: trigger type %s | "
                                 "state value %d unequal to event mapping value %d, ignored...",
                                 triggerType.c_str(), newValue, triggerValue);
                     continue;
@@ -141,7 +141,7 @@ void EventManager::ExecuteCommand(const std::string &stateName, double oldValue,
             {
                 if (newValue == triggerValue)
                 {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                    Debug::info("EventManager - ExecuteCommand: trigger type %s | "
                                 "state value %d equal to event mapping value %d, ignored...",
                                 triggerType.c_str(), newValue, triggerValue);
                     continue;
@@ -159,7 +159,7 @@ void EventManager::ExecuteCommand(const std::string &stateName, double oldValue,
             {
                 if (newValue < triggerValue)
                 {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                    Debug::info("EventManager - ExecuteCommand: trigger type %s | "
                                 "state value %d smaller than event mapping value %d, ignored...",
                                 triggerType.c_str(), newValue, triggerValue);
                     continue;
@@ -177,7 +177,7 @@ void EventManager::ExecuteCommand(const std::string &stateName, double oldValue,
             {
                 if (newValue > triggerValue)
                 {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                    Debug::info("EventManager - ExecuteCommand: trigger type %s | "
                                 "state value %d greater than event mapping value %d, ignored...",
                                 triggerType.c_str(), newValue, triggerValue);
                     continue;
@@ -195,7 +195,7 @@ void EventManager::ExecuteCommand(const std::string &stateName, double oldValue,
             {
                 if (newValue <= triggerValue)
                 {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                    Debug::info("EventManager - ExecuteCommand: trigger type %s | "
                                 "state value %d smaller or equal than event mapping value %d, ignored...",
                                 triggerType.c_str(), newValue, triggerValue);
                     continue;
@@ -213,7 +213,7 @@ void EventManager::ExecuteCommand(const std::string &stateName, double oldValue,
             {
                 if (newValue >= triggerValue)
                 {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
+                    Debug::info("EventManager - ExecuteCommand: trigger type %s | "
                                 "state value %d greater or equal than event mapping value %d, ignored...",
                                 triggerType.c_str(), newValue, triggerValue);
                     continue;
@@ -230,7 +230,7 @@ void EventManager::ExecuteCommand(const std::string &stateName, double oldValue,
         }
         else
         {
-            Debug::info("EventManager - OnStateChange: no trigger type found, always triggering...");
+            Debug::info("EventManager - ExecuteCommand: no trigger type found, always triggering...");
         }
 
         std::vector<double> argumentList;

@@ -98,8 +98,10 @@ void CANDriverSocketCAN::receiveLoop() // TODO: read errors, call onErrorCallbac
 	while(!done)
 	{
 		struct canfd_frame frame;
-		int readLength = read(canSocket, &frame, sizeof(struct canfd_frame));
+		int size = sizeof(frame);
+		int readLength = read(canSocket, &frame, size);
 		if(readLength < 0) throw std::runtime_error("CAN read failed");
+		else if(readLength < size) throw std::runtime_error("CAN read incomplete");
 
 		//TODO: switch timestamp to current unix time
 		struct timeval timestamp;
