@@ -72,8 +72,8 @@ void CANDriverSocketCAN::SendCANMessage(uint32_t canChannelID, uint32_t canID, u
     if(payloadLength > MAX_DATA_SIZE) throw std::runtime_error("CANDriver - SendCANMessage: payload length " + std::to_string(payloadLength) + " exceeds supported can fd msg data size " + std::to_string(MAX_DATA_SIZE));
 
 	struct canfd_frame frame;
-	frame.can_id = canID & 0x1FFFFFFF; // remove flags
-	frame.can_id |= 0x80000000; // extended ID flag
+	frame.can_id = canID & 0x7FF; // remove flags, use 0x1FFFFFFF to support extended IDs
+	frame.can_id |= 0; // no flags, use 0x80000000 for extended ID
 	frame.len = payloadLength;
 	std::memcpy(frame.data, payload, payloadLength);
 
