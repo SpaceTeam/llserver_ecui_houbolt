@@ -76,7 +76,7 @@ void CANDriverKvaser::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint
     {
         throw std::runtime_error("CANDriver - SendCANMessage: correct dlc couldn't be found");
     }
-    // Flags mean that the message is a FD message (FDF, BRS) and that an extended id is used (EXT)
+    // Flags mean that the message is a FD message with bit rate switching (FDF, BRS)
     uint8_t msg[64] = {0};
     std::copy_n(payload, payloadLength, msg);
     canStatus stat = canWrite(canHandles[canChannelID], canID, (void *) msg, dlcBytes, canFDMSG_FDF | canFDMSG_BRS);
@@ -131,6 +131,16 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
             }
             break;   
         }
+        case canNOTIFY_STATUS:
+        {
+            uint64_t statFlags = 0;
+            stat = canReadStatus(handle, &statFlags);
+            Debug::print("canNOTIFY_STATUS changed");
+            if(statFlags & canSTAT_OVERRUN) {
+                Debug::print("canNOTIFY_STATUS: buffer overflow");
+            }
+            break;
+        }
         case canNOTIFY_RX:
         {
             while (stat == canOK) {
@@ -155,6 +165,7 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                 //TODO: wrap a try except around
                 //TODO: switch timestamp to current unix time
                 uint64_t softwareTime = utils::getCurrentTimestamp();
+                uint64_t statFlags = 0;
                 //TODO: MP flag is canok but it seems that its actuall canERR_NOMSG, further debugging needed to remove this dlc check
                 if (dlc > 0)
                 {
@@ -162,7 +173,20 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                 }
                 else
                 {
-                    Debug::error("CANDriver - OnCANCallback: invalid msg detected, ignoring...");
+                    stat = canReadStatus(handle, &statFlags);
+                    if (statFlags & canSTAT_SW_OVERRUN)
+                    {
+                        Debug::error("CANDriver - OnCANCallback: Software Overrun...");
+                    }
+                    else if (statFlags & canSTAT_HW_OVERRUN)
+                    {
+                        Debug::error("CANDriver - OnCANCallback: Hardware Overrun...");
+                    }
+                    else
+                    {
+                        Debug::error("CANDriver - OnCANCallback: canID: %d, dlc: %d, invalid msg detected, ignoring...", id, dlc);
+                    }
+                    Debug::print("\t\tCAN Status Flags: 0x%016x", statFlags);
                 }
                 
                 stat = canRead(handle, &id, data, &dlc, &flags, &timestamp);
@@ -244,7 +268,7 @@ canStatus CANDriverKvaser::InitializeCANChannel(uint32_t canBusChannelID) {
     }
 
     // Register callback for receiving a msg when the rcv buffer has been empty or when an error frame got received
-    stat = kvSetNotifyCallback(canHandles[canBusChannelID], (kvCallback_t) &CANDriverKvaser::OnCANCallback, (void *) this, canNOTIFY_RX | canNOTIFY_ERROR);
+    stat = kvSetNotifyCallback(canHandles[canBusChannelID], (kvCallback_t) &CANDriverKvaser::OnCANCallback, (void *) this, canNOTIFY_RX | canNOTIFY_ERROR | canNOTIFY_STATUS);
     if(stat < 0) {
         return stat;
     }
