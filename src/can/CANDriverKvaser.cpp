@@ -169,7 +169,14 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                 //TODO: MP flag is canok but it seems that its actuall canERR_NOMSG, further debugging needed to remove this dlc check
                 if (dlc > 0)
                 {
-                    canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, softwareTime);
+                    try
+                    {
+                        canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, softwareTime);
+                    }
+                    catch(const std::exception& e)
+                    {
+                        Debug::error("%s", e.what());
+                    }
                 }
                 else
                 {

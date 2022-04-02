@@ -109,6 +109,15 @@ void CANDriverSocketCAN::receiveLoop() // TODO: read errors, call onErrorCallbac
 		uint8_t canChannelID = 0; // TODO support multiple devices
 
 		frame.can_id &= 0x1FFFFFFF;
-		onRecvCallback(canChannelID, (uint32_t&)frame.can_id, frame.data, (uint32_t&)frame.len, timestamp_us);
+
+		try
+		{
+			onRecvCallback(canChannelID, (uint32_t&)frame.can_id, frame.data, (uint32_t&)frame.len, timestamp_us);
+		}
+		catch(const std::exception& e)
+		{
+			Debug::error("%s", e.what());
+		}
+		
 	}
 }
