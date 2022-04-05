@@ -252,7 +252,7 @@ int main(int argc, char const *argv[])
 
 
     std::string inputStr;
-    while (1)
+    while (running)
     {
 	    sleep(1);
     }

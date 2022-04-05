@@ -134,7 +134,12 @@ void EcuiSocket::Destroy()
     if (connectionActive)
     {
         shallClose = true;
-        delete asyncListenThread;
+        if (asyncListenThread->joinable())
+        {
+            asyncListenThread->join();
+            delete asyncListenThread;
+        }
+        
         delete socket;
         connectionActive = false;
     }
