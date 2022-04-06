@@ -15,6 +15,11 @@ const std::map<std::string, std::vector<double>> Channel::sensorScalingMap = {};
 //-------------------------------GETTER & SETTER Functions-------------------------------//
 //---------------------------------------------------------------------------------------//
 
+const std::string Channel::GetChannelTypeName()
+{
+    return channelTypeName;
+}
+
 /**
  * returns of the channel and combines it with channelName to a map
  * @return states of channel, sends a can command for each state, process can command writes the result to the

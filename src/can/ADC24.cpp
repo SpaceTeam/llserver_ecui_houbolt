@@ -29,7 +29,7 @@ const std::map<ADC24_VARIABLES , std::string> ADC24::variableMap =
         };
 
 ADC24::ADC24(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
-        : Channel(channelID, std::move(channelName), sensorScaling, parent, ADC24_DATA_N_BYTES), NonNodeChannel(parent)
+        : Channel("ADC24", channelID, std::move(channelName), sensorScaling, parent, ADC24_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {
         {"SetRefreshDivider", {std::bind(&ADC24::SetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},

@@ -35,6 +35,7 @@ private:
     static const std::vector<std::string> states;
     static const std::map<std::string, std::vector<double>> scalingMap;
     static const std::map<GENERIC_VARIABLES, std::string> variableMap;
+	
     static bool enableFastLogging;
     static InfluxDbLogger *logger;
     static std::mutex loggerMtx;
@@ -71,6 +72,7 @@ public:
 	uint8_t GetCANBusChannelID();
 
     std::vector<std::string> GetStates() override;
+	std::map<std::string, std::string> GetChannelTypeMap();
 	std::map<std::string, command_t> GetCommands() override;
     std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
 

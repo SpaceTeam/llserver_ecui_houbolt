@@ -48,7 +48,7 @@ const std::map<PNEUMATIC_VALVE_VARIABLES , std::string> PneumaticValve::variable
         };
 
 PneumaticValve::PneumaticValve(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
-        : Channel(channelID, std::move(channelName), sensorScaling, parent, PNEUMATIC_VALVE_DATA_N_BYTES), NonNodeChannel(parent)
+        : Channel("PneumaticValve", channelID, std::move(channelName), sensorScaling, parent, PNEUMATIC_VALVE_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {
         {"SetEnabled", {std::bind(&PneumaticValve::SetEnabled, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},

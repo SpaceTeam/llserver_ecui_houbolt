@@ -28,6 +28,8 @@ private:
 
 protected:
 
+    const std::string channelTypeName = "undefined";
+
     uint8_t channelID;
     const std::string channelName;
     std::vector<double> sensorScaling;
@@ -134,8 +136,8 @@ protected:
                                       uint8_t canBusChannelID, CANDriver *driver, bool testOnly);
 
 public:
-    Channel(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Channel *parent, uint8_t typeSize = 0) :
-            channelID(channelID), channelName(std::move(channelName)), sensorScaling(sensorScaling), typeSize(typeSize)
+    Channel(std::string channelTypeName, uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Channel *parent, uint8_t typeSize = 0) :
+            channelTypeName(channelTypeName), channelID(channelID), channelName(std::move(channelName)), sensorScaling(sensorScaling), typeSize(typeSize)
     {
         commandMap = std::map<std::string, command_t>();
     };
@@ -144,6 +146,8 @@ public:
     {};
 
     //-------------------------------GETTER & SETTER Functions-------------------------------//
+
+    virtual const std::string GetChannelTypeName();
 
     virtual void GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &value);
 

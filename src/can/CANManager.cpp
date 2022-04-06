@@ -248,6 +248,8 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
 				//add available commands to event manager
 				EventManager *eventManager = EventManager::Instance();
+				auto channelTypeMap = node->GetChannelTypeMap();
+				eventManager->AddChannelTypes(channelTypeMap);
 				eventManager->AddCommands(node->GetCommands());
 
 				Debug::print("Node %s with ID %d on CAN Bus %d detected\n\t\t\tfirmware version 0x%08x", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID, node->GetFirmwareVersion());

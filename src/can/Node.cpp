@@ -64,7 +64,7 @@ std::mutex Node::loggerMtx;
  */
 
 Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
-    : Channel::Channel(0xFF, std::move(nodeChannelName), {1.0, 0.0}, this), canBusChannelID(canBusChannelID), nodeID(nodeID), firwareVersion(nodeInfo.firmware_version), driver(driver)
+    : Channel::Channel("Generic", 0xFF, std::move(nodeChannelName), {1.0, 0.0}, this), canBusChannelID(canBusChannelID), nodeID(nodeID), firwareVersion(nodeInfo.firmware_version), driver(driver)
 {
 
     if (logger == nullptr)
@@ -223,7 +223,19 @@ std::vector<std::string> Node::GetStates()
     return states;
 }
 
-//TODO: add node name and channel names as prefix
+std::map<std::string, std::string> Node::GetChannelTypeMap()
+{
+    std::map<std::string, std::string> channelTypeMap;
+    channelTypeMap[GetChannelName()] = GetChannelTypeName();
+
+    for (auto &channel : channelMap)
+    {
+        channelTypeMap[channel.second->GetChannelName()] = channel.second->GetChannelTypeName();
+    }
+
+    return channelTypeMap;
+}
+
 std::map<std::string, command_t> Node::GetCommands()
 {
     std::map<std::string, command_t> commandsTmp;

@@ -35,12 +35,19 @@ private:
     //TODO: write channel cmds as method in each channel class
     //<stateName, <callback, pointer to state>
     std::map<std::string, command_t> eventMap;
+    std::map<std::string, std::string> channelTypeMap; //1. stateName, 2. stateType
     std::map<std::string, command_t> commandMap;
+
+    JSONMapping *defaultMapping;
+    nlohmann::json defaultMappingJSON;
 
     JSONMapping *mapping;
     nlohmann::json mappingJSON;
 
     bool CheckEvents();
+
+    bool ShallTrigger(nlohmann::json& event, double& oldValue, double& newValue);
+    void GetArgumentList(const std::string &stateName, nlohmann::json& event, std::vector<double>& argumentList, double& newValue);
 
     ~EventManager();
 public:
@@ -53,11 +60,12 @@ public:
      */
     void Start();
 
+    void AddChannelTypes(std::map<std::string, std::string>& channelTypes);
     void AddCommands(std::map<std::string, command_t> commands);
     std::map<std::string, command_t> GetCommands();
     void OnStateChange(const std::string& stateName, double oldValue, double newValue);
 
-    void ExecuteCommand(const std::string &stateName, double oldValue, double newValue, bool testOnly);
+    void ExecuteCommand(const std::string &stateName, double oldValue, double newValue, bool useDefaultMapping, bool testOnly);
     void ExecuteCommand(const std::string &commandName, std::vector<double> &params, bool testOnly);
 
 
