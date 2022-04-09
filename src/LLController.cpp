@@ -136,10 +136,27 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             else if (type.compare("states-load") == 0)
             {
                 nlohmann::json stateLabels = llInterface->GetAllStateLabels();
+                while (stateLabels.size() > 500)
+                {
+                    nlohmann::json stateLabelsChunk(stateLabels.begin(), stateLabels.begin() + 500);
+                    
+                    EcuiSocket::SendJson("states-load", stateLabelsChunk);
+                    stateLabels.erase(stateLabels.begin(), stateLabels.begin() + 500);
+                }
+                
                 EcuiSocket::SendJson("states-load", stateLabels);
 
                 //send all states to initialize correctly
                 nlohmann::json states = llInterface->GetAllStates();
+
+                while (states.size() > 500)
+                {
+                    nlohmann::json statesChunk(states.begin(), states.begin() + 500);
+                    
+                    EcuiSocket::SendJson("states", statesChunk);
+                    states.erase(states.begin(), states.begin() + 500);
+                }
+                
                 EcuiSocket::SendJson("states", states);
 
                 bool isAutoAbortActive = seqManager->GetAutoAbort();
@@ -199,7 +216,13 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                         commandJson["parameterNames"].push_back(paramName);
                     }
                     commandsJson.push_back(commandJson);
+                    if (commandsJson.size() >= 500)
+                    {
+                        EcuiSocket::SendJson("commands-load", commandsJson);
+                        commandsJson.erase(commandsJson.begin(), commandsJson.begin() + 500);
+                    }
                 }
+                
                 EcuiSocket::SendJson("commands-load", commandsJson);
             }
             else if (type.compare("commands-set") == 0)

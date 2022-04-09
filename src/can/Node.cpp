@@ -78,7 +78,7 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
                         std::get<int>(Config::getData("INFLUXDB/database_port")),
                         std::get<std::string>(Config::getData("INFLUXDB/database_name")),
                         std::get<std::string>(Config::getData("INFLUXDB/fast_sensor_measurement")), MICROSECONDS,
-                        std::get<int>(Config::getData("INFLUXDB/buffer_size")));
+                        std::get<int>(Config::getData("INFLUXDB/fast_sensor_buffer_size")));
         }
         else
         {
