@@ -7,8 +7,6 @@
 
 #include "utility/Config.h"
 #include "utility/utils.h"
-#include "driver/SocketOld.h"
-#include "hcp/HcpManager.h"
 #include "SequenceManager.h"
 #include "LLInterface.h"
 #include "EcuiSocket.h"
@@ -27,29 +25,10 @@ void LLController::PrintLogo()
     f.close();
 }
 
-void LLController::Init(ServerMode serverMode)
+void LLController::Init(std::string &configPath)
 {
     try
     {
-        std::string configPath = "";
-        switch (serverMode)
-        {
-            case ServerMode::SMALL_TESTSTAND:
-                configPath = "config_small_teststand.json";
-                break;
-            case ServerMode::SMALL_OXFILL:
-                configPath = "config_small_oxfill.json";
-                break;
-            case ServerMode::TEST:
-                configPath = "config_Franz_test.json";
-                break;
-            case ServerMode::LARGE_TESTSTAND:
-                configPath = "config_Franz.json";
-                break;
-            default:
-                exit(1);
-
-        }
         Config::Init(configPath);
 
         Debug::Init();
@@ -138,18 +117,55 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             }
             else if (type.compare("send-postseq-comment") == 0)
             {
-               seqManager->WritePostSeqComment(msg["content"][0]);
+                seqManager->WritePostSeqComment(msg["content"][0]);
             }
             //TODO: MP Move this logic to state and event manager
             else if (type.compare("abort") == 0)
             {
-               seqManager->AbortSequence("manual abort");
+                seqManager->AbortSequence("manual abort");
+            }
+            else if (type.compare("auto-abort-change") == 0)
+            {
+                bool isAutoAbortActive = msg["content"];
+                seqManager->SetAutoAbort(isAutoAbortActive);
+                //send it to server as acknowledgement
+                isAutoAbortActive = seqManager->GetAutoAbort();
+                EcuiSocket::SendJson("auto-abort-change", isAutoAbortActive);
             }
             //TODO: MP probably not even needed
             else if (type.compare("states-load") == 0)
             {
-                nlohmann::json states = llInterface->GetAllStateLabels();
-                EcuiSocket::SendJson("states-load", states);
+                nlohmann::json stateLabels = llInterface->GetAllStateLabels();
+                while (stateLabels.size() > 500)
+                {
+                    nlohmann::json stateLabelsChunk(stateLabels.begin(), stateLabels.begin() + 500);
+                    
+                    EcuiSocket::SendJson("states-load", stateLabelsChunk);
+                    stateLabels.erase(stateLabels.begin(), stateLabels.begin() + 500);
+                }
+                
+                EcuiSocket::SendJson("states-load", stateLabels);
+
+                //send all states to initialize correctly
+                nlohmann::json states = llInterface->GetAllStates();
+
+                while (states.size() > 500)
+                {
+                    nlohmann::json statesChunk(states.begin(), states.begin() + 500);
+                    
+                    EcuiSocket::SendJson("states", statesChunk);
+                    states.erase(states.begin(), states.begin() + 500);
+                }
+                
+                EcuiSocket::SendJson("states", states);
+
+                bool isAutoAbortActive = seqManager->GetAutoAbort();
+                EcuiSocket::SendJson("auto-abort-change", isAutoAbortActive);
+            }
+            else if (type.compare("states-get") == 0)
+            {
+                nlohmann::json states = llInterface->GetStates(msg["content"]);
+                EcuiSocket::SendJson("states", states);
             }
             else if (type.compare("states-set") == 0)
             {
@@ -200,7 +216,13 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                         commandJson["parameterNames"].push_back(paramName);
                     }
                     commandsJson.push_back(commandJson);
+                    if (commandsJson.size() >= 500)
+                    {
+                        EcuiSocket::SendJson("commands-load", commandsJson);
+                        commandsJson.erase(commandsJson.begin(), commandsJson.begin() + 500);
+                    }
                 }
+                
                 EcuiSocket::SendJson("commands-load", commandsJson);
             }
             else if (type.compare("commands-set") == 0)

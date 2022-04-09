@@ -23,24 +23,10 @@ typedef struct __attribute__((__packed__))
 	uint8_t channel_data[60];
 } SensorMsg_t;
 
-typedef struct
-{
-    union
-    {
-        struct
-        {
-            uint8_t nodeId;
-            uint8_t channelId;
-        } separate;
-        uint16_t nodeChannelID;
-    };
-    SensorData_t data;
-} Sensor_t;
-
 #include "can/Channel.h"
-#include "can/CANDriver.h"
+#include "CANDriverKvaser.h"
 #include "can_houbolt/channels/generic_channel_def.h"
-#include "utility/RingBuffer.h"
+#include "logging/InfluxDbLogger.h"
 
 class Node : public Channel
 {
@@ -49,11 +35,15 @@ private:
     static const std::vector<std::string> states;
     static const std::map<std::string, std::vector<double>> scalingMap;
     static const std::map<GENERIC_VARIABLES, std::string> variableMap;
+	
+    static bool enableFastLogging;
+    static InfluxDbLogger *logger;
+    static std::mutex loggerMtx;
 
 private:
-    uint8_t canBusChannelID;
-	uint8_t nodeID;
-    uint32_t firwareVersion;
+    uint8_t canBusChannelID = 0;
+	uint8_t nodeID = 0;
+    uint32_t firwareVersion = 0;
 	std::map<uint8_t, Channel *> channelMap;
     CANDriver* driver;
     SensorData_t *latestSensorBuffer;
@@ -82,12 +72,13 @@ public:
 	uint8_t GetCANBusChannelID();
 
     std::vector<std::string> GetStates() override;
+	std::map<std::string, std::string> GetChannelTypeMap();
 	std::map<std::string, command_t> GetCommands() override;
     std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
 
     //-------------------------------RECEIVE Functions-------------------------------//
 
-    void ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp, RingBuffer<Sensor_t> &buffer);
+    void ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
 
     void ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp) override;
 

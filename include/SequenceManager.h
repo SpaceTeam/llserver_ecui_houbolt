@@ -35,7 +35,7 @@ class SequenceManager : public Singleton<SequenceManager>
 
 private:
     bool isRunning = false;
-    bool isAutoAbort = true;
+    std::atomic_bool isAutoAbort = true;
     bool isAbort = false;
     bool isAbortRunning = false;
 
@@ -86,6 +86,9 @@ private:
 public:
 
     void Init();
+
+    bool GetAutoAbort();
+    void SetAutoAbort(bool active);
 
     void AbortSequence(std::string abortMsg="abort");
     void StopSequence();

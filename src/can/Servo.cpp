@@ -63,7 +63,7 @@ const std::map<SERVO_VARIABLES , std::string> Servo::variableMap =
         };
 
 Servo::Servo(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
-        : Channel(channelID, std::move(channelName), sensorScaling, parent, SERVO_DATA_N_BYTES), NonNodeChannel(parent)
+        : Channel("Servo", channelID, std::move(channelName), sensorScaling, parent, SERVO_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {
         {"SetPosition", {std::bind(&Servo::SetPosition, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},

@@ -1,9 +1,4 @@
-//
-// Created by luis on 1/12/20.
-//
-
-#ifndef TXV_ECUI_LLSERVER_CONFIG_H
-#define TXV_ECUI_LLSERVER_CONFIG_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -13,23 +8,30 @@
 #include <iomanip>
 #include <variant>
 
-class Config {
-private:
-    static nlohmann::json data;
 
-    //static std::map<std::string, std::string> data;
+#define CONFIG_FILE_NAME "config.json"
+#define MAPPING_FILE_NAME "mapping.json"
 
-    static std::variant<int, double, std::string, bool, nlohmann::json> convertJSONtoType(nlohmann::json object);
 
-public:
-    static void Init(std::string filePath = "config.nlohmann::json");
+class Config
+{
+	private:
+		static nlohmann::json data;
+		static std::string configFilePath;
+		static std::string mappingFilePath;
 
-    //getData either with a vector of the data tree (eg: {"ECUI", "hcp"}) or a string with '/' as separators
-    //(eg: "ECUI/hcp"). At the end you have to extract the result from the std::variant with std::get<0>(std::variant)
-    static std::variant<int, double, std::string, bool, nlohmann::json> getData(std::vector<std::string> keyChain); //each step of the access is a separate vector element
-    static std::variant<int, double, std::string, bool, nlohmann::json> getData(std::string keyChain); //each step of the access is separated by a /
+		static std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>> convertJSONtoType(nlohmann::json object);
 
-    static void print();
+	public:
+		static void Init(std::string configPath);
+
+		//getData either with a vector of the data tree (eg: {"ECUI", "version"}) or a string with '/' as separators
+		//(eg: "ECUI/version"). At the end you have to extract the result from the std::variant with std::get<0>(std::variant)
+		static std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>> getData(std::vector<std::string> keyChain); //each step of the access is a separate vector element
+		static std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>> getData(std::string keyChain); //each step of the access is separated by a /
+
+		static std::string getConfigFilePath();
+		static std::string getMappingFilePath();
+
+		static void print();
 };
-
-#endif //TXV_ECUI_LLSERVER_CONFIG_H

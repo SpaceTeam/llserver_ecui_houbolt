@@ -2,6 +2,7 @@
 #include <iomanip>      // std::setprecision
 #include <sched.h>
 #include <csignal>
+#include <fstream>
 
 #include <sys/stat.h>
 
@@ -13,6 +14,10 @@
 
 #include "LLController.h"
 #include "utility/Config.h"
+
+
+#define CONFIG_PATH_FILE "configPath.txt"
+
 
 sig_atomic_t running = 1;
 sig_atomic_t signum = 0;
@@ -84,7 +89,7 @@ void testFnc()
     sensorMsg.channel_mask = 0x0000001D;
 
     Can_MessageId_t dataCanID = {0};
-    dataCanID.info.direction = 0;
+    dataCanID.info.direction = 1;
     dataCanID.info.priority = STANDARD_PRIORITY;
     dataCanID.info.special_cmd = STANDARD_SPECIAL_CMD;
     dataCanID.info.node_id = CAN_TEST_NODE_ID;
@@ -107,6 +112,7 @@ void testFnc()
         sensorMsg.channel_data[10] = 0xA0;
         std::copy_n((uint8_t*)&sensorMsg.channel_mask, 4, msg.bit.data.uint8);
         std::copy_n(sensorMsg.channel_data, 11, &msg.bit.data.uint8[4]);
+
 
         manager->OnCANRecv(0, dataCanID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
         std::this_thread::sleep_for(100ms);
@@ -216,40 +222,37 @@ int main(int argc, char const *argv[])
     signal(SIGTERM, signalHandler);
     signal(SIGABRT, signalHandler);
 
-    ServerMode serverMode = ServerMode::LARGE_TESTSTAND;
+    std::string configPath = "";
     if (argc > 1)
+	{
+    	std::string cfgPath(argv[1]);
+    	configPath = cfgPath;
+        std::cout << "Config path given as argument, using this." << std::endl;
+	}
+    else
     {
-        if (strcmp(argv[1],"--smallTeststand") == 0)
-        {
-            serverMode = ServerMode::SMALL_TESTSTAND;
-            printf("Using Small Teststand Profile...\n");
-        }
-        else if (strcmp(argv[1],"--smallOxfill") == 0)
-        {
-            serverMode = ServerMode::SMALL_OXFILL;
-            printf("Using Small Oxfill Profile...\n");
-        }
-        else if (strcmp(argv[1],"--test") == 0)
-        {
-            serverMode = ServerMode::TEST;
-            printf("Using Franz test Profile...\n");
-        }
-        else
-        {
-            printf("Defaulting to Franz Profile...\n");
-        }
+    	std::ifstream configPathFile(CONFIG_PATH_FILE);
+    	if(configPathFile.fail())
+    	{
+            std::cerr << "Config path file " << CONFIG_PATH_FILE << " is missing or could not be read!" << std::endl;
+            exit(EXIT_FAILURE);
+		}
+    	std::getline(configPathFile, configPath);
+        std::cout << "Using config path in " << CONFIG_PATH_FILE << std::endl;
     }
+
+    std::cout << "Config path: " << configPath << std::endl;
 
     #ifdef TEST_LLSERVER
     testThread = new std::thread(testFnc);
     #endif
 
     LLController *llController = LLController::Instance();
-    llController->Init(serverMode);
+    llController->Init(configPath);
 
 
     std::string inputStr;
-    while (1)
+    while (running)
     {
 	    sleep(1);
     }

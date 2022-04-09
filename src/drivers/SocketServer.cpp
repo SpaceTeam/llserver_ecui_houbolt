@@ -1,6 +1,9 @@
 //
 // Created by Markus on 15.04.20.
 //
+// WARNING!!! SocketServer has never actively been used and shall thus be used with care!
+// This is only conceptional code and needs to be tested thoroughly!
+//
 
 #include "driver/SocketServer.h"
 
@@ -150,7 +153,7 @@ vector<uint8_t> SocketServer::RecvBytes(uint32_t sizeInBytes)
             }
             else
             {
-                if (recvBytes != sizeInBytes)
+                if (recvBytes != (int)(sizeInBytes))
                 {
                     Debug::error("in ServerSocket: requested msg not fully received");
                 }

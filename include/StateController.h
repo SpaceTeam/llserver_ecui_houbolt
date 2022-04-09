@@ -45,6 +45,7 @@ public:
 
     void AddUninitializedStates(std::vector<std::string> &states);
     void AddStates(std::map<std::string, std::tuple<double, uint64_t>> &states);
+    std::tuple<double, uint64_t, bool> GetState(std::string stateName);
     void SetState(std::string stateName, double value, uint64_t timestamp);
 
     double GetStateValue(std::string stateName);

@@ -29,6 +29,9 @@ namespace utils
 
     void matrixMultiply(std::vector<std::vector<double>> &a, std::vector<std::vector<double>> &b, std::vector<std::vector<double>> &result);
 
+    std::string replace(const std::string& str, const std::string& from, const std::string& to);
+    bool replaceRef(std::string& str, const std::string& from, const std::string& to);
+
 }
 
 #endif //TXV_ECUI_LLSERVER_UTILS_H

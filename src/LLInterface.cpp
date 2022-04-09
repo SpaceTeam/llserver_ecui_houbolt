@@ -6,7 +6,6 @@
 #include <math.h>
 #include <utility/utils.h>
 
-//#include "hcp/HcpManager.h"
 #include "EcuiSocket.h"
 #include "utility/Timer.h"
 #include "utility/Config.h"
@@ -37,13 +36,6 @@ void LLInterface::Init()
 {
     if (!isInitialized)
     {
-//        Debug::print("Initializing HcpManager...");
-//        HcpManager::Init();
-//        Debug::print("Initializing HcpManager done\n");
-//        Debug::print("Starting periodic sensor fetching...");
-//        HcpManager::StartSensorFetch(std::get<int>(Config::getData("HCP/sensor_sample_rate")));
-//        Debug::print("Periodic sensor fetching started\n");
-
         Debug::print("Initializing EventManager...");
         eventManager = EventManager::Instance();
         eventManager->Init();
@@ -60,8 +52,7 @@ void LLInterface::Init()
         Debug::print("Initializing CANManager done\n");
 
         Debug::print("Initializing GUIMapping...");
-        std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
-        guiMapping = new JSONMapping(mappingPath, "GUIMapping");
+        guiMapping = new JSONMapping(Config::getMappingFilePath(), "GUIMapping");
         LoadGUIStates();
         Debug::print("GUIMapping initialized");
 
@@ -91,18 +82,9 @@ void LLInterface::Init()
         sensorStateTimer->startContinous(0, sensorStateSamplingInterval,
                 std::bind(&LLInterface::FilterSensors, this, std::placeholders::_1),
                 std::bind(&LLInterface::StopFilterSensors, this));
-        Debug::print("Connecting to warning light...");
-        warnLight = new WarnLight(0);
-
-        useTMPoE = std::get<bool>(Config::getData("useTMPoE"));
-        if (useTMPoE)
-        {
-            Debug::print("Initializing TMPoE...");
-            tmPoE = new TMPoE(0, 50);
-        }
-        //i2cDevice = new I2C(0, "someDev"); //not in use right now
-
-
+        
+        //WARNING LIGHT init goes here...
+        //Debug::print("Connecting to warning light...");
 
         isInitialized = true;
     }
@@ -114,15 +96,8 @@ LLInterface::~LLInterface()
 {
     if (isInitialized)
     {
-        //Debug::print("Shutting down I2C...");
-        //delete i2cDevice;
-        Debug::print("Shutting down Debug...");
-        delete warnLight;
-        if (useTMPoE)
-        {
-            Debug::print("Shutting down Debug...");
-            delete tmPoE;
-        }
+        //WARNING LIGHT delete goes here...
+        //Debug::print("Shutting down warning light...");
 
         Debug::print("Stopping State transmission...");
         StopStateTransmission();
@@ -210,11 +185,11 @@ void LLInterface::StartStateTransmission()
 {
     if (!isTransmittingStates)
     {
-        uint64_t stateTransmissionRate = std::get<double>(Config::getData("WEBSERVER/state_transmission_rate"));
+        double stateTransmissionRate = std::get<double>(Config::getData("WEBSERVER/state_transmission_rate"));
         uint64_t stateTransmissionInterval = 1000000.0/stateTransmissionRate;
 
         stateTimer->startContinous(0, stateTransmissionInterval,
-                std::bind(&LLInterface::GetStates, this, std::placeholders::_1),
+                std::bind(static_cast<void (LLInterface::*)(int64_t)>(&LLInterface::GetStates), this, std::placeholders::_1),
                 std::bind(&LLInterface::StopGetStates, this));
         isTransmittingStates = true;
     }
@@ -386,6 +361,27 @@ nlohmann::json LLInterface::GetAllStateLabels()
     return statesJson;
 }
 
+nlohmann::json LLInterface::GetStates(nlohmann::json &stateNames)
+{
+    if (!stateNames.is_array())
+    {
+        throw std::runtime_error("LLInterface - GetStates: stateNames must be json array");
+    }
+    std::map<std::string, std::tuple<double, uint64_t, bool>> states;
+    for (const auto& stateName : stateNames)
+    {
+        if (!stateName.is_string())
+        {
+            throw std::runtime_error("LLInterface - GetStates: stateName must be string");
+        }
+           
+        states[stateName] = stateController->GetState(stateName);
+    }
+    nlohmann::json statesJson = StatesToJson(states);
+    return statesJson;
+    
+}
+
 void LLInterface::SetState(std::string stateName, double value, uint64_t timestamp)
 {
     stateController->SetState(stateName, value, timestamp);
@@ -393,28 +389,16 @@ void LLInterface::SetState(std::string stateName, double value, uint64_t timesta
 
 void LLInterface::TurnRed()
 {
-    warnLight->SetColor(255, 0, 0);
-    warnLight->SetMode("default");
-    warnLight->StopBuzzer();
 }
 
 void LLInterface::TurnGreen()
 {
-    warnLight->SetColor(0, 255, 0);
-    warnLight->SetMode("spin");
-    warnLight->StopBuzzer();
 }
 
 void LLInterface::TurnYellow()
 {
-    warnLight->SetColor(255, 255, 0);
-    warnLight->SetMode("spin");
-    warnLight->StopBuzzer();
 }
 
 void LLInterface::BeepRed()
 {
-    warnLight->SetColor(255, 0, 0);
-    warnLight->SetMode("blink");
-    warnLight->StartBuzzerBeep(500);
 }

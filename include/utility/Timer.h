@@ -6,6 +6,7 @@
 #define TXV_ECUI_LLSERVER_TIMER_H
 
 #include <thread>
+#include <atomic>
 #include <functional>
 #include <mutex>
 #include "common.h"
@@ -19,7 +20,7 @@ class Timer
 private:
 
     int threadPriority;
-    bool isRunning = false;
+    std::atomic_bool isRunning = false;
 
     std::string threadName;
     static int nameIndex;
@@ -38,7 +39,6 @@ private:
 
 
     std::thread* timerThread;
-    std::mutex syncMtx;
     std::function<void()> stopCallback;
     std::function<void(int64_t)> tickCallback;
 

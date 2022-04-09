@@ -32,8 +32,9 @@
 *.exe
 *.out
 *.app
-TXV_ECUI_LLSERVER
+llserver_ecui_houbolt
 
+# CMake
 CMakeFiles/
 CMakeCache.txt
 Makefile
@@ -44,3 +45,11 @@ cmake-build-debug/
 *.cmake
 
 *.cpb
+
+# Eclipse
+.project
+.cproject
+.settings/
+
+# Config Path File
+configPath.txt
