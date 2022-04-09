@@ -14,6 +14,8 @@ enum Severity {
 
 class MessageLogger {
     public:
+        virtual ~MessageLogger() {};
+
         virtual void log(std::string source, std::string msg, std::size_t timestamp, Severity severity) = 0;
         
     protected:

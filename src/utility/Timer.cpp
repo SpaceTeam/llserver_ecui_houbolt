@@ -68,7 +68,7 @@ void Timer::startContinous(int64_t startTimeMicros, uint64_t intervalMicros, std
 
         this->isRunning = true;
         this->timerThread = new std::thread(&Timer::internalContinousLoop, this);
-        this->timerThread->detach();
+        //this->timerThread->detach();
     }
     else
     {
@@ -81,10 +81,16 @@ void Timer::stop()
     if (isRunning)
     {
         isRunning = false;
-        syncMtx.lock();
         stopCallback();
-        delete this->timerThread;
-        syncMtx.unlock();
+        if (this->timerThread->joinable())
+        {
+            this->timerThread->join();
+            delete this->timerThread;
+        }
+        else
+        {
+            printf("Timer - Stop: Timer thread was not joinable");
+        }
     }
 }
 
@@ -194,7 +200,7 @@ void Timer::internalContinousLoop(void){
     int64_t lastExceed = TS_TO_MICRO(next_expiration);
 #endif
 
-    while(isRunning){
+    while(this->isRunning){
 
 #ifdef ENABLE_TIMER_DIAGNOSTICS
         struct timespec start;
@@ -205,12 +211,11 @@ void Timer::internalContinousLoop(void){
         int64_t sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
         try
         {
-            tickCallback(sequence_time);
+            this->tickCallback(sequence_time);
         }
         catch (std::exception &e)
         {
             Debug::error("Timer - internalContinousLoop: %s", e.what());
-            break;
         }
 
 #ifdef ENABLE_TIMER_DIAGNOSTICS
@@ -242,7 +247,7 @@ void Timer::internalContinousLoop(void){
 #endif
         //get time after callback finished
         clock_gettime(CLOCK_MONOTONIC, &ts_after_callback);
-        incrementTimeSpec(&next_expiration, interval_ns, &ts_after_callback);
+        incrementTimeSpec(&next_expiration, this->interval_ns, &ts_after_callback);
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_expiration, NULL);
     }
 
@@ -263,7 +268,6 @@ void Timer::internalLoop(void){
         /** Sequence Time is the used in rocket launches (where 0 is the ignition) */
         int64_t sequence_time = TS_TO_MICRO(next_expiration)- reportedOffset;
 //        printf("SEQTIME: %lld\n", sequence_time);
-
         try
         {
             tickCallback(sequence_time);

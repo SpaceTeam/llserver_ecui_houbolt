@@ -1,0 +1,15 @@
+Description=Service for ECUI Low Level Server
+
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/llserver_ecui_houbolt/llserver_ecui_houbolt
+WorkingDirectory=/home/pi/llserver_ecui_houbolt/
+Restart=always
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

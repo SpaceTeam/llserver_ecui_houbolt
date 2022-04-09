@@ -1,28 +1,43 @@
-//
-// Created by luis on 1/12/20.
-//
-
 #include "utility/Config.h"
 #include "utility/utils.h"
 #include "common.h"
 
-nlohmann::json Config::data;
 
-void Config::Init(std::string filePath) {
+nlohmann::json Config::data;
+std::string Config::configFilePath = "";
+std::string Config::mappingFilePath = "";
+
+
+void Config::Init(std::string configPath)
+{
+    configFilePath = configPath + "/" + CONFIG_FILE_NAME;
+    mappingFilePath = configPath + "/" + MAPPING_FILE_NAME;
 
 	try
 	{
-		data = nlohmann::json::parse(utils::loadFile(filePath));
+		data = nlohmann::json::parse(utils::loadFile(configFilePath));
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << "config file not found" << '\n';
+		std::cerr << "config file not found: " << Config::configFilePath << std::endl;
 		exit(1);
 	}
-	
 }
 
-std::variant<int, double, std::string, bool, nlohmann::json> Config::getData(std::vector<std::string> keyChain) {
+
+std::string Config::getConfigFilePath()
+{
+    return configFilePath;
+}
+
+
+std::string Config::getMappingFilePath()
+{
+    return mappingFilePath;
+}
+
+
+std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>> Config::getData(std::vector<std::string> keyChain) {
     nlohmann::json obj = data;
     while (keyChain.size() > 0) {
         if (utils::keyExists(obj, keyChain[0]))
@@ -40,7 +55,7 @@ std::variant<int, double, std::string, bool, nlohmann::json> Config::getData(std
     return convertJSONtoType(obj);
 }
 
-std::variant<int, double, std::string, bool, nlohmann::json> Config::getData(std::string keyChain) {
+std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>> Config::getData(std::string keyChain) {
     std::vector<std::string> keyVector;
     long unsigned int endPos;
     for (long unsigned int pos = 0; pos != std::string::npos; pos = endPos) {
@@ -57,7 +72,7 @@ void Config::print() {
     std::cerr << std::setw(4) << data << std::endl;
 }
 
-std::variant<int, double, std::string, bool, nlohmann::json> Config::convertJSONtoType(nlohmann::json object) {
+std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>> Config::convertJSONtoType(nlohmann::json object) {
     if (object == nullptr)
         return object;
     switch (object.type()) {
@@ -75,6 +90,9 @@ std::variant<int, double, std::string, bool, nlohmann::json> Config::convertJSON
             break;
         case nlohmann::json::value_t::boolean:
             return object.get<bool>();
+            break;
+        case nlohmann::json::value_t::array:
+            return object.get<std::vector<std::string>>();
             break;
         default:
             return object;

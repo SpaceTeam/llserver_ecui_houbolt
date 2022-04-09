@@ -110,7 +110,7 @@ void Socket::Send(std::string msg)
                 return;
             }
             int sentBytes = send(socketfd, msg.c_str(), msg.size(), 0);
-            if (sentBytes < 0 || sentBytes != msg.size())
+            if (sentBytes < 0 || sentBytes != (int)(msg.size()))
             {
                 Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
                 Close();

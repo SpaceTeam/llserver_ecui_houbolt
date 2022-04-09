@@ -9,10 +9,21 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall")
 
 include_directories(include include/can_houbolt)
 
+
+
 file(GLOB_RECURSE sources main.cpp src/*.cpp src/*.c include/*.h)
 
-
 add_executable(${PROJECT_NAME} ${sources})
+
+option(TEST "test with simple CAN Driver simulation" OFF)
+if(TEST)
+   add_compile_definitions(TEST_LLSERVER)
+endif()
+
+if(NO_CANLIB)
+  MESSAGE(STATUS "Kvaser CanLib is not used")
+  add_compile_definitions(NO_CANLIB)
+endif()
 
 
 if(UNIX AND NOT APPLE)
@@ -20,7 +31,11 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(LINUX)
-   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -lcanlib)
+   if(NO_CANLIB)
+      target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic)
+   else()
+      target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic -lcanlib)
+   endif()
 else()
    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 endif()

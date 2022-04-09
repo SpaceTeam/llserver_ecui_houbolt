@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include <utility>
+#include "utility/Config.h"
 #include "can/DigitalOut.h"
 #include "can/ADC16.h"
 #include "can/ADC16Single.h"
@@ -51,6 +52,10 @@ const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
             {GENERIC_UART_ENABLED, "UARTEnabled"}
         };
 
+InfluxDbLogger *Node::logger = nullptr;
+bool Node::enableFastLogging;
+std::mutex Node::loggerMtx;
+
 /**
  * consider putting event mapping into llinterface
  * @param id
@@ -59,8 +64,28 @@ const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
  */
 
 Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver)
-    : nodeID(nodeID), firwareVersion(nodeInfo.firmware_version), canBusChannelID(canBusChannelID), driver(driver), Channel::Channel(0xFF, std::move(nodeChannelName), {1.0, 0.0}, this)
+    : Channel::Channel("Generic", 0xFF, std::move(nodeChannelName), {1.0, 0.0}, this), canBusChannelID(canBusChannelID), nodeID(nodeID), firwareVersion(nodeInfo.firmware_version), driver(driver)
 {
+
+    if (logger == nullptr)
+    {
+        enableFastLogging = std::get<bool>(Config::getData("INFLUXDB/enable_fast_sensor_logging"));
+        if (enableFastLogging)
+        {
+            Debug::print("Fast logging enabled");
+            logger = new InfluxDbLogger();
+            logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
+                        std::get<int>(Config::getData("INFLUXDB/database_port")),
+                        std::get<std::string>(Config::getData("INFLUXDB/database_name")),
+                        std::get<std::string>(Config::getData("INFLUXDB/fast_sensor_measurement")), MICROSECONDS,
+                        std::get<int>(Config::getData("INFLUXDB/fast_sensor_buffer_size")));
+        }
+        else
+        {
+            Debug::print("Fast logging disabled");
+        }
+    }
+
     commandMap = {
         {"SetBus1Voltage", {std::bind(&Node::SetBus1Voltage, this, std::placeholders::_1, std::placeholders::_2),{"Value"}}},
         {"GetBus1Voltage", {std::bind(&Node::GetBus1Voltage, this, std::placeholders::_1, std::placeholders::_2),{}}},
@@ -158,7 +183,7 @@ std::map<std::string, std::tuple<double, uint64_t>> Node::GetLatestSensorData()
     std::memcpy(copy, latestSensorBuffer, bytes);
     bufferMtx.unlock();
 
-    for (int32_t i = 0; i < latestSensorBufferLength; i++)
+    for (size_t i = 0; i < latestSensorBufferLength; i++)
     {
         if (channelMap.find(i) != channelMap.end())
         {
@@ -198,7 +223,19 @@ std::vector<std::string> Node::GetStates()
     return states;
 }
 
-//TODO: add node name and channel names as prefix
+std::map<std::string, std::string> Node::GetChannelTypeMap()
+{
+    std::map<std::string, std::string> channelTypeMap;
+    channelTypeMap[GetChannelName()] = GetChannelTypeName();
+
+    for (auto &channel : channelMap)
+    {
+        channelTypeMap[channel.second->GetChannelName()] = channel.second->GetChannelTypeName();
+    }
+
+    return channelTypeMap;
+}
+
 std::map<std::string, command_t> Node::GetCommands()
 {
     std::map<std::string, command_t> commandsTmp;
@@ -251,7 +288,7 @@ uint8_t Node::GetCANBusChannelID()
 //TODO: adapt to CanMessageData_t type
 //TODO: add buffer writing
 void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint32_t &canMsgLength,
-                                                 uint64_t &timestamp, RingBuffer<Sensor_t> &buffer)
+                                                 uint64_t &timestamp)
 {
     //TODO: make this more efficient
     if (canMsgLength < 2)
@@ -283,16 +320,22 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                 ch = channelMap[channelID];
 
                 ch->GetSensorValue(valuePtr, currValueLength, currValue);
+                // Debug::print("Hello chid %d, value %f", channelID, currValue);
                 if (currValueLength <= 0)
                 {
                     throw std::logic_error("Node - ProcessSensorDataAndWriteToRingBuffer: value length from channel is 0");
                 }
-                Sensor_t sensor = {{{nodeID, channelID}}, {currValue, timestamp}};
 
                 {
                     std::lock_guard<std::mutex> lock(bufferMtx);
 
                     latestSensorBuffer[channelID] = {currValue, timestamp};
+
+                    if (enableFastLogging)
+                    {
+                        std::lock_guard<std::mutex> lock(loggerMtx);
+                        logger->log(ch->GetSensorName(), currValue, timestamp);
+                    }
                     //buffer.push_back(sensor); //TODO: uncomment if implemented
                 }
 
@@ -365,7 +408,7 @@ void Node::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, 
 
 void Node::NodeStatusResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
 {
-    NodeStatusMsg_t *statusMsg = (NodeStatusMsg_t *) canMsg->bit.data.uint8;
+    //NodeStatusMsg_t *statusMsg = (NodeStatusMsg_t *) canMsg->bit.data.uint8;
 
     throw std::logic_error("Node - NodeStatusResponse: not implemented");
 }

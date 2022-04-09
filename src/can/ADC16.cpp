@@ -29,7 +29,7 @@ const std::map<ADC16_VARIABLES , std::string> ADC16::variableMap =
         };
 
 ADC16::ADC16(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
-        : Channel(channelID, std::move(channelName), sensorScaling, parent, ADC16_DATA_N_BYTES), NonNodeChannel(parent)
+        : Channel("ADC16", channelID, std::move(channelName), sensorScaling, parent, ADC16_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {
         {"SetMeasurement", {std::bind(&ADC16::SetMeasurement, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},

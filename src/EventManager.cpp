@@ -9,6 +9,7 @@
 #include "StateController.h"
 
 #include "utility/Config.h"
+#include "utility/utils.h"
 
 EventManager::~EventManager()
 {
@@ -26,8 +27,11 @@ void EventManager::Init()
         Debug::print("Initializing EventManager...");
         try
         {
-            std::string mappingPath = std::get<std::string>(Config::getData("mapping_path"));
-            mapping = new JSONMapping(mappingPath, "EventMapping");
+            defaultMapping = new JSONMapping(Config::getMappingFilePath(), "DefaultEventMapping");
+            defaultMappingJSON = *defaultMapping->GetJSONMapping();
+            Debug::print("DefaultEventMapping initialized");
+
+            mapping = new JSONMapping(Config::getMappingFilePath(), "EventMapping");
             mappingJSON = *mapping->GetJSONMapping();
             Debug::print("EventMapping initialized");
             initialized = true;
@@ -76,6 +80,183 @@ bool EventManager::CheckEvents()
     return true;
 }
 
+bool EventManager::ShallTrigger(nlohmann::json& event, double& oldValue, double& newValue)
+{
+    bool shallTrigger = true;
+    if (event.contains("triggerType"))
+        {
+            std::string triggerType = event["triggerType"];
+            double triggerValue = event["triggerValue"];
+
+            //Lo and Behold, this actually works! Why you ask my friend... well
+            //https://www.cplusplus.com/reference/string/string/operators/ says relational operators
+            //use operator overloading to compare two strings using the compare method.
+            //C++ is a mighty language right? What do you think?
+            if (triggerType == "==")
+            {
+                if (newValue != triggerValue)
+                {
+                    Debug::info("EventManager - ShallTrigger: trigger type %s | "
+                                "state value %d unequal to event mapping value %d, ignored...",
+                                triggerType.c_str(), newValue, triggerValue);
+                    shallTrigger = false;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue == triggerValue)
+                    {
+                        shallTrigger = false;
+                    }
+                }
+            }
+            else if (triggerType == "!=")
+            {
+                if (newValue == triggerValue)
+                {
+                    Debug::info("EventManager - ShallTrigger: trigger type %s | "
+                                "state value %d equal to event mapping value %d, ignored...",
+                                triggerType.c_str(), newValue, triggerValue);
+                    shallTrigger = false;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue != triggerValue)
+                    {
+                        shallTrigger = false;
+                    }
+                }
+            }
+            else if (triggerType == ">=")
+            {
+                if (newValue < triggerValue)
+                {
+                    Debug::info("EventManager - ShallTrigger: trigger type %s | "
+                                "state value %d smaller than event mapping value %d, ignored...",
+                                triggerType.c_str(), newValue, triggerValue);
+                    shallTrigger = false;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue >= triggerValue)
+                    {
+                        shallTrigger = false;
+                    }
+                }
+            }
+            else if (triggerType == "<=")
+            {
+                if (newValue > triggerValue)
+                {
+                    Debug::info("EventManager - ShallTrigger: trigger type %s | "
+                                "state value %d greater than event mapping value %d, ignored...",
+                                triggerType.c_str(), newValue, triggerValue);
+                    shallTrigger = false;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue <= triggerValue)
+                    {
+                        shallTrigger = false;
+                    }
+                }
+            }
+            else if (triggerType == ">")
+            {
+                if (newValue <= triggerValue)
+                {
+                    Debug::info("EventManager - ShallTrigger: trigger type %s | "
+                                "state value %d smaller or equal than event mapping value %d, ignored...",
+                                triggerType.c_str(), newValue, triggerValue);
+                    shallTrigger = false;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue > triggerValue)
+                    {
+                        shallTrigger = false;
+                    }
+                }
+            }
+            else if (triggerType == "<")
+            {
+                if (newValue >= triggerValue)
+                {
+                    Debug::info("EventManager - ShallTrigger: trigger type %s | "
+                                "state value %d greater or equal than event mapping value %d, ignored...",
+                                triggerType.c_str(), newValue, triggerValue);
+                    shallTrigger = false;
+                }
+                else
+                {
+                    //old value also in trigger range, do not trigger
+                    if (oldValue < triggerValue)
+                    {
+                        shallTrigger = false;
+                    }
+                }
+            }
+        }
+        else
+        {
+            Debug::info("EventManager - ShallTrigger: no trigger type found, always triggering...");
+        }
+    return shallTrigger;
+}
+    
+void EventManager::GetArgumentList(const std::string &stateName, nlohmann::json& event, std::vector<double>& argumentList, double& newValue)
+{
+    for (nlohmann::json &param : event["parameters"])
+    {
+
+        if (param.is_string())
+        {
+            if (stateName.compare(param) == 0)
+            {
+                argumentList.push_back(newValue);
+            }
+            else
+            {
+                StateController *controller = StateController::Instance();
+                double val = controller->GetStateValue(param);
+                argumentList.push_back(val);
+            }
+        }
+        else if (param.is_number())
+        {
+            argumentList.push_back(param);
+        }
+        else
+        {
+            throw std::invalid_argument( "EventManager - GetArgumentList: parameter not string or number" );
+        }
+    }
+}
+
+void EventManager::AddChannelTypes(std::map<std::string, std::string>& channelTypes)
+{
+    if (initialized)
+    {
+        try
+        {
+            channelTypeMap.insert(channelTypes.begin(), channelTypes.end());
+        }
+        catch (const std::exception& e)
+        {
+            throw std::runtime_error("EventManager - AddChannelTypes: " + std::string(e.what()));
+        }
+
+    }
+    else
+    {
+        throw std::runtime_error("EventManager - AddChannelTypes: EventManager not initialized");
+    }
+}
+
 void EventManager::AddCommands(std::map<std::string, command_t> commands)
 {
     if (initialized)
@@ -101,171 +282,46 @@ std::map<std::string, command_t> EventManager::GetCommands()
     return commandMap;
 }
 
-void EventManager::ExecuteCommand(const std::string &stateName, double oldValue, double newValue, bool testOnly)
+void EventManager::ExecuteCommand(const std::string &stateName, double oldValue, double newValue, bool useDefaultMapping, bool testOnly)
 {
-    if (!mappingJSON.contains(stateName)){
-        //state name not in mapping, shall not trigger anything
-        Debug::info("EventManager - OnStateChange: state name not in event mapping, ignored...");
-        return;
+    nlohmann::json events;
+    std::string currStateName = stateName;
+    std::string commandChannelName = stateName;
+    if (useDefaultMapping)
+    {
+        utils::replaceRef(commandChannelName, "gui:", "");
+        utils::replaceRef(commandChannelName, ":sensor", "");
+        currStateName = channelTypeMap[commandChannelName];
+        if (defaultMappingJSON.contains(currStateName))
+        {
+            Debug::info("Found default event for: %s", stateName);
+        }
+        events = defaultMappingJSON[currStateName];
     }
-    nlohmann::json events = mappingJSON[stateName];
+    else
+    {
+        events = mappingJSON[currStateName];
+    }
+    
     for (auto& eventJSON : events)
     {
-        if (eventJSON.contains("triggerType"))
+        if (!ShallTrigger(eventJSON, oldValue, newValue))
         {
-            std::string triggerType = eventJSON["triggerType"];
-            double triggerValue = eventJSON["triggerValue"];
-
-            //Lo and Behold, this actually works! Why you ask my friend... well
-            //https://www.cplusplus.com/reference/string/string/operators/ says relational operators
-            //use operator overloading to compare two strings using the compare method.
-            //C++ is a mighty language right? What do you think?
-            if (triggerType == "==")
-            {
-                if (newValue != triggerValue)
-                {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
-                                "state value %d unequal to event mapping value %d, ignored...",
-                                triggerType.c_str(), newValue, triggerValue);
-                    continue;
-                }
-                else
-                {
-                    //old value also in trigger range, do not trigger
-                    if (oldValue == triggerValue)
-                    {
-                        continue;
-                    }
-                }
-            }
-            else if (triggerType == "!=")
-            {
-                if (newValue == triggerValue)
-                {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
-                                "state value %d equal to event mapping value %d, ignored...",
-                                triggerType.c_str(), newValue, triggerValue);
-                    continue;
-                }
-                else
-                {
-                    //old value also in trigger range, do not trigger
-                    if (oldValue != triggerValue)
-                    {
-                        continue;
-                    }
-                }
-            }
-            else if (triggerType == ">=")
-            {
-                if (newValue < triggerValue)
-                {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
-                                "state value %d smaller than event mapping value %d, ignored...",
-                                triggerType.c_str(), newValue, triggerValue);
-                    continue;
-                }
-                else
-                {
-                    //old value also in trigger range, do not trigger
-                    if (oldValue >= triggerValue)
-                    {
-                        continue;
-                    }
-                }
-            }
-            else if (triggerType == "<=")
-            {
-                if (newValue > triggerValue)
-                {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
-                                "state value %d greater than event mapping value %d, ignored...",
-                                triggerType.c_str(), newValue, triggerValue);
-                    continue;
-                }
-                else
-                {
-                    //old value also in trigger range, do not trigger
-                    if (oldValue <= triggerValue)
-                    {
-                        continue;
-                    }
-                }
-            }
-            else if (triggerType == ">")
-            {
-                if (newValue <= triggerValue)
-                {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
-                                "state value %d smaller or equal than event mapping value %d, ignored...",
-                                triggerType.c_str(), newValue, triggerValue);
-                    continue;
-                }
-                else
-                {
-                    //old value also in trigger range, do not trigger
-                    if (oldValue > triggerValue)
-                    {
-                        continue;
-                    }
-                }
-            }
-            else if (triggerType == "<")
-            {
-                if (newValue >= triggerValue)
-                {
-                    Debug::info("EventManager - OnStateChange: trigger type %s | "
-                                "state value %d greater or equal than event mapping value %d, ignored...",
-                                triggerType.c_str(), newValue, triggerValue);
-                    continue;
-                }
-                else
-                {
-                    //old value also in trigger range, do not trigger
-                    if (oldValue < triggerValue)
-                    {
-                        continue;
-                    }
-                }
-            }
-        }
-        else
-        {
-            Debug::info("EventManager - OnStateChange: no trigger type found, always triggering...");
+            continue;
         }
 
         std::vector<double> argumentList;
-        for (nlohmann::json &param : eventJSON["parameters"])
-        {
-
-            if (param.is_string())
-            {
-                if (stateName.compare(param) == 0)
-                {
-                    argumentList.push_back(newValue);
-                }
-                else
-                {
-                    StateController *controller = StateController::Instance();
-                    double val = controller->GetStateValue(param);
-                    argumentList.push_back(val);
-                }
-            }
-            else if (param.is_number())
-            {
-                argumentList.push_back(param);
-            }
-            else
-            {
-                throw std::invalid_argument( "parameter not string or number" );
-            }
-        }
+        GetArgumentList(currStateName, eventJSON, argumentList, newValue);
 
         std::string commandName = eventJSON["command"];
+        if (useDefaultMapping)
+        {
+            utils::replaceRef(commandName, currStateName, commandChannelName);
+        }
         //trigger command
         if (commandMap.find(commandName) == commandMap.end()){
             //state name not in mapping, shall not trigger anything
-            throw std::runtime_error("command " + commandName + " not implemented");
+            Debug::error("EventManager - ExecuteCommand: " + commandName + " not implemented, ignoring...");
             continue;
         }
         auto commandFunc = std::get<0>(commandMap[commandName]);
@@ -282,7 +338,22 @@ void EventManager::OnStateChange(const std::string& stateName, double oldValue, 
 {
     try
     {
-        ExecuteCommand(stateName, oldValue, newValue, false);
+        if (!mappingJSON.contains(stateName))
+        {
+            if (stateName.find("gui:") != std::string::npos) {
+                Debug::info("EventManager - OnStateChange: State name not found, looking for default config...");
+                ExecuteCommand(stateName, oldValue, newValue, true, false);
+            }
+            else
+            {
+                Debug::info("EventManager - OnStateChange: State name not in event mapping...");
+            }    
+        }
+        else
+        {
+            ExecuteCommand(stateName, oldValue, newValue, false, false);
+        }
+        
     }
     catch (const std::exception& e)
     {

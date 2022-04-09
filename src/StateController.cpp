@@ -80,6 +80,21 @@ void StateController::AddStates(std::map<std::string, std::tuple<double, uint64_
     }
 }
 
+std::tuple<double, uint64_t, bool> StateController::GetState(std::string stateName)
+{
+    std::lock_guard<std::mutex> lock(stateMtx);
+    std::tuple<double, uint64_t, bool> value;
+    try
+    {
+        value = states.at(stateName);
+    }
+    catch (const std::exception& e)
+    {
+        throw std::runtime_error("StateController - GetState: " + std::string(e.what()));
+    }
+    return value;
+}
+
 void StateController::SetState(std::string stateName, double value, uint64_t timestamp)
 {
     try
