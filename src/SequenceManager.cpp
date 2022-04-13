@@ -472,7 +472,7 @@ void SequenceManager::Tick(int64_t microTime)
                         //TODO: remove try catch if timer catch is used again
                         try
                         {
-                            Debug::error("%d: %s, %f", microTime, devItem.first.c_str(), nextValue[0]);
+                            //Debug::error("%d: %s, %f", microTime, devItem.first.c_str(), nextValue[0]);
                             eventManager->ExecuteCommand(devItem.first, nextValue, false);
                         }
                         catch(const std::exception& e)

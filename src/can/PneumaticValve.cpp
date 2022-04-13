@@ -23,9 +23,9 @@ const std::map<std::string, std::vector<double>> PneumaticValve::scalingMap =
         {
             {"Enabled", {1.0, 0.0}},
             {"Position", {1.0, 0.0}},
-            {"TargetPosition", {267.737617, 0.0}},
+            {"TargetPosition", {0.003735, 0.0}},
             {"Threshold", {1.0, 0.0}},
-            {"Hysteresis", {267.737617, 0.0}},
+            {"Hysteresis", {0.003735, 0.0}},
             {"OnChannelID", {1.0, 0.0}},
             {"OffChannelID", {1.0, 0.0}},
             {"PosChannelID", {1.0, 0.0}},
