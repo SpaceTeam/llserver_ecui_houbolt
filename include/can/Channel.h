@@ -39,19 +39,39 @@ protected:
 
     //-------------------------------INLINE Functions-------------------------------//
 
-    static inline double Scale(double value, double a, double b)
+    static inline double ScaleSensor(double value, double a, double b)
     {
         double result = value;
         if (a != 1 || b != 0)
         {
-            result = a * value + b;
+            result = value * a + b;
+        }
+        return result;
+    };
+
+    static inline double ScaleToRaw(double value, double a, double b)
+    {
+        double result = value;
+        if (a != 1 || b != 0)
+        {
+            result = value / a + b;
+        }
+        return result;
+    };
+
+    static inline double ScaleToDouble(double value, double a, double b)
+    {
+        double result = value;
+        if (a != 1 || b != 0)
+        {
+            result = value * a + b;
         }
         return result;
     };
 
     static inline int8_t ScaleAndConvertInt8(double value, double a, double b)
     {
-        double result = Scale(value, a, b);
+        double result = ScaleToRaw(value, a, b);
         if (result < INT8_MIN || result > INT8_MAX)
         {
             throw std::runtime_error(
@@ -63,7 +83,7 @@ protected:
 
     static inline int16_t ScaleAndConvertInt16(double value, double a, double b)
     {
-        double result = Scale(value, a, b);
+        double result = ScaleToRaw(value, a, b);
         if (result < INT16_MIN || result > INT16_MAX)
         {
             throw std::runtime_error(
@@ -75,7 +95,7 @@ protected:
 
     static inline int32_t ScaleAndConvertInt32(double value, double a, double b)
     {
-        double result = Scale(value, a, b);
+        double result = ScaleToRaw(value, a, b);
         if (result < INT32_MIN || result > INT32_MAX)
         {
             throw std::runtime_error(
@@ -110,7 +130,7 @@ protected:
 
         //convert and scale
         std::vector<double> scalingParams = scalingMap.at(variableStateName);
-        double value = Scale((double)(setMsg->value), scalingParams[0], scalingParams[1]);
+        double value = ScaleToDouble((double)(setMsg->value), scalingParams[0], scalingParams[1]);
 
         //set new state value
         SetState(variableStateName, value, timestamp);
