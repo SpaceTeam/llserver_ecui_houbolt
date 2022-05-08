@@ -43,12 +43,28 @@ CANMappingObj CANMapping::GetChannelObj(uint8_t &nodeID, uint8_t &channelID)
         channelObj = this->mapping[std::to_string(nodeID)][std::to_string(channelID)];
         Debug::info(channelObj.dump(4));
         mappingObj.stringID = channelObj["stringID"];
-        mappingObj.slope = channelObj["slope"];
-        mappingObj.offset = channelObj["offset"];
+        try
+        {
+        	mappingObj.slope = channelObj["slope"];
+        }
+        catch(std::exception& e)
+		{
+        	Debug::warning("For channel %s no slope is specified, using 1.0", mappingObj.stringID.c_str());
+        	mappingObj.slope = 1.0;
+		}
+        try
+		{
+        	mappingObj.offset = channelObj["offset"];
+		}
+		catch(std::exception& e)
+		{
+			Debug::warning("For channel %s no offset is specified, using 0.0", mappingObj.stringID.c_str());
+			mappingObj.offset = 0.0;
+		}
     }
     catch(std::exception& e)
     {
-        Debug::error("Node id %d, channel id %d or stringID or slope or offset do not exist: %s", nodeID, channelID, e.what());
+        Debug::error("Node id %d, channel id %d or stringID do not exist: %s", nodeID, channelID, e.what());
         throw std::runtime_error("CANMapping - GetChannelObj: failed");
     }
     return mappingObj;
