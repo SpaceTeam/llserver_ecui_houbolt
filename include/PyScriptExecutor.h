@@ -1,22 +1,34 @@
 #include "StateController.h"
 
 
-static PyObject *
-get_state_value(PyObject *self, PyObject *args)
+static PyObject * get_state_value(PyObject *self, PyObject *args)
 {
     const char *stateName;
 
     if (!PyArg_ParseTuple(args, "s", &stateName))
         return NULL;
-    int state = StateController::Instance() -> GetStateValue((std::string) stateName);
+    double stateValue = StateController::Instance() -> GetStateValue((std::string) stateName);
     printf("Gettin state through python method!\n");
-    return PyLong_FromLong(state);
+    return PyFloat_FromDouble(stateValue);
+}
+
+static PyObject * set_state(PyObject *self, PyObject *args)
+{
+    const char *stateName;
+    double stateValue;
+
+    if !PyArg_ParseTuple(args, "sd", &stateName, &stateValue)
+        return NULL;
+
+    StateController::Instance() -> SetState((std::string) stateName, stateValue);
+    Py_RETURN_NONE;
 }
 
 static PyMethodDef StateControllerMethods[] = {
     {"get_state_value",  get_state_value, METH_VARARGS,
      "Get the state value."},
-    {NULL, NULL, 0, NULL}        /* Sentinel */
+    {"set_state", set_state, METH_VARARGS, "Set the state value."},
+    {NULL, NULL, 0, NULL}
 };
 
 static struct PyModuleDef StateControllerModule = {
