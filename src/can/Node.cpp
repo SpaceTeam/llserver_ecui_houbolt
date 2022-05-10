@@ -12,6 +12,9 @@
 #include "can/ADC24.h"
 #include "can/Servo.h"
 #include "can/PneumaticValve.h"
+#include "can/Control.h"
+#include "can/IMU.h"
+#include "can/Rocket.h"
 #include "StateController.h"
 
 const std::vector<std::string> Node::states =
@@ -148,6 +151,15 @@ void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<st
                     break;
                 case CHANNEL_TYPE_PNEUMATIC_VALVE:
                     ch = new PneumaticValve(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
+                    break;
+                case CHANNEL_TYPE_CONTROL:
+                    ch = new Control(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
+                    break;
+                case CHANNEL_TYPE_IMU:
+                    ch = new IMU(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
+                    break;
+                case CHANNEL_TYPE_ROCKET:
+                    ch = new Rocket(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                     break;
                 default:
                     throw std::runtime_error("channel type not recognized");
