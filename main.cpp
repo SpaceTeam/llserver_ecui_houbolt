@@ -1,3 +1,5 @@
+#include <Python.h>
+
 #include <string>
 #include <iomanip>      // std::setprecision
 #include <sched.h>
