@@ -76,6 +76,10 @@ public:
 	std::map<std::string, command_t> GetCommands() override;
     std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
 
+	//-------------------------------Utility Functions-------------------------------//
+
+	std::vector<double> ResetSensorOffset(std::vector<double> &params, bool testOnly) override;
+
     //-------------------------------RECEIVE Functions-------------------------------//
 
     void ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);

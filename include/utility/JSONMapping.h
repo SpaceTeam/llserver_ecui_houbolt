@@ -13,11 +13,11 @@ class JSONMapping
 protected:
     std::string mappingPath;
     nlohmann::json mapping = nullptr;
+    std::string mappingID = "";
 
 
     //TODO: make thread safe
     virtual void LoadMapping();
-    virtual void LoadMapping(std::string &mappingID);
     virtual void SaveMapping();
 
 public:

@@ -670,3 +670,34 @@ void Node::RequestResetAllSettings(std::vector<double> &params, bool testOnly)
         throw std::runtime_error("Node - RequestData: " + std::string(e.what()));
     }
 }
+
+//----------------------------------------------------------------------------//
+//-----------------------------Utility Functions------------------------------//
+//----------------------------------------------------------------------------//
+
+std::vector<double> Node::ResetSensorOffset(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        if (params.size() != 2) //number of required parameters
+        {
+            throw std::runtime_error("2 parameters expected (channelID, currValue), but " + std::to_string(params.size()) + " were provided");
+        }
+        uint8_t channelID = params[0];
+        params.erase(params.begin());
+
+        if (channelMap.find(channelID) == channelMap.end())
+        {
+            throw std::runtime_error("Node - ResetSensorOffset: Channel not found");
+        }
+        Channel *channel = channelMap[channelID];
+        return channel->ResetSensorOffset(params, testOnly);
+        
+
+
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - ResetSensorOffset: " + std::string(e.what()));
+    }
+}
