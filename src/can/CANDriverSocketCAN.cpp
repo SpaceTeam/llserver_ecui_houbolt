@@ -8,6 +8,7 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 #include <linux/sockios.h>
+#include <poll.h>
 #include "can_houbolt/can_cmds.h"
 #include "utility/utils.h"
 #include "utility/Config.h"
@@ -97,6 +98,22 @@ void CANDriverSocketCAN::receiveLoop() // TODO: read errors, call onErrorCallbac
 {
 	while(!done)
 	{
+		// wait for data getting received
+		struct pollfd fd = {.fd = canSocket, .events = POLLIN};
+		int pollRet = poll(&fd, 1, 200); // 200ms timeout
+		if(pollRet < 0)
+		{
+			std::cerr << "Error polling canSocket" << errno << std::endl;
+			done = true;
+			return;
+		}
+		if(pollRet == 0) // timeout
+		{
+//			std::cout << "canSocket poll timeout" << std::endl;
+			if(done) break;
+			continue;
+		}
+
 		struct canfd_frame frame;
 		int size = sizeof(frame);
 		int readLength = read(canSocket, &frame, size);
