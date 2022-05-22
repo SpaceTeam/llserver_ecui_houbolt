@@ -1,4 +1,7 @@
+#include "driver/PythonController.h"
+
 #include "StateController.h"
+#include "EventManager.h"
 #include "utility/utils.h"
 
 #include <stdio.h>
@@ -60,11 +63,10 @@ static struct PyModuleDef StateControllerModule = {
     StateControllerMethods
 };
 
-PyMODINIT_FUNC PyInit_statecontroller(void)
+PyMODINIT_FUNC PyInit_StateController(void)
 {
     return PyModule_Create(&StateControllerModule);
 }
-
 
 static PyObject * execute_command(PyObject *self, PyObject *args)
 {
@@ -145,18 +147,23 @@ static struct PyModuleDef EventManagerModule = {
     EventManagerMethods
 };
 
-PyMODINIT_FUNC PyInit_eventmanager(void)
+PyMODINIT_FUNC PyInit_EventManager(void)
 {
     return PyModule_Create(&EventManagerModule);
 }
 
+PythonController::~PythonController()
+{
+    return;
+}
 
-int runPyScript(std::string scriptPath){
-    if (PyImport_AppendInittab("state_controller", PyInit_statecontroller) == -1) {
+int32_t PythonController::RunPyScript(std::string scriptPath)
+{
+    if (PyImport_AppendInittab("state_controller", PyInit_StateController) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
         return -1;
     }
-    if (PyImport_AppendInittab("event_manager", PyInit_eventmanager) == -1) {
+    if (PyImport_AppendInittab("event_manager", PyInit_EventManager) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
         return -1;
     }

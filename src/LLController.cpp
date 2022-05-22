@@ -12,7 +12,7 @@
 #include "LLInterface.h"
 #include "EcuiSocket.h"
 #include "EventManager.h"
-#include "PyScriptExecutor.h"
+#include "driver/PythonController.h"
 
 #include "LLController.h"
 
@@ -260,7 +260,8 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             else if (type.compare("pythonScript-start") == 0) {
                 std::string script = msg["content"];
                 Debug::print("Executing Python script.");
-                std::thread *pyThread = new std::thread(runPyScript, script);
+                PythonController *pyController = PythonController::Instance();
+                std::thread *pyThread = new std::thread(&PythonController::RunPyScript, pyController, script);
                 pyThread->detach();
             }
             else
