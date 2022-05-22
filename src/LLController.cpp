@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include <csignal>
+#include <thread>
 
 #include "utility/Config.h"
 #include "utility/utils.h"
@@ -11,6 +12,7 @@
 #include "LLInterface.h"
 #include "EcuiSocket.h"
 #include "EventManager.h"
+#include "driver/PythonController.h"
 
 #include "LLController.h"
 
@@ -97,6 +99,7 @@ void LLController::Abort(std::string &abortMsg)
     EcuiSocket::SendJson("abort", abortMsg);
 }
 
+// Callback on recieving message from ECUI Socket
 void LLController::OnECUISocketRecv(nlohmann::json msg)
 {
     try
@@ -253,6 +256,13 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                     EcuiSocket::SendJson("commands-error", commandsErrorJson);
                 }
 
+            }
+            else if (type.compare("pythonScript-start") == 0) {
+                std::string script = msg["content"];
+                Debug::print("Executing Python script.");
+                PythonController *pyController = PythonController::Instance();
+                std::thread *pyThread = new std::thread(&PythonController::RunPyScript, pyController, script);
+                pyThread->detach();
             }
             else
             {
