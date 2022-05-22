@@ -82,4 +82,8 @@ class CANManager : public Singleton<CANManager>
 
 		//TODO: MP add error info to arguments
 		void OnCANError(std::string *error);
+
+		//-------------------------------Utility Functions-------------------------------//
+
+		void ResetOffset(std::vector<double> &params, bool testOnly);
 };

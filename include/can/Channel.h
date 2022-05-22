@@ -13,6 +13,7 @@
 #include <string>
 #include <can_houbolt/cmds.h>
 #include <limits.h>
+#include <atomic>
 
 #include "StateController.h"
 #include "can_houbolt/cmds.h"
@@ -32,6 +33,7 @@ protected:
 
     uint8_t channelID;
     const std::string channelName;
+    std::mutex scalingMtx;
     std::vector<double> sensorScaling;
     const uint8_t typeSize; //in bytes
 
@@ -177,8 +179,11 @@ public:
     virtual std::string GetChannelName()
     { return this->channelName; };
 
-    virtual void SetScaling(double)
-    { this->sensorScaling = sensorScaling; };
+    virtual std::vector<double> GetScaling()
+    { std::lock_guard<std::mutex> lock(scalingMtx); return this->sensorScaling; };
+
+    virtual void SetScaling(std::vector<double> &sensorScaling)
+    { std::lock_guard<std::mutex> lock(scalingMtx); this->sensorScaling = sensorScaling; };
 
     virtual std::vector<std::string> GetStates();
 
@@ -199,6 +204,10 @@ public:
 
     virtual void RequestResetSettings(std::vector<double> &params, bool testOnly)
     { throw std::logic_error("Channel - RequestResetSettings: not implemented"); };
+
+    //-------------------------------Utility Functions-------------------------------//
+
+    virtual std::vector<double> ResetSensorOffset(std::vector<double> &params, bool testOnly);
 };
 
 #endif // LLSERVER_ECUI_HOUBOLT_CHANNEL_H

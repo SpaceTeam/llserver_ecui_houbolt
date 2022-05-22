@@ -8,11 +8,6 @@
 
 void JSONMapping::LoadMapping()
 {
-    LoadMapping((std::string &) "");
-}
-
-void JSONMapping::LoadMapping(std::string &mappingID)
-{
 
     try
     {
@@ -37,7 +32,12 @@ void JSONMapping::SaveMapping()
     try
     {
         Debug::print("saving mapping...");
-        utils::saveFile(this->mappingPath, mapping.dump(4));
+        nlohmann::json mappingJson = nlohmann::json::parse(utils::loadFile(this->mappingPath));
+        if (!mappingID.empty())
+        {
+            mappingJson[mappingID] = this->mapping;
+        }
+        utils::saveFile(this->mappingPath, mappingJson.dump(4));
         Debug::print("mapping saved");
     }
     catch(std::exception& e)
@@ -54,14 +54,14 @@ nlohmann::json *JSONMapping::GetJSONMapping()
 
 JSONMapping::JSONMapping(std::string mappingPath)
 {
-    this->mappingPath = std::move(mappingPath);
-    LoadMapping();
+    JSONMapping(mappingPath, "");
 }
 
 JSONMapping::JSONMapping(std::string mappingPath, std::string mappingID)
 {
     this->mappingPath = std::move(mappingPath);
-    LoadMapping(mappingID);
+    this->mappingID = std::move(mappingID);
+    LoadMapping();
 }
 
 JSONMapping::~JSONMapping()
