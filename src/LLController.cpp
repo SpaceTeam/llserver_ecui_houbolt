@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include <csignal>
+#include <thread>
 
 #include "utility/Config.h"
 #include "utility/utils.h"
@@ -256,10 +257,11 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                 }
 
             }
-            else if (type.compare("start-python-script") == 0) {
+            else if (type.compare("pythonScript-start") == 0) {
                 std::string script = msg["content"];
                 Debug::print("Executing Python script.");
-                runPyScript(script);
+                std::thread *pyThread = new std::thread(runPyScript, script);
+                pyThread->detach();
             }
             else
             {

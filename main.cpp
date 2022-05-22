@@ -1,4 +1,3 @@
-#include <Python.h>
 
 #include <string>
 #include <iomanip>      // std::setprecision
