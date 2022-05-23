@@ -47,6 +47,7 @@ private:
     bool CheckEvents();
 
     bool ShallTrigger(nlohmann::json& event, double& oldValue, double& newValue);
+    double GetArgument(const std::string &stateName, nlohmann::json& param, double& newValue);
     void GetArgumentList(const std::string &stateName, nlohmann::json& event, std::vector<double>& argumentList, double& newValue);
 
     ~EventManager();

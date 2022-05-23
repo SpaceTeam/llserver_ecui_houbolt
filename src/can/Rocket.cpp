@@ -22,9 +22,9 @@ const std::vector<std::string> Rocket::states =
 
 const std::map<std::string, std::vector<double>> Rocket::scalingMap =
         {
-            {"MinimumChamberPressure", {1.0, 0.0}},
-            {"MinimumFuelPressure", {1.0, 0.0}},
-            {"MinimumOxPressure", {1.0, 0.0}},
+            {"MinimumChamberPressure", {0.0037, 0.0}},
+            {"MinimumFuelPressure", {0.00367, 0.0}},
+            {"MinimumOxPressure", {0.003735, 0.0}},
             {"HolddownTimeout", {1.0, 0.0}},
             {"StateRefreshDivider", {1.0, 0.0}},
         };
