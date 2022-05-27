@@ -701,3 +701,21 @@ std::vector<double> Node::ResetSensorOffset(std::vector<double> &params, bool te
         throw std::runtime_error("Node - ResetSensorOffset: " + std::string(e.what()));
     }
 }
+
+void Node::RequestCurrentState()
+{
+    std::vector<double> params;
+
+    GetBus1Voltage(params, false);
+	GetBus2Voltage(params, false);
+	GetPowerVoltage(params, false);
+	GetPowerCurrent(params, false);
+	GetRefreshDivider(params, false);
+	GetRefreshRate(params, false);
+	GetUARTEnabled(params, false);
+
+    for (auto &channel : channelMap)
+    {
+        channel.second->RequestCurrentState();
+    }
+}

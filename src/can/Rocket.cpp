@@ -393,3 +393,15 @@ void Rocket::RequestResetSettings(std::vector<double> &params, bool testOnly)
         throw std::runtime_error("Rocket - RequestResetSettings: " + std::string(e.what()));
     }
 }
+
+void Rocket::RequestCurrentState()
+{
+    std::vector<double> params;
+
+	GetMinimumChamberPressure(params, false);
+	GetMinimumFuelPressure(params, false);
+	GetMinimumOxPressure(params, false);
+	GetHolddownTimeout(params, false);
+	GetStateRefreshDivider(params, false);
+    GetRocketState(params, false);
+}

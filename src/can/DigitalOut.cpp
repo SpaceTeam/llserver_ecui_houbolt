@@ -270,3 +270,14 @@ void DigitalOut::RequestResetSettings(std::vector<double> &params, bool testOnly
         throw std::runtime_error("DigitalOut - RequestResetSettings: " + std::string(e.what()));
     }
 }
+
+void DigitalOut::RequestCurrentState()
+{
+    std::vector<double> params;
+    
+	GetState(params, false);
+	GetDutyCycle(params, false);
+	GetFrequency(params, false);
+	GetMeasurement(params, false);
+	GetRefreshDivider(params, false);
+}

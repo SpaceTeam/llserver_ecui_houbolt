@@ -121,6 +121,10 @@ CANResult CANManager::Init()
             // no need for std::cin.get(); here, since the thread needs an input to quit
 
             initialized = true;
+
+			Debug::print("Request current state and config from nodes...\n");
+			RequestCurrentState();
+
         }
         catch (std::exception& e)
         {
@@ -159,12 +163,22 @@ CANResult CANManager::RequestCANInfo()
     Debug::print("---Press enter to send node request---");
     std::cin.get();
     //TODO: MP be careful if one channel is used for backup
-    canDriver->SendCANMessage(0, canID.uint32, msg.uint8, msgLength);
-    canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength);
-    canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength);
-    //canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength);
+    canDriver->SendCANMessage(0, canID.uint32, msg.uint8, msgLength, false);
+    canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength, false);
+    canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength, false);
+    canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength, false);
 
 	return CANResult::SUCCESS;
+}
+
+void CANManager::RequestCurrentState()
+{
+	Node *currNode;
+	for (auto &it : nodeMap)
+    {
+        currNode = it.second;
+        currNode->RequestCurrentState();
+    }
 }
 
 /**

@@ -594,3 +594,23 @@ void Servo::RequestResetSettings(std::vector<double> &params, bool testOnly)
         throw std::runtime_error("Servo - RequestResetSettings: " + std::string(e.what()));
     }
 }
+
+void Servo::RequestCurrentState()
+{
+    std::vector<double> params;
+
+	GetPosition(params, false);
+	GetTargetPosition(params, false);
+	GetTargetPressure(params, false);
+	GetMaxSpeed(params, false);
+	GetMaxAccel(params, false);
+	GetMaxTorque(params, false);
+	GetP(params, false);
+	GetI(params, false);
+	GetD(params, false);
+	GetSensorChannelID(params, false);
+	GetStartpoint(params, false);
+	GetEndpoint(params, false);
+	GetPWMEnabled(params, false);
+	GetRefreshDivider(params, false);
+}

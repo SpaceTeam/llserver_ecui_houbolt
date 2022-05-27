@@ -52,12 +52,17 @@ public:
 
     void SetRocketState(std::vector<double> &params, bool testOnly);
     void GetRocketState(std::vector<double> &params, bool testOnly);
+    
     void RequestInternalControl(std::vector<double> &params, bool testOnly);
     void RequestAbort(std::vector<double> &params, bool testOnly);
     void RequestEndOfFlight(std::vector<double> &params, bool testOnly);
 
 	void RequestStatus(std::vector<double> &params, bool testOnly) override;
 	void RequestResetSettings(std::vector<double> &params, bool testOnly) override;
+
+    //-------------------------------Utility Functions-------------------------------//
+
+    void RequestCurrentState() override;
 
 };
 

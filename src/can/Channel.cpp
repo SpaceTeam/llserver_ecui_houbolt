@@ -155,7 +155,7 @@ void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *comman
 
     if (!testOnly)
     {
-        driver->SendCANMessage(canBusChannelID, canID.uint32, msg.uint8, msgLength);
+        driver->SendCANMessage(canBusChannelID, canID.uint32, msg.uint8, msgLength, true);
     }
 }
 
@@ -188,6 +188,7 @@ void Channel::GetVariable(uint8_t cmdID, uint8_t nodeID, uint8_t variableID,
     {
         GetMsg_t getMsg = {0};
         getMsg.variable_id = variableID;
+        Debug::info("GetVariable of channel %s with variable id: %d called", channelName.c_str(), variableID);
         SendStandardCommand(nodeID, cmdID, (uint8_t *) &getMsg, sizeof(getMsg), canBusChannelID, driver, testOnly);
     }
     else

@@ -66,7 +66,7 @@ CANDriverSocketCAN::~CANDriverSocketCAN()
 }
 
 
-void CANDriverSocketCAN::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength)
+void CANDriverSocketCAN::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking)
 {
 	if(canChannelID > 0) return; // TODO: support multiple devices, use canChannelID
 

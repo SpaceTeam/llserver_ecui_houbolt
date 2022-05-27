@@ -24,7 +24,7 @@ class CANDriverSocketCAN : public CANDriver
 					   	   std::function<void(std::string *)> onErrorCallback);
         ~CANDriverSocketCAN();
 
-        void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength);
+        void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking);
 
         std::map<std::string, bool> GetCANStatusReadable(uint32_t canChannelID);
 };
