@@ -23,6 +23,7 @@ public:
     void InternalControlResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
     void AbortResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
     void EndOfFlightResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
+    void AutoCheckResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
 
 public:
     Rocket(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
@@ -56,6 +57,7 @@ public:
     void RequestInternalControl(std::vector<double> &params, bool testOnly);
     void RequestAbort(std::vector<double> &params, bool testOnly);
     void RequestEndOfFlight(std::vector<double> &params, bool testOnly);
+    void RequestAutoCheck(std::vector<double> &params, bool testOnly);
 
 	void RequestStatus(std::vector<double> &params, bool testOnly) override;
 	void RequestResetSettings(std::vector<double> &params, bool testOnly) override;

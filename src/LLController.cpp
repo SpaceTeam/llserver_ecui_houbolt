@@ -158,11 +158,11 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                 {
                     nlohmann::json statesChunk(states.begin(), states.begin() + 500);
                     
-                    EcuiSocket::SendJson("states", statesChunk);
+                    EcuiSocket::SendJson("states-init", statesChunk);
                     states.erase(states.begin(), states.begin() + 500);
                 }
                 
-                EcuiSocket::SendJson("states", states);
+                EcuiSocket::SendJson("states-init", states);
 
                 bool isAutoAbortActive = seqManager->GetAutoAbort();
                 EcuiSocket::SendJson("auto-abort-change", isAutoAbortActive);
@@ -261,7 +261,6 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             }
             else if (type.compare("pythonScript-start") == 0) {
                 std::string scriptPath = msg["content"];
-                Debug::print("Executing Python script.");
                 PythonController *pyController = PythonController::Instance();
                 pyController->StartPythonScript(scriptPath);
             }
