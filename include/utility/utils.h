@@ -32,6 +32,8 @@ namespace utils
     std::string replace(const std::string& str, const std::string& from, const std::string& to);
     bool replaceRef(std::string& str, const std::string& from, const std::string& to);
 
+    std::vector<std::string> split(const std::string& str, const std::string& delimiter);
+    std::string merge(std::vector<std::string> strList, const std::string& delimiter);
 }
 
 #endif //TXV_ECUI_LLSERVER_UTILS_H

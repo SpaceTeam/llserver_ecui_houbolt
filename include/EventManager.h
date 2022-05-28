@@ -66,7 +66,8 @@ public:
     std::map<std::string, command_t> GetCommands();
     void OnStateChange(const std::string& stateName, double oldValue, double newValue);
 
-    void ExecuteCommand(const std::string &stateName, double oldValue, double newValue, bool useDefaultMapping, bool testOnly);
+    void ExecuteRegexCommandOrState(const std::string &regexKey, nlohmann::json &events, const std::string &stateName, double oldValue, double newValue, bool testOnly);
+    void ExecuteCommandOrState(const std::string &stateName, double oldValue, double newValue, bool useDefaultMapping, bool testOnly);
     void ExecuteCommand(const std::string &commandName, std::vector<double> &params, bool testOnly);
 
 

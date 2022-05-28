@@ -48,9 +48,9 @@ static PyObject * set_state(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef StateControllerMethods[] = {
-    {"get_state_value",  get_state_value, METH_VARARGS,
+    {"GetStateValue",  get_state_value, METH_VARARGS,
      "Get the state value."},
-    {"set_state", set_state, METH_VARARGS, "Set the state value."},
+    {"SetState", set_state, METH_VARARGS, "Set the state value."},
     {NULL, NULL, 0, NULL}
 };
 
@@ -133,7 +133,7 @@ static PyObject * execute_command(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef EventManagerMethods[] = {
-    {"execute_command",  execute_command, METH_VARARGS,
+    {"ExecuteCommand",  execute_command, METH_VARARGS,
      "Execute command directly over CAN Bus."},
     {NULL, NULL, 0, NULL}
 };
@@ -154,25 +154,51 @@ PyMODINIT_FUNC PyInit_EventManager(void)
 
 PythonController::~PythonController()
 {
+    if (running)
+    {
+        StateController::Instance() -> SetState((std::string) "python_running", 0, utils::getCurrentTimestamp());
+        if (pyThread != nullptr)
+        {
+            if (pyThread->joinable())
+            {
+                pyThread->join();
+                delete pyThread;
+            }
+        }
+    }
+    
     return;
 }
 
-int32_t PythonController::RunPyScript(std::string scriptPath)
+void PythonController::StartPythonScript(std::string scriptPath)
+{
+    if (!running)
+    {
+        pyThread = new std::thread(&PythonController::RunPyScript, this, scriptPath);
+    }
+    
+}
+
+void PythonController::RunPyScript(std::string scriptPath)
 {
     if (PyImport_AppendInittab("state_controller", PyInit_StateController) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
-        return -1;
+        return;
     }
     if (PyImport_AppendInittab("event_manager", PyInit_EventManager) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
-        return -1;
+        return;
     }
 
     Py_Initialize();
 
     FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
+
+    StateController::Instance() -> SetState((std::string) "python_running", 1, utils::getCurrentTimestamp());
+
 	PyRun_SimpleFile(fp, scriptPath.c_str());
 
     Py_Finalize();
-    return 0;
+
+    running = true;
 }

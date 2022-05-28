@@ -83,6 +83,8 @@ bool LLController::IsInitialized()
 LLController::~LLController()
 {
     //    SequenceManager::AbortSequence();
+    Debug::print("Shutting down PythonController...");
+    PythonController::Destroy();
     Debug::print("Shutting down ECUISocket...");
     EcuiSocket::Destroy();
     Debug::print("Shutting down LLInterface...");
@@ -258,11 +260,10 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
 
             }
             else if (type.compare("pythonScript-start") == 0) {
-                std::string script = msg["content"];
+                std::string scriptPath = msg["content"];
                 Debug::print("Executing Python script.");
                 PythonController *pyController = PythonController::Instance();
-                std::thread *pyThread = new std::thread(&PythonController::RunPyScript, pyController, script);
-                pyThread->detach();
+                pyController->StartPythonScript(scriptPath);
             }
             else
             {

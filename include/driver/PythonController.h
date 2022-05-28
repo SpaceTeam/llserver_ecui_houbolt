@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "common.h"
 
 #include "utility/Singleton.h"
@@ -11,9 +13,13 @@ class PythonController : public Singleton<PythonController>
 private:
 
     ~PythonController();
+
+    std::atomic_bool running = false;
+    std::thread *pyThread = nullptr;
     
 public:
 
-    int32_t RunPyScript(std::string scriptPath);
+    void StartPythonScript(std::string scriptPath);
+    void RunPyScript(std::string scriptPath);
 
 };

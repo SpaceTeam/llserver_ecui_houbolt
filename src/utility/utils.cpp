@@ -70,11 +70,39 @@ namespace utils
         return newStr;
     }
 
-    bool replaceRef(std::string& str, const std::string& from, const std::string& to) {
+    bool replaceRef(std::string& str, const std::string& from, const std::string& to) 
+    {
         size_t start_pos = str.find(from);
         if(start_pos == std::string::npos)
             return false;
         str.replace(start_pos, from.length(), to);
         return true;
+    }
+
+    std::vector<std::string> split(const std::string& str, const std::string& delimiter)
+    {
+        std::vector<std::string> res;
+
+        auto start = 0U;
+        auto end = str.find(delimiter);
+        while (end != std::string::npos)
+        {
+            res.push_back(str.substr(start, end - start));
+            start = end + delimiter.length();
+            end = str.find(delimiter, start);
+        }
+
+        res.push_back(str.substr(start, end));
+        return res;
+    }
+
+    std::string merge(std::vector<std::string> strList, const std::string& delimiter)
+    {
+        std::string res = "";
+        for (const auto &str : strList)
+        {
+            res += str + ":";
+        }
+        return res.substr(0, res.length() - delimiter.length());
     }
 }
