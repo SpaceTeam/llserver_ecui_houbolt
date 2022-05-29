@@ -13,7 +13,7 @@
 #include "common.h"
 
 
-#define CAN_CHANNELS 3
+#define CAN_CHANNELS 4
 
 
 class CANDriverKvaser : public CANDriver

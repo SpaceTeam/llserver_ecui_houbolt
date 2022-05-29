@@ -174,6 +174,7 @@ void PythonController::StartPythonScript(std::string scriptPath)
 {
     if (!running)
     {
+        running = true;
         Debug::print("Executing Python script.");
         pyThread = new std::thread(&PythonController::RunPyScript, this, scriptPath);
     }
@@ -196,7 +197,7 @@ void PythonController::RunPyScript(std::string scriptPath)
     FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
 
     StateController::Instance() -> SetState((std::string) "python_running", 1, utils::getCurrentTimestamp());
-    running = true;
+    
 
 	PyRun_SimpleFile(fp, scriptPath.c_str());
 

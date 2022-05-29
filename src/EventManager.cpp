@@ -446,15 +446,16 @@ void EventManager::OnStateChange(const std::string& stateName, double oldValue, 
         if (!mappingJSON.contains(stateName))
         {
             bool foundMatch = false;
-            for (auto it = mappingJSON.begin(); it != mappingJSON.end(); ++it)
+            /* for (auto it = mappingJSON.begin(); it != mappingJSON.end(); ++it)
             {
-                std::regex regex(it.key());
+                std::string keyName = it.key();
+                std::regex regex(keyName);
                 if (std::regex_match(stateName, regex))
                 {
                     ExecuteRegexCommandOrState(it.key(), it.value(), stateName, oldValue, newValue, false);
                     foundMatch = true;
                 }
-            }
+            } */
             if (!foundMatch && (stateName.find("gui:") != std::string::npos)) {
                 Debug::info("EventManager - OnStateChange: State name not found, looking for default config...");
                 ExecuteCommandOrState(stateName, oldValue, newValue, true, false);
