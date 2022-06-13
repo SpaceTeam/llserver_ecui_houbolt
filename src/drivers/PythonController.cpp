@@ -184,3 +184,19 @@ int32_t PythonController::RunPyScript(std::string scriptPath)
     Py_Finalize();
     return 0;
 }
+
+int32_t PythonController::RunPyScriptWithArgv(std::string scriptPath, int pyArgc, wchar_t *pyArgv[])
+{
+    if (PythonController::Appendinittab() == -1) {
+        return -1;
+    }
+    
+    Py_Initialize();
+    PySys_SetArgv(pyArgc, pyArgv);
+
+    FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
+	PyRun_SimpleFile(fp, scriptPath.c_str());
+
+    Py_Finalize();
+    return 0;
+}
