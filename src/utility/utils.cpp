@@ -77,4 +77,17 @@ namespace utils
         str.replace(start_pos, from.length(), to);
         return true;
     }
+
+    wchar_t * strToWCharPtr( const std::string& str )
+    {
+        std::wostringstream wstm ;
+        const std::ctype<wchar_t>& ctfacet = 
+                            std::use_facet< std::ctype<wchar_t> >( wstm.getloc() ) ;
+        for( size_t i=0 ; i<str.size() ; ++i ) 
+                wstm << ctfacet.widen( str[i] ) ;
+        std::wstring wideStr = wstm.str() ;
+        const wchar_t *constWideStr = wideStr.c_str();
+        wchar_t * wideCharStr = const_cast< wchar_t * >( constWideStr );
+        return wideCharStr;
+    }
 }
