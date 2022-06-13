@@ -157,7 +157,7 @@ PythonController::~PythonController()
     return;
 }
 
-int32_t PythonController::RunPyScript(std::string scriptPath)
+int32_t PythonController::AppendInittab()
 {
     if (PyImport_AppendInittab("state_controller", PyInit_StateController) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
@@ -168,6 +168,14 @@ int32_t PythonController::RunPyScript(std::string scriptPath)
         return -1;
     }
 
+}
+
+int32_t PythonController::RunPyScript(std::string scriptPath)
+{
+    if (PythonController::Appendinittab() == -1) {
+        return -1;
+    }
+    
     Py_Initialize();
 
     FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
