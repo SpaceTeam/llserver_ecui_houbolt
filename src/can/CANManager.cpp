@@ -11,6 +11,7 @@
 #include "can/CANManager.h"
 #include "can/CANDriverKvaser.h"
 #include "can/CANDriverSocketCAN.h"
+#include "can/CANDriverUDP.h"
 #include "can_houbolt/channels/generic_channel_def.h"
 
 #include "StateController.h"
@@ -76,6 +77,16 @@ CANResult CANManager::Init()
             	Debug::print("Can driver \"" + can_driver + "\" specified in config not found!");
             	throw std::runtime_error("Can driver \"" + can_driver + "\" specified in config not found!");
             }
+
+			bool use_lora = std::get<bool>(Config::getData("use_lora"));
+
+            if(use_lora)
+			{
+				Debug::print("Initializing LoRa...");
+
+				loraDriver = new CANDriverUDP(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
+				                            std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
+			}
 
             Debug::print("Retreiving CANHardware info...");
             RequestCANInfo();
@@ -167,6 +178,8 @@ CANResult CANManager::RequestCANInfo()
     canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength, false);
     canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength, false);
     canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength, false);
+
+
 
 	return CANResult::SUCCESS;
 }
@@ -295,6 +308,7 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 			if (canIDStruct->info.direction == 0)
 			{
 				Debug::print("Direction bit master to node from node %d on bus %d, delegating msg...", nodeID, canBusChannelID);
+				//TODO: DIRTY HOTFIX, remove it
 				std::vector<uint8_t> channels = {0,1,2,3};
 				channels.erase(channels.begin()+canBusChannelID);
 				for (const auto &currChannelID : channels)

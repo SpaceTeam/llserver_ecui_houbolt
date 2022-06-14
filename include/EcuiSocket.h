@@ -5,6 +5,8 @@
 #ifndef TXV_ECUI_LLSERVER_ECUISOCKET_H
 #define TXV_ECUI_LLSERVER_ECUISOCKET_H
 
+#include <atomic>
+
 #include "common.h"
 
 #include "utility/json.hpp"
@@ -19,8 +21,8 @@ private:
 
     static Socket* socket;
 
-    static bool connectionActive;
-    static bool shallClose;
+    static std::atomic_bool connectionActive;
+    static std::atomic_bool shallClose;
 
     static std::thread* asyncListenThread;
 

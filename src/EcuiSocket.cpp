@@ -10,12 +10,10 @@
 
 #include "utility/Config.h"
 
-using namespace std;
-
 Socket* EcuiSocket::socket;
 
-bool EcuiSocket::connectionActive = false;
-bool EcuiSocket::shallClose = false;
+std::atomic_bool EcuiSocket::connectionActive = false;
+std::atomic_bool EcuiSocket::shallClose = false;
 
 std::thread* EcuiSocket::asyncListenThread;
 std::function<void()> EcuiSocket::onCloseCallback;
@@ -24,14 +22,14 @@ void EcuiSocket::Init(std::function<void(nlohmann::json)> onMsgCallback, std::fu
 {
     EcuiSocket::onCloseCallback = onCloseCallback;
 
-    string ip = std::get<std::string>(Config::getData("WEBSERVER/ip"));
+    std::string ip = std::get<std::string>(Config::getData("WEBSERVER/ip"));
     int32_t port = std::get<int>(Config::getData("WEBSERVER/port"));
 
     socket = new Socket("EcuiSocket", Close, ip, port);
     while(socket->Connect()!=0);
     
     connectionActive = true;
-    asyncListenThread = new thread(AsyncListen, onMsgCallback);
+    asyncListenThread = new std::thread(AsyncListen, onMsgCallback);
     asyncListenThread->detach();
 
 }
@@ -40,7 +38,7 @@ void EcuiSocket::AsyncListen(std::function<void(nlohmann::json)> onMsgCallback)
 {
     while(!shallClose)
     {
-        string msg;
+        std::string msg;
         try {
             msg = socket->Recv();
             nlohmann::json jsonMsg = nlohmann::json::parse(msg);
@@ -51,7 +49,7 @@ void EcuiSocket::AsyncListen(std::function<void(nlohmann::json)> onMsgCallback)
             socket->Connect();
         }
 
-        this_thread::yield();
+        std::this_thread::yield();
     }
 }
 
@@ -84,7 +82,7 @@ void EcuiSocket::SendJson(std::string type, nlohmann::json content)
         }
         //    cout << "Content: "<< content.dump() << endl;
         //    cout << "Msg: "<< jsonMsg.dump() << endl;
-        string msg = jsonMsg.dump() + "\n";
+        std::string msg = jsonMsg.dump() + "\n";
 
 //        std::thread sendThread(SendAsync, msg);
 //
@@ -110,7 +108,7 @@ void EcuiSocket::SendJson(std::string type, float content)
 
         //	cout << "Content: "<< content.dump() << endl;
         //	cout << "Msg: "<< jsonMsg.dump() << endl;
-        string msg = jsonMsg.dump() + "\n";
+        std::string msg = jsonMsg.dump() + "\n";
 
 
 //        std::thread sendThread(SendAsync, msg);

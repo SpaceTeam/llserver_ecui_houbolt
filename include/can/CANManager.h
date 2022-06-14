@@ -48,6 +48,7 @@ class CANManager : public Singleton<CANManager>
 
 
 		CANDriver *canDriver;
+		CANDriver *loraDriver;
 		CANMapping *mapping;
 
 		std::mutex nodeMapMtx;
