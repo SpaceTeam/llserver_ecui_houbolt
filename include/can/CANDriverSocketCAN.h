@@ -20,7 +20,7 @@ class CANDriverSocketCAN : public CANDriver
 		int canSocket;
 
     public:
-        CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
+        CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
 					   	   std::function<void(std::string *)> onErrorCallback);
         ~CANDriverSocketCAN();
 

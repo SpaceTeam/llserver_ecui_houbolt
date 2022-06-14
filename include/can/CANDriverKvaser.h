@@ -12,14 +12,10 @@
 #include <canlib.h>
 #include "common.h"
 
-
-#define CAN_CHANNELS 4
-
-
 class CANDriverKvaser : public CANDriver
 {
     private:
-        canHandle canHandles[CAN_CHANNELS];
+        std::map<uint32_t, canHandle> canHandlesMap = std::map<uint32_t, canHandle>();
 
 		CANParams arbitrationParams;
 		CANParams dataParams;
@@ -31,8 +27,8 @@ class CANDriverKvaser : public CANDriver
         canStatus InitializeCANChannel(uint32_t canChannelID);
 
     public:
-        CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
-						std::function<void(std::string *)> onErrorCallback);
+        CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
+						std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs);
         ~CANDriverKvaser();
 
         void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking);

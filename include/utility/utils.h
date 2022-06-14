@@ -34,6 +34,8 @@ namespace utils
 
     std::vector<std::string> split(const std::string& str, const std::string& delimiter);
     std::string merge(std::vector<std::string> strList, const std::string& delimiter);
+
+    uint64_t byteArrayToUInt64BigEndian(uint8_t *data);
 }
 
 #endif //TXV_ECUI_LLSERVER_UTILS_H

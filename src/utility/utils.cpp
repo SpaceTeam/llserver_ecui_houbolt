@@ -105,4 +105,17 @@ namespace utils
         }
         return res.substr(0, res.length() - delimiter.length());
     }
+
+    uint64_t byteArrayToUInt64BigEndian(uint8_t *data)
+    {
+        uint64_t converted = 0;
+        int i = 0;
+        for (int shift=8*(sizeof(uint64_t)-1); shift > 0; shift-=8)
+        {
+            converted |= (uint64_t)data[i] << shift;
+            i++;
+        }
+        converted |= (uint64_t)data[i];
+        return converted;
+    }
 }

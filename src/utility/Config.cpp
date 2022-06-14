@@ -38,7 +38,7 @@ std::string Config::getMappingFilePath()
 }
 
 
-std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>> Config::getData(std::vector<std::string> keyChain) {
+std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>, std::vector<int>> Config::getData(std::vector<std::string> keyChain) {
     nlohmann::json obj = data;
     while (keyChain.size() > 0) {
         if (utils::keyExists(obj, keyChain[0]))
@@ -56,7 +56,7 @@ std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::st
     return convertJSONtoType(obj);
 }
 
-std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>> Config::getData(std::string keyChain) {
+std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>, std::vector<int>> Config::getData(std::string keyChain) {
     std::vector<std::string> keyVector;
     long unsigned int endPos;
     for (long unsigned int pos = 0; pos != std::string::npos; pos = endPos) {
@@ -73,7 +73,7 @@ void Config::print() {
     std::cerr << std::setw(4) << data << std::endl;
 }
 
-std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>> Config::convertJSONtoType(nlohmann::json object) {
+std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>, std::vector<int>> Config::convertJSONtoType(nlohmann::json object) {
     if (object == nullptr)
         return object;
     switch (object.type()) {
@@ -93,7 +93,19 @@ std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::st
             return object.get<bool>();
             break;
         case nlohmann::json::value_t::array:
-            return object.get<std::vector<std::string>>();
+            if (std::all_of(object.begin(), object.end(), [](const nlohmann::json& el){ return el.is_string(); }))
+            {
+                return object.get<std::vector<std::string>>();
+            }
+            else if (std::all_of(object.begin(), object.end(), [](const nlohmann::json& el){ return el.is_number_integer(); }))
+            {
+                return object.get<std::vector<int>>();
+            }
+            else
+            {
+                Debug::error("Array elements neither string nor integer, returning object");
+                return object;
+            }
             break;
         default:
             return object;
