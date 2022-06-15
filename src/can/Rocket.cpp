@@ -15,6 +15,7 @@ const std::vector<std::string> Rocket::states =
             "InternalControl",
             "Abort",
             "EndOfFlight",
+            "AutoCheck",
             "StateRefreshDivider",
             "RequestStatus",
             "ResetAllSettings"
@@ -22,9 +23,9 @@ const std::vector<std::string> Rocket::states =
 
 const std::map<std::string, std::vector<double>> Rocket::scalingMap =
         {
-            {"MinimumChamberPressure", {1.0, 0.0}},
-            {"MinimumFuelPressure", {1.0, 0.0}},
-            {"MinimumOxPressure", {1.0, 0.0}},
+            {"MinimumChamberPressure", {0.0037, 0.0}},
+            {"MinimumFuelPressure", {0.00367, 0.0}},
+            {"MinimumOxPressure", {0.003735, 0.0}},
             {"HolddownTimeout", {1.0, 0.0}},
             {"StateRefreshDivider", {1.0, 0.0}},
         };
@@ -57,6 +58,7 @@ Rocket::Rocket(uint8_t channelID, std::string channelName, std::vector<double> s
         {"ActivateInternalControl", {std::bind(&Rocket::RequestInternalControl, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"Abort", {std::bind(&Rocket::RequestAbort, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"EndOfFlight", {std::bind(&Rocket::RequestEndOfFlight, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"AutoCheck", {std::bind(&Rocket::RequestAutoCheck, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"RequestStatus", {std::bind(&Rocket::RequestStatus, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"RequestResetSettings", {std::bind(&Rocket::RequestResetSettings, this, std::placeholders::_1, std::placeholders::_2), {}}},
     };
@@ -109,6 +111,9 @@ void Rocket::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength
             case ROCKET_RES_END_OF_FLIGHT:
                 EndOfFlightResponse(canMsg, canMsgLength, timestamp);
                 break;
+            case ROCKET_RES_AUTO_CHECK:
+                AutoCheckResponse(canMsg, canMsgLength, timestamp);
+                break;
             case ROCKET_REQ_RESET_SETTINGS:
             case ROCKET_REQ_STATUS:
             case ROCKET_REQ_SET_VARIABLE:
@@ -151,6 +156,11 @@ void Rocket::AbortResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, ui
 void Rocket::EndOfFlightResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
 {
     SetState("EndOfFlight", 1, timestamp);
+}
+
+void Rocket::AutoCheckResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
+{
+    SetState("AutoCheck", 1, timestamp);
 }
 
 //----------------------------------------------------------------------------//
@@ -314,7 +324,7 @@ void Rocket::RequestInternalControl(std::vector<double> &params, bool testOnly)
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("ADC24 - RequestInternalControl: " + std::string(e.what()));
+        throw std::runtime_error("Rocket - RequestInternalControl: " + std::string(e.what()));
     }
 }
 
@@ -326,7 +336,7 @@ void Rocket::RequestAbort(std::vector<double> &params, bool testOnly)
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("ADC24 - RequestAbort: " + std::string(e.what()));
+        throw std::runtime_error("Rocket - RequestAbort: " + std::string(e.what()));
     }
 }
 
@@ -338,7 +348,19 @@ void Rocket::RequestEndOfFlight(std::vector<double> &params, bool testOnly)
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("ADC24 - RequestEndOfFlight: " + std::string(e.what()));
+        throw std::runtime_error("Rocket - RequestEndOfFlight: " + std::string(e.what()));
+    }
+}
+
+void Rocket::RequestAutoCheck(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        SendNoPayloadCommand(params, parent->GetNodeID(), ROCKET_REQ_AUTO_CHECK, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Rocket - RequestAutoCheck: " + std::string(e.what()));
     }
 }
 
@@ -392,4 +414,16 @@ void Rocket::RequestResetSettings(std::vector<double> &params, bool testOnly)
     {
         throw std::runtime_error("Rocket - RequestResetSettings: " + std::string(e.what()));
     }
+}
+
+void Rocket::RequestCurrentState()
+{
+    std::vector<double> params;
+
+	GetMinimumChamberPressure(params, false);
+	GetMinimumFuelPressure(params, false);
+	GetMinimumOxPressure(params, false);
+	GetHolddownTimeout(params, false);
+	GetStateRefreshDivider(params, false);
+    GetRocketState(params, false);
 }

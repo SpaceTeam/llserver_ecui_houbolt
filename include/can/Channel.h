@@ -130,6 +130,7 @@ protected:
         SetMsg_t *setMsg = (SetMsg_t *) canMsg->bit.data.uint8;
         std::string variableStateName = variableMap.at((VAR)(setMsg->variable_id));
 
+        Debug::info("Received variable %s of channel %s", variableStateName.c_str(), channelName.c_str());
         //convert and scale
         std::vector<double> scalingParams = scalingMap.at(variableStateName);
         double value = ScaleToDouble((double)(setMsg->value), scalingParams[0], scalingParams[1]);
@@ -208,6 +209,9 @@ public:
     //-------------------------------Utility Functions-------------------------------//
 
     virtual std::vector<double> ResetSensorOffset(std::vector<double> &params, bool testOnly);
+
+    virtual void RequestCurrentState()
+    { throw std::logic_error("Channel - RequestCurrentState: not implemented"); };
 };
 
 #endif // LLSERVER_ECUI_HOUBOLT_CHANNEL_H

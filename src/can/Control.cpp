@@ -337,3 +337,16 @@ void Control::RequestResetSettings(std::vector<double> &params, bool testOnly)
         throw std::runtime_error("Control - RequestResetSettings: " + std::string(e.what()));
     }
 }
+
+void Control::RequestCurrentState()
+{
+    std::vector<double> params;
+    
+	GetEnabled(params, false);
+	GetTarget(params, false);
+	GetThreshold(params, false);
+	GetHysteresis(params, false);
+	GetActuatorChannelID(params, false);
+	GetSensorChannelID(params, false);
+	GetRefreshDivider(params, false);
+}

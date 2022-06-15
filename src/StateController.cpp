@@ -99,19 +99,34 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
 {
     try
     {
-        stateMtx.lock();
-        //TODO: I don't understand how that works when state is not in map, but it's magic appearently
-        auto *state = &this->states[stateName];
-        double oldValue = std::get<0>(*state);
-        std::get<0>(*state) = value;
-        std::get<1>(*state) = timestamp;
-        std::get<2>(*state) = true;
-        //Debug::print("%zd: %s, %zd", count, stateName.c_str(), count);
-        logger->log(stateName, value, timestamp);
-        if(timestamp != 0) {
-            count++;
+        double oldValue;
+        bool firstEntry = false;
+        {
+            std::lock_guard<std::mutex> lock(stateMtx);
+            
+            if (this->states.find(stateName) == this->states.end())
+            {
+                firstEntry = true;
+            }
+            auto *state = &this->states[stateName]; //this inits tuple to 0s when statename not in states
+            if (firstEntry)
+            {
+                oldValue = NAN;
+            }
+            else
+            {
+                oldValue = std::get<0>(*state);
+            }
+            
+            std::get<0>(*state) = value;
+            std::get<1>(*state) = timestamp;
+            std::get<2>(*state) = true;
+            //Debug::print("%zd: %s, %zd", count, stateName.c_str(), count);
+            logger->log(stateName, value, timestamp);
+            if(timestamp != 0) {
+                count++;
+            }
         }
-        stateMtx.unlock();
         this->onStateChangeCallback(stateName, oldValue, value);
     }
     catch (const std::exception& e)

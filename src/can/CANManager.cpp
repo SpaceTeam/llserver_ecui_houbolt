@@ -121,6 +121,10 @@ CANResult CANManager::Init()
             // no need for std::cin.get(); here, since the thread needs an input to quit
 
             initialized = true;
+
+			Debug::print("Request current state and config from nodes...\n");
+			RequestCurrentState();
+
         }
         catch (std::exception& e)
         {
@@ -159,12 +163,22 @@ CANResult CANManager::RequestCANInfo()
     Debug::print("---Press enter to send node request---");
     std::cin.get();
     //TODO: MP be careful if one channel is used for backup
-    canDriver->SendCANMessage(0, canID.uint32, msg.uint8, msgLength);
-    canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength);
-    canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength);
-    //canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength);
+    canDriver->SendCANMessage(0, canID.uint32, msg.uint8, msgLength, false);
+    canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength, false);
+    canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength, false);
+    canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength, false);
 
 	return CANResult::SUCCESS;
+}
+
+void CANManager::RequestCurrentState()
+{
+	Node *currNode;
+	for (auto &it : nodeMap)
+    {
+        currNode = it.second;
+        currNode->RequestCurrentState();
+    }
 }
 
 /**
@@ -280,7 +294,15 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 		{
 			if (canIDStruct->info.direction == 0)
 			{
-				throw std::runtime_error("Direction bit master to node, ignoring msg...");
+				Debug::print("Direction bit master to node from node %d on bus %d, delegating msg...", nodeID, canBusChannelID);
+				std::vector<uint8_t> channels = {0,1,2,3};
+				channels.erase(channels.begin()+canBusChannelID);
+				for (const auto &currChannelID : channels)
+				{
+					canDriver->SendCANMessage(currChannelID, canID, payload, payloadLength, false);
+				}
+				return;
+				//throw std::runtime_error("Direction bit master to node, ignoring msg...");
 			}
 			//Don't require mutex at this point, since it is read only after initialization
 			bool found = nodeMap.find(nodeID) != nodeMap.end();

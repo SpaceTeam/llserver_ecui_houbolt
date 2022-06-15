@@ -114,6 +114,8 @@ public:
 	void RequestData(std::vector<double> &params, bool testOnly);
 	void RequestNodeStatus(std::vector<double> &params, bool testOnly);
 	void RequestResetAllSettings(std::vector<double> &params, bool testOnly);
+
+	void RequestCurrentState() override;
 };
 
 class NonNodeChannel

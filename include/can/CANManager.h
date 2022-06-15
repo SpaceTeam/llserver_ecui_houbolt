@@ -65,6 +65,8 @@ class CANManager : public Singleton<CANManager>
 		static inline uint8_t GetNodeID(uint32_t &canID);
 		static inline uint16_t MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &channelId);
 
+		void RequestCurrentState();
+
 		~CANManager();
 	public:
 

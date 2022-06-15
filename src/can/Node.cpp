@@ -204,8 +204,8 @@ std::map<std::string, std::tuple<double, uint64_t>> Node::GetLatestSensorData()
         }
 
     }
-    if (nodeID==8)
-    Debug::print("NodeID %d, %zd sensor data transmissions", nodeID, uint64_t(count));
+    /* if (nodeID==8)
+    Debug::print("NodeID %d, %zd sensor data transmissions", nodeID, uint64_t(count));*/
     count = 0;
     return sensorData;
 }
@@ -699,5 +699,23 @@ std::vector<double> Node::ResetSensorOffset(std::vector<double> &params, bool te
     catch (std::exception &e)
     {
         throw std::runtime_error("Node - ResetSensorOffset: " + std::string(e.what()));
+    }
+}
+
+void Node::RequestCurrentState()
+{
+    std::vector<double> params;
+
+    GetBus1Voltage(params, false);
+	GetBus2Voltage(params, false);
+	GetPowerVoltage(params, false);
+	GetPowerCurrent(params, false);
+	GetRefreshDivider(params, false);
+	GetRefreshRate(params, false);
+	GetUARTEnabled(params, false);
+
+    for (auto &channel : channelMap)
+    {
+        channel.second->RequestCurrentState();
     }
 }

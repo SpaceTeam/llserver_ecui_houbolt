@@ -196,3 +196,11 @@ void ADC16::RequestResetSettings(std::vector<double> &params, bool testOnly)
         throw std::runtime_error("ADC16 - RequestResetSettings: " + std::string(e.what()));
     }
 }
+
+void ADC16::RequestCurrentState()
+{
+    std::vector<double> params;
+
+    GetMeasurement(params, false);
+	GetRefreshDivider(params, false);
+}

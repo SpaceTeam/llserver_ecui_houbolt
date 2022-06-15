@@ -26,6 +26,8 @@ CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8
     int32_t sjwData = std::get<int>(Config::getData("CAN/BUS/DATA/sync_jump_width"));
     dataParams = {bitrateData, tseg1Data, tseg2Data, sjwData};
 
+    blockingTimeout = std::get<int>(Config::getData("CAN/blocking_timeout"));
+
     canStatus stat;
     for (size_t i = 0; i < CAN_CHANNELS; i++)
     {
@@ -52,7 +54,7 @@ CANDriverKvaser::~CANDriverKvaser()
 }
 
 
-void CANDriverKvaser::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength)
+void CANDriverKvaser::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking)
 {
     if (payloadLength > MAX_DATA_SIZE)
     {
@@ -79,8 +81,17 @@ void CANDriverKvaser::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint
     // Flags mean that the message is a FD message with bit rate switching (FDF, BRS)
     uint8_t msg[64] = {0};
     std::copy_n(payload, payloadLength, msg);
-    canStatus stat = canWrite(canHandles[canChannelID], canID, (void *) msg, dlcBytes, canFDMSG_FDF | canFDMSG_BRS);
-
+    
+    canStatus stat;
+    if (blocking)
+    {
+        stat = canWriteWait(canHandles[canChannelID], canID, (void *) msg, dlcBytes, canFDMSG_FDF | canFDMSG_BRS, blockingTimeout);
+    }
+    else
+    {
+        stat = canWrite(canHandles[canChannelID], canID, (void *) msg, dlcBytes, canFDMSG_FDF | canFDMSG_BRS);
+    }
+    
     if(stat < 0) {
         throw std::runtime_error("CANDriver - SendCANMessage: " + CANError(stat));
     }

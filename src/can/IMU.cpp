@@ -196,3 +196,11 @@ void IMU::RequestResetSettings(std::vector<double> &params, bool testOnly)
         throw std::runtime_error("IMU - RequestResetSettings: " + std::string(e.what()));
     }
 }
+
+void IMU::RequestCurrentState()
+{
+    std::vector<double> params;
+    
+	GetMeasurement(params, false);
+	GetRefreshDivider(params, false);
+}

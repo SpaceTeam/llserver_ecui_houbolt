@@ -59,6 +59,10 @@ public:
 
 	void RequestStatus(std::vector<double> &params, bool testOnly) override;
 	void RequestResetSettings(std::vector<double> &params, bool testOnly) override;
+
+    //-------------------------------Utility Functions-------------------------------//
+
+    void RequestCurrentState() override;
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_PNEUMATIC_VALVE_H
