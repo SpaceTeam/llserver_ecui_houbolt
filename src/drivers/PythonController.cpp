@@ -157,7 +157,7 @@ PythonController::~PythonController()
     return;
 }
 
-int32_t PythonController::AppendInittab()
+int32_t PythonController::SetupImports()
 {
     if (PyImport_AppendInittab("state_controller", PyInit_StateController) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
@@ -168,11 +168,17 @@ int32_t PythonController::AppendInittab()
         return -1;
     }
 
+    const char *importPath = "/TODO/insert/PyEC/or/pip/path";
+    PyObject *pyImportPath = PyUnicode_FromString(importPath);
+    PyObject *path = PySys_GetObject("path");
+    PyList_Append(path, pyImportPath);
+
+
 }
 
 int32_t PythonController::RunPyScript(std::string scriptPath)
 {
-    if (PythonController::Appendinittab() == -1) {
+    if (PythonController::SetupImports() == -1) {
         return -1;
     }
     
@@ -187,7 +193,7 @@ int32_t PythonController::RunPyScript(std::string scriptPath)
 
 int32_t PythonController::RunPyScriptWithArgv(std::string scriptPath, int pyArgc, wchar_t *pyArgv[])
 {
-    if (PythonController::Appendinittab() == -1) {
+    if (PythonController::SetupImports() == -1) {
         return -1;
     }
     
