@@ -172,8 +172,6 @@ int32_t PythonController::SetupImports()
     PyObject *pyImportPath = PyUnicode_FromString(importPath);
     PyObject *path = PySys_GetObject("path");
     PyList_Append(path, pyImportPath);
-
-
 }
 
 int32_t PythonController::RunPyScript(std::string scriptPath)

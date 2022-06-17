@@ -264,6 +264,14 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                 std::thread *pyThread = new std::thread(&PythonController::RunPyScript, pyController, script);
                 pyThread->detach();
             }
+            else if (type.compare("pythonScript-runChecklistItem") == 0) {
+                std::string scriptPath = msg["content"]["scriptPath"];
+                std::string item = msg["content"]["checklistItem"];
+                wchar_t *wideItem = utils::strToWCharPtr(item);
+                wchar_t *pyArgv[] = {L"python", L"script.py", L"run_checklist_item", wideItem};
+                PythonController *pyController = PythonController::Instance();
+                std::thread *pyThread = new std::thread(&PythonController::RunPyScriptWithArgv, scriptPath, 4, pyArgv);
+            }
             else
             {
                 throw std::runtime_error("ECUISocket: message not supported");
