@@ -106,6 +106,7 @@ int32_t Debug::info(std::string fmt, ...)
 {
     if (printInfos)
     {
+        std::lock_guard<std::recursive_mutex> lock(_outMutex);
         int printed;
         va_list args;
         char msg[1024];
@@ -134,6 +135,7 @@ int32_t Debug::warning(std::string fmt, ...)
 {
     if (printWarnings)
     {
+        std::lock_guard<std::recursive_mutex> lock(_outMutex);
         int printed;
         va_list args;
         char msg[1024];
@@ -266,6 +268,7 @@ void Debug::writeToFile()
 
 int32_t Debug::error(std::string fmt, ...)
 {
+    std::lock_guard<std::recursive_mutex> lock(_outMutex);
     int printed;
     va_list args;
     char msg[1024];
