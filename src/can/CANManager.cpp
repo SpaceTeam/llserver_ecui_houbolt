@@ -185,6 +185,8 @@ CANResult CANManager::RequestCANInfo(CANDriver *driver, std::vector<uint32_t> &c
 		driver->SendCANMessage(channelID, canID.uint32, msg.uint8, msgLength, false);
 	}
 
+
+
 	return CANResult::SUCCESS;
 }
 
