@@ -122,20 +122,26 @@ void CANDriverUDP::AsyncListen()
 
 void CANDriverUDP::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking)
 {
-	uint8_t udpPayload[256];
+	uint8_t udpPayload[256] = {0};
 	UDPMessage msg = {0};
-	msg.dataLength = 1+4+2+payloadLength;
+	msg.dataLength = MSG_HEADER_SIZE+totalRequiredMsgPayloadSize;
 	msg.data = udpPayload;
 	uint64_t timestamp = utils::getCurrentTimestamp();
+
+	Can_MessageId_t *canIDStruct = (Can_MessageId_t *)&canID;
 	
 	msg.data[0] = (uint8_t)MessageType::DATAFRAME;
-	msg.data[1] = timestamp >> 24;
-	msg.data[2] = timestamp >> 16;
-	msg.data[3] = timestamp >> 8;
-	msg.data[4] = timestamp;
-	msg.data[5] = canID >> 8;
-	msg.data[6] = canID;
-	std::copy_n(payload, payloadLength, &msg.data[7]);
+	msg.data[1] = timestamp >> 56;
+	msg.data[2] = timestamp >> 48;
+	msg.data[3] = timestamp >> 40;
+	msg.data[4] = timestamp >> 32;
+	msg.data[5] = timestamp >> 24;
+	msg.data[6] = timestamp >> 16;
+	msg.data[7] = timestamp >> 8;
+	msg.data[8] = timestamp;
+	//node id byte is used instead of can option
+	msg.data[9] = canIDStruct->info.node_id;
+	std::copy_n(payload, payloadLength, &msg.data[10]);
 
 	socket->Send(&msg);
 }
