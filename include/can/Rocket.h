@@ -11,7 +11,7 @@
 
 class Rocket : public Channel, public NonNodeChannel
 {
-public:
+private:
     //TODO: MP check if this is the only and correct way to implement static const with inheritation
     static const std::vector<std::string> states;
     static const std::map<std::string, std::vector<double>> scalingMap;

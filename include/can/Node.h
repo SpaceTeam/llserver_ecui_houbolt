@@ -57,6 +57,8 @@ private:
     void NodeStatusResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
     void ResetAllSettingsResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
 
+	void FlashClearResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
+
 public:
     std::atomic_uint64_t count = 0;
 
@@ -109,7 +111,12 @@ public:
 	void SetUARTEnabled(std::vector<double> &params, bool testOnly);
 	void GetUARTEnabled(std::vector<double> &params, bool testOnly);
 
+	void SetLoggingEnabled(std::vector<double> &params, bool testOnly);
+	void GetLoggingEnabled(std::vector<double> &params, bool testOnly);
+
 	void RequestSetSpeaker(std::vector<double> &params, bool testOnly);
+
+	void RequestFlashClear(std::vector<double> &params, bool testOnly);
 
 	void RequestData(std::vector<double> &params, bool testOnly);
 	void RequestNodeStatus(std::vector<double> &params, bool testOnly);
