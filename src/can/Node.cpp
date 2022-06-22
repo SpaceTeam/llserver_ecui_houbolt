@@ -773,6 +773,7 @@ void Node::RequestCurrentState()
 	GetRefreshDivider(params, false);
 	GetRefreshRate(params, false);
 	GetUARTEnabled(params, false);
+    GetLoggingEnabled(params, false);
 
     for (auto &channel : channelMap)
     {

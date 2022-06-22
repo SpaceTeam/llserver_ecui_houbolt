@@ -633,6 +633,7 @@ void Servo::RequestCurrentState()
     std::vector<double> params;
 
 	GetPosition(params, false);
+    GetPositionRaw(params, false);
 	GetTargetPosition(params, false);
 	GetTargetPressure(params, false);
 	GetMaxSpeed(params, false);

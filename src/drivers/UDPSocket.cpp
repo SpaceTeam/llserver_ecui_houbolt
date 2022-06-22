@@ -49,7 +49,7 @@ int UDPSocket::Connect(int32_t tries)
     // serv_addr.sin_port = htons(port);
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = htonl (INADDR_ANY);
-    serv_addr.sin_port = htons (5001);
+    serv_addr.sin_port = htons (port);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, address.c_str(), &serv_addr.sin_addr) <= 0) 
@@ -135,6 +135,7 @@ void UDPSocket::Recv(UDPMessage *msg)
             //TODO: write better exception
             throw std::runtime_error("UDPSocket error");
         }
+        Debug::print("Received UDP message from %s:%u", inet_ntoa (recv_addr.sin_addr), ntohs (recv_addr.sin_port));
     } 
     else
     {

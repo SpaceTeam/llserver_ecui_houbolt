@@ -200,6 +200,58 @@ void CANManager::RequestCurrentState()
     }
 }
 
+void CANManager::InitializeNode(uint8_t canBusChannelID, uint8_t nodeID, NodeInfoMsg_t *nodeInfo, CANDriver *driver)
+{
+	nodeMapMtx.lock();
+	bool found = nodeMap.find(nodeID) != nodeMap.end();
+	nodeMapMtx.unlock();
+	if (found)
+	{
+		std::runtime_error("Node already initialized, possible logic error on hardware or in software, ignoring node info msg...");
+	}
+
+	CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
+
+	std::map<uint8_t, std::tuple<std::string, std::vector<double>>> nodeChannelInfo;
+	for (uint8_t channelID = 0; channelID < 32; channelID++)
+	{
+		uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
+		if (mask == 1)
+		{
+			CANMappingObj channelMappingObj = mapping->GetChannelObj(nodeID, channelID);
+			nodeChannelInfo[channelID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
+
+			//add sensor names and scaling to array for fast sensor processing
+			//uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
+			//sensorInfoMap[mergedID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
+
+		}
+		else if (mask > 1)
+		{
+			throw std::logic_error("CANManager - OnCANInit: mask conversion of node info failed");
+		}
+	}
+
+	Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, nodeChannelInfo, canBusChannelID, driver);
+	nodeMapMtx.lock();
+	nodeMap[nodeID] = node;
+	nodeMapMtx.unlock();
+
+	//add states to state controller
+	auto states = node->GetStates();
+	StateController *stateController = StateController::Instance();
+	stateController->AddUninitializedStates(states);
+
+	//add available commands to event manager
+	EventManager *eventManager = EventManager::Instance();
+	auto channelTypeMap = node->GetChannelTypeMap();
+	eventManager->AddChannelTypes(channelTypeMap);
+	eventManager->AddCommands(node->GetCommands());
+	eventManager->AddCommands({{"Tare", {std::bind(&CANManager::ResetOffset, this, std::placeholders::_1, std::placeholders::_2),{"NodeID","ChannelID","Current Sensor Value"}}}});
+
+	Debug::print("Node %s with ID %d on CAN Bus %d detected\n\t\t\tfirmware version 0x%08x", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID, node->GetFirmwareVersion());
+}
+
 /**
  * returns latest sensor data in map format
  * @return
@@ -237,57 +289,21 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 			{
 				uint8_t nodeID = canIDStruct->info.node_id;
 
-				nodeMapMtx.lock();
-				bool found = nodeMap.find(nodeID) != nodeMap.end();
-				nodeMapMtx.unlock();
-				if (found)
-				{
-					std::runtime_error("Node already initialized, possible logic error on hardware or in software, ignoring node info msg...");
-				}
-
-				CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
-
 				NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *) &canMsg->bit.data.uint8;
 
-				std::map<uint8_t, std::tuple<std::string, std::vector<double>>> nodeChannelInfo;
-				for (uint8_t channelID = 0; channelID < 32; channelID++)
+				InitializeNode(canBusChannelID, nodeID, nodeInfo, canDriver);
+
+				//WHAT THE HACK? Exactly that's a hack, because Andi doesn't want to implement it properly!!!
+				std::vector<int> nodeIDsRefInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDsRef"));
+				std::vector<int> nodeIDsInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDs"));
+				auto foundIt = std::find(nodeIDsRefInt.begin(), nodeIDsRefInt.end(), nodeID); 
+				if (foundIt != nodeIDsRefInt.end()) 
 				{
-					uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
-					if (mask == 1)
-					{
-						CANMappingObj channelMappingObj = mapping->GetChannelObj(nodeID, channelID);
-						nodeChannelInfo[channelID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
-
-						//add sensor names and scaling to array for fast sensor processing
-						//uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
-						//sensorInfoMap[mergedID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
-
-					}
-					else if (mask > 1)
-					{
-						throw std::logic_error("CANManager - OnCANInit: mask conversion of node info failed");
-					}
+					uint8_t loraNodeID = nodeIDsInt[foundIt - nodeIDsRefInt.begin()];
+					Debug::print("Found lora equivalent with nodeID %d; can bus nodeID %d", loraNodeID, nodeID);
+					InitializeNode(0, loraNodeID, nodeInfo, loraDriver);
 				}
-
-				Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, nodeChannelInfo, canBusChannelID, canDriver);
-				nodeMapMtx.lock();
-				nodeMap[nodeID] = node;
-				nodeMapMtx.unlock();
-
-				//add states to state controller
-				auto states = node->GetStates();
-				StateController *stateController = StateController::Instance();
-				stateController->AddUninitializedStates(states);
-
-				//add available commands to event manager
-				EventManager *eventManager = EventManager::Instance();
-				auto channelTypeMap = node->GetChannelTypeMap();
-				eventManager->AddChannelTypes(channelTypeMap);
-				eventManager->AddCommands(node->GetCommands());
-				eventManager->AddCommands({{"Tare", {std::bind(&CANManager::ResetOffset, this, std::placeholders::_1, std::placeholders::_2),{"NodeID","ChannelID","Current Sensor Value"}}}});
-
-
-				Debug::print("Node %s with ID %d on CAN Bus %d detected\n\t\t\tfirmware version 0x%08x", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID, node->GetFirmwareVersion());
+				
 			}
 		}
 		catch (std::runtime_error &e)
