@@ -12,8 +12,8 @@ CANDriverUDP::CANDriverUDP(std::function<void(uint8_t &, uint32_t &, uint8_t *, 
 									   std::function<void(std::string *)> onErrorCallback) :
 	CANDriver(onRecvCallback, onErrorCallback)
 {
-	std::string ip = std::get<std::string>(Config::getData("LORA/ip"));
-    int32_t port = std::get<int>(Config::getData("LORA/port"));
+	std::string sendIP = std::get<std::string>(Config::getData("LORA/ip"));
+    int32_t sendPort = std::get<int>(Config::getData("LORA/port"));
 	std::vector<int> canIDSInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDs"));
 	std::vector<int> canMsgSizesInt = std::get<std::vector<int>>(Config::getData("LORA/canMsgSizes"));
 
@@ -34,7 +34,7 @@ CANDriverUDP::CANDriverUDP(std::function<void(uint8_t &, uint32_t &, uint8_t *, 
 		throw std::runtime_error("nodeIDs and canMsgSizes in config don't have the same length");
 	}
 
-    socket = new UDPSocket("CAN_UDPSocket", std::bind(&CANDriverUDP::Close, this), ip, port);
+    socket = new UDPSocket("CAN_UDPSocket", std::bind(&CANDriverUDP::Close, this), sendIP, sendPort);
     while(socket->Connect()!=0);
     
     connectionActive = true;
@@ -68,22 +68,27 @@ void CANDriverUDP::AsyncListen()
         
         try {
             socket->Recv(&msg);
+
 			if (msg.dataLength <= 0)
 			{
 				Debug::error("CANDriverUDP - AsyncListen: msg length smaller than one, ignoring message...");
 				continue;
 			}
-			CANDriverUDPMessage udpMessage = {0};
-			udpMessage.msgType = msg.data[0];
-			udpMessage.timestamp = utils::byteArrayToUInt64BigEndian(&msg.data[1]);
-			udpMessage.payload = &msg.data[MSG_HEADER_SIZE];
+			
 			uint8_t canBusChannelID = 0;
-			uint8_t *payload = udpMessage.payload;
+			uint8_t *payload = msg.data;
+			uint64_t timestamp = utils::getCurrentTimestamp();
 			if (msg.dataLength != totalRequiredMsgPayloadSize + MSG_HEADER_SIZE)
 			{
 				Debug::error("CANDriverUDP - AsyncListen: msg length is too short or too long\n\t\trequired: %d, actual %d\n\t\tignoring message...", totalRequiredMsgPayloadSize+MSG_HEADER_SIZE, msg.dataLength);
 				continue;
 			}
+
+			for (auto i=0; i < msg.dataLength; ++i)
+			{
+				printf("0x%02x ", msg.data[i]);
+			}
+			printf("\n");
 
 			//create canid
 			Can_MessageId_t canID = {0};
@@ -97,7 +102,7 @@ void CANDriverUDP::AsyncListen()
 					case (uint8_t)CanMessageOption::USED:
 						{
 							canID.info.node_id = nodeIDs[i];
-							onRecvCallback(canBusChannelID, canID.uint32, &payload[CAN_MSG_HEADER_SIZE], canMsgSizes[i], udpMessage.timestamp, this);
+							onRecvCallback(canBusChannelID, canID.uint32, &payload[CAN_MSG_HEADER_SIZE], canMsgSizes[i], timestamp, this);
 							payload += CAN_MSG_HEADER_SIZE + canMsgSizes[i];
 						}
 						break;
@@ -130,18 +135,9 @@ void CANDriverUDP::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t
 
 	Can_MessageId_t *canIDStruct = (Can_MessageId_t *)&canID;
 	
-	msg.data[0] = (uint8_t)MessageType::DATAFRAME;
-	msg.data[1] = timestamp >> 56;
-	msg.data[2] = timestamp >> 48;
-	msg.data[3] = timestamp >> 40;
-	msg.data[4] = timestamp >> 32;
-	msg.data[5] = timestamp >> 24;
-	msg.data[6] = timestamp >> 16;
-	msg.data[7] = timestamp >> 8;
-	msg.data[8] = timestamp;
 	//node id byte is used instead of can option
-	msg.data[9] = canIDStruct->info.node_id;
-	std::copy_n(payload, payloadLength, &msg.data[10]);
+	msg.data[0] = canIDStruct->info.node_id;
+	std::copy_n(payload, payloadLength, &msg.data[1]);
 
 	socket->Send(&msg);
 }

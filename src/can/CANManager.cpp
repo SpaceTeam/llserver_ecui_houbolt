@@ -96,7 +96,7 @@ CANResult CANManager::Init()
 			if (use_lora)
 			{
 				std::vector<uint32_t> loraBusChannels = {0};
-				RequestCANInfo(loraDriver, loraBusChannels);
+				//RequestCANInfo(loraDriver, loraBusChannels);
 			}
             using namespace std::chrono_literals;
             //TODO: wait for user input or expected node count to continue

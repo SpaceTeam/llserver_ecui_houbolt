@@ -23,10 +23,16 @@ private:
     int32_t socketfd;
     
     std::string name;
+    std::string recvAddress;
+    uint16_t recvPort;
     std::string address;
     uint16_t port;
+
     struct sockaddr_in serv_addr;
     socklen_t serv_addr_len;
+
+    struct sockaddr_in recv_addr;
+    socklen_t recv_addr_len;
 
     uint8_t *buffer;
 

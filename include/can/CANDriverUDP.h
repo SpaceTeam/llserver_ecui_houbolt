@@ -41,7 +41,7 @@ private:
     std::vector<uint32_t> nodeIDs;
     std::vector<uint32_t> canMsgSizes;
     uint32_t totalRequiredMsgPayloadSize = 0;
-    const uint32_t MSG_HEADER_SIZE = 9;
+    const uint32_t MSG_HEADER_SIZE = 0;
     const uint32_t CAN_MSG_HEADER_SIZE = 1;
 
     std::thread *asyncListenThread;
