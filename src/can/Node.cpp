@@ -28,7 +28,7 @@ const std::vector<std::string> Node::states =
             "UARTEnabled",
             "ResetAllSettings",
             "Logging_Enabled",
-            "FlashClearStatus",
+            "FlashStatus",
         };
 
 const std::map<std::string, std::vector<double>> Node::scalingMap =
@@ -45,7 +45,7 @@ const std::map<std::string, std::vector<double>> Node::scalingMap =
             {"SpeakerOffTime", {1.0, 0.0}},
             {"SpeakerCount", {1.0, 0.0}},
             {"LoggingEnabled", {1.0, 0.0}},
-            {"FlashClearStatus", {1.0, 0.0}}
+            {"FlashStatus", {1.0, 0.0}}
         };
 
 const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
@@ -114,7 +114,7 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
         {"RequestSetSpeaker", {std::bind(&Node::RequestSetSpeaker, this, std::placeholders::_1, std::placeholders::_2),{"ToneFrequency","OnTime","OffTime","Count"}}},
         {"RequestData", {std::bind(&Node::RequestData, this, std::placeholders::_1, std::placeholders::_2),{}}},
         {"RequestNodeStatus", {std::bind(&Node::RequestNodeStatus, this, std::placeholders::_1, std::placeholders::_2),{}}},
-        {"RequestFlashClear", {std::bind(&Node::RequestFlashClear, this, std::placeholders::_1, std::placeholders::_2),{}}},
+        {"RequestFlashStatus", {std::bind(&Node::RequestFlashStatus, this, std::placeholders::_1, std::placeholders::_2),{}}},
         {"RequestResetAllSettings", {std::bind(&Node::RequestResetAllSettings, this, std::placeholders::_1, std::placeholders::_2),{}}},
     };
 
@@ -404,8 +404,8 @@ void Node::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, 
                 case GENERIC_RES_SYNC_CLOCK:
                     throw std::runtime_error("GENERIC_RES_SYNC_CLOCK: not implemented");
                     break;
-                case GENERIC_RES_FLASH_CLEAR:
-                    FlashClearResponse(canMsg, canMsgLength, timestamp);
+                case GENERIC_RES_FLASH_STATUS:
+                    FlashStatusResponse(canMsg, canMsgLength, timestamp);
                     break;
                 case GENERIC_REQ_SET_VARIABLE:
                 case GENERIC_REQ_GET_VARIABLE:
@@ -415,7 +415,7 @@ void Node::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, 
                 case GENERIC_REQ_NODE_INFO:
                 case GENERIC_REQ_RESET_ALL_SETTINGS:
                 case GENERIC_REQ_SYNC_CLOCK:
-                case GENERIC_REQ_FLASH_CLEAR:
+                case GENERIC_REQ_FLASH_STATUS:
                     //TODO: uncomment after testing
                     //throw std::runtime_error("request message type has been received, major fault in protocol");
                     break;
@@ -442,10 +442,10 @@ void Node::ResetAllSettingsResponse(Can_MessageData_t *canMsg, uint32_t &canMsgL
     SetState("ResetAllSettings", 1, timestamp);
 }
 
-void Node::FlashClearResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
+void Node::FlashStatusResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp)
 {
-    FlashClearMsg_t *resMsg = (FlashClearMsg_t *) canMsg->bit.data.uint8;
-    SetState("FlashClearStatus", (double)resMsg->status, timestamp);
+    FlashStatusMsg_t *resMsg = (FlashStatusMsg_t *) canMsg->bit.data.uint8;
+    SetState("FlashStatus", (double)resMsg->status, timestamp);
 }
 
 
@@ -678,7 +678,7 @@ void Node::RequestSetSpeaker(std::vector<double> &params, bool testOnly)
     }
 }
 
-void Node::RequestFlashClear(std::vector<double> &params, bool testOnly)
+void Node::RequestFlashStatus(std::vector<double> &params, bool testOnly)
 {
     try
     {
@@ -687,11 +687,11 @@ void Node::RequestFlashClear(std::vector<double> &params, bool testOnly)
             throw std::runtime_error("0 parameter expected, but " + std::to_string(params.size()) + " were provided");
         }
 
-        SendNoPayloadCommand(params, nodeID, GENERIC_REQ_FLASH_CLEAR, canBusChannelID, driver, testOnly);
+        SendNoPayloadCommand(params, nodeID, GENERIC_REQ_FLASH_STATUS, canBusChannelID, driver, testOnly);
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("Node - RequestFlashClear: " + std::string(e.what()));
+        throw std::runtime_error("Node - RequestFlashStatus: " + std::string(e.what()));
     }
 }
 
