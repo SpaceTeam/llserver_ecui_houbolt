@@ -114,7 +114,7 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
         {"RequestSetSpeaker", {std::bind(&Node::RequestSetSpeaker, this, std::placeholders::_1, std::placeholders::_2),{"ToneFrequency","OnTime","OffTime","Count"}}},
         {"RequestData", {std::bind(&Node::RequestData, this, std::placeholders::_1, std::placeholders::_2),{}}},
         {"RequestNodeStatus", {std::bind(&Node::RequestNodeStatus, this, std::placeholders::_1, std::placeholders::_2),{}}},
-        {"RequestFlashStatus", {std::bind(&Node::RequestFlashStatus, this, std::placeholders::_1, std::placeholders::_2),{}}},
+        {"RequestFlashClear", {std::bind(&Node::RequestFlashClear, this, std::placeholders::_1, std::placeholders::_2),{}}},
         {"RequestResetAllSettings", {std::bind(&Node::RequestResetAllSettings, this, std::placeholders::_1, std::placeholders::_2),{}}},
     };
 
@@ -415,7 +415,7 @@ void Node::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, 
                 case GENERIC_REQ_NODE_INFO:
                 case GENERIC_REQ_RESET_ALL_SETTINGS:
                 case GENERIC_REQ_SYNC_CLOCK:
-                case GENERIC_REQ_FLASH_STATUS:
+                case GENERIC_REQ_FLASH_CLEAR:
                     //TODO: uncomment after testing
                     //throw std::runtime_error("request message type has been received, major fault in protocol");
                     break;
@@ -678,7 +678,7 @@ void Node::RequestSetSpeaker(std::vector<double> &params, bool testOnly)
     }
 }
 
-void Node::RequestFlashStatus(std::vector<double> &params, bool testOnly)
+void Node::RequestFlashClear(std::vector<double> &params, bool testOnly)
 {
     try
     {
@@ -687,7 +687,7 @@ void Node::RequestFlashStatus(std::vector<double> &params, bool testOnly)
             throw std::runtime_error("0 parameter expected, but " + std::to_string(params.size()) + " were provided");
         }
 
-        SendNoPayloadCommand(params, nodeID, GENERIC_REQ_FLASH_STATUS, canBusChannelID, driver, testOnly);
+        SendNoPayloadCommand(params, nodeID, GENERIC_REQ_FLASH_CLEAR, canBusChannelID, driver, testOnly);
     }
     catch (std::exception &e)
     {

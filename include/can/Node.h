@@ -116,7 +116,7 @@ public:
 
 	void RequestSetSpeaker(std::vector<double> &params, bool testOnly);
 
-	void RequestFlashStatus(std::vector<double> &params, bool testOnly);
+	void RequestFlashClear(std::vector<double> &params, bool testOnly);
 
 	void RequestData(std::vector<double> &params, bool testOnly);
 	void RequestNodeStatus(std::vector<double> &params, bool testOnly);
