@@ -108,13 +108,21 @@ CANResult CANManager::Init()
                     std::cin.get();
                     return true;
                 });
+			
+			uint32_t counter = 0;
             do {
                 Debug::print("Waiting for nodes %d of %d, press enter to continue...", currNodeCount, nodeCount);
-                if (future.wait_for(100ms) == std::future_status::ready)
+                if (future.wait_for(500ms) == std::future_status::ready)
                     canceled = true;
                 nodeMapMtx.lock();
                 currNodeCount = nodeMap.size();
                 nodeMapMtx.unlock();
+				if (++counter % 4 == 0)
+				{
+					Debug::print("Resending node info...");
+					RequestCANInfo(canDriver, canBusChannelIDs);
+					counter = 0;
+				}
             }
             while((currNodeCount < nodeCount) && !canceled);
 
@@ -207,7 +215,8 @@ void CANManager::InitializeNode(uint8_t canBusChannelID, uint8_t nodeID, NodeInf
 	nodeMapMtx.unlock();
 	if (found)
 	{
-		std::runtime_error("Node already initialized, possible logic error on hardware or in software, ignoring node info msg...");
+		Debug::print("Node already initialized, ignoring node info msg...");
+		return;
 	}
 
 	CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);

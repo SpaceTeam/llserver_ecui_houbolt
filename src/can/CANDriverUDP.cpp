@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <net/if.h>
 #include "can_houbolt/can_cmds.h"
+#include "can_houbolt/channels/generic_channel_def.h"
 #include "utility/utils.h"
 #include "utility/Config.h"
 
@@ -84,9 +85,13 @@ void CANDriverUDP::AsyncListen()
 				continue;
 			}
 
-			for (auto i=0; i < msg.dataLength; ++i)
+			for (size_t i=0; i < msg.dataLength; ++i)
 			{
-				printf("0x%02x ", msg.data[i]);
+					if (i % 8 == 0)
+					{
+							printf("\n%zd\t", i);
+					}
+					printf("0x%02x ", msg.data[i]);
 			}
 			printf("\n");
 
@@ -95,6 +100,12 @@ void CANDriverUDP::AsyncListen()
 			canID.info.direction = NODE2MASTER_DIRECTION;
 			canID.info.priority = STANDARD_PRIORITY;
 			canID.info.special_cmd = STANDARD_SPECIAL_CMD;
+
+			Can_MessageData_t command = {0};
+			command.bit.info.buffer = DIRECT_BUFFER;
+			command.bit.info.channel_id = GENERIC_CHANNEL_ID;
+			command.bit.cmd_id = GENERIC_RES_DATA;
+
 			for (size_t i = 0; i < nodeIDs.size(); i++)
 			{
 				switch (payload[0])
@@ -102,7 +113,8 @@ void CANDriverUDP::AsyncListen()
 					case (uint8_t)CanMessageOption::USED:
 						{
 							canID.info.node_id = nodeIDs[i];
-							onRecvCallback(canBusChannelID, canID.uint32, &payload[CAN_MSG_HEADER_SIZE], canMsgSizes[i], timestamp, this);
+							std::memcpy(command.bit.data.uint8, &payload[CAN_MSG_HEADER_SIZE], canMsgSizes[i]);
+							onRecvCallback(canBusChannelID, canID.uint32, command.uint8, canMsgSizes[i], timestamp, this);
 							payload += CAN_MSG_HEADER_SIZE + canMsgSizes[i];
 						}
 						break;
@@ -121,7 +133,6 @@ void CANDriverUDP::AsyncListen()
             Debug::error("CANDriverUDP - AsyncListen: %s", e.what());
         }
 
-        std::this_thread::yield();
     }
 }
 
@@ -131,7 +142,6 @@ void CANDriverUDP::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t
 	UDPMessage msg = {0};
 	msg.dataLength = MSG_HEADER_SIZE+totalRequiredMsgPayloadSize;
 	msg.data = udpPayload;
-	uint64_t timestamp = utils::getCurrentTimestamp();
 
 	Can_MessageId_t *canIDStruct = (Can_MessageId_t *)&canID;
 	
