@@ -272,7 +272,7 @@ void LLInterface::FilterSensors(int64_t microTime)
         uint64_t timestamp = utils::getCurrentTimestamp();
         double baro = std::get<0>(filteredSensors["pmu_barometer:sensor"]);
         double height = 0.3048 * (1 - pow((baro / 1013.25), 0.190284)) * 145366.45;
-        filteredSensors["pmu_height:sensor"] = {height, timestamp};
+        filteredSensors["pmu_altitude:sensor"] = {height, timestamp};
     }
 
     if (filteredSensors.find("rcu_barometer:sensor") != filteredSensors.end())
@@ -280,7 +280,7 @@ void LLInterface::FilterSensors(int64_t microTime)
         uint64_t timestamp = utils::getCurrentTimestamp();
         double baro = std::get<0>(filteredSensors["rcu_barometer:sensor"]);
         double height = 0.3048 * (1 - pow((baro / 1013.25), 0.190284)) * 145366.45;
-        filteredSensors["rcu_height:sensor"] = {height, timestamp};
+        filteredSensors["rcu_altitude:sensor"] = {height, timestamp};
     }
 
     //TODO: reconsider if states should be iterated here or 

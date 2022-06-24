@@ -115,7 +115,6 @@ void CANDriverUDP::AsyncListen()
 							canID.info.node_id = nodeIDs[i];
 							std::memcpy(command.bit.data.uint8, &payload[CAN_MSG_HEADER_SIZE], canMsgSizes[i]);
 							onRecvCallback(canBusChannelID, canID.uint32, command.uint8, canMsgSizes[i], timestamp, this);
-							payload += CAN_MSG_HEADER_SIZE + canMsgSizes[i];
 						}
 						break;
 					case (uint8_t)CanMessageOption::EMPTY:
@@ -125,6 +124,7 @@ void CANDriverUDP::AsyncListen()
 						Debug::error("CANDriverUDP - AsyncListen: CanMessageOption 0x%02x not recognized, ignoring can msg", payload[0]);
 						continue;
 				}
+				payload += CAN_MSG_HEADER_SIZE + canMsgSizes[i];
 				
 			}
 
