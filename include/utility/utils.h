@@ -32,6 +32,7 @@ namespace utils
     std::string replace(const std::string& str, const std::string& from, const std::string& to);
     bool replaceRef(std::string& str, const std::string& from, const std::string& to);
 
+    void strToWCharPtr( const std::string& str, wchar_t *wCharStrOut);
 }
 
 #endif //TXV_ECUI_LLSERVER_UTILS_H

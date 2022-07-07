@@ -78,7 +78,7 @@ namespace utils
         return true;
     }
 
-    wchar_t * strToWCharPtr( const std::string& str )
+    void strToWCharPtr( const std::string& str, wchar_t *wCharStrOut)
     {
         std::wostringstream wstm ;
         const std::ctype<wchar_t>& ctfacet = 
@@ -86,8 +86,6 @@ namespace utils
         for( size_t i=0 ; i<str.size() ; ++i ) 
                 wstm << ctfacet.widen( str[i] ) ;
         std::wstring wideStr = wstm.str() ;
-        const wchar_t *constWideStr = wideStr.c_str();
-        wchar_t * wideCharStr = const_cast< wchar_t * >( constWideStr );
-        return wideCharStr;
+        std::wcsncpy(wCharStrOut, wideStr.c_str(), wideStr.size()+1);
     }
 }

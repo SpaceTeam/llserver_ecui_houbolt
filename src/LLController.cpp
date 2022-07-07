@@ -267,10 +267,10 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             else if (type.compare("pythonScript-runChecklistItem") == 0) {
                 std::string scriptPath = msg["content"]["scriptPath"];
                 std::string item = msg["content"]["checklistItem"];
-                wchar_t *wideItem = utils::strToWCharPtr(item);
-                wchar_t *pyArgv[] = {L"python", L"script.py", L"run_checklist_item", wideItem};
+                std::vector<std::string> args = {"script.py", "run_checklist_item", item};
                 PythonController *pyController = PythonController::Instance();
-                std::thread *pyThread = new std::thread(&PythonController::RunPyScriptWithArgv, scriptPath, 4, pyArgv);
+                std::thread *pyThread = new std::thread(&PythonController::RunPyScriptWithArgv, pyController, scriptPath, args);
+                pyThread->detach();
             }
             else
             {

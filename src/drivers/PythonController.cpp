@@ -3,6 +3,7 @@
 #include "StateController.h"
 #include "EventManager.h"
 #include "utility/utils.h"
+#include "utility/Config.h"
 
 #include <stdio.h>
 #include <Python.h>
@@ -56,7 +57,7 @@ static PyMethodDef StateControllerMethods[] = {
 
 static struct PyModuleDef StateControllerModule = {
     PyModuleDef_HEAD_INIT,
-    "state_controller",   /* name of module */
+    "__state_controller",   /* name of module */
     "Control the state", /* module documentation, may be NULL */
     -1,       /* size of per-interpreter state of the module,
                  or -1 if the module keeps state in global variables. */
@@ -140,7 +141,7 @@ static PyMethodDef EventManagerMethods[] = {
 
 static struct PyModuleDef EventManagerModule = {
     PyModuleDef_HEAD_INIT,
-    "event_manager",   /* name of module */
+    "__event_manager",   /* name of module */
     "Manage Events", /* module documentation, may be NULL */
     -1,       /* size of per-interpreter state of the module,
                  or -1 if the module keeps state in global variables. */
@@ -159,19 +160,25 @@ PythonController::~PythonController()
 
 int32_t PythonController::SetupImports()
 {
-    if (PyImport_AppendInittab("state_controller", PyInit_StateController) == -1) {
+    if (PyImport_AppendInittab("__state_controller", PyInit_StateController) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
         return -1;
     }
-    if (PyImport_AppendInittab("event_manager", PyInit_EventManager) == -1) {
+    if (PyImport_AppendInittab("__event_manager", PyInit_EventManager) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
         return -1;
     }
 
-    const char *importPath = "/TODO/insert/PyEC/or/pip/path";
+    Py_Initialize();
+
+    std::string pyenvStr = std::get<std::string>(Config::getData("pyenv"));
+    const char *importPath = pyenvStr.c_str();
     PyObject *pyImportPath = PyUnicode_FromString(importPath);
-    PyObject *path = PySys_GetObject("path");
+    const char *name = "path";
+    PyObject *path = PySys_GetObject(name);
     PyList_Append(path, pyImportPath);
+
+    return 0;
 }
 
 int32_t PythonController::RunPyScript(std::string scriptPath)
@@ -179,8 +186,6 @@ int32_t PythonController::RunPyScript(std::string scriptPath)
     if (PythonController::SetupImports() == -1) {
         return -1;
     }
-    
-    Py_Initialize();
 
     FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
 	PyRun_SimpleFile(fp, scriptPath.c_str());
@@ -189,13 +194,36 @@ int32_t PythonController::RunPyScript(std::string scriptPath)
     return 0;
 }
 
-int32_t PythonController::RunPyScriptWithArgv(std::string scriptPath, int pyArgc, wchar_t *pyArgv[])
+int32_t PythonController::RunPyScriptWithArgv(std::string scriptPath, std::vector<std::string> args)
+{
+    wchar_t **pyArgv = new wchar_t *[args.size()];
+    std::vector<std::wstring> wstr;
+
+    for (size_t i=0; i<args.size(); i++)
+    {
+        pyArgv[i] = new wchar_t[args[i].size()+1];
+        utils::strToWCharPtr(args[i], pyArgv[i]);
+        wstr.push_back(pyArgv[i]);
+
+    }
+    int32_t ret = RunPyScriptWithArgvWChar(scriptPath, args.size(), pyArgv);
+
+    for (size_t i=0; i<args.size(); i++)
+    {
+        delete []pyArgv[i];
+
+    }
+    delete []pyArgv;
+
+    return ret;
+}
+
+int32_t PythonController::RunPyScriptWithArgvWChar(std::string scriptPath, int pyArgc, wchar_t **pyArgv)
 {
     if (PythonController::SetupImports() == -1) {
         return -1;
     }
-    
-    Py_Initialize();
+
     PySys_SetArgv(pyArgc, pyArgv);
 
     FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
