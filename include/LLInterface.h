@@ -7,12 +7,11 @@
 
 #include "utility/json.hpp"
 #include "utility/JSONMapping.h"
-#include "utility/IntervalChecker.hpp"
-
 #include "can/CANManager.h"
 #include "DataFilter.h"
 #include "EventManager.h"
 #include "StateController.h"
+#include "utility/LoopTimer.hpp"
 
 class LLInterface : public Singleton<LLInterface>
 {
@@ -28,14 +27,14 @@ class LLInterface : public Singleton<LLInterface>
 		bool isInitialized;
 
 		std::thread* transmitStatesThread;
-		uint64_t transmitStatesInterval = 1e4;
-		IntervalChecker* transmitStatesIntervalChecker;
+		uint32_t transmitStatesInterval = 1e4;
+		LoopTimer* transmitStatesLoopTimer;
 		bool transmitStatesRunning;
 		void transmitStatesLoop();
 
 		std::thread* filterSensorsThread;
-		uint64_t filterSensorsInterval = 1e4;
-		IntervalChecker* filterSensorsIntervalChecker;
+		uint32_t filterSensorsInterval = 1e4;
+		LoopTimer* filterSensorsLoopTimer;
 		bool filterSensorsRunning;
 		void filterSensorsLoop();
 

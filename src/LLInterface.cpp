@@ -1,7 +1,6 @@
 #include <regex>
 #include <math.h>
 #include <utility/utils.h>
-#include <chrono>
 
 #include "EcuiSocket.h"
 #include "utility/Config.h"
@@ -72,8 +71,8 @@ void LLInterface::Init()
         Debug::print("Initializing DataFilter done\n");
 
         Debug::print("Starting filterSensorsThread...");
-        filterSensorsInterval = (uint64_t)(1e6 / std::get<double>(Config::getData("LLSERVER/sensor_state_sampling_rate")));
-        filterSensorsIntervalChecker = new IntervalChecker((uint32_t)(filterSensorsInterval * 1.1), "filterSensorsThread");
+        filterSensorsInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("LLSERVER/sensor_state_sampling_rate")));
+        filterSensorsLoopTimer = new LoopTimer(filterSensorsInterval, "filterSensorsThread");
         filterSensorsRunning = true;
         filterSensorsThread = new std::thread(&LLInterface::filterSensorsLoop, this);
         Debug::print("FilterSensorsThread started\n");
@@ -91,9 +90,10 @@ LLInterface::~LLInterface()
 
         Debug::print("Stopping filterSensorsThread...");
         filterSensorsRunning = false;
-        filterSensorsThread->join();
+        if(filterSensorsThread->joinable()) filterSensorsThread->join();
+        else Debug::warning("filterSensorsThread was not joinable.");
         delete filterSensorsThread;
-        delete filterSensorsIntervalChecker;
+        delete filterSensorsLoopTimer;
 
         Debug::print("Deleting Data Filter...");
         delete dataFilter;
@@ -175,8 +175,8 @@ void LLInterface::StartStateTransmission()
     if (!transmitStatesRunning)
     {
         Debug::print("Starting transmitStatesThread...");
-        transmitStatesInterval = (uint64_t)(1e6 / std::get<double>(Config::getData("WEBSERVER/state_transmission_rate")));
-        transmitStatesIntervalChecker = new IntervalChecker((uint32_t)(transmitStatesInterval * 1.1), "transmitStatesThread");
+        transmitStatesInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("WEBSERVER/state_transmission_rate")));
+        transmitStatesLoopTimer = new LoopTimer(transmitStatesInterval, "transmitStatesThread");
         transmitStatesRunning = true;
 		transmitStatesThread = new std::thread(&LLInterface::transmitStatesLoop, this);
 		Debug::print("TransmitStatesThread started\n");
@@ -188,9 +188,10 @@ void LLInterface::StopStateTransmission()
     if (transmitStatesRunning)
     {
         transmitStatesRunning = false;
-        transmitStatesThread->join();
+        if(transmitStatesThread->joinable()) transmitStatesThread->join();
+        else Debug::warning("transmitStatesThread was not joinable.");
         delete transmitStatesThread;
-        delete transmitStatesIntervalChecker;
+        delete transmitStatesLoopTimer;
     }
 }
 
@@ -200,22 +201,17 @@ void LLInterface::transmitStatesLoop()
 	param.sched_priority = 40;
 	sched_setscheduler(0, SCHED_FIFO, &param);
 
-	auto nextTime = std::chrono::steady_clock::now();
-
 	while(transmitStatesRunning)
 	{
-		transmitStatesIntervalChecker->check();
+		transmitStatesLoopTimer->wait();
 
 		std::map<std::string, std::tuple<double, uint64_t>> states = stateController->GetDirtyStates();
 
 		if (states.size() > 0)
 		{
-			uint8_t time_us = std::chrono::time_point_cast<std::chrono::microseconds>(nextTime).time_since_epoch().count();
+			uint64_t time_us = transmitStatesLoopTimer->getTimePoint_us();
 			TransmitStates(time_us, states);
 		}
-
-		nextTime += std::chrono::microseconds(transmitStatesInterval);
-		std::this_thread::sleep_until(nextTime);
 	}
 
     Debug::print("Stopped State Timer...");
@@ -236,12 +232,9 @@ void LLInterface::filterSensorsLoop()
 	struct sched_param param;
 	param.sched_priority = 40;
 	sched_setscheduler(0, SCHED_FIFO, &param);
-
-	auto nextTime = std::chrono::steady_clock::now();
-
 	while(filterSensorsRunning)
 	{
-		filterSensorsIntervalChecker->check();
+		filterSensorsLoopTimer->wait();
 
 		std::map<std::string, std::tuple<double, uint64_t>> rawSensors;
 		rawSensors = canManager->GetLatestSensorData();
@@ -284,9 +277,6 @@ void LLInterface::filterSensorsLoop()
 		{
 			stateController->SetState(sensor.first, std::get<0>(sensor.second), std::get<1>(sensor.second));
 		}
-
-		nextTime += std::chrono::microseconds(filterSensorsInterval);
-		std::this_thread::sleep_until(nextTime);
 	}
 
 	Debug::print("Stopped FilterSensorsThread");
