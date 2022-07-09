@@ -57,7 +57,7 @@ static PyMethodDef StateControllerMethods[] = {
 
 static struct PyModuleDef StateControllerModule = {
     PyModuleDef_HEAD_INIT,
-    "__state_controller",   /* name of module */
+    "_state_controller",   /* name of module */
     "Control the state", /* module documentation, may be NULL */
     -1,       /* size of per-interpreter state of the module,
                  or -1 if the module keeps state in global variables. */
@@ -141,7 +141,7 @@ static PyMethodDef EventManagerMethods[] = {
 
 static struct PyModuleDef EventManagerModule = {
     PyModuleDef_HEAD_INIT,
-    "__event_manager",   /* name of module */
+    "_event_manager",   /* name of module */
     "Manage Events", /* module documentation, may be NULL */
     -1,       /* size of per-interpreter state of the module,
                  or -1 if the module keeps state in global variables. */
@@ -160,11 +160,11 @@ PythonController::~PythonController()
 
 int32_t PythonController::SetupImports()
 {
-    if (PyImport_AppendInittab("__state_controller", PyInit_StateController) == -1) {
+    if (PyImport_AppendInittab("_state_controller", PyInit_StateController) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
         return -1;
     }
-    if (PyImport_AppendInittab("__event_manager", PyInit_EventManager) == -1) {
+    if (PyImport_AppendInittab("_event_manager", PyInit_EventManager) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
         return -1;
     }
