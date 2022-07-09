@@ -158,17 +158,19 @@ PythonController::~PythonController()
     if (running)
     {
         StateController::Instance() -> SetState((std::string) "python_running", 0, utils::getCurrentTimestamp());
-        if (pyThread != nullptr)
+        if (!pyThreads.empty())
         {
-            if (pyThread->joinable())
+            for (auto &thread : pyThreads)
             {
-                pyThread->join();
-                delete pyThread;
+                if (thread->joinable())
+                {
+                    thread->join();
+                    delete thread;
+                }
             }
         }
     }
-    
-    return;
+    running = false;
 }
 
 void PythonController::StartPythonScript(std::string scriptPath)
@@ -177,7 +179,11 @@ void PythonController::StartPythonScript(std::string scriptPath)
     {
         running = true;
         Debug::print("Executing Python script.");
-        pyThread = new std::thread(&PythonController::RunPyScript, this, scriptPath);
+        pyThreads.push_back(new std::thread(&PythonController::RunPyScript, this, scriptPath));
+    }
+    else
+    {
+        Debug::error("Python script already running.");
     }
     
 }
@@ -188,9 +194,12 @@ void PythonController::StartPythonScript(std::string scriptPath, std::vector<std
     {
         running = true;
         Debug::print("Executing Python script with arguments.");
-        pyThread = new std::thread(&PythonController::RunPyScriptWithArgv, this, scriptPath, args);
+        pyThreads.push_back(new std::thread(&PythonController::RunPyScriptWithArgv, this, scriptPath, args));
     }
-    
+    else
+    {
+        Debug::error("Python script already running.");
+    }
 }
 
 void PythonController::SetupImports()
@@ -224,6 +233,7 @@ void PythonController::RunPyScript(std::string scriptPath)
 	PyRun_SimpleFile(fp, scriptPath.c_str());
 
     Py_Finalize();
+
     running = false;
 }
 
@@ -262,5 +272,6 @@ void PythonController::RunPyScriptWithArgvWChar(std::string scriptPath, int pyAr
 	PyRun_SimpleFile(fp, scriptPath.c_str());
 
     Py_Finalize();
+
     running = false;
 }

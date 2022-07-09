@@ -15,7 +15,7 @@ private:
     ~PythonController();
 
     std::atomic_bool running = false;
-    std::thread *pyThread = nullptr;
+    std::vector<std::thread *> pyThreads;
     
 public:
 
