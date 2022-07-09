@@ -33,6 +33,9 @@ public:
 	void SetPosition(std::vector<double> &params, bool testOnly);
 	void GetPosition(std::vector<double> &params, bool testOnly);
 
+    void SetPositionRaw(std::vector<double> &params, bool testOnly);
+	void GetPositionRaw(std::vector<double> &params, bool testOnly);
+
     void SetTargetPosition(std::vector<double> &params, bool testOnly);
 	void GetTargetPosition(std::vector<double> &params, bool testOnly);
 

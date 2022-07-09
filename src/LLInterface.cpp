@@ -239,32 +239,48 @@ void LLInterface::FilterSensors(int64_t microTime)
     filteredSensors = dataFilter->FilterData(rawSensors);
 
     //TODO: remove hotfix
-    std::vector<std::vector<double>> sensorMatrix = {{0},{0},{0},{0},{0},{0}};
-    std::vector<std::vector<double>> resultMatrix = {{0},{0},{0},{0},{0},{0}};
-    std::string thrustState;
-    double thrustSum = 0;
-    for (int32_t i = 0; i < 6; i++)
+    // std::vector<std::vector<double>> sensorMatrix = {{0},{0},{0},{0},{0},{0}};
+    // std::vector<std::vector<double>> resultMatrix = {{0},{0},{0},{0},{0},{0}};
+    // std::string thrustState;
+    // double thrustSum = 0;
+    // for (int32_t i = 0; i < 6; i++)
+    // {
+    //     thrustState = "engine_thrust_"+std::to_string(i)+":sensor";
+    //     if (filteredSensors.find(thrustState) == filteredSensors.end())
+    //     {
+    //         break;
+    //     }
+    //     sensorMatrix[i][0] = std::get<0>(filteredSensors[thrustState]);
+    //     thrustSum += sensorMatrix[i][0];
+    //     if (i==5)
+    //     {
+    //         std::vector<std::vector<double>> transformMatrix = *thrustTransformMatrix; 
+    //         utils::matrixMultiply(transformMatrix, sensorMatrix, resultMatrix);
+    //         uint64_t thrustTimestamp = utils::getCurrentTimestamp();
+    //         filteredSensors["engine_thrust_x"] = {resultMatrix[0][0], thrustTimestamp};
+    //         filteredSensors["engine_thrust_y"] = {resultMatrix[1][0], thrustTimestamp};
+    //         filteredSensors["engine_thrust_z"] = {resultMatrix[2][0], thrustTimestamp};
+    //         filteredSensors["engine_thrust_mx"] = {resultMatrix[3][0], thrustTimestamp};
+    //         filteredSensors["engine_thrust_my"] = {resultMatrix[4][0], thrustTimestamp};
+    //         filteredSensors["engine_thrust_mz"] = {resultMatrix[5][0], thrustTimestamp};
+    //         filteredSensors["engine_thrust_sum"] = {thrustSum, thrustTimestamp};
+    //     }
+    // }
+
+    if (filteredSensors.find("pmu_barometer:sensor") != filteredSensors.end())
     {
-        thrustState = "engine_thrust_"+std::to_string(i)+":sensor";
-        if (filteredSensors.find(thrustState) == filteredSensors.end())
-        {
-            break;
-        }
-        sensorMatrix[i][0] = std::get<0>(filteredSensors[thrustState]);
-        thrustSum += sensorMatrix[i][0];
-        if (i==5)
-        {
-            std::vector<std::vector<double>> transformMatrix = *thrustTransformMatrix; 
-            utils::matrixMultiply(transformMatrix, sensorMatrix, resultMatrix);
-            uint64_t thrustTimestamp = utils::getCurrentTimestamp();
-            filteredSensors["engine_thrust_x"] = {resultMatrix[0][0], thrustTimestamp};
-            filteredSensors["engine_thrust_y"] = {resultMatrix[1][0], thrustTimestamp};
-            filteredSensors["engine_thrust_z"] = {resultMatrix[2][0], thrustTimestamp};
-            filteredSensors["engine_thrust_mx"] = {resultMatrix[3][0], thrustTimestamp};
-            filteredSensors["engine_thrust_my"] = {resultMatrix[4][0], thrustTimestamp};
-            filteredSensors["engine_thrust_mz"] = {resultMatrix[5][0], thrustTimestamp};
-            filteredSensors["engine_thrust_sum"] = {thrustSum, thrustTimestamp};
-        }
+        uint64_t timestamp = utils::getCurrentTimestamp();
+        double baro = std::get<0>(filteredSensors["pmu_barometer:sensor"]);
+        double height = 0.3048 * (1 - pow((baro / 1013.25), 0.190284)) * 145366.45;
+        filteredSensors["pmu_altitude:sensor"] = {height, timestamp};
+    }
+
+    if (filteredSensors.find("rcu_barometer:sensor") != filteredSensors.end())
+    {
+        uint64_t timestamp = utils::getCurrentTimestamp();
+        double baro = std::get<0>(filteredSensors["rcu_barometer:sensor"]);
+        double height = 0.3048 * (1 - pow((baro / 1013.25), 0.190284)) * 145366.45;
+        filteredSensors["rcu_altitude:sensor"] = {height, timestamp};
     }
 
     //TODO: reconsider if states should be iterated here or 

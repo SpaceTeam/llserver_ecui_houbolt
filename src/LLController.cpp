@@ -18,7 +18,7 @@
 
 void LLController::PrintLogo()
 {
-    std::ifstream f("img/txvLogoSquashed.txt");
+    std::ifstream f("img/stAscii.txt");
 
     if (f.is_open())
         std::cout << f.rdbuf();
@@ -263,6 +263,13 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                 std::string scriptPath = msg["content"];
                 PythonController *pyController = PythonController::Instance();
                 pyController->StartPythonScript(scriptPath);
+            }
+            else if (type.compare("pythonScript-runChecklistItem") == 0) {
+                std::string scriptPath = msg["content"]["scriptPath"];
+                std::string item = msg["content"]["checklistItem"];
+                std::vector<std::string> args = {"script.py", "run_checklist_item", item};
+                PythonController *pyController = PythonController::Instance();
+                pyController->StartPythonScript(scriptPath, args);
             }
             else
             {

@@ -3,6 +3,7 @@
 #include "StateController.h"
 #include "EventManager.h"
 #include "utility/utils.h"
+#include "utility/Config.h"
 
 #include <stdio.h>
 #include <Python.h>
@@ -48,15 +49,15 @@ static PyObject * set_state(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef StateControllerMethods[] = {
-    {"GetStateValue",  get_state_value, METH_VARARGS,
+    {"get_state_value",  get_state_value, METH_VARARGS,
      "Get the state value."},
-    {"SetState", set_state, METH_VARARGS, "Set the state value."},
+    {"set_state", set_state, METH_VARARGS, "Set the state value."},
     {NULL, NULL, 0, NULL}
 };
 
 static struct PyModuleDef StateControllerModule = {
     PyModuleDef_HEAD_INIT,
-    "state_controller",   /* name of module */
+    "_state_controller",   /* name of module */
     "Control the state", /* module documentation, may be NULL */
     -1,       /* size of per-interpreter state of the module,
                  or -1 if the module keeps state in global variables. */
@@ -133,14 +134,14 @@ static PyObject * execute_command(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef EventManagerMethods[] = {
-    {"ExecuteCommand",  execute_command, METH_VARARGS,
+    {"execute_command",  execute_command, METH_VARARGS,
      "Execute command directly over CAN Bus."},
     {NULL, NULL, 0, NULL}
 };
 
 static struct PyModuleDef EventManagerModule = {
     PyModuleDef_HEAD_INIT,
-    "event_manager",   /* name of module */
+    "_event_manager",   /* name of module */
     "Manage Events", /* module documentation, may be NULL */
     -1,       /* size of per-interpreter state of the module,
                  or -1 if the module keeps state in global variables. */
@@ -157,17 +158,19 @@ PythonController::~PythonController()
     if (running)
     {
         StateController::Instance() -> SetState((std::string) "python_running", 0, utils::getCurrentTimestamp());
-        if (pyThread != nullptr)
+        if (!pyThreads.empty())
         {
-            if (pyThread->joinable())
+            for (auto &thread : pyThreads)
             {
-                pyThread->join();
-                delete pyThread;
+                if (thread->joinable())
+                {
+                    thread->join();
+                    delete thread;
+                }
             }
         }
     }
-    
-    return;
+    running = false;
 }
 
 void PythonController::StartPythonScript(std::string scriptPath)
@@ -176,23 +179,51 @@ void PythonController::StartPythonScript(std::string scriptPath)
     {
         running = true;
         Debug::print("Executing Python script.");
-        pyThread = new std::thread(&PythonController::RunPyScript, this, scriptPath);
+        pyThreads.push_back(new std::thread(&PythonController::RunPyScript, this, scriptPath));
+    }
+    else
+    {
+        Debug::error("Python script already running.");
     }
     
 }
 
-void PythonController::RunPyScript(std::string scriptPath)
+void PythonController::StartPythonScript(std::string scriptPath, std::vector<std::string> args)
 {
-    if (PyImport_AppendInittab("state_controller", PyInit_StateController) == -1) {
-        fprintf(stderr, "Error: could not extend in-built modules table\n");
-        return;
+    if (!running)
+    {
+        running = true;
+        Debug::print("Executing Python script with arguments.");
+        pyThreads.push_back(new std::thread(&PythonController::RunPyScriptWithArgv, this, scriptPath, args));
     }
-    if (PyImport_AppendInittab("event_manager", PyInit_EventManager) == -1) {
-        fprintf(stderr, "Error: could not extend in-built modules table\n");
-        return;
+    else
+    {
+        Debug::error("Python script already running.");
+    }
+}
+
+void PythonController::SetupImports()
+{
+    if (PyImport_AppendInittab("_state_controller", PyInit_StateController) == -1) {
+        throw new std::runtime_error("PythonController - SetupImports: could not extend _state_controller module");
+    }
+    if (PyImport_AppendInittab("_event_manager", PyInit_EventManager) == -1) {
+        throw new std::runtime_error("PythonController - SetupImports: could not extend _event_manager module");
     }
 
     Py_Initialize();
+
+    std::string pyenvStr = std::get<std::string>(Config::getData("pyenv"));
+    const char *importPath = pyenvStr.c_str();
+    PyObject *pyImportPath = PyUnicode_FromString(importPath);
+    const char *name = "path";
+    PyObject *path = PySys_GetObject(name);
+    PyList_Append(path, pyImportPath);
+}
+
+void PythonController::RunPyScript(std::string scriptPath)
+{
+    PythonController::SetupImports();
 
     FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
 
@@ -202,5 +233,45 @@ void PythonController::RunPyScript(std::string scriptPath)
 	PyRun_SimpleFile(fp, scriptPath.c_str());
 
     Py_Finalize();
+
+    running = false;
+}
+
+void PythonController::RunPyScriptWithArgv(std::string scriptPath, std::vector<std::string> args)
+{
+    wchar_t **pyArgv = new wchar_t *[args.size()];
+    std::vector<std::wstring> wstr;
+
+    for (size_t i=0; i<args.size(); i++)
+    {
+        pyArgv[i] = new wchar_t[args[i].size()+1];
+        utils::strToWCharPtr(args[i], pyArgv[i]);
+        wstr.push_back(pyArgv[i]);
+
+    }
+    RunPyScriptWithArgvWChar(scriptPath, args.size(), pyArgv);
+
+    for (size_t i=0; i<args.size(); i++)
+    {
+        delete []pyArgv[i];
+
+    }
+    delete []pyArgv;
+}
+
+void PythonController::RunPyScriptWithArgvWChar(std::string scriptPath, int pyArgc, wchar_t **pyArgv)
+{
+    PythonController::SetupImports();
+
+    PySys_SetArgv(pyArgc, pyArgv);
+
+    FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
+
+    StateController::Instance() -> SetState((std::string) "python_running", 1, utils::getCurrentTimestamp());
+
+	PyRun_SimpleFile(fp, scriptPath.c_str());
+
+    Py_Finalize();
+
     running = false;
 }

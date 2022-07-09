@@ -40,11 +40,12 @@ const std::map<uint32_t, uint32_t> dlcToCANFDMsgLength = {
 class CANDriver
 {
 	protected:
-		std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback;
+		std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback;
 		std::function<void(std::string *)> onErrorCallback;
+        std::vector<uint32_t> canBusChannelIDs;
 
     public:
-        CANDriver(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
+        CANDriver(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
                   std::function<void(std::string *)> onErrorCallback);
         virtual ~CANDriver();
 

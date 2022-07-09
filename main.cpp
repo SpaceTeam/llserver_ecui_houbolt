@@ -74,7 +74,7 @@ void testFnc()
     canID.info.special_cmd = STANDARD_SPECIAL_CMD;
     canID.info.node_id = CAN_TEST_NODE_ID;
 
-    manager->OnCANInit(0, canID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
+    //manager->OnCANInit(0, canID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
 
    std::this_thread::sleep_for(1000ms);
 
@@ -115,7 +115,7 @@ void testFnc()
         std::copy_n(sensorMsg.channel_data, 11, &msg.bit.data.uint8[4]);
 
 
-        manager->OnCANRecv(0, dataCanID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
+        //manager->OnCANRecv(0, dataCanID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
         std::this_thread::sleep_for(100ms);
         counter++;
     }
@@ -224,11 +224,13 @@ int main(int argc, char const *argv[])
     signal(SIGABRT, signalHandler);
 
     std::string configPath = "";
+
+    std::stringstream ss;
     if (argc > 1)
 	{
     	std::string cfgPath(argv[1]);
     	configPath = cfgPath;
-        std::cout << "Config path given as argument, using this." << std::endl;
+        ss << "Config path given as argument, using this.\n";
 	}
     else
     {
@@ -239,10 +241,10 @@ int main(int argc, char const *argv[])
             exit(EXIT_FAILURE);
 		}
     	std::getline(configPathFile, configPath);
-        std::cout << "Using config path in " << CONFIG_PATH_FILE << std::endl;
+        ss << "Using config path in " << CONFIG_PATH_FILE << "\n";
     }
 
-    std::cout << "Config path: " << configPath << std::endl;
+    ss << "Config path: " << configPath << "\n";
 
     #ifdef TEST_LLSERVER
     testThread = new std::thread(testFnc);
@@ -251,6 +253,7 @@ int main(int argc, char const *argv[])
     LLController *llController = LLController::Instance();
     llController->Init(configPath);
 
+    std::cout << ss.str() << std::endl;
 
     std::string inputStr;
     while (running)

@@ -4,6 +4,7 @@
 #include <map>
 #include <functional>
 #include <mutex>
+#include <vector>
 #include "common.h"
 #include "utility/Singleton.h"
 #include "can/Node.h"
@@ -48,6 +49,7 @@ class CANManager : public Singleton<CANManager>
 
 
 		CANDriver *canDriver;
+		CANDriver *loraDriver;
 		CANMapping *mapping;
 
 		std::mutex nodeMapMtx;
@@ -61,9 +63,11 @@ class CANManager : public Singleton<CANManager>
 
 		std::atomic_bool initialized = false;
 
-		CANResult RequestCANInfo();
+		CANResult RequestCANInfo(CANDriver *driver, std::vector<uint32_t> &canBusChannelIDs);
 		static inline uint8_t GetNodeID(uint32_t &canID);
 		static inline uint16_t MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &channelId);
+
+		void InitializeNode(uint8_t canBusChannelID, uint8_t nodeID, NodeInfoMsg_t *nodeInfo, CANDriver *driver);
 
 		void RequestCurrentState();
 
@@ -80,7 +84,7 @@ class CANManager : public Singleton<CANManager>
 		std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
 
 		void OnChannelStateChanged(std::string stateName, double value, uint64_t timestamp);
-		void OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp);
+		void OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp, CANDriver *canDriver);
 
 		//TODO: MP add error info to arguments
 		void OnCANError(std::string *error);

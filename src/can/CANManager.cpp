@@ -11,6 +11,7 @@
 #include "can/CANManager.h"
 #include "can/CANDriverKvaser.h"
 #include "can/CANDriverSocketCAN.h"
+#include "can/CANDriverUDP.h"
 #include "can_houbolt/channels/generic_channel_def.h"
 
 #include "StateController.h"
@@ -53,6 +54,8 @@ CANResult CANManager::Init()
             Debug::print("Initializing CANDriver...");
 
             std::string can_driver = std::get<std::string>(Config::getData("CAN/DRIVER"));
+			std::vector<int> canBusChannelIDsInt = std::get<std::vector<int>>(Config::getData("CAN/canBusChannelIDs"));
+			std::vector<uint32_t> canBusChannelIDs(canBusChannelIDsInt.begin(), canBusChannelIDsInt.end());
 
             if(can_driver == "Kvaser")
             {
@@ -61,14 +64,14 @@ CANResult CANManager::Init()
             	throw std::runtime_error("Can driver \"Kvaser\" specified in config but excluded by Cmake argument NO_CANLIB");
 				#else
             	Debug::print("Using Kvaser CAN driver");
-				canDriver = new CANDriverKvaser(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
-				                                std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
+				canDriver = new CANDriverKvaser(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6),
+				                                std::bind(&CANManager::OnCANError, this, std::placeholders::_1), canBusChannelIDs);
 				#endif
             }
             else if(can_driver == "SocketCAN")
 			{
             	Debug::print("Using SocketCAN driver");
-            	canDriver = new CANDriverSocketCAN(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5),
+            	canDriver = new CANDriverSocketCAN(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6),
 				                                   std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
 			}
             else
@@ -77,8 +80,24 @@ CANResult CANManager::Init()
             	throw std::runtime_error("Can driver \"" + can_driver + "\" specified in config not found!");
             }
 
+			bool use_lora = std::get<bool>(Config::getData("use_lora"));
+
+            if(use_lora)
+			{
+				Debug::print("Initializing LoRa...");
+				loraDriver = new CANDriverUDP(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6),
+				                            std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
+			}
+
             Debug::print("Retreiving CANHardware info...");
-            RequestCANInfo();
+			Debug::print("---Press enter to send node request---");
+    		std::cin.get();
+            RequestCANInfo(canDriver, canBusChannelIDs);
+			if (use_lora)
+			{
+				std::vector<uint32_t> loraBusChannels = {0};
+				//RequestCANInfo(loraDriver, loraBusChannels);
+			}
             using namespace std::chrono_literals;
             //TODO: wait for user input or expected node count to continue
             uint32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
@@ -89,13 +108,21 @@ CANResult CANManager::Init()
                     std::cin.get();
                     return true;
                 });
+			
+			uint32_t counter = 0;
             do {
                 Debug::print("Waiting for nodes %d of %d, press enter to continue...", currNodeCount, nodeCount);
-                if (future.wait_for(100ms) == std::future_status::ready)
+                if (future.wait_for(500ms) == std::future_status::ready)
                     canceled = true;
                 nodeMapMtx.lock();
                 currNodeCount = nodeMap.size();
                 nodeMapMtx.unlock();
+				if (++counter % 4 == 0)
+				{
+					Debug::print("Resending node info...");
+					RequestCANInfo(canDriver, canBusChannelIDs);
+					counter = 0;
+				}
             }
             while((currNodeCount < nodeCount) && !canceled);
 
@@ -144,7 +171,7 @@ CANResult CANManager::Init()
  * only protocol message implemented inside CANManager
  * @return
  */
-CANResult CANManager::RequestCANInfo()
+CANResult CANManager::RequestCANInfo(CANDriver *driver, std::vector<uint32_t> &canBusChannelIDs)
 {
     //TODO: MP change to correct broadcasting id
     Can_MessageId_t canID = {0};
@@ -160,13 +187,13 @@ CANResult CANManager::RequestCANInfo()
 
     uint32_t msgLength = sizeof(Can_MessageDataInfo_t) + sizeof(uint8_t);
 
-    Debug::print("---Press enter to send node request---");
-    std::cin.get();
     //TODO: MP be careful if one channel is used for backup
-    canDriver->SendCANMessage(0, canID.uint32, msg.uint8, msgLength, false);
-    canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength, false);
-    canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength, false);
-    canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength, false);
+	for (auto &channelID : canBusChannelIDs)
+	{
+		driver->SendCANMessage(channelID, canID.uint32, msg.uint8, msgLength, false);
+	}
+
+
 
 	return CANResult::SUCCESS;
 }
@@ -179,6 +206,59 @@ void CANManager::RequestCurrentState()
         currNode = it.second;
         currNode->RequestCurrentState();
     }
+}
+
+void CANManager::InitializeNode(uint8_t canBusChannelID, uint8_t nodeID, NodeInfoMsg_t *nodeInfo, CANDriver *driver)
+{
+	nodeMapMtx.lock();
+	bool found = nodeMap.find(nodeID) != nodeMap.end();
+	nodeMapMtx.unlock();
+	if (found)
+	{
+		Debug::print("Node already initialized, ignoring node info msg...");
+		return;
+	}
+
+	CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
+
+	std::map<uint8_t, std::tuple<std::string, std::vector<double>>> nodeChannelInfo;
+	for (uint8_t channelID = 0; channelID < 32; channelID++)
+	{
+		uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
+		if (mask == 1)
+		{
+			CANMappingObj channelMappingObj = mapping->GetChannelObj(nodeID, channelID);
+			nodeChannelInfo[channelID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
+
+			//add sensor names and scaling to array for fast sensor processing
+			//uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
+			//sensorInfoMap[mergedID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
+
+		}
+		else if (mask > 1)
+		{
+			throw std::logic_error("CANManager - OnCANInit: mask conversion of node info failed");
+		}
+	}
+
+	Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, nodeChannelInfo, canBusChannelID, driver);
+	nodeMapMtx.lock();
+	nodeMap[nodeID] = node;
+	nodeMapMtx.unlock();
+
+	//add states to state controller
+	auto states = node->GetStates();
+	StateController *stateController = StateController::Instance();
+	stateController->AddUninitializedStates(states);
+
+	//add available commands to event manager
+	EventManager *eventManager = EventManager::Instance();
+	auto channelTypeMap = node->GetChannelTypeMap();
+	eventManager->AddChannelTypes(channelTypeMap);
+	eventManager->AddCommands(node->GetCommands());
+	eventManager->AddCommands({{"Tare", {std::bind(&CANManager::ResetOffset, this, std::placeholders::_1, std::placeholders::_2),{"NodeID","ChannelID","Current Sensor Value"}}}});
+
+	Debug::print("Node %s with ID %d on CAN Bus %d detected\n\t\t\tfirmware version 0x%08x", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID, node->GetFirmwareVersion());
 }
 
 /**
@@ -205,7 +285,7 @@ void CANManager::OnChannelStateChanged(std::string stateName, double value, uint
     stateController->SetState(std::move(stateName), value, timestamp);
 }
 
-void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp)
+void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, uint64_t timestamp, CANDriver *canDriver)
 {
 	if(!initialized) // TODO consolidate code from the two initialized/!initialized cases
 	{
@@ -218,57 +298,21 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 			{
 				uint8_t nodeID = canIDStruct->info.node_id;
 
-				nodeMapMtx.lock();
-				bool found = nodeMap.find(nodeID) != nodeMap.end();
-				nodeMapMtx.unlock();
-				if (found)
-				{
-					std::runtime_error("Node already initialized, possible logic error on hardware or in software, ignoring node info msg...");
-				}
-
-				CANMappingObj nodeMappingObj = mapping->GetNodeObj(nodeID);
-
 				NodeInfoMsg_t *nodeInfo = (NodeInfoMsg_t *) &canMsg->bit.data.uint8;
 
-				std::map<uint8_t, std::tuple<std::string, std::vector<double>>> nodeChannelInfo;
-				for (uint8_t channelID = 0; channelID < 32; channelID++)
+				InitializeNode(canBusChannelID, nodeID, nodeInfo, canDriver);
+
+				//WHAT THE HACK? Exactly that's a hack, because Andi doesn't want to implement it properly!!!
+				std::vector<int> nodeIDsRefInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDsRef"));
+				std::vector<int> nodeIDsInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDs"));
+				auto foundIt = std::find(nodeIDsRefInt.begin(), nodeIDsRefInt.end(), nodeID); 
+				if (foundIt != nodeIDsRefInt.end()) 
 				{
-					uint32_t mask = 0x00000001 & (nodeInfo->channel_mask >> channelID);
-					if (mask == 1)
-					{
-						CANMappingObj channelMappingObj = mapping->GetChannelObj(nodeID, channelID);
-						nodeChannelInfo[channelID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
-
-						//add sensor names and scaling to array for fast sensor processing
-						//uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
-						//sensorInfoMap[mergedID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
-
-					}
-					else if (mask > 1)
-					{
-						throw std::logic_error("CANManager - OnCANInit: mask conversion of node info failed");
-					}
+					uint8_t loraNodeID = nodeIDsInt[foundIt - nodeIDsRefInt.begin()];
+					Debug::print("Found lora equivalent with nodeID %d; can bus nodeID %d", loraNodeID, nodeID);
+					InitializeNode(0, loraNodeID, nodeInfo, loraDriver);
 				}
-
-				Node *node = new Node(nodeID, nodeMappingObj.stringID, *nodeInfo, nodeChannelInfo, canBusChannelID, canDriver);
-				nodeMapMtx.lock();
-				nodeMap[nodeID] = node;
-				nodeMapMtx.unlock();
-
-				//add states to state controller
-				auto states = node->GetStates();
-				StateController *stateController = StateController::Instance();
-				stateController->AddUninitializedStates(states);
-
-				//add available commands to event manager
-				EventManager *eventManager = EventManager::Instance();
-				auto channelTypeMap = node->GetChannelTypeMap();
-				eventManager->AddChannelTypes(channelTypeMap);
-				eventManager->AddCommands(node->GetCommands());
-				eventManager->AddCommands({{"Tare", {std::bind(&CANManager::ResetOffset, this, std::placeholders::_1, std::placeholders::_2),{"NodeID","ChannelID","Current Sensor Value"}}}});
-
-
-				Debug::print("Node %s with ID %d on CAN Bus %d detected\n\t\t\tfirmware version 0x%08x", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID, node->GetFirmwareVersion());
+				
 			}
 		}
 		catch (std::runtime_error &e)
@@ -295,6 +339,7 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 			if (canIDStruct->info.direction == 0)
 			{
 				Debug::print("Direction bit master to node from node %d on bus %d, delegating msg...", nodeID, canBusChannelID);
+				//TODO: DIRTY HOTFIX, remove it
 				std::vector<uint8_t> channels = {0,1,2,3};
 				channels.erase(channels.begin()+canBusChannelID);
 				for (const auto &currChannelID : channels)

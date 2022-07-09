@@ -19,6 +19,7 @@ const std::vector<std::string> Servo::states =
             "Startpoint",
             "Endpoint",
             "PWMEnabled",
+            "PositionRaw",
             "RefreshDivider",
             "RequestStatus",
             "ResetAllSettings"
@@ -39,6 +40,7 @@ const std::map<std::string, std::vector<double>> Servo::scalingMap =
             {"Startpoint", {1.0, 0.0}},
             {"Endpoint", {1.0, 0.0}},
             {"PWMEnabled", {1.0, 0.0}},
+            {"PositionRaw", {1.0, 0.0}},
             {"MovePosition", {1.0, 0.0}},
             {"MoveInterval", {1.0, 0.0}},
             {"RefreshDivider", {1.0, 0.0}},
@@ -59,6 +61,7 @@ const std::map<SERVO_VARIABLES , std::string> Servo::variableMap =
             {SERVO_POSITION_STARTPOINT, "Startpoint"},
             {SERVO_POSITION_ENDPOINT, "Endpoint"},
             {SERVO_PWM_ENABLED, "PWMEnabled"},
+            {SERVO_POSITION_RAW, "PositionRaw"},
             {SERVO_SENSOR_REFRESH_DIVIDER, "RefreshDivider"},
         };
 
@@ -92,6 +95,8 @@ Servo::Servo(uint8_t channelID, std::string channelName, std::vector<double> sen
         {"GetEndpoint", {std::bind(&Servo::GetEndpoint, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetPWMEnabled", {std::bind(&Servo::SetPWMEnabled, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetPWMEnabled", {std::bind(&Servo::GetPWMEnabled, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetPositionRaw", {std::bind(&Servo::SetPositionRaw, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetPositionRaw", {std::bind(&Servo::GetPositionRaw, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetRefreshDivider", {std::bind(&Servo::SetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetRefreshDivider", {std::bind(&Servo::GetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"RequestStatus", {std::bind(&Servo::RequestStatus, this, std::placeholders::_1, std::placeholders::_2), {}}},
@@ -180,6 +185,34 @@ void Servo::GetPosition(std::vector<double> &params, bool testOnly)
     catch (std::exception &e)
     {
         throw std::runtime_error("Servo - GetPosition: " + std::string(e.what()));
+    }
+}
+
+void Servo::SetPositionRaw(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("PositionRaw");
+
+    try
+    {
+        SetVariable(SERVO_REQ_SET_VARIABLE, parent->GetNodeID(), SERVO_POSITION_RAW,
+                    scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Servo - SetPositionRaw: " + std::string(e.what()));
+    }
+}
+
+void Servo::GetPositionRaw(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(SERVO_REQ_GET_VARIABLE, parent->GetNodeID(), SERVO_POSITION_RAW,
+                    params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Servo - GetPositionRaw: " + std::string(e.what()));
     }
 }
 
@@ -600,6 +633,7 @@ void Servo::RequestCurrentState()
     std::vector<double> params;
 
 	GetPosition(params, false);
+    GetPositionRaw(params, false);
 	GetTargetPosition(params, false);
 	GetTargetPressure(params, false);
 	GetMaxSpeed(params, false);

@@ -7,8 +7,8 @@
 #include "utility/utils.h"
 #include "utility/Config.h"
 
-CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &)> onRecvCallback,
-								 std::function<void(std::string *)> onErrorCallback) :
+CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
+								 std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs) :
 	CANDriver(onRecvCallback, onErrorCallback)
 {
     //arbitration bus parameters
@@ -29,26 +29,25 @@ CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8
     blockingTimeout = std::get<int>(Config::getData("CAN/blocking_timeout"));
 
     canStatus stat;
-    for (size_t i = 0; i < CAN_CHANNELS; i++)
+    for (auto &channelID : canBusChannelIDs)
     {
-        stat = InitializeCANChannel(i);
+        stat = InitializeCANChannel(channelID);
         if (stat < 0) {
             std::ostringstream stringStream;
-            stringStream << "CANDriver - Constructor: CAN-Channel " << i << ": " << CANError(stat);
+            stringStream << "CANDriver - Constructor: CAN-Channel " << channelID << ": " << CANError(stat);
             throw std::runtime_error(stringStream.str());
         }
     }
-    
 }
 
 CANDriverKvaser::~CANDriverKvaser()
 {
     // Empty transfer queues (not strictly necessary but recommended by Kvaser)
-    for (size_t i = 0; i < CAN_CHANNELS; i++)
+    for (auto &handle : canHandlesMap)
     {
-        (void) canWriteSync(canHandles[i], 5);
-        (void) canBusOff(canHandles[i]);
-        (void) canClose(canHandles[i]);
+        (void) canWriteSync(handle.second, 5);
+        (void) canBusOff(handle.second);
+        (void) canClose(handle.second);
     }
     canUnloadLibrary();
 }
@@ -85,11 +84,11 @@ void CANDriverKvaser::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint
     canStatus stat;
     if (blocking)
     {
-        stat = canWriteWait(canHandles[canChannelID], canID, (void *) msg, dlcBytes, canFDMSG_FDF | canFDMSG_BRS, blockingTimeout);
+        stat = canWriteWait(canHandlesMap[canChannelID], canID, (void *) msg, dlcBytes, canFDMSG_FDF | canFDMSG_BRS, blockingTimeout);
     }
     else
     {
-        stat = canWrite(canHandles[canChannelID], canID, (void *) msg, dlcBytes, canFDMSG_FDF | canFDMSG_BRS);
+        stat = canWrite(canHandlesMap[canChannelID], canID, (void *) msg, dlcBytes, canFDMSG_FDF | canFDMSG_BRS);
     }
     
     if(stat < 0) {
@@ -101,7 +100,7 @@ std::map<std::string, bool> CANDriverKvaser::GetCANStatusReadable(uint32_t canBu
 {
     std::map<std::string, bool> canState;
     uint64_t flags;
-    canStatus stat = canReadStatus(canHandles[canBusChannelID], &flags);
+    canStatus stat = canReadStatus(canHandlesMap[canBusChannelID], &flags);
 
     if(stat == canOK) {
         std::vector<std::string> names = {"ERROR_PASSIVE", "BUS_OFF", "ERROR_WARNING", "ERROR_ACTIVE",
@@ -161,14 +160,12 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                     return;
                 }
                 uint8_t canBusChannelID = -1;
-                for (int i = 0; i < CAN_CHANNELS; i++)
+                const auto &handleFindIt = canDriver->canHandlesMap.find(handle);
+                if (handleFindIt != canDriver->canHandlesMap.end())
                 {
-                    if (handle == canDriver->canHandles[i])
-                    {
-                        canBusChannelID = i;
-                    }
+                    canBusChannelID = handleFindIt->first;
                 }
-                if (canBusChannelID == (uint8_t)-1)
+                else
                 {
                     Debug::error("CANDriver - OnCANCallback: can handle not found");
                     return;
@@ -182,7 +179,7 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                 {
                     try
                     {
-                        canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, softwareTime);
+                        canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, softwareTime, canDriver);
                     }
                     catch(const std::exception& e)
                     {
@@ -237,19 +234,19 @@ canStatus CANDriverKvaser::InitializeCANChannel(uint32_t canBusChannelID) {
     canInitializeLibrary();
 
     // TODO: Might want to remove canOPEN_ACCEPT_VIRTUAL later (DB)
-    canHandles[canBusChannelID] = canOpenChannel(canBusChannelID, canOPEN_CAN_FD | canOPEN_ACCEPT_LARGE_DLC | canOPEN_ACCEPT_VIRTUAL);
-    if(canHandles[canBusChannelID] < 0){
-        return (canStatus)canHandles[canBusChannelID];
+    canHandlesMap[canBusChannelID] = canOpenChannel(canBusChannelID, canOPEN_CAN_FD | canOPEN_ACCEPT_LARGE_DLC | canOPEN_ACCEPT_VIRTUAL);
+    if(canHandlesMap[canBusChannelID] < 0){
+        return (canStatus)canHandlesMap[canBusChannelID];
     }
 
     int timeScale = 1; //1us precision
-    stat = canIoCtl(canHandles[canBusChannelID], canIOCTL_SET_TIMER_SCALE, &timeScale, sizeof(timeScale));
+    stat = canIoCtl(canHandlesMap[canBusChannelID], canIOCTL_SET_TIMER_SCALE, &timeScale, sizeof(timeScale));
     if (stat != canOK)
     {
         return stat;
     }
 
-    stat = canSetBusParams(canHandles[canBusChannelID],
+    stat = canSetBusParams(canHandlesMap[canBusChannelID],
             arbitrationParams.bitrate,
             arbitrationParams.timeSegment1,
             arbitrationParams.timeSeqment2,
@@ -260,7 +257,7 @@ canStatus CANDriverKvaser::InitializeCANChannel(uint32_t canBusChannelID) {
 
     }
 
-    stat = canSetBusParamsFd(canHandles[canBusChannelID],
+    stat = canSetBusParamsFd(canHandlesMap[canBusChannelID],
             dataParams.bitrate,
             dataParams.timeSegment1,
             dataParams.timeSeqment2,
@@ -275,18 +272,18 @@ canStatus CANDriverKvaser::InitializeCANChannel(uint32_t canBusChannelID) {
         return stat;
     }*/
 
-    stat = canSetBusOutputControl(canHandles[canBusChannelID], canDRIVER_NORMAL);
+    stat = canSetBusOutputControl(canHandlesMap[canBusChannelID], canDRIVER_NORMAL);
     if(stat < 0) {
         return stat;
     }
 
-    stat = canBusOn(canHandles[canBusChannelID]);
+    stat = canBusOn(canHandlesMap[canBusChannelID]);
     if(stat < 0) {
         return stat;
     }
 
     // Register callback for receiving a msg when the rcv buffer has been empty or when an error frame got received
-    stat = kvSetNotifyCallback(canHandles[canBusChannelID], (kvCallback_t) &CANDriverKvaser::OnCANCallback, (void *) this, canNOTIFY_RX | canNOTIFY_ERROR | canNOTIFY_STATUS);
+    stat = kvSetNotifyCallback(canHandlesMap[canBusChannelID], (kvCallback_t) &CANDriverKvaser::OnCANCallback, (void *) this, canNOTIFY_RX | canNOTIFY_ERROR | canNOTIFY_STATUS);
     if(stat < 0) {
         return stat;
     }
