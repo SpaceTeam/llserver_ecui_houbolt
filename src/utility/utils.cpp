@@ -118,4 +118,15 @@ namespace utils
         converted |= (uint64_t)data[i];
         return converted;
     }
+
+    void strToWCharPtr( const std::string& str, wchar_t *wCharStrOut)
+    {
+        std::wostringstream wstm ;
+        const std::ctype<wchar_t>& ctfacet = 
+                            std::use_facet< std::ctype<wchar_t> >( wstm.getloc() ) ;
+        for( size_t i=0 ; i<str.size() ; ++i ) 
+                wstm << ctfacet.widen( str[i] ) ;
+        std::wstring wideStr = wstm.str() ;
+        std::wcsncpy(wCharStrOut, wideStr.c_str(), wideStr.size()+1);
+    }
 }
