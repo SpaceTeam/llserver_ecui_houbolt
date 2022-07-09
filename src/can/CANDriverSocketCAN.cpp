@@ -60,7 +60,8 @@ CANDriverSocketCAN::CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &,
 CANDriverSocketCAN::~CANDriverSocketCAN()
 {
 	done = true;
-	receiveThread->join();
+	if(receiveThread->joinable()) receiveThread->join();
+	else Debug::warning("receiveThread was not joinable.");
 	delete receiveThread;
 	close(canSocket);
 }

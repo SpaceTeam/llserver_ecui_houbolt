@@ -1,7 +1,3 @@
-//
-// Created by Markus on 03.12.20.
-//
-
 #include "utility/WatchDog.h"
 
 WatchDog::WatchDog(std::chrono::microseconds expireInterval, std::function<void(WatchDog*)> onExpireCallback)
@@ -68,7 +64,8 @@ void WatchDog::Stop()
     if (watching)
     {
         watching = false;
-        watchThread.join();
+        if(watchThread.joinable()) watchThread.join();
+        else Debug::warning("watchThread was not joinable.");
     }
 }
 
