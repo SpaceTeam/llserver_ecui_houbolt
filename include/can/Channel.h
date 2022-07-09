@@ -13,6 +13,7 @@
 #include <string>
 #include <can_houbolt/cmds.h>
 #include <limits.h>
+#include <atomic>
 
 #include "StateController.h"
 #include "can_houbolt/cmds.h"
@@ -32,6 +33,7 @@ protected:
 
     uint8_t channelID;
     const std::string channelName;
+    std::mutex scalingMtx;
     std::vector<double> sensorScaling;
     const uint8_t typeSize; //in bytes
 
@@ -128,6 +130,7 @@ protected:
         SetMsg_t *setMsg = (SetMsg_t *) canMsg->bit.data.uint8;
         std::string variableStateName = variableMap.at((VAR)(setMsg->variable_id));
 
+        Debug::info("Received variable %s of channel %s", variableStateName.c_str(), channelName.c_str());
         //convert and scale
         std::vector<double> scalingParams = scalingMap.at(variableStateName);
         double value = ScaleToDouble((double)(setMsg->value), scalingParams[0], scalingParams[1]);
@@ -177,8 +180,11 @@ public:
     virtual std::string GetChannelName()
     { return this->channelName; };
 
-    virtual void SetScaling(double)
-    { this->sensorScaling = sensorScaling; };
+    virtual std::vector<double> GetScaling()
+    { std::lock_guard<std::mutex> lock(scalingMtx); return this->sensorScaling; };
+
+    virtual void SetScaling(std::vector<double> &sensorScaling)
+    { std::lock_guard<std::mutex> lock(scalingMtx); this->sensorScaling = sensorScaling; };
 
     virtual std::vector<std::string> GetStates();
 
@@ -199,6 +205,13 @@ public:
 
     virtual void RequestResetSettings(std::vector<double> &params, bool testOnly)
     { throw std::logic_error("Channel - RequestResetSettings: not implemented"); };
+
+    //-------------------------------Utility Functions-------------------------------//
+
+    virtual std::vector<double> ResetSensorOffset(std::vector<double> &params, bool testOnly);
+
+    virtual void RequestCurrentState()
+    { throw std::logic_error("Channel - RequestCurrentState: not implemented"); };
 };
 
 #endif // LLSERVER_ECUI_HOUBOLT_CHANNEL_H

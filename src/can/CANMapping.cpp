@@ -70,3 +70,10 @@ CANMappingObj CANMapping::GetChannelObj(uint8_t &nodeID, uint8_t &channelID)
     return mappingObj;
 }
 
+void CANMapping::SetChannelObj(uint8_t &nodeID, uint8_t &channelID, CANMappingObj &obj)
+{
+    this->mapping.at(std::to_string(nodeID)).at(std::to_string(channelID)).at("slope") = obj.slope;
+    this->mapping.at(std::to_string(nodeID)).at(std::to_string(channelID)).at("offset") = obj.offset;
+    SaveMapping();
+}
+

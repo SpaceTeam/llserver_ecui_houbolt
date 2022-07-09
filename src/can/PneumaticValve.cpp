@@ -404,3 +404,18 @@ void PneumaticValve::RequestResetSettings(std::vector<double> &params, bool test
         throw std::runtime_error("PneumaticValve - RequestResetSettings: " + std::string(e.what()));
     }
 }
+
+void PneumaticValve::RequestCurrentState()
+{
+    std::vector<double> params;
+    
+	GetEnabled(params, false);
+	GetPosition(params, false);
+    GetTargetPosition(params, false);
+    GetThreshold(params, false);
+    GetHysteresis(params, false);
+    GetOnChannelID(params, false);
+    GetOffChannelID(params, false);
+    GetPosChannelID(params, false);
+    GetRefreshDivider(params, false);
+}

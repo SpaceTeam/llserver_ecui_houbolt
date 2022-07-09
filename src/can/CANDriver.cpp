@@ -15,7 +15,7 @@ CANDriver::~CANDriver()
 
 }
 
-void CANDriver::SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength)
+void CANDriver::SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking)
 {
 	std::cerr << "CANDriver::SendCANMessage called, probably an error" << std::endl;
 }

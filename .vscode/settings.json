@@ -81,6 +81,7 @@
         "locale": "cpp",
         "stack": "cpp",
         "codecvt": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "cinttypes": "cpp"
     }
 }

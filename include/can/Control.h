@@ -2,25 +2,25 @@
 // Created by Markus on 03.09.21.
 //
 
-#ifndef LLSERVER_ECUI_HOUBOLT_PNEUMATIC_VALVE_H
-#define LLSERVER_ECUI_HOUBOLT_PNEUMATIC_VALVE_H
+#ifndef LLSERVER_ECUI_HOUBOLT_CONTROL_H
+#define LLSERVER_ECUI_HOUBOLT_CONTROL_H
 
 #include "can/Channel.h"
 #include "can/Node.h"
-#include "can_houbolt/channels/pneumatic_valve_channel_def.h"
+#include "can_houbolt/channels/control_channel_def.h"
 
-class PneumaticValve : public Channel, public NonNodeChannel
+class Control : public Channel, public NonNodeChannel
 {
 public:
     //TODO: MP check if this is the only and correct way to implement static const with inheritation
     static const std::vector<std::string> states;
     static const std::map<std::string, std::vector<double>> scalingMap;
-    static const std::map<PNEUMATIC_VALVE_VARIABLES , std::string> variableMap;
+    static const std::map<CONTROL_VARIABLES , std::string> variableMap;
 
     //-------------------------------RECEIVE Functions-------------------------------//
 
 public:
-    PneumaticValve(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
+    Control(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
 
     std::vector<std::string> GetStates() override;
 
@@ -33,11 +33,8 @@ public:
     void SetEnabled(std::vector<double> &params, bool testOnly);
 	void GetEnabled(std::vector<double> &params, bool testOnly);
 
-	void SetPosition(std::vector<double> &params, bool testOnly);
-	void GetPosition(std::vector<double> &params, bool testOnly);
-
-    void SetTargetPosition(std::vector<double> &params, bool testOnly);
-	void GetTargetPosition(std::vector<double> &params, bool testOnly);
+    void SetTarget(std::vector<double> &params, bool testOnly);
+	void GetTarget(std::vector<double> &params, bool testOnly);
 
     void SetThreshold(std::vector<double> &params, bool testOnly);
 	void GetThreshold(std::vector<double> &params, bool testOnly);
@@ -45,14 +42,11 @@ public:
     void SetHysteresis(std::vector<double> &params, bool testOnly);
 	void GetHysteresis(std::vector<double> &params, bool testOnly);
 
-    void SetOnChannelID(std::vector<double> &params, bool testOnly);
-	void GetOnChannelID(std::vector<double> &params, bool testOnly);
+    void SetActuatorChannelID(std::vector<double> &params, bool testOnly);
+	void GetActuatorChannelID(std::vector<double> &params, bool testOnly);
 
-    void SetOffChannelID(std::vector<double> &params, bool testOnly);
-	void GetOffChannelID(std::vector<double> &params, bool testOnly);
-
-    void SetPosChannelID(std::vector<double> &params, bool testOnly);
-	void GetPosChannelID(std::vector<double> &params, bool testOnly);
+    void SetSensorChannelID(std::vector<double> &params, bool testOnly);
+	void GetSensorChannelID(std::vector<double> &params, bool testOnly);
 
     void SetRefreshDivider(std::vector<double> &params, bool testOnly);
 	void GetRefreshDivider(std::vector<double> &params, bool testOnly);
@@ -65,4 +59,4 @@ public:
     void RequestCurrentState() override;
 };
 
-#endif //LLSERVER_ECUI_HOUBOLT_PNEUMATIC_VALVE_H
+#endif //LLSERVER_ECUI_HOUBOLT_CONTROL_H

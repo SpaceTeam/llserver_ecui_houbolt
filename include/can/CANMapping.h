@@ -24,6 +24,8 @@ public:
 
     CANMappingObj GetNodeObj(uint8_t &nodeID);
     CANMappingObj GetChannelObj(uint8_t &nodeID, uint8_t &channelID);
+
+    void SetChannelObj(uint8_t &nodeID, uint8_t &channelID, CANMappingObj &obj);
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_CANMAPPING_H
