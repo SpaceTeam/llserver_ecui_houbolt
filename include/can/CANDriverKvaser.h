@@ -13,7 +13,7 @@
 #include "common.h"
 
 
-#define CAN_CHANNELS 3
+#define CAN_CHANNELS 4
 
 
 class CANDriverKvaser : public CANDriver
@@ -24,6 +24,8 @@ class CANDriverKvaser : public CANDriver
 		CANParams arbitrationParams;
 		CANParams dataParams;
 
+        uint64_t blockingTimeout;
+
         static void OnCANCallback(int handle, void *driver, unsigned int event);
         std::string CANError(canStatus status);
         canStatus InitializeCANChannel(uint32_t canChannelID);
@@ -33,7 +35,7 @@ class CANDriverKvaser : public CANDriver
 						std::function<void(std::string *)> onErrorCallback);
         ~CANDriverKvaser();
 
-        void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength);
+        void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking);
 
         std::map<std::string, bool> GetCANStatusReadable(uint32_t canChannelID);
 };

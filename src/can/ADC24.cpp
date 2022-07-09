@@ -226,3 +226,11 @@ void ADC24::RequestResetSettings(std::vector<double> &params, bool testOnly)
         throw std::runtime_error("ADC24 - RequestResetSettings: " + std::string(e.what()));
     }
 }
+
+void ADC24::RequestCurrentState()
+{
+    std::vector<double> params;
+
+	GetLowerThreshold(params, false);
+	GetUpperThreshold(params, false);
+}

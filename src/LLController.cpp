@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include <csignal>
+#include <thread>
 
 #include "utility/Config.h"
 #include "utility/utils.h"
@@ -11,6 +12,7 @@
 #include "LLInterface.h"
 #include "EcuiSocket.h"
 #include "EventManager.h"
+#include "driver/PythonController.h"
 
 #include "LLController.h"
 
@@ -81,6 +83,8 @@ bool LLController::IsInitialized()
 LLController::~LLController()
 {
     //    SequenceManager::AbortSequence();
+    Debug::print("Shutting down PythonController...");
+    PythonController::Destroy();
     Debug::print("Shutting down ECUISocket...");
     EcuiSocket::Destroy();
     Debug::print("Shutting down LLInterface...");
@@ -97,6 +101,7 @@ void LLController::Abort(std::string &abortMsg)
     EcuiSocket::SendJson("abort", abortMsg);
 }
 
+// Callback on recieving message from ECUI Socket
 void LLController::OnECUISocketRecv(nlohmann::json msg)
 {
     try
@@ -153,11 +158,11 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                 {
                     nlohmann::json statesChunk(states.begin(), states.begin() + 500);
                     
-                    EcuiSocket::SendJson("states", statesChunk);
+                    EcuiSocket::SendJson("states-init", statesChunk);
                     states.erase(states.begin(), states.begin() + 500);
                 }
                 
-                EcuiSocket::SendJson("states", states);
+                EcuiSocket::SendJson("states-init", states);
 
                 bool isAutoAbortActive = seqManager->GetAutoAbort();
                 EcuiSocket::SendJson("auto-abort-change", isAutoAbortActive);
@@ -253,6 +258,11 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                     EcuiSocket::SendJson("commands-error", commandsErrorJson);
                 }
 
+            }
+            else if (type.compare("pythonScript-start") == 0) {
+                std::string scriptPath = msg["content"];
+                PythonController *pyController = PythonController::Instance();
+                pyController->StartPythonScript(scriptPath);
             }
             else
             {

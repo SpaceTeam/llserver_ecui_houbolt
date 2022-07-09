@@ -2,6 +2,7 @@
 
 #include "logging/InfluxDbWriter.h"
 #include "logging/influxDb.h"
+#include "utility/Debug.h"
 
 InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string dbName, std::size_t bufferSize) : buffer_size(bufferSize) {
     host = hostname;
@@ -145,9 +146,8 @@ void InfluxDbWriter::transferPartialWrite() {
 
 void InfluxDbWriter::joinThreads() {
     for (std::thread &t : threads) {
-        if(t.joinable()) {
-            t.join();
-        }
+        if(t.joinable()) t.join();
+        else Debug::warning("InfluxDbWriter thread was not joinable.");
     }
 } 
 

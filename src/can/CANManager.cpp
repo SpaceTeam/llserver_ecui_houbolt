@@ -121,6 +121,10 @@ CANResult CANManager::Init()
             // no need for std::cin.get(); here, since the thread needs an input to quit
 
             initialized = true;
+
+			Debug::print("Request current state and config from nodes...\n");
+			RequestCurrentState();
+
         }
         catch (std::exception& e)
         {
@@ -159,12 +163,22 @@ CANResult CANManager::RequestCANInfo()
     Debug::print("---Press enter to send node request---");
     std::cin.get();
     //TODO: MP be careful if one channel is used for backup
-    canDriver->SendCANMessage(0, canID.uint32, msg.uint8, msgLength);
-    canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength);
-    canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength);
-    //canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength);
+    canDriver->SendCANMessage(0, canID.uint32, msg.uint8, msgLength, false);
+    canDriver->SendCANMessage(1, canID.uint32, msg.uint8, msgLength, false);
+    canDriver->SendCANMessage(2, canID.uint32, msg.uint8, msgLength, false);
+    canDriver->SendCANMessage(3, canID.uint32, msg.uint8, msgLength, false);
 
 	return CANResult::SUCCESS;
+}
+
+void CANManager::RequestCurrentState()
+{
+	Node *currNode;
+	for (auto &it : nodeMap)
+    {
+        currNode = it.second;
+        currNode->RequestCurrentState();
+    }
 }
 
 /**
@@ -226,8 +240,8 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 						nodeChannelInfo[channelID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
 
 						//add sensor names and scaling to array for fast sensor processing
-						uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
-						sensorInfoMap[mergedID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
+						//uint16_t mergedID = MergeNodeIDAndChannelID(nodeID, channelID);
+						//sensorInfoMap[mergedID] = {channelMappingObj.stringID, {channelMappingObj.slope, channelMappingObj.offset}};
 
 					}
 					else if (mask > 1)
@@ -251,6 +265,8 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 				auto channelTypeMap = node->GetChannelTypeMap();
 				eventManager->AddChannelTypes(channelTypeMap);
 				eventManager->AddCommands(node->GetCommands());
+				eventManager->AddCommands({{"Tare", {std::bind(&CANManager::ResetOffset, this, std::placeholders::_1, std::placeholders::_2),{"NodeID","ChannelID","Current Sensor Value"}}}});
+
 
 				Debug::print("Node %s with ID %d on CAN Bus %d detected\n\t\t\tfirmware version 0x%08x", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID, node->GetFirmwareVersion());
 			}
@@ -278,7 +294,15 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 		{
 			if (canIDStruct->info.direction == 0)
 			{
-				throw std::runtime_error("Direction bit master to node, ignoring msg...");
+				Debug::print("Direction bit master to node from node %d on bus %d, delegating msg...", nodeID, canBusChannelID);
+				std::vector<uint8_t> channels = {0,1,2,3};
+				channels.erase(channels.begin()+canBusChannelID);
+				for (const auto &currChannelID : channels)
+				{
+					canDriver->SendCANMessage(currChannelID, canID, payload, payloadLength, false);
+				}
+				return;
+				//throw std::runtime_error("Direction bit master to node, ignoring msg...");
 			}
 			//Don't require mutex at this point, since it is read only after initialization
 			bool found = nodeMap.find(nodeID) != nodeMap.end();
@@ -320,6 +344,38 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 void CANManager::OnCANError(std::string *error)
 {
     Debug::error("CANManager - OnCANError: CAN error %s", error->c_str());
+}
+
+//----------------------------------------------------------------------------//
+//-----------------------------Utility Functions------------------------------//
+//----------------------------------------------------------------------------//
+
+void CANManager::ResetOffset(std::vector<double> &params, bool testOnly)
+{
+	try
+    {
+        if (params.size() != 3) //number of required parameters
+        {
+            throw std::runtime_error("3 parameters expected (nodeId, channelId, currValue), but " + std::to_string(params.size()) + " were provided");
+        }
+        uint8_t nodeID = params[0];
+		uint8_t channelID = params[1];
+		params.erase(params.begin());
+
+		Node *currNode = nodeMap.at(nodeID);
+
+		std::vector<double> newScaling = currNode->ResetSensorOffset(params, testOnly);
+
+		CANMappingObj obj = mapping->GetChannelObj(nodeID, channelID);
+		obj.slope = newScaling[0];
+		obj.offset = newScaling[1];
+		mapping->SetChannelObj(nodeID, channelID, obj);
+
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("CANManager - ResetOffset: " + std::string(e.what()));
+    }
 }
 
 //std::vector<std::string> CANManager::GetChannelStates()

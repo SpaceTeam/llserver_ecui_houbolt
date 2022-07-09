@@ -60,13 +60,14 @@ CANDriverSocketCAN::CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &,
 CANDriverSocketCAN::~CANDriverSocketCAN()
 {
 	done = true;
-	receiveThread->join();
+	if(receiveThread->joinable()) receiveThread->join();
+	else Debug::warning("receiveThread was not joinable.");
 	delete receiveThread;
 	close(canSocket);
 }
 
 
-void CANDriverSocketCAN::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength)
+void CANDriverSocketCAN::SendCANMessage(uint32_t canChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking)
 {
 	if(canChannelID > 0) return; // TODO: support multiple devices, use canChannelID
 
@@ -83,6 +84,8 @@ void CANDriverSocketCAN::SendCANMessage(uint32_t canChannelID, uint32_t canID, u
 		Debug::print("Errno: 0x%x", errno);
 		throw std::runtime_error("CAN write failed");
 	}
+
+	//TODO wait for completion if blocking. is this possible?
 }
 
 

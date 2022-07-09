@@ -65,6 +65,8 @@ class CANManager : public Singleton<CANManager>
 		static inline uint8_t GetNodeID(uint32_t &canID);
 		static inline uint16_t MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &channelId);
 
+		void RequestCurrentState();
+
 		~CANManager();
 	public:
 
@@ -82,4 +84,8 @@ class CANManager : public Singleton<CANManager>
 
 		//TODO: MP add error info to arguments
 		void OnCANError(std::string *error);
+
+		//-------------------------------Utility Functions-------------------------------//
+
+		void ResetOffset(std::vector<double> &params, bool testOnly);
 };

@@ -3,6 +3,7 @@
 //
 
 #include <chrono>
+#include <regex>
 
 #include "EventManager.h"
 
@@ -122,7 +123,7 @@ bool EventManager::ShallTrigger(nlohmann::json& event, double& oldValue, double&
                 else
                 {
                     //old value also in trigger range, do not trigger
-                    if (oldValue != triggerValue)
+                    if (oldValue != triggerValue && !std::isnan(oldValue))
                     {
                         shallTrigger = false;
                     }
@@ -207,33 +208,37 @@ bool EventManager::ShallTrigger(nlohmann::json& event, double& oldValue, double&
         }
     return shallTrigger;
 }
+
+double EventManager::GetArgument(const std::string &stateName, nlohmann::json& param, double& newValue)
+{
+    if (param.is_string())
+    {
+        if (stateName.compare(param) == 0)
+        {
+            return newValue;
+        }
+        else
+        {
+            StateController *controller = StateController::Instance();
+            double val = controller->GetStateValue(param);
+            return val;
+        }
+    }
+    else if (param.is_number())
+    {
+        return param;
+    }
+    else
+    {
+        throw std::invalid_argument( "EventManager - GetArgument: parameter not string or number" );
+    }
+}
     
 void EventManager::GetArgumentList(const std::string &stateName, nlohmann::json& event, std::vector<double>& argumentList, double& newValue)
 {
     for (nlohmann::json &param : event["parameters"])
     {
-
-        if (param.is_string())
-        {
-            if (stateName.compare(param) == 0)
-            {
-                argumentList.push_back(newValue);
-            }
-            else
-            {
-                StateController *controller = StateController::Instance();
-                double val = controller->GetStateValue(param);
-                argumentList.push_back(val);
-            }
-        }
-        else if (param.is_number())
-        {
-            argumentList.push_back(param);
-        }
-        else
-        {
-            throw std::invalid_argument( "EventManager - GetArgumentList: parameter not string or number" );
-        }
+        argumentList.push_back(GetArgument(stateName, param, newValue));
     }
 }
 
@@ -282,7 +287,78 @@ std::map<std::string, command_t> EventManager::GetCommands()
     return commandMap;
 }
 
-void EventManager::ExecuteCommand(const std::string &stateName, double oldValue, double newValue, bool useDefaultMapping, bool testOnly)
+void EventManager::ExecuteRegexCommandOrState(const std::string &regexKey, nlohmann::json &events, const std::string &stateName, double oldValue, double newValue, bool testOnly)
+{
+    auto stateSplit = utils::split(stateName, ":");
+    stateSplit.pop_back();
+    auto strippedState = utils::merge(stateSplit, ":");
+
+    for (auto& eventJSON : events)
+    {
+        if (!ShallTrigger(eventJSON, oldValue, newValue))
+        {
+            continue;
+        }
+
+        bool isState = utils::keyExists(eventJSON, "state");
+        bool isCommand = utils::keyExists(eventJSON, "command");
+        if (isState && isCommand)
+        {
+            throw std::invalid_argument( "EventManager - ExecuteRegexCommandOrState: can't have both command and state key in event definiton" );
+        }
+        else if (isState)
+        {
+            double newStateVal;
+            if (utils::keyExists(eventJSON, "value"))
+            {
+                nlohmann::json param = eventJSON["value"];
+                if (regexKey == eventJSON["value"])
+                {
+                    param = stateName;
+                }
+                newStateVal = GetArgument(stateName, param, newValue);
+                StateController::Instance()->SetState(utils::replace(eventJSON["state"], "{}", strippedState), newStateVal, utils::getCurrentTimestamp());
+            }
+            else
+            {
+                throw std::invalid_argument( "EventManager - ExecuteRegexCommandOrState: need value key when specifying state in event definiton" );
+            }
+        }
+        else if (isCommand)
+        {
+            std::vector<double> argumentList;
+            for (nlohmann::json &param : eventJSON["parameters"])
+            {
+                if (regexKey == param)
+                {
+                    param = stateName;
+                }
+            }
+            GetArgumentList(stateName, eventJSON, argumentList, newValue);
+
+            std::string commandName = utils::replace(eventJSON["command"], "{}", strippedState);
+
+            //trigger command
+            if (commandMap.find(commandName) == commandMap.end()){
+                //state name not in mapping, shall not trigger anything
+                Debug::error("EventManager - ExecuteRegexCommandOrState: " + commandName + " not implemented, ignoring...");
+                continue;
+            }
+            auto commandFunc = std::get<0>(commandMap[commandName]);
+            commandFunc(argumentList, testOnly);
+        }
+        else
+        {
+            throw std::invalid_argument( "EventManager - ExecuteRegexCommandOrState: need either command or state key in event definiton" );
+        }
+
+
+        
+    }
+
+}
+
+void EventManager::ExecuteCommandOrState(const std::string &stateName, double oldValue, double newValue, bool useDefaultMapping, bool testOnly)
 {
     nlohmann::json events;
     std::string currStateName = stateName;
@@ -310,22 +386,51 @@ void EventManager::ExecuteCommand(const std::string &stateName, double oldValue,
             continue;
         }
 
-        std::vector<double> argumentList;
-        GetArgumentList(currStateName, eventJSON, argumentList, newValue);
-
-        std::string commandName = eventJSON["command"];
-        if (useDefaultMapping)
+        bool isState = utils::keyExists(eventJSON, "state");
+        bool isCommand = utils::keyExists(eventJSON, "command");
+        if (isState && isCommand)
         {
-            utils::replaceRef(commandName, currStateName, commandChannelName);
+            throw std::invalid_argument( "EventManager - ExecuteCommandOrState: can't have both command and state key in event definiton" );
         }
-        //trigger command
-        if (commandMap.find(commandName) == commandMap.end()){
-            //state name not in mapping, shall not trigger anything
-            Debug::error("EventManager - ExecuteCommand: " + commandName + " not implemented, ignoring...");
-            continue;
+        else if (isState)
+        {
+            double newStateVal;
+            if (utils::keyExists(eventJSON, "value"))
+            {
+                newStateVal = GetArgument(stateName, eventJSON["value"], newValue);
+                StateController::Instance()->SetState(eventJSON["state"], newStateVal, utils::getCurrentTimestamp());
+            }
+            else
+            {
+                throw std::invalid_argument( "EventManager - ExecuteCommandOrState: need value key when specifying state in event definiton" );
+            }
         }
-        auto commandFunc = std::get<0>(commandMap[commandName]);
-        commandFunc(argumentList, testOnly);
+        else if (isCommand)
+        {
+            std::vector<double> argumentList;
+            GetArgumentList(currStateName, eventJSON, argumentList, newValue);
+
+            std::string commandName = eventJSON["command"];
+            if (useDefaultMapping)
+            {
+                utils::replaceRef(commandName, currStateName, commandChannelName);
+            }
+            //trigger command
+            if (commandMap.find(commandName) == commandMap.end()){
+                //state name not in mapping, shall not trigger anything
+                Debug::error("EventManager - ExecuteCommandOrState: " + commandName + " not implemented, ignoring...");
+                continue;
+            }
+            auto commandFunc = std::get<0>(commandMap[commandName]);
+            commandFunc(argumentList, testOnly);
+        }
+        else
+        {
+            throw std::invalid_argument( "EventManager - ExecuteCommandOrState: need either command or state key in event definiton" );
+        }
+
+
+        
     }
 }
 
@@ -340,18 +445,29 @@ void EventManager::OnStateChange(const std::string& stateName, double oldValue, 
     {
         if (!mappingJSON.contains(stateName))
         {
-            if (stateName.find("gui:") != std::string::npos) {
+            bool foundMatch = false;
+            /* for (auto it = mappingJSON.begin(); it != mappingJSON.end(); ++it)
+            {
+                std::string keyName = it.key();
+                std::regex regex(keyName);
+                if (std::regex_match(stateName, regex))
+                {
+                    ExecuteRegexCommandOrState(it.key(), it.value(), stateName, oldValue, newValue, false);
+                    foundMatch = true;
+                }
+            } */
+            if (!foundMatch && (stateName.find("gui:") != std::string::npos)) {
                 Debug::info("EventManager - OnStateChange: State name not found, looking for default config...");
-                ExecuteCommand(stateName, oldValue, newValue, true, false);
+                ExecuteCommandOrState(stateName, oldValue, newValue, true, false);
             }
             else
             {
-                Debug::info("EventManager - OnStateChange: State name not in event mapping...");
+                //Debug::info("EventManager - OnStateChange: State name not in event mapping...");
             }    
         }
         else
         {
-            ExecuteCommand(stateName, oldValue, newValue, false, false);
+            ExecuteCommandOrState(stateName, oldValue, newValue, false, false);
         }
         
     }

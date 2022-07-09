@@ -1,7 +1,3 @@
-//
-// Created by Markus on 2019-10-15.
-//
-
 #include <thread>
 
 #include "driver/Socket.h"
@@ -134,11 +130,11 @@ void EcuiSocket::Destroy()
     if (connectionActive)
     {
         shallClose = true;
-        if (asyncListenThread->joinable())
-        {
-            asyncListenThread->join();
-            delete asyncListenThread;
-        }
+
+        if(asyncListenThread->joinable()) asyncListenThread->join();
+		else Debug::warning("asyncListenThread was not joinable.");
+
+        delete asyncListenThread;
         
         delete socket;
         connectionActive = false;

@@ -76,6 +76,10 @@ public:
 	void RequestResetSettings(std::vector<double> &params, bool testOnly) override;
 
     void RequestMove(std::vector<double> &params, bool testOnly);
+
+    //-------------------------------Utility Functions-------------------------------//
+
+    void RequestCurrentState() override;
 };
 
 #endif //LLSERVER_ECUI_HOUBOLT_SERVO_H

@@ -247,16 +247,16 @@ void LLInterface::filterSensorsLoop()
 		std::vector<std::vector<double>> resultMatrix = {{0},{0},{0},{0},{0},{0}};
 		std::string thrustState;
 		double thrustSum = 0;
-		for (int32_t i = 1; i < 7; i++)
+		for (int32_t i = 0; i < 6; i++)
 		{
 			thrustState = "engine_thrust_"+std::to_string(i)+":sensor";
 			if (filteredSensors.find(thrustState) == filteredSensors.end())
 			{
 				break;
 			}
-			sensorMatrix[i-1][0] = std::get<0>(filteredSensors[thrustState]);
-			thrustSum += sensorMatrix[i-1][0];
-			if (i==6)
+			sensorMatrix[i][0] = std::get<0>(filteredSensors[thrustState]);
+			thrustSum += sensorMatrix[i][0];
+			if (i==5)
 			{
 				std::vector<std::vector<double>> transformMatrix = *thrustTransformMatrix;
 				utils::matrixMultiply(transformMatrix, sensorMatrix, resultMatrix);

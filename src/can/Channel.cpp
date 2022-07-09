@@ -115,7 +115,13 @@ void Channel::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &va
             throw std::logic_error("Channel - GetSensorValue: channel type has more than 4 bytes\n\tgood luck if this exception happens");
     }
     value = (double)(intValue);
-    value = ScaleSensor(value, sensorScaling[0], sensorScaling[1]);
+
+    scalingMtx.lock();
+    double slope = sensorScaling[0];
+    double offset = sensorScaling[1];
+    scalingMtx.unlock();
+
+    value = ScaleSensor(value, slope, offset);
 }
 
 void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *command, uint32_t commandLength,
@@ -149,7 +155,7 @@ void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *comman
 
     if (!testOnly)
     {
-        driver->SendCANMessage(canBusChannelID, canID.uint32, msg.uint8, msgLength);
+        driver->SendCANMessage(canBusChannelID, canID.uint32, msg.uint8, msgLength, true);
     }
 }
 
@@ -182,6 +188,7 @@ void Channel::GetVariable(uint8_t cmdID, uint8_t nodeID, uint8_t variableID,
     {
         GetMsg_t getMsg = {0};
         getMsg.variable_id = variableID;
+        Debug::info("GetVariable of channel %s with variable id: %d called", channelName.c_str(), variableID);
         SendStandardCommand(nodeID, cmdID, (uint8_t *) &getMsg, sizeof(getMsg), canBusChannelID, driver, testOnly);
     }
     else
@@ -201,5 +208,32 @@ void Channel::SendNoPayloadCommand(std::vector<double> &params, uint8_t nodeID, 
     else
     {
         throw std::runtime_error("no parameter expected, but " + std::to_string(params.size()) + " were provided");
+    }
+}
+
+//----------------------------------------------------------------------------//
+//-----------------------------Utility Functions------------------------------//
+//----------------------------------------------------------------------------//
+
+std::vector<double> Channel::ResetSensorOffset(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        if (params.size() != 1) //number of required parameters
+        {
+            throw std::runtime_error("1 parameter expected (currValue), but " + std::to_string(params.size()) + " were provided");
+        }
+        double currValue = params[0];
+        scalingMtx.lock();
+        sensorScaling[1] = sensorScaling[1] - currValue;
+        scalingMtx.unlock();
+
+		return sensorScaling;
+
+
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Channel - ResetSensorOffset: " + std::string(e.what()));
     }
 }

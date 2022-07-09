@@ -48,7 +48,7 @@ class CANDriver
                   std::function<void(std::string *)> onErrorCallback);
         virtual ~CANDriver();
 
-        virtual void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength);
+        virtual void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking);
 
         virtual std::map<std::string, bool> GetCANStatusReadable(uint32_t canChannelID);
 };

@@ -101,7 +101,7 @@ void Socket::Send(std::string msg)
             uint8_t header[HEADER_SIZE];
             header[0] = msgLen >> 8;
             header[1] = msgLen & 0x00FF;
-            Debug::info("msb: 0x%02x, lsb: 0x%02x", header[0], header[1]);
+            //Debug::info("msb: 0x%02x, lsb: 0x%02x", header[0], header[1]);
             int sentHeaderBytes = send(socketfd, header, HEADER_SIZE, 0);
             if (sentHeaderBytes < 0 || sentHeaderBytes != HEADER_SIZE)
             {
@@ -147,7 +147,7 @@ std::string Socket::Recv()
         uint16_t msgLen;
         msgLen  = header[1];
         msgLen += header[0] << 8;
-        Debug::info("MSB: %d, LSB: %d", header[0], header[1]);
+        //Debug::info("MSB: %d, LSB: %d", header[0], header[1]);
 
         uint8_t newBuffer[msgLen+1];
         newBuffer[msgLen] = 0; //Strings are stupid
