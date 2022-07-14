@@ -153,6 +153,11 @@ PyMODINIT_FUNC PyInit_EventManager(void)
     return PyModule_Create(&EventManagerModule);
 }
 
+PythonController::PythonController() {
+    PythonController::SetupAndInitialize();
+    return;
+}
+
 PythonController::~PythonController()
 {
     if (running)
@@ -202,7 +207,7 @@ void PythonController::StartPythonScript(std::string scriptPath, std::vector<std
     }
 }
 
-void PythonController::SetupImports()
+void PythonController::SetupAndInitialize()
 {
     if (PyImport_AppendInittab("_state_controller", PyInit_StateController) == -1) {
         throw new std::runtime_error("PythonController - SetupImports: could not extend _state_controller module");
@@ -212,6 +217,10 @@ void PythonController::SetupImports()
     }
 
     Py_Initialize();
+
+    Py_BEGIN_ALLOW_THREADS
+    
+    // TODO: Add Py_END_ALLOW_THREADS when destroying the controller
 
     std::string pyenvStr = std::get<std::string>(Config::getData("pyenv"));
     const char *importPath = pyenvStr.c_str();
@@ -223,16 +232,16 @@ void PythonController::SetupImports()
 
 void PythonController::RunPyScript(std::string scriptPath)
 {
-    PythonController::SetupImports();
-
+    PyGILState_STATE gstate = PyGILState_Ensure();  
     FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
 
     StateController::Instance() -> SetState((std::string) "python_running", 1, utils::getCurrentTimestamp());
     
 
 	PyRun_SimpleFile(fp, scriptPath.c_str());
+    PyGILState_Release(gstate);
 
-    Py_Finalize();
+    // Py_Finalize(); TODO: Call this at the end of lifecycle
 
     running = false;
 }
@@ -261,8 +270,7 @@ void PythonController::RunPyScriptWithArgv(std::string scriptPath, std::vector<s
 
 void PythonController::RunPyScriptWithArgvWChar(std::string scriptPath, int pyArgc, wchar_t **pyArgv)
 {
-    PythonController::SetupImports();
-
+    PyGILState_STATE gstate = PyGILState_Ensure();  
     PySys_SetArgv(pyArgc, pyArgv);
 
     FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
@@ -270,8 +278,9 @@ void PythonController::RunPyScriptWithArgvWChar(std::string scriptPath, int pyAr
     StateController::Instance() -> SetState((std::string) "python_running", 1, utils::getCurrentTimestamp());
 
 	PyRun_SimpleFile(fp, scriptPath.c_str());
+    PyGILState_Release(gstate);
 
-    Py_Finalize();
-
+    // Py_Finalize(); TODO: Call this at the end of lifecycle
+    
     running = false;
 }

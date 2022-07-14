@@ -18,12 +18,13 @@ private:
     std::vector<std::thread *> pyThreads;
     
 public:
+    PythonController();
 
     void StartPythonScript(std::string scriptPath);
     void StartPythonScript(std::string scriptPath, std::vector<std::string> args);
     
     void RunPyScript(std::string scriptPath);
-    void SetupImports();
+    void SetupAndInitialize();
 
     void RunPyScriptWithArgv(std::string scriptPath, std::vector<std::string> args);
 
