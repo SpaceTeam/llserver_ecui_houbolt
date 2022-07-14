@@ -13,9 +13,10 @@ private:
     ~PythonController();
     
 public:
+    PythonController();
 
     int32_t RunPyScript(std::string scriptPath);
-    int32_t SetupImports();
+    int32_t SetupAndInitialize();
 
     int32_t RunPyScriptWithArgv(std::string scriptPath, std::vector<std::string> args);
 

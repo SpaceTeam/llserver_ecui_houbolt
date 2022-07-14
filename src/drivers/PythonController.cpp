@@ -153,12 +153,17 @@ PyMODINIT_FUNC PyInit_EventManager(void)
     return PyModule_Create(&EventManagerModule);
 }
 
+PythonController::PythonController() {
+    PythonController::SetupAndInitialize();
+    return;
+}
+
 PythonController::~PythonController()
 {
     return;
 }
 
-int32_t PythonController::SetupImports()
+int32_t PythonController::SetupAndInitialize()
 {
     if (PyImport_AppendInittab("_state_controller", PyInit_StateController) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table\n");
@@ -170,6 +175,10 @@ int32_t PythonController::SetupImports()
     }
 
     Py_Initialize();
+
+    Py_BEGIN_ALLOW_THREADS
+    
+    // TODO: Add Py_END_ALLOW_THREADS when destroying the controller
 
     std::string pyenvStr = std::get<std::string>(Config::getData("pyenv"));
     const char *importPath = pyenvStr.c_str();
@@ -183,14 +192,12 @@ int32_t PythonController::SetupImports()
 
 int32_t PythonController::RunPyScript(std::string scriptPath)
 {
-    if (PythonController::SetupImports() == -1) {
-        return -1;
-    }
-
+    PyGILState_STATE gstate = PyGILState_Ensure();  
     FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
 	PyRun_SimpleFile(fp, scriptPath.c_str());
+    PyGILState_Release(gstate);
 
-    Py_Finalize();
+    // Py_Finalize(); TODO: Call this at the end of lifecycle
     return 0;
 }
 
@@ -220,15 +227,13 @@ int32_t PythonController::RunPyScriptWithArgv(std::string scriptPath, std::vecto
 
 int32_t PythonController::RunPyScriptWithArgvWChar(std::string scriptPath, int pyArgc, wchar_t **pyArgv)
 {
-    if (PythonController::SetupImports() == -1) {
-        return -1;
-    }
-
+    PyGILState_STATE gstate = PyGILState_Ensure();  
     PySys_SetArgv(pyArgc, pyArgv);
 
     FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
 	PyRun_SimpleFile(fp, scriptPath.c_str());
+    PyGILState_Release(gstate);
 
-    Py_Finalize();
+    // Py_Finalize(); TODO: Call this at the end of lifecycle
     return 0;
 }
