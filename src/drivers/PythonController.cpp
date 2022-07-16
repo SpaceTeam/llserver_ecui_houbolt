@@ -207,7 +207,11 @@ void PythonController::StartPythonScript(std::string scriptPath, std::vector<std
     }
 }
 
+<<<<<<< HEAD
 void PythonController::SetupAndInitialize()
+=======
+int32_t PythonController::SetupAndInitialize()
+>>>>>>> 1afec203523b02f9480af8c9a4741925a53c0c35
 {
     if (PyImport_AppendInittab("_state_controller", PyInit_StateController) == -1) {
         throw new std::runtime_error("PythonController - SetupImports: could not extend _state_controller module");
@@ -242,8 +246,12 @@ void PythonController::RunPyScript(std::string scriptPath)
     PyGILState_Release(gstate);
 
     // Py_Finalize(); TODO: Call this at the end of lifecycle
+<<<<<<< HEAD
 
     running = false;
+=======
+    return 0;
+>>>>>>> 1afec203523b02f9480af8c9a4741925a53c0c35
 }
 
 void PythonController::RunPyScriptWithArgv(std::string scriptPath, std::vector<std::string> args)
