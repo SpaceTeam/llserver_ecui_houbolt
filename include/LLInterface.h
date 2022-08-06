@@ -27,16 +27,12 @@ class LLInterface : public Singleton<LLInterface>
 		bool isInitialized;
 
 		std::thread* transmitStatesThread;
-		uint32_t transmitStatesInterval = 1e4;
-		LoopTimer* transmitStatesLoopTimer;
 		bool transmitStatesRunning;
-		void transmitStatesLoop();
+		void transmitStatesLoop(uint32_t transmitStatesInterval);
 
 		std::thread* filterSensorsThread;
-		uint32_t filterSensorsInterval = 1e4;
-		LoopTimer* filterSensorsLoopTimer;
 		bool filterSensorsRunning;
-		void filterSensorsLoop();
+		void filterSensorsLoop(uint32_t filterSensorsInterval);
 
 		std::map<std::string, double> thrustVariables;
 		std::vector<std::vector<double>> *thrustTransformMatrix;

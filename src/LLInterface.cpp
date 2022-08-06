@@ -1,3 +1,5 @@
+#include "LLInterface.h"
+
 #include <regex>
 #include <math.h>
 #include <utility/utils.h>
@@ -5,13 +7,10 @@
 #include "EcuiSocket.h"
 #include "utility/Config.h"
 
-#include "LLInterface.h"
-
-#define PI 3.14159265
 
 void LLInterface::CalcThrustTransformMatrix()
 {
-    double deg60 = 60*PI/180;
+    double deg60 = 60*M_PI/180;
     double beta = thrustVariables["beta"];
     double gamma = thrustVariables["gamma"];
     double alpha = thrustVariables["alpha"];
@@ -71,10 +70,9 @@ void LLInterface::Init()
         Debug::print("Initializing DataFilter done\n");
 
         Debug::print("Starting filterSensorsThread...");
-        filterSensorsInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("LLSERVER/sensor_state_sampling_rate")));
-        filterSensorsLoopTimer = new LoopTimer(filterSensorsInterval, "filterSensorsThread"); //ToDo create locally in thread before loop, like in Sequencemanager
+        uint32_t filterSensorsInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("LLSERVER/sensor_state_sampling_rate")));
         filterSensorsRunning = true;
-        filterSensorsThread = new std::thread(&LLInterface::filterSensorsLoop, this);
+        filterSensorsThread = new std::thread(&LLInterface::filterSensorsLoop, this, filterSensorsInterval);
         Debug::print("FilterSensorsThread started\n");
 
         isInitialized = true;
@@ -93,7 +91,6 @@ LLInterface::~LLInterface()
         if(filterSensorsThread->joinable()) filterSensorsThread->join();
         else Debug::warning("filterSensorsThread was not joinable.");
         delete filterSensorsThread;
-        delete filterSensorsLoopTimer;
 
         Debug::print("Deleting Data Filter...");
         delete dataFilter;
@@ -175,10 +172,9 @@ void LLInterface::StartStateTransmission()
     if (!transmitStatesRunning)
     {
         Debug::print("Starting transmitStatesThread...");
-        transmitStatesInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("WEBSERVER/state_transmission_rate")));
-        transmitStatesLoopTimer = new LoopTimer(transmitStatesInterval, "transmitStatesThread"); //ToDo create locally in thread before loop, like in Sequencemanager
+        uint32_t transmitStatesInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("WEBSERVER/state_transmission_rate")));
         transmitStatesRunning = true;
-		transmitStatesThread = new std::thread(&LLInterface::transmitStatesLoop, this);
+		transmitStatesThread = new std::thread(&LLInterface::transmitStatesLoop, this, transmitStatesInterval);
 		Debug::print("TransmitStatesThread started\n");
     }
 }
@@ -191,27 +187,28 @@ void LLInterface::StopStateTransmission()
         if(transmitStatesThread->joinable()) transmitStatesThread->join();
         else Debug::warning("transmitStatesThread was not joinable.");
         delete transmitStatesThread;
-        delete transmitStatesLoopTimer;
     }
 }
 
-void LLInterface::transmitStatesLoop()
+void LLInterface::transmitStatesLoop(uint32_t transmitStatesInterval)
 {
 	struct sched_param param;
 	param.sched_priority = 40;
 	sched_setscheduler(0, SCHED_FIFO, &param);
 
-	transmitStatesLoopTimer->init();
+	LoopTimer transmitStatesLoopTimer(transmitStatesInterval, "transmitStatesThread");
+
+	transmitStatesLoopTimer.init();
 
 	while(transmitStatesRunning)
 	{
-		transmitStatesLoopTimer->wait();
+		transmitStatesLoopTimer.wait();
 
 		std::map<std::string, std::tuple<double, uint64_t>> states = stateController->GetDirtyStates();
 
 		if (states.size() > 0)
 		{
-			uint64_t time_us = transmitStatesLoopTimer->getTimePoint_us();
+			uint64_t time_us = transmitStatesLoopTimer.getTimePoint_us();
 			TransmitStates(time_us, states);
 		}
 	}
@@ -229,17 +226,19 @@ std::map<std::string, command_t> LLInterface::GetCommands()
     return eventManager->GetCommands();
 }
 
-void LLInterface::filterSensorsLoop()
+void LLInterface::filterSensorsLoop(uint32_t filterSensorsInterval)
 {
 	struct sched_param param;
 	param.sched_priority = 40;
 	sched_setscheduler(0, SCHED_FIFO, &param);
 
-	filterSensorsLoopTimer->init();
+	LoopTimer filterSensorsLoopTimer(filterSensorsInterval, "filterSensorsThread");
+
+	filterSensorsLoopTimer.init();
 
 	while(filterSensorsRunning)
 	{
-		filterSensorsLoopTimer->wait();
+		filterSensorsLoopTimer.wait();
 
 		std::map<std::string, std::tuple<double, uint64_t>> rawSensors;
 		rawSensors = canManager->GetLatestSensorData();
