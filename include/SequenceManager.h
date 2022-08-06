@@ -1,16 +1,10 @@
-//
-// Created by Markus on 2019-09-27.
-//
-
-#ifndef TXV_ECUI_LLSERVER_SEQUENCEMANAGER_H
-#define TXV_ECUI_LLSERVER_SEQUENCEMANAGER_H
+#pragma once
 
 #include "common.h"
 #include <atomic>
 
 #include "utility/json.hpp"
 #include "utility/Logging.h"
-#include "utility/Timer.h"
 
 #include "LLInterface.h"
 #include "EventManager.h"
@@ -33,71 +27,70 @@ class SequenceManager : public Singleton<SequenceManager>
 {
     friend class Singleton;
 
-private:
-    bool isRunning = false;
-    std::atomic_bool isAutoAbort = true;
-    bool isAbort = false;
-    bool isAbortRunning = false;
+	public:
+		~SequenceManager();
 
-    std::mutex syncMtx;
-    Timer* timer;
+		void Init();
 
-    nlohmann::json jsonSequence = nlohmann::json::object();
-    nlohmann::json jsonAbortSequence = nlohmann::json::object();
+		bool GetAutoAbort();
+		void SetAutoAbort(bool active);
 
-    std::string comments = "";
-    std::string currentDirPath = "";
-    std::string logFileName = "";
-    std::string lastDir = "";
+		void StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments);
+		void AbortSequence(std::string abortMsg="abort");
 
-    std::atomic_bool isInitialized = false;
+		void WritePostSeqComment(std::string msg);
 
-    //config variables
-    int32_t timerSyncInterval = 0;
-    //----
+		bool IsSequenceRunning();
 
-    std::map<std::string, Interpolation> interpolationMap;
-    std::map<int64_t, std::map<std::string, double[2]>> sensorsNominalRangeTimeMap;
-    std::map<std::string, std::map<int64_t, double[2]>> sensorsNominalRangeMap;
-    std::map<std::string, std::map<int64_t, std::vector<double>>> deviceMap;
-    int64_t sequenceStartTime = INT64_MIN;
+	private:
+		void SetupLogging();
 
-    LLInterface *llInterface = nullptr;
-    EventManager *eventManager = nullptr;
+		void LoadInterpolationMap();
+		bool LoadSequence(nlohmann::json jsonSeq);
 
-    void SetupLogging();
+		void CheckSensors(int64_t microTime);
 
-    void LoadInterpolationMap();
-    bool LoadSequence(nlohmann::json jsonSeq);
+		double GetTimestamp(nlohmann::json obj);
 
-    void CheckSensors(int64_t microTime);
+		void abortSequence();
 
-    double GetTimestamp(nlohmann::json obj);
-    void Tick(int64_t microTime);
+		void plotMaps(uint8_t option);
 
-    void StopAbortSequence();
-    void StartAbortSequence();
+		bool sequenceRunning = false;
+		bool sequenceToStop = false;
 
+		std::atomic_bool autoAbortEnabled = true;
 
-    void plotMaps(uint8_t option);
+		bool isAbortRunning = false;
 
-    ~SequenceManager();
+		std::mutex syncMtx;
 
-public:
+		int64_t startTime_us;
+		int64_t endTime_us;
 
-    void Init();
+		std::thread* sequenceThread;
+		void sequenceLoop(int64_t interval_us);
 
-    bool GetAutoAbort();
-    void SetAutoAbort(bool active);
+		nlohmann::json jsonSequence = nlohmann::json::object();
+		nlohmann::json jsonAbortSequence = nlohmann::json::object();
 
-    void AbortSequence(std::string abortMsg="abort");
-    void StopSequence();
-    void StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments);
-    void WritePostSeqComment(std::string msg);
+		std::string comments = "";
+		std::string currentDirPath = "";
+		std::string logFileName = "";
+		std::string lastDir = "";
 
-    bool IsSequenceRunning();
+		std::atomic_bool isInitialized = false;
 
+		//config variables
+		int32_t timerSyncInterval = 0;
+		//----
+
+		std::map<std::string, Interpolation> interpolationMap;
+		std::map<int64_t, std::map<std::string, double[2]>> sensorsNominalRangeTimeMap;
+		std::map<std::string, std::map<int64_t, double[2]>> sensorsNominalRangeMap;
+		std::map<std::string, std::map<int64_t, std::vector<double>>> deviceMap;
+		int64_t sequenceStartTime = INT64_MIN;
+
+		LLInterface *llInterface = nullptr;
+		EventManager *eventManager = nullptr;
 };
-
-
-#endif //TXV_ECUI_LLSERVER_SEQUENCEMANAGER_H

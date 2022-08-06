@@ -72,7 +72,7 @@ void LLInterface::Init()
 
         Debug::print("Starting filterSensorsThread...");
         filterSensorsInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("LLSERVER/sensor_state_sampling_rate")));
-        filterSensorsLoopTimer = new LoopTimer(filterSensorsInterval, "filterSensorsThread");
+        filterSensorsLoopTimer = new LoopTimer(filterSensorsInterval, "filterSensorsThread"); //ToDo create locally in thread before loop, like in Sequencemanager
         filterSensorsRunning = true;
         filterSensorsThread = new std::thread(&LLInterface::filterSensorsLoop, this);
         Debug::print("FilterSensorsThread started\n");
@@ -176,7 +176,7 @@ void LLInterface::StartStateTransmission()
     {
         Debug::print("Starting transmitStatesThread...");
         transmitStatesInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("WEBSERVER/state_transmission_rate")));
-        transmitStatesLoopTimer = new LoopTimer(transmitStatesInterval, "transmitStatesThread");
+        transmitStatesLoopTimer = new LoopTimer(transmitStatesInterval, "transmitStatesThread"); //ToDo create locally in thread before loop, like in Sequencemanager
         transmitStatesRunning = true;
 		transmitStatesThread = new std::thread(&LLInterface::transmitStatesLoop, this);
 		Debug::print("TransmitStatesThread started\n");
@@ -200,6 +200,8 @@ void LLInterface::transmitStatesLoop()
 	struct sched_param param;
 	param.sched_priority = 40;
 	sched_setscheduler(0, SCHED_FIFO, &param);
+
+	transmitStatesLoopTimer->init();
 
 	while(transmitStatesRunning)
 	{
@@ -232,6 +234,9 @@ void LLInterface::filterSensorsLoop()
 	struct sched_param param;
 	param.sched_priority = 40;
 	sched_setscheduler(0, SCHED_FIFO, &param);
+
+	filterSensorsLoopTimer->init();
+
 	while(filterSensorsRunning)
 	{
 		filterSensorsLoopTimer->wait();
