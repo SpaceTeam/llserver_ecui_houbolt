@@ -181,12 +181,17 @@ void signalHandler(int signum) {
 
 
 #include <unistd.h>
+#include <iostream>
 #include <fstream>
 #include <string>
+#include <csignal>
+#include <cerrno>
 
 struct options {
 	std::string config_path = "config";
 };
+
+volatile sig_atomic_t finished = false;
 
 void
 usage(
@@ -194,7 +199,7 @@ usage(
 ) {
 	extern char *__progname;
 
-	fprintf(stderr, "usage: %s [-c configfile]\n", __progname);
+	std::cerr << "usage: " << __progname << " [-c configfile]" << std::endl;
 
 	exit(EXIT_FAILURE);
 }
@@ -206,7 +211,6 @@ get_options(
 	struct options *options
 ) {
 	extern char *optarg;
-	extern int errno;
 
 	int option;
 	while ((option = getopt(argc, argv, "c:")) != -1) {
@@ -218,6 +222,47 @@ get_options(
 		default:
 			usage();
 		};
+	}
+
+	return;
+}
+
+void
+signal_handler(
+	int signal
+) {
+        extern volatile sig_atomic_t finished;
+
+        switch (signal) {
+        case SIGINT:
+        case SIGTERM:
+        case SIGABRT:
+                finished = true;
+                break;
+
+        default:
+                break;
+        }
+
+	return;
+}
+
+void
+setup_signal_handling(
+	void
+) {
+	extern int errno;
+
+	if (signal(SIGINT, signal_handler) == SIG_ERR) {
+		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGINT");
+	}
+
+	if (signal(SIGTERM, signal_handler) == SIG_ERR) {
+		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGTERM");
+	}
+
+	if (signal(SIGABRT, signal_handler) == SIG_ERR) {
+		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGABRT");
 	}
 
 	return;
@@ -277,16 +322,13 @@ main(
 		usage();
 	}
 
+	setup_signal_handling();
+
 	set_scheduling_priority(60);
 
 	set_latency_target();
 
 /*
-	// IMPROVE: this should be refactored to own function
-	signal(SIGINT, signalHandler);
-	signal(SIGTERM, signalHandler);
-	signal(SIGABRT, signalHandler);
-
 	// SMELL: don't test the program with itself use a test program
 #ifdef TEST_LLSERVER
 	testThread = new std::thread(testFnc);
