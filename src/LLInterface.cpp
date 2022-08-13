@@ -55,6 +55,7 @@ void LLInterface::Init()
         // stateController->WaitUntilStatesInitialized(); //TODO: uncomment when can interface works
         Debug::print("All States initialized\n");
 
+        // IMPROVE: This can be refactored away into a function
         Debug::print("Initializing Thrust Matrix...");
         thrustVariables["alpha"] = std::get<double>(Config::getData("THRUST/alpha"));
         thrustVariables["beta"] = std::get<double>(Config::getData("THRUST/beta"));
@@ -71,6 +72,7 @@ void LLInterface::Init()
 
         Debug::print("Starting filterSensorsThread...");
         uint32_t filterSensorsInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("LLSERVER/sensor_state_sampling_rate")));
+        // IMPROVE: don't singleton and write into the constructor
         filterSensorsRunning = true;
         filterSensorsThread = new std::thread(&LLInterface::filterSensorsLoop, this, filterSensorsInterval);
         Debug::print("FilterSensorsThread started\n");
@@ -233,7 +235,7 @@ void LLInterface::filterSensorsLoop(uint32_t filterSensorsInterval)
 	sched_setscheduler(0, SCHED_FIFO, &param);
 
 	LoopTimer filterSensorsLoopTimer(filterSensorsInterval, "filterSensorsThread");
-
+    // IMPROVE: move init in constructor
 	filterSensorsLoopTimer.init();
 
 	while(filterSensorsRunning)
@@ -342,7 +344,7 @@ nlohmann::json LLInterface::GetAllStates()
 nlohmann::json LLInterface::GetAllStateLabels()
 {
     std::map<std::string, std::tuple<double, uint64_t, bool>> states = stateController->GetAllStates();
-    
+
     nlohmann::json statesJson = nlohmann::json::array();
 
     nlohmann::json *guiMappingJson = guiMapping->GetJSONMapping();
@@ -359,7 +361,7 @@ nlohmann::json LLInterface::GetAllStateLabels()
                 break;
             }
         }
-        
+
         statesJson.push_back(stateJson);
     }
 
@@ -379,12 +381,12 @@ nlohmann::json LLInterface::GetStates(nlohmann::json &stateNames)
         {
             throw std::runtime_error("LLInterface - GetStates: stateName must be string");
         }
-           
+
         states[stateName] = stateController->GetState(stateName);
     }
     nlohmann::json statesJson = StatesToJson(states);
     return statesJson;
-    
+
 }
 
 void LLInterface::SetState(std::string stateName, double value, uint64_t timestamp)

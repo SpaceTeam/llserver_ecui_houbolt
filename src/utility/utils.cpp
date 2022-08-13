@@ -17,6 +17,7 @@ namespace utils
         return (int64_t) (val * 1000000);
     }
 
+    // IMPROVE: refactor to read json (is only used to load a json from a file)
     std::string loadFile(std::string filePath)
     {
         std::ifstream ifs(filePath);
@@ -33,6 +34,7 @@ namespace utils
         ostr.close();
     }
 
+    // SMELL: this function is a simple find. remove!
     bool keyExists(const nlohmann::json& j, const std::string& key)
     {
         return j.find(key) != j.end();

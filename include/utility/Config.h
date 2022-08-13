@@ -8,11 +8,12 @@
 #include <iomanip>
 #include <variant>
 
-
+// SMELL never use macros as constants
 #define CONFIG_FILE_NAME "config.json"
 #define MAPPING_FILE_NAME "mapping.json"
 
 
+// IMPROVE: this class can be deleted as a whole. Is not needed (functionality is already in nlohmann lib)
 class Config
 {
 	private:

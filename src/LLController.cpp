@@ -38,6 +38,7 @@ void LLController::Init(std::string &configPath)
         //LLInterface needs to be initialized first to ensure proper initialization before receiving
         //aynchronous commands from the web server
         PrintLogo();
+        // IMPROVE: read config json file with nlohmann functionalities and delete Config class
         std::string version = std::get<std::string>(Config::getData("version"));
 
         Debug::printNoTime("Version: " + version);
