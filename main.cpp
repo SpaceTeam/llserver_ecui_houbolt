@@ -1,44 +1,45 @@
-#include <string>
-#include <iomanip>	  // std::setprecision
-#include <sched.h>
-#include <csignal>
-#include <fstream>
-
-#include <sys/stat.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#include "common.h"
-
-#include "LLController.h"
-#include "utility/Config.h"
-
-// SMELL: don't use macros for constants. (this can go wrong in bigger projects)
-#define CONFIG_PATH_FILE "configPath.txt"
-// IMPROVE: use bool for running = true, running = false. more readable
-sig_atomic_t running = 1;
-// SMELL: unused global variable (maybe compile with -Wall -pedantic)
-sig_atomic_t signum = 0;
-
-//#define TEST_LLSERVER
-
-//#ifdef TEST_LLSERVER
-#include <thread>
-#include "can/CANManager.h"
-#include "can_houbolt/can_cmds.h"
-#include "can_houbolt/channels/generic_channel_def.h"
-#include <utility>
-#include <string>
-#include "utility/utils.h"
-// SMELL: Either use a constant or no global variable at all! no macros (if you can afford not to use a macro it is the right decision)
-#define CAN_TEST_NODE_ID 12
+//#include <string>
+//#include <iomanip>	  // std::setprecision
+//#include <sched.h>
+//#include <csignal>
+//#include <fstream>
+//
+//#include <sys/stat.h>
+//
+//#include <sys/types.h>
+//#include <sys/stat.h>
+//#include <fcntl.h>
+//
+//#include "common.h"
+//
+//#include "LLController.h"
+//#include "utility/Config.h"
+//
+//// SMELL: don't use macros for constants. (this can go wrong in bigger projects)
+//#define CONFIG_PATH_FILE "configPath.txt"
+//// IMPROVE: use bool for running = true, running = false. more readable
+//sig_atomic_t running = 1;
+//// SMELL: unused global variable (maybe compile with -Wall -pedantic)
+//sig_atomic_t signum = 0;
+//
+////#define TEST_LLSERVER
+//
+////#ifdef TEST_LLSERVER
+//#include <thread>
+//#include "can/CANManager.h"
+//#include "can_houbolt/can_cmds.h"
+//#include "can_houbolt/channels/generic_channel_def.h"
+//#include <utility>
+//#include <string>
+//#include "utility/utils.h"
+//// SMELL: Either use a constant or no global variable at all! no macros (if you can afford not to use a macro it is the right decision)
+//#define CAN_TEST_NODE_ID 12
 
 //#define TEST_NODE_INIT
 //#define TEST_SPEAKER
 //#define TEST_DATA
 
+/*
 std::thread *testThread = nullptr;
 // SMELL: extract into separate program
 // IMPROVE: use descriptive test function names.
@@ -170,6 +171,7 @@ void signalHandler(int signum) {
 
 	exit(signum);
 }
+*/
 
 
 
@@ -178,16 +180,12 @@ void signalHandler(int signum) {
 
 
 
-
-
-
-
-
-
-
+#include <unistd.h>
+#include <fstream>
+#include <string>
 
 struct options {
-	char *config_path = "config";
+	std::string config_path = "config";
 };
 
 void
@@ -214,7 +212,7 @@ get_options(
 	while ((option = getopt(argc, argv, "c:")) != -1) {
 		switch (option) {
 		case 'c':
-			options->option_path = optarg;
+			options->config_path = optarg;
 			break;
 
 		default:
@@ -233,7 +231,7 @@ set_scheduling_priority(
 	struct sched_param scheduling_parameters{};
 	scheduling_parameters.sched_priority = 60;
 
-	sched_setscheduler(0, SCHED_FIFO, &sp);
+	sched_setscheduler(0, SCHED_FIFO, &scheduling_parameters);
 
 	return;
 }
@@ -249,44 +247,25 @@ set_scheduling_priority(
  * 
  * Documentation/power/pm_qos_interface.txt
  */
-void
+std::ofstream
 set_latency_target(
 	void
 ) {
-	struct stat file_status{};
-
-	int error;
-
-	latency_target_path = "/dev/cpu_dma_latency";
-
-	error = stat(latency_target_path, &file_status);
-
-	if (error == 0) {
-		int latency_target_fd = open(latency_target_path, O_RDWR);
-		if (latency_target_fd == -1) {
-			return;
-		}
-		
-		int ret;
+	std::ofstream latency_target_file("/dev/cpu_dma_latency", std::ofstream::out);
+	if (latency_target_file.is_open()) {
 		int32_t latency_target_value = 0;
 
-		size_t bytes_written = write(latency_target_fd, &latency_target_value, sizeof(latency_target_value));
-		if (bytes_written == -1) {
-			err(EXIT_FAILURE, "could not set cpu_dma_latency to %d: %s\n", latency_target_value, latency_target_path);
-			close(latency_target_fd);
-
-			return;
-		}
+		latency_target_file << latency_target_value;
 	}
 
-	return;
+	// NOTE(Lukas Karafiat): file handle should be left open as power management would be reset
+	return latency_target_file;
 }
-
 
 int
 main(
 	int argc,
-	char const *argv[]
+	char *argv[]
 ) {
 	struct options options{};
 
@@ -302,6 +281,7 @@ main(
 
 	set_latency_target();
 
+/*
 	// IMPROVE: this should be refactored to own function
 	signal(SIGINT, signalHandler);
 	signal(SIGTERM, signalHandler);
@@ -320,5 +300,6 @@ main(
 	while (running) {
 		sleep(1);
 	}
+*/
 }
 
