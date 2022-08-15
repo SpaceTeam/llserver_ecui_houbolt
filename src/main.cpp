@@ -80,7 +80,7 @@ void
 setup_signal_handling(
 	void
 ) {
-	extern int errno;
+	//extern int errno;
 
 	if (signal(SIGINT, signal_handler) == SIG_ERR) {
 		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGINT");

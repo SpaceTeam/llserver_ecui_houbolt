@@ -1,80 +1,58 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 project(llserver_ecui_houbolt)
-
-find_package(Threads REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED)
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -pedantic")
 
-include_directories(include include/can_houbolt)
-include_directories(/usr/include/python3.8)
+include_directories(include)
 
-file(GLOB_RECURSE sources main.cpp src/*.cpp src/*.c include/*.h)
+file(GLOB_RECURSE SRC_FILES src/*.cpp)
+file(GLOB_RECURSE INCL_FILES include/*.hpp include/*.h)
+#file(GLOB LIB_FILES lib/[a-zA-Z]*)
+file(GLOB_RECURSE TEST_FILES test/*)
 
-add_executable(${PROJECT_NAME} ${sources})
+#add_subdirectory(${LIB_FILES})
 
-option(TEST "test with simple CAN Driver simulation" OFF)
-if(TEST)
-   add_compile_definitions(TEST_LLSERVER)
-endif()
+find_package(Threads REQUIRED)
 
-if(NO_CANLIB)
-  MESSAGE(STATUS "Kvaser CanLib is not used")
-  add_compile_definitions(NO_CANLIB)
-endif()
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${INCL_FILES})
 
+add_library(${PROJECT_NAME}_lib ${SRC_FILES} ${INCL_FILES})
+add_executable(test_${PROJECT_NAME} ${TEST_FILES})
+
+# Google Test stuff
+include(FetchContent)
+FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG release-1.12.1
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+add_test(Name test_${PROJECT_NAME} COMMAND test_${PROJECT_NAME})
+
+include(GoogleTest)
+gtest_discover_tests(test_${PROJECT_NAME})
+
+# Libary linking
 
 if(UNIX AND NOT APPLE)
-   set(LINUX TRUE)
-endif()
-
-if(LINUX)
-   if(NO_CANLIB)
-      target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic -lpython3.8)
-   else()
-      target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic -lcanlib -lpython3.8)
-   endif()
+    if(NO_CANLIB)
+        #target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic -lpython3.8)
+        target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic)
+    else()
+        #target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic -lcanlib -lpython3.8)
+        target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic)
+    endif()
 else()
    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 endif()
 
-
-##----WITH BOOST
-# cmake_minimum_required(VERSION 3.13)
-# project(llserver_ecui_houbolt)
-
-# find_package(Threads REQUIRED)
-
-# set(CMAKE_CXX_STANDARD 17)
-# set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall")
-
-# #if(NOT TARGET spdlog)
-# #    # Stand-alone build
-# #    find_package(spdlog REQUIRED)
-# #endif()
-
-# include_directories(include)
-
-# file(GLOB sources ./*.cpp src/*.cpp include/*.h)
-
-# set(Boost_USE_STATIC_LIBS OFF)
-# set(Boost_USE_MULTITHREADED ON)
-# set(Boost_USE_STATIC_RUNTIME OFF)
-# find_package(Boost 1.45.0 COMPONENTS system)
-
-# if(Boost_FOUND)
-#     add_executable(${PROJECT_NAME} ${sources})
-#     #spdlog_enable_warnings(${PROJECT_NAME})
+target_link_libraries(test_${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_lib GTest::gtest_main -latomic -lpthread -lstdc++fs)
 
 
-#     if(UNIX AND NOT APPLE)
-#         set(LINUX TRUE)
-#     endif()
-
-#     if(LINUX)
-#         target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs Boost::system)#spdlog::spdlog)
-#     else()
-#         target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads Boost::system)#spdlog::spdlog)
-#     endif()
-# endif()

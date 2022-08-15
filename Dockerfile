@@ -1,17 +1,25 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 as base
 
-# Replace shell with bash so we can source files
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+WORKDIR /app
 
-# Set debconf to run non-interactively
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+LABEL maintainer=christofer.held@spaceteam.at
 
-# Install base dependencies
-RUN apt-get update && apt-get install -y -q --no-install-recommends \
-        git \
-        cmake \
-        build-essential 
+ENV TZ="Europe/Vienna"
 
-WORKDIR /llserver_ecui_houbolt
+RUN apt-get update -y && apt-get upgrade -y && apt-get install tzdata -y
 
-CMD ["bash"]
+RUN apt-get install git make cmake g++23 build-essential -y
+
+RUN git clone -q https://github.com/google/googletest.git /googletest \
+  && mkdir -p /googletest/build \
+  && cd /googletest/build \
+  && cmake .. && make && make install \
+  && cd / && rm -rf /googletest
+
+COPY . ./
+
+RUN cmake .; make; make install
+
+RUN ./test_llserver_ecui_houbolt
+
+CMD ["./llserver_ecui_houbolt"]
