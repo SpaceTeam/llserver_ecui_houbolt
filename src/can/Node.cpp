@@ -10,6 +10,7 @@
 #include "can/ADC16.h"
 #include "can/ADC16Single.h"
 #include "can/ADC24.h"
+#include "can/DATA32.h"
 #include "can/Servo.h"
 #include "can/PneumaticValve.h"
 #include "can/Control.h"
@@ -150,6 +151,9 @@ void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<st
     			    break;
                 case CHANNEL_TYPE_ADC24:
                     ch = new ADC24(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
+                    break;
+                case CHANNEL_TYPE_DATA32:
+                    ch = new DATA32(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                     break;
                 case CHANNEL_TYPE_DIGITAL_OUT:
                     ch = new DigitalOut(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
