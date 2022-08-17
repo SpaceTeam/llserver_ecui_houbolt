@@ -3,8 +3,8 @@
 #include <iostream>
 
 Dispatcher::Dispatcher(
-	Queue& request_queue,
-	Queue& response_queue
+	std::shared_ptr<Queue>& request_queue,
+	std::shared_ptr<Queue>& response_queue
 ) {
 	return;
 }

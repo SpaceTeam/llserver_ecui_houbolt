@@ -14,6 +14,7 @@ private:
 	char *payload_buffer;
 
 public:
+	Socket() = delete;
 	Socket(std::string, std::string);
 	~Socket(void);
 

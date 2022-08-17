@@ -3,11 +3,14 @@
 
 #include "Queue.h"
 
+#include <memory>
+
 class Dispatcher {
 private:
 
 public:
-	Dispatcher(Queue&, Queue&);
+	Dispatcher(std::shared_ptr<Queue>&, std::shared_ptr<Queue>&);
+
 	void run(void);
 };
 

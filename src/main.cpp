@@ -7,6 +7,7 @@
 
 #include <thread>
 #include <system_error>
+#include <memory>
 
 #include "server/Controller.h"
 #include "server/Dispatcher.h"
@@ -161,7 +162,7 @@ main(
 	set_scheduling_priority(60);
 	set_latency_target();
 
-	Queue response_queue, request_queue;
+	std::shared_ptr<Queue> response_queue, request_queue;
 
 	// NOTE(Lukas Karafiat): In a normal web server the dispatcher would
 	//     be integrated into the controller, but if we want to hold more

@@ -14,7 +14,7 @@ private:
 	std::mutex write_mutex;
 	std::mutex read_mutex;
 
-	std::counting_semaphore<32> unread_elements(0);
+	std::counting_semaphore<32> unread_elements{0};
 
 public:
 	Queue(void) = default;
