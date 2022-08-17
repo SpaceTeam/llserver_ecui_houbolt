@@ -1,41 +1,28 @@
 #include "server/Queue.h"
 
-Queue::Queue(
-	void
-) {
-	return;
-}
-
-
-Queue::~Queue(
-	void
-) {
-	return;
-}
-
-
 void
 Queue::push(
 	int value
 ) {
-	// 1. acquire lock(1)
-	// 2. push
-	// 3. increase semaphore
-	// 4. release lock(1)
+	std::lock_guard<std::mutex> lock(write_mutex);
+
+	buffer.push(value);
+	unread_elements.release();	
 
 	return;
 }
 
 
 int
-pop(
+Queue::pop(
 	void
 ) {
-	// 1. acquire lock(2)
-	// 2. pop
-	// 3. decrease semaphore
-	// 4. relesase lock(2)
+	std::lock_guard<std::mutex> lock(read_mutex);
 
-	return 0;
+	unread_elements.acquire();
+	int value = buffer.front();
+	buffer.pop();
+
+	return value;
 }
 
