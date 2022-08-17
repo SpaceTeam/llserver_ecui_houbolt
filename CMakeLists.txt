@@ -1,3 +1,4 @@
+# WARNING! This Cmake will only run on linux (use Dockerfile if you use windows or mac)
 cmake_minimum_required(VERSION 3.16)
 project(llserver_ecui_houbolt)
 
@@ -13,6 +14,11 @@ file(GLOB_RECURSE INCL_FILES include/*.hpp include/*.h)
 file(GLOB_RECURSE TEST_FILES test/*)
 
 #add_subdirectory(${LIB_FILES})
+
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
+    message(FATAL_ERROR "Require at least gcc-10.0")
+endif()
+
 
 find_package(Threads REQUIRED)
 
