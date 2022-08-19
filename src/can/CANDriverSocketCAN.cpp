@@ -138,7 +138,7 @@ void CANDriverSocketCAN::receiveLoop() // TODO: read errors, call onErrorCallbac
 		}
 		catch(const std::exception& e)
 		{
-			Debug::error("%s", e.what());
+			Debug::error("CANDriverSocketCAN::receiveLoop error: %s", e.what());
 		}
 		
 	}

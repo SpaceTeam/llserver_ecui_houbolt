@@ -269,8 +269,8 @@ void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonA
             EcuiSocket::SendJson("timer-start");
 
             sequenceRunning = true;
-            sequenceThread = new std::thread(&SequenceManager::sequenceLoop, this, interval_us);
-            sequenceThread->detach();
+            std::thread sequenceThread = std::thread(&SequenceManager::sequenceLoop, this, interval_us);
+            sequenceThread.detach();
 
             Debug::print("Sequence Started");
         }
@@ -469,7 +469,7 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 					}
 					catch(const std::exception& e)
 					{
-
+						Debug::error("SequenceManager::sequenceLoop ExecuteCommand error: %s", e.what());
 					}
 				}
 			}

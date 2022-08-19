@@ -68,7 +68,6 @@ class SequenceManager : public Singleton<SequenceManager>
 		int64_t startTime_us;
 		int64_t endTime_us;
 
-		std::thread* sequenceThread;
 		void sequenceLoop(int64_t interval_us);
 
 		nlohmann::json jsonSequence = nlohmann::json::object();

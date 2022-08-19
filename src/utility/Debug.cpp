@@ -94,7 +94,7 @@ int32_t Debug::print(std::string fmt, ...)
     va_end(args);
 
     if(initialized) {
-        logger->log("Class:Debug", msg, time_ms, DEBUG);
+//        logger->log("Class:Debug", msg, time_ms, DEBUG); //FIXME causes crash sometimes
     }
 
     printed = fprintf(stderr, "%s %s\n", time_str.c_str(), msg);
@@ -119,7 +119,7 @@ int32_t Debug::info(std::string fmt, ...)
         va_end(args);
 
         if(initialized) {
-            logger->log("Class:Debug", msg, time_ms, INFO);
+//            logger->log("Class:Debug", msg, time_ms, INFO); //FIXME causes crash sometimes
         }
 
         printed = fprintf(stderr, "%sinfo: %s\n", time_str.c_str(), msg);
@@ -147,7 +147,7 @@ int32_t Debug::warning(std::string fmt, ...)
         va_end(args);
 
         if(initialized) {
-            logger->log("Class:Debug", msg, time_ms, WARNING);
+//            logger->log("Class:Debug", msg, time_ms, WARNING); //FIXME causes crash sometimes
         }
 
         printed = fprintf(stderr, "%swarning: %s\n", time_str.c_str(), msg);
@@ -222,7 +222,7 @@ void Debug::log(std::string msg)
     logStream << msg;
     if(initialized) {
         //TODO: MP this makes no sense here, since it is only used to write to files in csv format
-        // logger->log("Class:Debug", msg, getTime(), DEBUG);
+        // logger->log("Class:Debug", msg, getTime(), DEBUG); //FIXME causes crash sometimes?
     }
 
 }
@@ -279,7 +279,7 @@ int32_t Debug::error(std::string fmt, ...)
     va_end(args);
 
     if(initialized) {
-        logger->log("Class:Debug", msg, time_ms, ERROR);
+//        logger->log("Class:Debug", msg, time_ms, ERROR); //FIXME causes crash sometimes
     }
 
     printed = fprintf(stderr, "%serror: %s\n", time_str.c_str(), msg);
