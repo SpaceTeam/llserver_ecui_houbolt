@@ -5,6 +5,7 @@
 #include <iostream>
 #include <thread>
 #include <string>
+#include <optional>
 
 Controller::Controller(
 	std::shared_ptr<RingBuffer<std::string>>& request_queue,
@@ -35,8 +36,21 @@ Controller::read_loop(
 ) {
 	extern volatile sig_atomic_t finished;
 
+	std::optional<std::string> tmp = std::nullopt;
+
 	while(!finished) {
-		request_queue->push(socket.receive());
+		try {
+			if (tmp == std::nullopt) {
+				tmp = std::make_optional<std::string>(socket.receive());
+			}
+
+			request_queue->push(tmp.value());
+			tmp.reset();
+
+		} catch (...) {
+			// NOTE(Lukas Karafiat): due to previous deadlock behaviour of pop() and send()
+			//     a timeout will be thrown and finished flag has to be checked again
+		}
 	}
 
 	return;
@@ -49,8 +63,21 @@ Controller::write_loop(
 ) {
 	extern volatile sig_atomic_t finished;
 
+	std::optional<std::string> tmp = std::nullopt;
+
 	while(!finished) {
-		socket.send(request_queue->pop());
+		try {
+			if (tmp == std::nullopt) {
+				tmp = std::make_optional<std::string>(request_queue->pop());
+			}
+
+			socket.send(tmp.value());
+			tmp.reset();
+
+		} catch (...) {
+			// NOTE(Lukas Karafiat): due to previous deadlock behaviour of pop() and send()
+			//     a timeout will be thrown and finished flag has to be checked again
+		}
 	}
 
 	return;

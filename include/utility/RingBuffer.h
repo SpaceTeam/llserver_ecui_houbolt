@@ -13,9 +13,9 @@ template<typename ElementType>
 class RingBuffer {
 
 public:
-    // Variables for setup
-    const static int RING_BUFFER_SIZE = 128;
-    const std::chrono::milliseconds TIMEOUT{1000};
+	// Variables for setup
+	const static int RING_BUFFER_SIZE = 128;
+	const std::chrono::milliseconds TIMEOUT{1000};
 
  private:
 	ElementType buffer[RING_BUFFER_SIZE];
@@ -54,9 +54,9 @@ RingBuffer<ElementType>::push(
 	ElementType value
 ) {
 	// if buffer full it blocks for one second
-	if(!unwritten_elements.try_acquire_for(TIMEOUT)){
-      throw std::exception();
-    };
+	if (!unwritten_elements.try_acquire_for(TIMEOUT)) {
+		throw std::exception();
+	};
 
 	// critical write section till end of function
 	std::lock_guard<std::mutex> lock{write_mutex};
@@ -81,9 +81,9 @@ RingBuffer<ElementType>::pop(
 	void
 ) {
 	// if buffer empty it blocks for one second
-	if(!unread_elements.try_acquire_for(TIMEOUT)){
-      throw std::exception();
-    };
+	if (!unread_elements.try_acquire_for(TIMEOUT)) {
+		throw std::exception();
+	};
 
 	// critical write section till end of function
 	std::lock_guard<std::mutex> lock{read_mutex};
