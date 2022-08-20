@@ -1,10 +1,10 @@
 #include "server/Controller.h"
 
+#include "control_flag.h"
+
 #include <iostream>
 #include <thread>
 #include <string>
-
-// TODO: add header containing 'sig_atomic finished' deklaration, or do something equivalent
 
 Controller::Controller(
 	std::shared_ptr<RingBuffer<std::string>>& request_queue,
@@ -33,7 +33,7 @@ void
 Controller::read_loop(
 	void
 ) {
-	extern bool finished;
+	extern volatile sig_atomic_t finished;
 
 	while(!finished) {
 		request_queue->push(socket.receive());
@@ -47,7 +47,7 @@ void
 Controller::write_loop(
 	void
 ) {
-	extern bool finished;
+	extern volatile sig_atomic_t finished;
 
 	while(!finished) {
 		socket.send(request_queue->pop());
