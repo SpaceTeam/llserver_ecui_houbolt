@@ -4,22 +4,31 @@
 #include <gtest/gtest.h>
 #include "utility/RingBuffer.h"
 
-// Demonstrate some basic assertions.
 TEST(WritingAndReadingFromRingBuffer, ReadingAndWriting) {
-  RingBuffer r = RingBuffer<int>();
-  r.push(1);
-  EXPECT_EQ(r.pop(),1);
+  RingBuffer buffer = RingBuffer<int>();
+  buffer.push(1);
+  EXPECT_EQ(buffer.pop(), 1);
 }
 
 TEST(WritingAndReadingFromRingBuffer, ReadTimeoutShouldThrowException) {
-  RingBuffer r = RingBuffer<int>();
-  EXPECT_ANY_THROW(r.pop());
+  RingBuffer buffer = RingBuffer<int>();
+  EXPECT_ANY_THROW(buffer.pop());
 }
 
 TEST(WritingAndReadingFromRingBuffer, WriteTimeoutShouldThrowException) {
-  RingBuffer r = RingBuffer<int>();
-  for(int i = 0; i < r.RING_BUFFER_SIZE; i++){
-    r.push(i);
+  RingBuffer buffer = RingBuffer<int>();
+  for(int i = 0; i < RingBuffer<int>::RING_BUFFER_SIZE; i++){
+    buffer.push(i);
   }
-  EXPECT_ANY_THROW(r.push(0));
+  EXPECT_ANY_THROW(buffer.push(0));
+}
+
+TEST(WritingAndReadingFromRingBuffer, WriteFullReadAllShouldBeInOrder) {
+  RingBuffer buffer = RingBuffer<int>();
+  for(int i = 0; i < RingBuffer<int>::RING_BUFFER_SIZE; i++){
+    buffer.push(i);
+  }
+  for(int i = 0; i < RingBuffer<int>::RING_BUFFER_SIZE; i++){
+    EXPECT_EQ(buffer.pop(),i);
+  }
 }
