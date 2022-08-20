@@ -2,10 +2,13 @@
 
 #include <iostream>
 #include <thread>
+#include <string>
+
+// TODO: add header containing 'sig_atomic finished' deklaration, or do something equivalent
 
 Controller::Controller(
-	std::shared_ptr<RingBuffer<int>>& request_queue,
-	std::shared_ptr<RingBuffer<int>>& response_queue
+	std::shared_ptr<RingBuffer<std::string>>& request_queue,
+	std::shared_ptr<RingBuffer<std::string>>& response_queue
 ) :
 	socket("127.0.0.1", "8080"),
 	request_queue(request_queue),
@@ -33,8 +36,7 @@ Controller::read_loop(
 	extern bool finished;
 
 	while(!finished) {
-		socket.receive();
-		request_queue->push(1);
+		request_queue->push(socket.receive());
 	}
 
 	return;
@@ -48,9 +50,7 @@ Controller::write_loop(
 	extern bool finished;
 
 	while(!finished) {
-		//int value = request_queue->pop();
-		std::string payload = "sample";
-		socket.send(payload);
+		socket.send(request_queue->pop());
 	}
 
 	return;

@@ -64,7 +64,9 @@ signal_handler(
 
 	switch (signal) {
 	case SIGINT:
+		[[fallthrough]]
 	case SIGTERM:
+		[[fallthrough]]
 	case SIGABRT:
 		finished = true;
 		break;
@@ -162,20 +164,18 @@ main(
 	set_scheduling_priority(60);
 	set_latency_target();
 
-	std::shared_ptr<RingBuffer<int>> response_queue, request_queue;
+	std::shared_ptr<RingBuffer<std::string>> response_queue, request_queue;
 
 	// NOTE(Lukas Karafiat): In a normal web server the dispatcher would
 	//     be integrated into the controller, but if we want to hold more
 	//     connections than one, a sequential dispatch of intructions has
 	//     to be done, so I split it up.  Ordering will be done via a
-	//     queue.
+	//     ring buffer.
 	Dispatcher dispatcher = Dispatcher(response_queue, request_queue);
 	Controller controller = Controller(response_queue, request_queue);
 
-	std::thread dispatcher_thread(&Dispatcher::run, dispatcher);
+	std::jthread dispatcher_thread(&Dispatcher::run, dispatcher);
 	controller.run();
-
-	dispatcher_thread.join();
 
 	return EXIT_SUCCESS;
 }
