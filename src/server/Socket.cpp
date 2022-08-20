@@ -95,7 +95,7 @@ Socket::receive(
 
 void
 Socket::send(
-	std::string& payload
+	std::string payload
 ) {
 	if ((size_t) maximum_payload_size < payload.size()) {
 		throw std::runtime_error("sent payload too large");

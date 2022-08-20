@@ -64,9 +64,7 @@ signal_handler(
 
 	switch (signal) {
 	case SIGINT:
-		[[fallthrough]]
 	case SIGTERM:
-		[[fallthrough]]
 	case SIGABRT:
 		finished = true;
 		break;

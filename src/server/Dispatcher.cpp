@@ -3,8 +3,8 @@
 #include <iostream>
 
 Dispatcher::Dispatcher(
-	std::shared_ptr<RingBuffer<int>>& request_queue,
-	std::shared_ptr<RingBuffer<int>>& response_queue
+	std::shared_ptr<RingBuffer<std::string>>& request_queue,
+	std::shared_ptr<RingBuffer<std::string>>& response_queue
 ) {
 	return;
 }

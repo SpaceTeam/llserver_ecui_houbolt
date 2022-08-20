@@ -19,7 +19,7 @@ public:
 	~Socket(void);
 
 	std::string receive(void);
-	void send(std::string&);
+	void send(std::string);
 };
 
 #endif /* SOCKET_HPP */
