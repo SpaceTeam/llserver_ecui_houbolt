@@ -55,7 +55,7 @@ RingBuffer<ElementType>::push(
 ) {
 	// if buffer full it blocks for one second
 	if(!unwritten_elements.try_acquire_for(TIMEOUT)){
-      throw;
+      throw std::exception();
     };
 
 	// critical write section till end of function
@@ -81,8 +81,8 @@ RingBuffer<ElementType>::pop(
 	void
 ) {
 	// if buffer empty it blocks for one second
-	if(unread_elements.try_acquire_for(TIMEOUT)){
-      throw;
+	if(!unread_elements.try_acquire_for(TIMEOUT)){
+      throw std::exception();
     };
 
 	// critical write section till end of function
