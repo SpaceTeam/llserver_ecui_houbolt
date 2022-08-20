@@ -25,7 +25,7 @@ find_package(Threads REQUIRED)
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${INCL_FILES})
 
 add_library(${PROJECT_NAME}_lib ${SRC_FILES} ${INCL_FILES})
-add_executable(test_${PROJECT_NAME} ${TEST_FILES})
+add_executable(test_${PROJECT_NAME} ${TEST_FILES} test/TestRingBuffer.cpp)
 
 # Google Test stuff
 include(FetchContent)
