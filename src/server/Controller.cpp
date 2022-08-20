@@ -41,14 +41,14 @@ Controller::read_loop(
 	while(!finished) {
 		try {
 			if (tmp == std::nullopt) {
-				tmp = std::make_optional<std::string>(socket.receive());
+				tmp = std::make_optional<std::string>(socket.receive_message());
 			}
 
 			request_queue->push(tmp.value());
 			tmp.reset();
 
 		} catch (...) {
-			// NOTE(Lukas Karafiat): due to previous deadlock behaviour of pop() and send()
+			// NOTE(Lukas Karafiat): due to previous deadlock behaviour of push() and receive_message()
 			//     a timeout will be thrown and finished flag has to be checked again
 		}
 	}
@@ -71,11 +71,11 @@ Controller::write_loop(
 				tmp = std::make_optional<std::string>(request_queue->pop());
 			}
 
-			socket.send(tmp.value());
+			socket.send_message(tmp.value());
 			tmp.reset();
 
 		} catch (...) {
-			// NOTE(Lukas Karafiat): due to previous deadlock behaviour of pop() and send()
+			// NOTE(Lukas Karafiat): due to previous deadlock behaviour of pop() and send_message()
 			//     a timeout will be thrown and finished flag has to be checked again
 		}
 	}

@@ -30,7 +30,7 @@ Socket::Socket(
 		throw std::system_error(errno, std::generic_category(), std::string("could not get address info: ") + gai_strerror(error));
 	}
 
-	int socket_fd = socket(address_info->ai_family, address_info->ai_socktype, address_info->ai_protocol);
+	socket_fd = socket(address_info->ai_family, address_info->ai_socktype, address_info->ai_protocol);
 	if (socket_fd < 0) {
 		freeaddrinfo(address_info);
 		throw std::system_error(errno, std::generic_category(), "could not create socket");
@@ -40,13 +40,6 @@ Socket::Socket(
 	freeaddrinfo(address_info);
 	if (error != 0) {
 		throw std::system_error(errno, std::generic_category(), std::string("could not connect to: ") + ip + ":" + port);
-	}
-
-	connection = fdopen(socket_fd, "rb+");
-	if (connection == NULL) {
-		close(socket_fd);
-
-		throw std::system_error(errno, std::generic_category(), "could not open connection");
 	}
 
 	// allocate payload buffer
@@ -60,7 +53,7 @@ Socket::Socket(
 Socket::~Socket(
 	void
 ) {
-	fclose(connection);
+	close(socket_fd);
 
 	delete payload_buffer;
 
@@ -69,22 +62,30 @@ Socket::~Socket(
 
 
 std::string
-Socket::receive(
+Socket::receive_message(
 	void
 ) {
 	uint16_t payload_size;
 
-	// read header
-	fread(&payload_size, sizeof(payload_size), 1, connection);
+	int error;
 
-	if (maximum_payload_size < payload_size) {
-		throw std::runtime_error("received payload too large");
+	// read header
+	error = recv(socket_fd, &payload_size, sizeof(payload_size), MSG_DONTWAIT);
+	if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+		// TODO: find good exception name
+		throw;
+
+	} else if (error == -1) {
+		throw std::system_error(errno, std::generic_category(), "could not receive data from connection");
 	}
 
 	// read payload
-	fread(payload_buffer, payload_size, 1, connection);
+	error = recv(socket_fd, payload_buffer, payload_size, MSG_DONTWAIT);
+	if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+		// TODO: find good exception name
+		throw;
 
-	if (ferror(connection)) {
+	} else if (error == -1) {
 		throw std::system_error(errno, std::generic_category(), "could not receive data from connection");
 	}
 
@@ -94,7 +95,7 @@ Socket::receive(
 
 
 void
-Socket::send(
+Socket::send_message(
 	std::string payload
 ) {
 	if ((size_t) maximum_payload_size < payload.size()) {
@@ -103,11 +104,15 @@ Socket::send(
 
 	uint16_t payload_size = payload.size();
 
-	fwrite(&payload_size, sizeof(payload_size), 1, connection);
+	int error;
 
-	fwrite(payload.c_str(), payload.size(), 1, connection);
+	error = send(socket_fd, &payload_size, sizeof(payload_size), 0);
+	if (error == -1) {
+		throw std::system_error(errno, std::generic_category(), "could not send data to connection");
+	}
 
-	if (ferror(connection)) {
+	error = send(socket_fd, payload.c_str(), payload.size(), 0);
+	if (error == -1) {
 		throw std::system_error(errno, std::generic_category(), "could not send data to connection");
 	}
 

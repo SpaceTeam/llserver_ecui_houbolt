@@ -6,10 +6,10 @@
 
 class Socket {
 private:
-	FILE *connection;
+	int socket_fd;
 
-	// NOTE(Lukas Karafiat): 1 Byte is needed for the NULL-terminator
-	int maximum_payload_size = USHRT_MAX - 1;
+	// NOTE(Lukas Karafiat): 64kiByte - 1 Byte for NULL-terminator
+	int maximum_payload_size = USHRT_MAX;
 
 	char *payload_buffer;
 
@@ -18,8 +18,8 @@ public:
 	Socket(std::string, std::string);
 	~Socket(void);
 
-	std::string receive(void);
-	void send(std::string);
+	std::string receive_message(void);
+	void send_message(std::string);
 };
 
 #endif /* SOCKET_HPP */
