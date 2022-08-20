@@ -1,8 +1,6 @@
-//
-// Created by Markus on 2019-09-27.
-//
+#include "SequenceManager.h"
+
 #include <iomanip>
-// #include <filesystem>
 #include <experimental/filesystem>
 
 #include "utility/json.hpp"
@@ -10,13 +8,11 @@
 #include "utility/Config.h"
 
 #include "EcuiSocket.h"
-#include "SequenceManager.h"
-
 SequenceManager::~SequenceManager()
 {
     if (isInitialized)
     {
-        while (isRunning || isAbortRunning)
+        while (sequenceRunning || isAbortRunning)
         {
             Debug::print("wating for sequence to finish...");
             usleep(100000);
@@ -81,9 +77,7 @@ void SequenceManager::Init()
     llInterface = LLInterface::Instance();
     eventManager = EventManager::Instance();
 
-    timer = new Timer(40, "SequenceTimer");
-
-    isAutoAbort = std::get<bool>(Config::getData("autoabort"));
+    autoAbortEnabled = std::get<bool>(Config::getData("autoabort"));
 
     timerSyncInterval = 1000000/std::get<int>(Config::getData("WEBSERVER/timer_sync_rate"));
 
@@ -92,51 +86,36 @@ void SequenceManager::Init()
 
 bool SequenceManager::GetAutoAbort()
 {
-    return isAutoAbort;
+    return autoAbortEnabled;
 }
 
 void SequenceManager::SetAutoAbort(bool active)
 {
-    if (!isRunning)
+    if (!sequenceRunning)
     {
-        isAutoAbort = active;
+        autoAbortEnabled = active;
     }
 }
 
-
-void SequenceManager::StopSequence()
-{
-    Debug::flush();
-    Debug::print("Sequence Done");
-    //TODO: MP Set warning light here or insert into sequence
-
-    isRunning = false;
-    if (!isAbort)
-    {
-        EcuiSocket::SendJson("timer-done");
-    }
-}
 
 void SequenceManager::AbortSequence(std::string abortMsg)
 {
-    if (isRunning)
+    if(sequenceRunning)
     {
-        isAbort = true;
-        timer->stop();
-
         EcuiSocket::SendJson("abort", abortMsg);
-        Debug::error("Aborting... " + abortMsg);
-        isRunning = false;
+        Debug::info("Aborting... " + abortMsg);
 
-        StartAbortSequence();
+        sequenceToStop = true;
+		Debug::print("Asked sequence to stop...");
 
-        isAbort = false;
+		while(sequenceRunning);
+
+        abortSequence();
     }
     else
     {
         Debug::warning("cannot abort sequence: no running sequence");
     }
-
 }
 
 void SequenceManager::SetupLogging()
@@ -239,7 +218,7 @@ bool SequenceManager::LoadSequence(nlohmann::json jsonSeq)
 
 void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments)
 {
-    if (!isRunning && !isAbortRunning)
+    if (!sequenceRunning && !isAbortRunning)
     {
         jsonSequence = jsonSeq;
         jsonAbortSequence = jsonAbortSeq;
@@ -248,8 +227,6 @@ void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonA
         if (LoadSequence(jsonSeq))
         {
             SetupLogging();
-
-            //TODO: MP Set warning light here or insert into sequence
 
             std::string msg;
             //get sensor names
@@ -282,21 +259,20 @@ void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonA
 
             Debug::log(/*"Timestep;" +*/ msg + "\n");
 
-            isRunning = true;
-
             LoadInterpolationMap();
 
-            int64_t startTime = utils::toMicros(jsonSeq["globals"]["startTime"]);
-            int64_t endTime = utils::toMicros(jsonSeq["globals"]["endTime"]);
-            int64_t interval = utils::toMicros(jsonSeq["globals"]["interval"]);
-            Debug::info("%d %d %d", startTime, endTime, interval);
+            startTime_us = utils::toMicros(jsonSeq["globals"]["startTime"]);
+            endTime_us = utils::toMicros(jsonSeq["globals"]["endTime"]);
+            int64_t interval_us = utils::toMicros(jsonSeq["globals"]["interval"]);
+            Debug::info("%d %d %d", startTime_us, endTime_us, interval_us);
 
             EcuiSocket::SendJson("timer-start");
 
-            timer->start(startTime, endTime, interval, std::bind(&SequenceManager::Tick, this, std::placeholders::_1), 
-                std::bind(&SequenceManager::StopSequence, this));
+            sequenceRunning = true;
+            std::thread sequenceThread = std::thread(&SequenceManager::sequenceLoop, this, interval_us);
+            sequenceThread.detach();
 
-            Debug::print("Start Sequence");
+            Debug::print("Sequence Started");
         }
 
     }
@@ -330,26 +306,26 @@ void SequenceManager::CheckSensors(int64_t microTime)
 
     for (const auto& sensor : sensors)
     {
-        if (isAutoAbort && (sensorsNominalRangeMap.find(sensor.first) != sensorsNominalRangeMap.end()))
+        if (autoAbortEnabled && (sensorsNominalRangeMap.find(sensor.first) != sensorsNominalRangeMap.end()))
         {
             auto currInterval = sensorsNominalRangeMap[sensor.first].begin();
             double currValue = std::get<0>(sensor.second);
-            if (currInterval->second[0] > currValue)
+            if (currValue < currInterval->second[0])
             {
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + std::to_string(currValue) << " too low" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 std::string abortMsg = stream.str();
-                if (isRunning)
+                if (sequenceRunning)
                 {
                     AbortSequence(abortMsg);
                 }
             }
-            else if (std::get<0>(sensor.second) > currInterval->second[1])
+            else if (currValue > currInterval->second[1])
             {
                 std::stringstream stream;
                 stream << std::fixed << "auto abort Sensor: " << sensor.first << " value " + std::to_string(currValue) << " too high" << " at Time " << std::setprecision(2) << ((microTime/1000)/1000.0) << " seconds";
                 std::string abortMsg = stream.str();
-                if (isRunning)
+                if (sequenceRunning)
                 {
                     AbortSequence(abortMsg);
                 }
@@ -390,144 +366,157 @@ double SequenceManager::GetTimestamp(nlohmann::json obj)
     return time;
 }
 
-void SequenceManager::Tick(int64_t microTime)
+void SequenceManager::sequenceLoop(int64_t interval_us)
 {
-    if (microTime % 500000 == 0)
-    {
-        Debug::info("Micro Seconds: %d", microTime);
-    }
-    if (microTime % timerSyncInterval == 0)
-    {
-        EcuiSocket::SendJson("timer-sync", ((microTime/1000) / 1000.0));
-    }
-    if (microTime == 0)
-    {
-        //TODO: MP Set warning light here or insert into sequence
-    }
+	struct sched_param param;
+	param.sched_priority = 40;
+	sched_setscheduler(0, SCHED_FIFO, &param);
 
-    std::chrono::time_point<std::chrono::high_resolution_clock> beforeLogging;
-    if (isRunning)
-    {
-        std::string msg = std::to_string(microTime / 1000000.0) + ";";
-        syncMtx.lock();
-        if (isRunning)
-        {
-            //log nominal ranges
-            for (const auto sensor : sensorsNominalRangeMap)
-            {
-                msg += std::to_string(sensor.second.begin()->second[0]) + ";";
-                msg += std::to_string(sensor.second.begin()->second[1]) + ";";
-            }
+	LoopTimer sequenceLoopTimer(interval_us, "sequenceThread");
+	sequenceLoopTimer.init();
 
-            bool shallExec;
-            std::vector<double> nextValue = {0};
+	while(!sequenceToStop)
+	{
+		sequenceLoopTimer.wait();
 
-            for (const auto &devItem : deviceMap)
-            {
+		int64_t sequenceTime_us = sequenceLoopTimer.getTimeElapsed_us() + startTime_us;
 
-                shallExec = true;
+		if(sequenceTime_us > endTime_us)
+		{
+			EcuiSocket::SendJson("timer-done");
+			sequenceToStop = true;
+			break;
+		}
 
-                if (devItem.second.size() > 1)
-                {
-                    auto prevIt = devItem.second.begin();
-                    auto nextIt = std::next(devItem.second.begin());
+		static int32_t nextTimePrint_us = startTime_us;
+		if(sequenceTime_us >= nextTimePrint_us)
+		{
+			Debug::info("Sequence Time: %dus", sequenceTime_us);
+			nextTimePrint_us += 500000;
+		}
 
-                    if (microTime >= nextIt->first)
-                    {
-                        nextValue = nextIt->second;
-                        deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
-                    }
-                    else
-                    {
-                        Interpolation inter = Interpolation::NONE;
-                        if (interpolationMap.find(devItem.first) == interpolationMap.end())
-                        {
-                            Debug::error("%s not found in interpolation map, falling back to no interpolation", devItem.first.c_str());
-                        }
-                        else
-                        {
-                            inter = interpolationMap[devItem.first];
-                        }
-                        switch (inter)
-                        {
-                            case Interpolation::LINEAR:
-                            {
-                                nextValue = prevIt->second;
-                                double scale = ((nextIt->second[0] - prevIt->second[0]) * 1.0) / (nextIt->first - prevIt->first);
-                                nextValue[0] = (scale * (microTime - prevIt->first)) + prevIt->second[0];
-                                break;
-                            }
-                            case Interpolation::NONE:
-                            default:
-                                nextValue = prevIt->second;
-                                if (sequenceStartTime != prevIt->first)
-                                {
-                                    shallExec = false;
-                                }
-                        }
-                    }
+		static int32_t nextTimerSync_us = startTime_us;
+		if(sequenceTime_us >= nextTimerSync_us)
+		{
+			EcuiSocket::SendJson("timer-sync", ((sequenceTime_us/1000) / 1000.0));
+			nextTimerSync_us += timerSyncInterval;
+		}
 
-                    if (shallExec)
-                    {
-                        //TODO: remove try catch if timer catch is used again
-                        try
-                        {
-                            //Debug::error("%d: %s, %f", microTime, devItem.first.c_str(), nextValue[0]);
-                            eventManager->ExecuteCommand(devItem.first, nextValue, false);
-                        }
-                        catch(const std::exception& e)
-                        {
-                            
-                        }
-                    }
-                }
-                else
-                {
-                    Debug::info("no interval found, keeping the same value");
-                }
+		std::string msg = std::to_string(sequenceTime_us / 1000000.0) + ";";
+		syncMtx.lock();
 
-                std::stringstream nextValueStringStream;
-                std::copy(nextValue.begin(), nextValue.end(), std::ostream_iterator<double>(nextValueStringStream, ", "));
-                msg += "[" + nextValueStringStream.str() + "];";
-            }
-        }
-        //delete depricated timestamp and update sensorsNominalRangeMap as well
-        if (sensorsNominalRangeTimeMap.size() > 1)
-        {
-            auto beginRangeIt = sensorsNominalRangeTimeMap.begin();
-            int64_t nextRangeChange = beginRangeIt->first;
-            if (microTime >= nextRangeChange)
-            {
-                for (const auto& sensor : beginRangeIt->second)
-                {
-                    sensorsNominalRangeMap[sensor.first].erase(sensorsNominalRangeMap[sensor.first].begin());
-                }
-                sensorsNominalRangeTimeMap.erase(beginRangeIt);
-                //plotMaps();
-                Debug::info("updated sensor ranges at time: %d in ms", microTime/1000);
-            }
-        }
+		//log nominal ranges
+		for (const auto sensor : sensorsNominalRangeMap)
+		{
+			msg += std::to_string(sensor.second.begin()->second[0]) + ";";
+			msg += std::to_string(sensor.second.begin()->second[1]) + ";";
+		}
 
-        CheckSensors(microTime);
+		bool shallExec;
+		std::vector<double> nextValue = {0};
 
-        syncMtx.unlock();
-        Debug::log(msg + "\n");
-    }
+		for (const auto &devItem : deviceMap)
+		{
+
+			shallExec = true;
+
+			if (devItem.second.size() > 1)
+			{
+				auto prevIt = devItem.second.begin();
+				auto nextIt = std::next(devItem.second.begin());
+
+				if (sequenceTime_us >= nextIt->first)
+				{
+					nextValue = nextIt->second;
+					deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
+				}
+				else
+				{
+					Interpolation inter = Interpolation::NONE;
+					if (interpolationMap.find(devItem.first) == interpolationMap.end())
+					{
+						Debug::error("%s not found in interpolation map, falling back to no interpolation", devItem.first.c_str());
+					}
+					else
+					{
+						inter = interpolationMap[devItem.first];
+					}
+					switch (inter)
+					{
+						case Interpolation::LINEAR:
+						{
+							nextValue = prevIt->second;
+							double scale = ((nextIt->second[0] - prevIt->second[0]) * 1.0) / (nextIt->first - prevIt->first);
+							nextValue[0] = (scale * (sequenceTime_us - prevIt->first)) + prevIt->second[0];
+							break;
+						}
+						case Interpolation::NONE:
+						default:
+							nextValue = prevIt->second;
+							if (sequenceStartTime != prevIt->first)
+							{
+								shallExec = false;
+							}
+					}
+				}
+
+				if (shallExec)
+				{
+					try
+					{
+						//Debug::error("%d: %s, %f", microTime, devItem.first.c_str(), nextValue[0]);
+						eventManager->ExecuteCommand(devItem.first, nextValue, false);
+					}
+					catch(const std::exception& e)
+					{
+						Debug::error("SequenceManager::sequenceLoop ExecuteCommand error: %s", e.what());
+					}
+				}
+			}
+			else
+			{
+				Debug::info("no interval found, keeping the same value");
+			}
+
+			std::stringstream nextValueStringStream;
+			std::copy(nextValue.begin(), nextValue.end(), std::ostream_iterator<double>(nextValueStringStream, ", "));
+			msg += "[" + nextValueStringStream.str() + "];";
+		}
+
+		//delete depricated timestamp and update sensorsNominalRangeMap as well
+		if (sensorsNominalRangeTimeMap.size() > 1)
+		{
+			auto beginRangeIt = sensorsNominalRangeTimeMap.begin();
+			int64_t nextRangeChange = beginRangeIt->first;
+			if (sequenceTime_us >= nextRangeChange)
+			{
+				for (const auto& sensor : beginRangeIt->second)
+				{
+					sensorsNominalRangeMap[sensor.first].erase(sensorsNominalRangeMap[sensor.first].begin());
+				}
+				sensorsNominalRangeTimeMap.erase(beginRangeIt);
+				//plotMaps();
+				Debug::info("updated sensor ranges at time: %d in ms", sequenceTime_us/1000);
+			}
+		}
+
+		CheckSensors(sequenceTime_us);
+
+		syncMtx.unlock();
+		Debug::log(msg + "\n");
+	}
+	sequenceToStop = false;
+
+	Debug::info("Sequence ended");
+
+    Debug::flush();
+
+	sequenceRunning = false;
 }
 
-void SequenceManager::StopAbortSequence()
+void SequenceManager::abortSequence()
 {
-    if (isAbortRunning)
-    {
-        Debug::flush();
-        Debug::print("Abort Sequence Done");
-        isAbortRunning = false;
-    }
-}
-
-void SequenceManager::StartAbortSequence()
-{
-    if (!isRunning && !isAbortRunning)
+    if (!sequenceRunning && !isAbortRunning)
     {
         isAbortRunning = true;
 
@@ -550,12 +539,15 @@ void SequenceManager::StartAbortSequence()
             }
         }
         syncMtx.unlock();
-        StopAbortSequence();
+
+		Debug::print("Abort Sequence Done");
+        Debug::flush();
+		isAbortRunning = false;
     }
 
 }
 
 bool SequenceManager::IsSequenceRunning()
 {
-    return isRunning || isAbortRunning;
+    return sequenceRunning || isAbortRunning;
 }

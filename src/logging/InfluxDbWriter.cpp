@@ -147,7 +147,7 @@ void InfluxDbWriter::transferPartialWrite() {
 void InfluxDbWriter::joinThreads() {
     for (std::thread &t : threads) {
         if(t.joinable()) t.join();
-        else Debug::warning("InfluxDbWriter thread was not joinable.");
+//        else Debug::warning("InfluxDbWriter thread was not joinable."); // causes crash during "Waiting for nodes..."
     }
 } 
 

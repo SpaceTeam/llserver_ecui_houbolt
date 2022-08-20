@@ -84,6 +84,8 @@ void CANDriverSocketCAN::SendCANMessage(uint32_t canChannelID, uint32_t canID, u
 		Debug::print("Errno: 0x%x", errno);
 		throw std::runtime_error("CAN write failed");
 	}
+
+	//TODO wait for completion if blocking. is this possible?
 }
 
 
@@ -136,7 +138,7 @@ void CANDriverSocketCAN::receiveLoop() // TODO: read errors, call onErrorCallbac
 		}
 		catch(const std::exception& e)
 		{
-			Debug::error("%s", e.what());
+			Debug::error("CANDriverSocketCAN::receiveLoop error: %s", e.what());
 		}
 		
 	}

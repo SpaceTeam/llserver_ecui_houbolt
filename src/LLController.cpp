@@ -260,16 +260,24 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
 
             }
             else if (type.compare("pythonScript-start") == 0) {
+#ifdef NO_PYTHON
+                Debug::warning("Python features not enabled in build settings");
+#else
                 std::string scriptPath = msg["content"];
                 PythonController *pyController = PythonController::Instance();
                 pyController->StartPythonScript(scriptPath);
+#endif
             }
             else if (type.compare("pythonScript-runChecklistItem") == 0) {
+#ifdef NO_PYTHON
+                Debug::warning("Python features not enabled in build settings");
+#else
                 std::string scriptPath = msg["content"]["scriptPath"];
                 std::string item = msg["content"]["checklistItem"];
                 std::vector<std::string> args = {"script.py", "run_checklist_item", item};
                 PythonController *pyController = PythonController::Instance();
                 pyController->StartPythonScript(scriptPath, args);
+#endif
             }
             else
             {

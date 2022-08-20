@@ -1,34 +1,29 @@
-//
-// Created by Markus on 2019-10-15.
-//
+#include "LLInterface.h"
 
 #include <regex>
 #include <math.h>
 #include <utility/utils.h>
 
 #include "EcuiSocket.h"
-#include "utility/Timer.h"
 #include "utility/Config.h"
 
-#include "LLInterface.h"
-
-#define PI 3.14159265
 
 void LLInterface::CalcThrustTransformMatrix()
 {
-    double deg60 = 60*PI/180;
+    double deg60 = 60*M_PI/180;
     double beta = thrustVariables["beta"];
     double gamma = thrustVariables["gamma"];
     double alpha = thrustVariables["alpha"];
     double r = thrustVariables["r"];
     double d = thrustVariables["d"];
-    thrustTransformMatrix = new std::vector<std::vector<double>> {
-    {-sin(deg60-beta)*sin(gamma), -sin(deg60+beta)*sin(gamma), -sin(beta)*sin(gamma), sin(beta)*sin(gamma), sin(deg60+beta)*sin(gamma), sin(deg60-beta)*sin(gamma)},
-    {-cos(deg60-beta)*sin(gamma), cos(deg60+beta)*sin(gamma), cos(beta)*sin(gamma), cos(beta)*sin(gamma), cos(deg60+beta)*sin(gamma), -cos(deg60-beta)*sin(gamma)},
-    {cos(gamma), cos(gamma), cos(gamma), cos(gamma), cos(gamma), cos(gamma)},
-    {r*cos(deg60-alpha)*cos(gamma)-d*cos(deg60-beta)*sin(gamma), r*cos(deg60+alpha)*cos(gamma)-d*cos(deg60+beta)*sin(gamma), -r*cos(alpha)*cos(gamma)+d*cos(beta)*sin(gamma), -r*cos(alpha)*cos(gamma)+d*cos(beta)*sin(gamma), r*cos(deg60+alpha)*cos(gamma)-d*cos(deg60+beta)*sin(gamma), r*cos(deg60-alpha)*cos(gamma)-d*cos(deg60-beta)*sin(gamma)},
-    {r*sin(deg60-alpha)*cos(gamma)-d*sin(deg60-beta)*sin(gamma), r*sin(deg60+alpha)*cos(gamma)-d*sin(deg60+beta)*sin(gamma), r*sin(alpha)*cos(gamma)-d*sin(beta)*sin(gamma), -r*sin(alpha)*cos(gamma)+d*sin(beta)*sin(gamma), -r*sin(deg60+alpha)*cos(gamma)+d*sin(deg60+beta)*sin(gamma), -r*sin(deg60-alpha)*cos(gamma)+d*sin(deg60-beta)*sin(gamma)},
-    {-r*sin(beta-alpha), r*sin(beta-alpha), -r*sin(beta-alpha), r*sin(beta-alpha), -r*sin(beta-alpha), r*sin(beta-alpha)}
+    thrustTransformMatrix = new std::vector<std::vector<double>>
+    {
+		{-sin(deg60-beta)*sin(gamma), -sin(deg60+beta)*sin(gamma), -sin(beta)*sin(gamma), sin(beta)*sin(gamma), sin(deg60+beta)*sin(gamma), sin(deg60-beta)*sin(gamma)},
+		{-cos(deg60-beta)*sin(gamma), cos(deg60+beta)*sin(gamma), cos(beta)*sin(gamma), cos(beta)*sin(gamma), cos(deg60+beta)*sin(gamma), -cos(deg60-beta)*sin(gamma)},
+		{cos(gamma), cos(gamma), cos(gamma), cos(gamma), cos(gamma), cos(gamma)},
+		{r*cos(deg60-alpha)*cos(gamma)-d*cos(deg60-beta)*sin(gamma), r*cos(deg60+alpha)*cos(gamma)-d*cos(deg60+beta)*sin(gamma), -r*cos(alpha)*cos(gamma)+d*cos(beta)*sin(gamma), -r*cos(alpha)*cos(gamma)+d*cos(beta)*sin(gamma), r*cos(deg60+alpha)*cos(gamma)-d*cos(deg60+beta)*sin(gamma), r*cos(deg60-alpha)*cos(gamma)-d*cos(deg60-beta)*sin(gamma)},
+		{r*sin(deg60-alpha)*cos(gamma)-d*sin(deg60-beta)*sin(gamma), r*sin(deg60+alpha)*cos(gamma)-d*sin(deg60+beta)*sin(gamma), r*sin(alpha)*cos(gamma)-d*sin(beta)*sin(gamma), -r*sin(alpha)*cos(gamma)+d*sin(beta)*sin(gamma), -r*sin(deg60+alpha)*cos(gamma)+d*sin(deg60+beta)*sin(gamma), -r*sin(deg60-alpha)*cos(gamma)+d*sin(deg60-beta)*sin(gamma)},
+		{-r*sin(beta-alpha), r*sin(beta-alpha), -r*sin(beta-alpha), r*sin(beta-alpha), -r*sin(beta-alpha), r*sin(beta-alpha)}
     };
 }
 
@@ -54,7 +49,7 @@ void LLInterface::Init()
         Debug::print("Initializing GUIMapping...");
         guiMapping = new JSONMapping(Config::getMappingFilePath(), "GUIMapping");
         LoadGUIStates();
-        Debug::print("GUIMapping initialized");
+        Debug::print("GUIMapping initialized\n");
 
         Debug::print("Waiting for States to be initialized...");
         // stateController->WaitUntilStatesInitialized(); //TODO: uncomment when can interface works
@@ -67,43 +62,35 @@ void LLInterface::Init()
         thrustVariables["d"] = std::get<double>(Config::getData("THRUST/d"));
         thrustVariables["r"] = std::get<double>(Config::getData("THRUST/r"));
         CalcThrustTransformMatrix();
-        Debug::print("Initializing Thrust Matrix done");
+        Debug::print("Initializing Thrust Matrix done\n");
 
         Debug::print("Initializing DataFilter...");
         double sensorsSmoothingFactor = std::get<double>(Config::getData("WEBSERVER/sensors_smoothing_factor"));
         dataFilter = new DataFilter(sensorsSmoothingFactor);
         Debug::print("Initializing DataFilter done\n");
 
-        Debug::print("Starting Sensor State Timer...");
-        stateTimer = new Timer(40, "stateTimer");
-        sensorStateTimer = new Timer(40, "sensorTimer");
-        uint64_t sensorStateSamplingRate = std::get<double>(Config::getData("LLSERVER/sensor_state_sampling_rate"));
-        uint64_t sensorStateSamplingInterval = 1000000.0/sensorStateSamplingRate;
-        sensorStateTimer->startContinous(0, sensorStateSamplingInterval,
-                std::bind(&LLInterface::FilterSensors, this, std::placeholders::_1),
-                std::bind(&LLInterface::StopFilterSensors, this));
-        
-        //WARNING LIGHT init goes here...
-        //Debug::print("Connecting to warning light...");
+        Debug::print("Starting filterSensorsThread...");
+        uint32_t filterSensorsInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("LLSERVER/sensor_state_sampling_rate")));
+        filterSensorsRunning = true;
+        filterSensorsThread = new std::thread(&LLInterface::filterSensorsLoop, this, filterSensorsInterval);
+        Debug::print("FilterSensorsThread started\n");
 
         isInitialized = true;
     }
 }
 
-
-
 LLInterface::~LLInterface()
 {
     if (isInitialized)
     {
-        //WARNING LIGHT delete goes here...
-        //Debug::print("Shutting down warning light...");
-
         Debug::print("Stopping State transmission...");
         StopStateTransmission();
-        delete stateTimer;
-        Debug::print("Stopping Sensor State Timer...");
-        delete sensorStateTimer;
+
+        Debug::print("Stopping filterSensorsThread...");
+        filterSensorsRunning = false;
+        if(filterSensorsThread->joinable()) filterSensorsThread->join();
+        else Debug::warning("filterSensorsThread was not joinable.");
+        delete filterSensorsThread;
 
         Debug::print("Deleting Data Filter...");
         delete dataFilter;
@@ -159,8 +146,7 @@ void LLInterface::LoadGUIStates()
                         }
 
                         auto now = std::chrono::high_resolution_clock::now();
-                        uint64_t timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
-                                now.time_since_epoch()).count();
+                        uint64_t timestamp = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
 
                         states[stateName] = {defaultValue, timestamp};
                     }
@@ -183,41 +169,51 @@ nlohmann::json LLInterface::GetGUIMapping()
 
 void LLInterface::StartStateTransmission()
 {
-    if (!isTransmittingStates)
+    if (!transmitStatesRunning)
     {
-        double stateTransmissionRate = std::get<double>(Config::getData("WEBSERVER/state_transmission_rate"));
-        uint64_t stateTransmissionInterval = 1000000.0/stateTransmissionRate;
-
-        stateTimer->startContinous(0, stateTransmissionInterval,
-                std::bind(static_cast<void (LLInterface::*)(int64_t)>(&LLInterface::GetStates), this, std::placeholders::_1),
-                std::bind(&LLInterface::StopGetStates, this));
-        isTransmittingStates = true;
+        Debug::print("Starting transmitStatesThread...");
+        uint32_t transmitStatesInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("WEBSERVER/state_transmission_rate")));
+        transmitStatesRunning = true;
+		transmitStatesThread = new std::thread(&LLInterface::transmitStatesLoop, this, transmitStatesInterval);
+		Debug::print("TransmitStatesThread started\n");
     }
 }
 
 void LLInterface::StopStateTransmission()
 {
-    if (isTransmittingStates)
+    if (transmitStatesRunning)
     {
-
-        stateTimer->stop();
-        isTransmittingStates = false;
+        transmitStatesRunning = false;
+        if(transmitStatesThread->joinable()) transmitStatesThread->join();
+        else Debug::warning("transmitStatesThread was not joinable.");
+        delete transmitStatesThread;
     }
 }
 
-void LLInterface::StopGetStates()
+void LLInterface::transmitStatesLoop(uint32_t transmitStatesInterval)
 {
+	struct sched_param param;
+	param.sched_priority = 40;
+	sched_setscheduler(0, SCHED_FIFO, &param);
+
+	LoopTimer transmitStatesLoopTimer(transmitStatesInterval, "transmitStatesThread");
+
+	transmitStatesLoopTimer.init();
+
+	while(transmitStatesRunning)
+	{
+		transmitStatesLoopTimer.wait();
+
+		std::map<std::string, std::tuple<double, uint64_t>> states = stateController->GetDirtyStates();
+
+		if (states.size() > 0)
+		{
+			uint64_t time_us = transmitStatesLoopTimer.getTimePoint_us();
+			TransmitStates(time_us, states);
+		}
+	}
+
     Debug::print("Stopped State Timer...");
-}
-
-void LLInterface::GetStates(int64_t microTime)
-{
-    std::map<std::string, std::tuple<double, uint64_t>> states = stateController->GetDirtyStates();
-
-    if (states.size() > 0)
-    {
-        TransmitStates(microTime, states);
-    }
 }
 
 void LLInterface::ExecuteCommand(std::string &commandName, std::vector<double> &params, bool testOnly)
@@ -230,76 +226,85 @@ std::map<std::string, command_t> LLInterface::GetCommands()
     return eventManager->GetCommands();
 }
 
-void LLInterface::FilterSensors(int64_t microTime)
+void LLInterface::filterSensorsLoop(uint32_t filterSensorsInterval)
 {
-    std::map<std::string, std::tuple<double, uint64_t>> rawSensors;
-    rawSensors = canManager->GetLatestSensorData();
+	struct sched_param param;
+	param.sched_priority = 40;
+	sched_setscheduler(0, SCHED_FIFO, &param);
 
-    std::map<std::string, std::tuple<double, uint64_t>> filteredSensors;
-    filteredSensors = dataFilter->FilterData(rawSensors);
+	LoopTimer filterSensorsLoopTimer(filterSensorsInterval, "filterSensorsThread");
 
-    //TODO: remove hotfix
-    // std::vector<std::vector<double>> sensorMatrix = {{0},{0},{0},{0},{0},{0}};
-    // std::vector<std::vector<double>> resultMatrix = {{0},{0},{0},{0},{0},{0}};
-    // std::string thrustState;
-    // double thrustSum = 0;
-    // for (int32_t i = 0; i < 6; i++)
-    // {
-    //     thrustState = "engine_thrust_"+std::to_string(i)+":sensor";
-    //     if (filteredSensors.find(thrustState) == filteredSensors.end())
-    //     {
-    //         break;
-    //     }
-    //     sensorMatrix[i][0] = std::get<0>(filteredSensors[thrustState]);
-    //     thrustSum += sensorMatrix[i][0];
-    //     if (i==5)
-    //     {
-    //         std::vector<std::vector<double>> transformMatrix = *thrustTransformMatrix; 
-    //         utils::matrixMultiply(transformMatrix, sensorMatrix, resultMatrix);
-    //         uint64_t thrustTimestamp = utils::getCurrentTimestamp();
-    //         filteredSensors["engine_thrust_x"] = {resultMatrix[0][0], thrustTimestamp};
-    //         filteredSensors["engine_thrust_y"] = {resultMatrix[1][0], thrustTimestamp};
-    //         filteredSensors["engine_thrust_z"] = {resultMatrix[2][0], thrustTimestamp};
-    //         filteredSensors["engine_thrust_mx"] = {resultMatrix[3][0], thrustTimestamp};
-    //         filteredSensors["engine_thrust_my"] = {resultMatrix[4][0], thrustTimestamp};
-    //         filteredSensors["engine_thrust_mz"] = {resultMatrix[5][0], thrustTimestamp};
-    //         filteredSensors["engine_thrust_sum"] = {thrustSum, thrustTimestamp};
-    //     }
-    // }
+	filterSensorsLoopTimer.init();
 
-    if (filteredSensors.find("pmu_barometer:sensor") != filteredSensors.end())
-    {
-        uint64_t timestamp = utils::getCurrentTimestamp();
-        double baro = std::get<0>(filteredSensors["pmu_barometer:sensor"]);
-        double height = 0.3048 * (1 - pow((baro / 1013.25), 0.190284)) * 145366.45;
-        filteredSensors["pmu_altitude:sensor"] = {height, timestamp};
-    }
+	while(filterSensorsRunning)
+	{
+		filterSensorsLoopTimer.wait();
 
-    if (filteredSensors.find("rcu_barometer:sensor") != filteredSensors.end())
-    {
-        uint64_t timestamp = utils::getCurrentTimestamp();
-        double baro = std::get<0>(filteredSensors["rcu_barometer:sensor"]);
-        double height = 0.3048 * (1 - pow((baro / 1013.25), 0.190284)) * 145366.45;
-        filteredSensors["rcu_altitude:sensor"] = {height, timestamp};
-    }
+		std::map<std::string, std::tuple<double, uint64_t>> rawSensors;
+		rawSensors = canManager->GetLatestSensorData();
 
-    //TODO: reconsider if states should be iterated here or 
-    //sent directly to a new setStates of the state controller
-    for (auto &sensor : filteredSensors)
-    {
-        stateController->SetState(sensor.first, std::get<0>(sensor.second), std::get<1>(sensor.second));
-    }
+		std::map<std::string, std::tuple<double, uint64_t>> filteredSensors;
+		filteredSensors = dataFilter->FilterData(rawSensors);
 
+		//TODO: remove hotfix
+//		std::vector<std::vector<double>> sensorMatrix = {{0},{0},{0},{0},{0},{0}};
+//		std::vector<std::vector<double>> resultMatrix = {{0},{0},{0},{0},{0},{0}};
+//		std::string thrustState;
+//		double thrustSum = 0;
+//		for (int32_t i = 0; i < 6; i++)
+//		{
+//			thrustState = "engine_thrust_"+std::to_string(i)+":sensor";
+//			if (filteredSensors.find(thrustState) == filteredSensors.end())
+//			{
+//				break;
+//			}
+//			sensorMatrix[i][0] = std::get<0>(filteredSensors[thrustState]);
+//			thrustSum += sensorMatrix[i][0];
+//			if (i==5)
+//			{
+//				std::vector<std::vector<double>> transformMatrix = *thrustTransformMatrix;
+//				utils::matrixMultiply(transformMatrix, sensorMatrix, resultMatrix);
+//				uint64_t thrustTimestamp = utils::getCurrentTimestamp();
+//				filteredSensors["engine_thrust_x"] = {resultMatrix[0][0], thrustTimestamp};
+//				filteredSensors["engine_thrust_y"] = {resultMatrix[1][0], thrustTimestamp};
+//				filteredSensors["engine_thrust_z"] = {resultMatrix[2][0], thrustTimestamp};
+//				filteredSensors["engine_thrust_mx"] = {resultMatrix[3][0], thrustTimestamp};
+//				filteredSensors["engine_thrust_my"] = {resultMatrix[4][0], thrustTimestamp};
+//				filteredSensors["engine_thrust_mz"] = {resultMatrix[5][0], thrustTimestamp};
+//				filteredSensors["engine_thrust_sum"] = {thrustSum, thrustTimestamp};
+//			}
+//		}
+
+	    if (filteredSensors.find("pmu_barometer:sensor") != filteredSensors.end())
+	    {
+	        uint64_t timestamp = utils::getCurrentTimestamp();
+	        double baro = std::get<0>(filteredSensors["pmu_barometer:sensor"]);
+	        double height = 0.3048 * (1 - pow((baro / 1013.25), 0.190284)) * 145366.45;
+	        filteredSensors["pmu_altitude:sensor"] = {height, timestamp};
+	    }
+
+	    if (filteredSensors.find("rcu_barometer:sensor") != filteredSensors.end())
+	    {
+	        uint64_t timestamp = utils::getCurrentTimestamp();
+	        double baro = std::get<0>(filteredSensors["rcu_barometer:sensor"]);
+	        double height = 0.3048 * (1 - pow((baro / 1013.25), 0.190284)) * 145366.45;
+	        filteredSensors["rcu_altitude:sensor"] = {height, timestamp};
+	    }
+
+		//TODO: reconsider if states should be iterated here or
+		//sent directly to a new setStates of the state controller
+		for (auto &sensor : filteredSensors)
+		{
+			stateController->SetState(sensor.first, std::get<0>(sensor.second), std::get<1>(sensor.second));
+		}
+	}
+
+	Debug::print("Stopped FilterSensorsThread");
 }
 
 std::map<std::string, std::tuple<double, uint64_t>> LLInterface::GetLatestSensorData()
 {
     return canManager->GetLatestSensorData();
-}
-
-void LLInterface::StopFilterSensors()
-{
-    Debug::print("Stopped Sensor State Timer...");
 }
 
 nlohmann::json LLInterface::StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states)
@@ -401,20 +406,4 @@ nlohmann::json LLInterface::GetStates(nlohmann::json &stateNames)
 void LLInterface::SetState(std::string stateName, double value, uint64_t timestamp)
 {
     stateController->SetState(stateName, value, timestamp);
-}
-
-void LLInterface::TurnRed()
-{
-}
-
-void LLInterface::TurnGreen()
-{
-}
-
-void LLInterface::TurnYellow()
-{
-}
-
-void LLInterface::BeepRed()
-{
 }
