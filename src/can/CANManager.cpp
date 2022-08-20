@@ -89,9 +89,24 @@ CANResult CANManager::Init()
 				                            std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
 			}
 
+            bool noUserInputStart = false;
+            try
+            {
+            	noUserInputStart = std::get<bool>(Config::getData("no_user_input_start"));
+            }
+            catch(std::exception& e)
+            {
+            	Debug::print("no_user_input_start not found in config, using default false");
+            }
+
             Debug::print("Retreiving CANHardware info...");
-			Debug::print("---Press enter to send node request---");
-    		std::cin.get();
+
+            if(!noUserInputStart)
+            {
+				Debug::print("---Press enter to send node request---");
+				std::cin.get();
+            }
+
             RequestCANInfo(canDriver, canBusChannelIDs);
 			if (use_lora)
 			{
@@ -104,16 +119,29 @@ CANResult CANManager::Init()
             uint32_t currNodeCount = 0;
 
             bool canceled = false;
-            std::future<bool> future = std::async([](){
-                    std::cin.get();
-                    return true;
-                });
+            std::future<bool> future;
+            if(!noUserInputStart)
+            {
+				future = std::async([](){
+						std::cin.get();
+						return true;
+					});
+            }
 			
 			uint32_t counter = 0;
+			uint32_t counterTimeout = 0;
             do {
-                Debug::print("Waiting for nodes %d of %d, press enter to continue...", currNodeCount, nodeCount);
-                if (future.wait_for(500ms) == std::future_status::ready)
-                    canceled = true;
+                if(noUserInputStart)
+				{
+                	Debug::print("Waiting for nodes %d of %d...", currNodeCount, nodeCount);
+                	usleep(500000);
+                }
+                else
+                {
+                	Debug::print("Waiting for nodes %d of %d, press enter to continue...", currNodeCount, nodeCount);
+					if (future.wait_for(500ms) == std::future_status::ready)
+						canceled = true;
+                }
                 nodeMapMtx.lock();
                 currNodeCount = nodeMap.size();
                 nodeMapMtx.unlock();
@@ -122,6 +150,10 @@ CANResult CANManager::Init()
 					Debug::print("Resending node info...");
 					RequestCANInfo(canDriver, canBusChannelIDs);
 					counter = 0;
+				}
+				if(noUserInputStart)
+				{
+					if(++counterTimeout > 10) canceled = true;
 				}
             }
             while((currNodeCount < nodeCount) && !canceled);
@@ -144,8 +176,13 @@ CANResult CANManager::Init()
             }
             nodeMapMtx.unlock();
 
-            Debug::print("Initialized all nodes, press enter to continue...\n");
-            // no need for std::cin.get(); here, since the thread needs an input to quit
+            Debug::print("Initialized all nodes. \n");
+
+            if(!noUserInputStart)
+			{
+            	Debug::print("Press enter to continue...\n");
+            	std::cin.get();
+			}
 
             initialized = true;
 
