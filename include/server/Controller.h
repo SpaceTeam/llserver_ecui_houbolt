@@ -2,7 +2,7 @@
 #define CONTROLLER_HPP
 
 #include "Socket.h"
-#include "Queue.h"
+#include "utility/RingBuffer.h"
 
 #include <memory>
 
@@ -10,14 +10,14 @@ class Controller {
 private:
 	Socket socket;
 
-	std::shared_ptr<Queue> request_queue;
-	std::shared_ptr<Queue> response_queue;
+	std::shared_ptr<RingBuffer<int>> request_queue;
+	std::shared_ptr<RingBuffer<int>> response_queue;
 
 	void read_loop(void);
 	void write_loop(void);
 
 public:
-	Controller(std::shared_ptr<Queue>&, std::shared_ptr<Queue>&);
+	Controller(std::shared_ptr<RingBuffer<int>>&, std::shared_ptr<RingBuffer<int>>&);
 	~Controller() = default;
 
 	void run(void);
