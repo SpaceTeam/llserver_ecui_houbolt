@@ -47,6 +47,7 @@ class CANManager : public Singleton<CANManager>
     
 	private:
 
+		bool use_lora = false;
 
 		CANDriver *canDriver;
 		CANDriver *loraDriver;
