@@ -9,6 +9,8 @@
 #include <system_error>
 #include <memory>
 
+#include "control_flag.h"
+
 #include "server/Controller.h"
 #include "server/Dispatcher.h"
 #include "utility/RingBuffer.h"

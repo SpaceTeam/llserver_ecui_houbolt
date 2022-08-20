@@ -1,5 +1,7 @@
 #include "server/Dispatcher.h"
 
+#include "control_flag.h"
+
 #include <iostream>
 
 Dispatcher::Dispatcher(
