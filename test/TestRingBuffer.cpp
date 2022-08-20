@@ -14,5 +14,12 @@ TEST(WritingAndReadingFromRingBuffer, ReadingAndWriting) {
 TEST(WritingAndReadingFromRingBuffer, ReadTimeoutShouldThrowException) {
   RingBuffer r = RingBuffer<int>();
   EXPECT_ANY_THROW(r.pop());
-  sleep(1);
+}
+
+TEST(WritingAndReadingFromRingBuffer, WriteTimeoutShouldThrowException) {
+  RingBuffer r = RingBuffer<int>();
+  for(int i = 0; i < r.RING_BUFFER_SIZE; i++){
+    r.push(i);
+  }
+  EXPECT_ANY_THROW(r.push(0));
 }
