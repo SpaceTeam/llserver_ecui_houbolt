@@ -1,4 +1,4 @@
-#include "server/Socket.h"
+#include "server/SocketClient.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -10,8 +10,8 @@
 #include <system_error>
 #include <stdexcept>
 
-Socket::Socket(
-	std::string ip,
+SocketClient::SocketClient(
+	std::string hostname,
 	std::string port
 ) {
 	// build socket
@@ -24,7 +24,7 @@ Socket::Socket(
 	int error;
 
 	struct addrinfo *address_info;
-	error = getaddrinfo(ip.c_str(), port.c_str(), &hints, &address_info);
+	error = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &address_info);
 	if (error != 0) {
 		freeaddrinfo(address_info);
 		throw std::system_error(errno, std::generic_category(), std::string("could not get address info: ") + gai_strerror(error));
@@ -39,7 +39,7 @@ Socket::Socket(
 	error = connect(socket_fd, address_info->ai_addr, address_info->ai_addrlen);
 	freeaddrinfo(address_info);
 	if (error != 0) {
-		throw std::system_error(errno, std::generic_category(), std::string("could not connect to: ") + ip + ":" + port);
+		throw std::system_error(errno, std::generic_category(), std::string("could not connect to: ") + hostname + ":" + port);
 	}
 
 	// allocate payload buffer
@@ -50,7 +50,7 @@ Socket::Socket(
 }
 
 
-Socket::~Socket(
+SocketClient::~SocketClient(
 	void
 ) {
 	close(socket_fd);
@@ -62,7 +62,7 @@ Socket::~Socket(
 
 
 std::string
-Socket::receive_message(
+SocketClient::receive_message(
 	void
 ) {
 	uint16_t payload_size;
@@ -95,7 +95,7 @@ Socket::receive_message(
 
 
 void
-Socket::send_message(
+SocketClient::send_message(
 	std::string payload
 ) {
 	if ((size_t) maximum_payload_size < payload.size()) {
