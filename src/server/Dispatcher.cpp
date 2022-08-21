@@ -11,7 +11,7 @@ Dispatcher::Dispatcher(
 {
 	using namespace std;
 
-	unordered_map<string, function<void(string)>> commands = {
+	commands = {
 		{ "states-load"         , nullptr                     },
 		{ "states-get"          , get_states                  },
 		{ "states-set"          , set_states                  },
