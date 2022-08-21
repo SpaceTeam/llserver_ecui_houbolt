@@ -70,6 +70,13 @@ Dispatcher::get_states(
 }
 
 void
+Dispatcher::set_states(
+	std::string message
+) {
+	return;
+}
+
+void
 Dispatcher::start_periodic_transmission(
 	std::string message
 ) {

@@ -22,6 +22,7 @@ public:
 
 private:
 	static void get_states(std::string message);
+	static void set_states(std::string message);
 	static void start_periodic_transmission(std::string message);
 	static void stop_periodic_transmission(std::string message);
 	static void start_sequence(std::string message);

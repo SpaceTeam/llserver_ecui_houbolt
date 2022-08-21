@@ -34,14 +34,16 @@ void
 Controller::read_loop(
 	void
 ) {
+	using namespace std;
+
 	extern volatile sig_atomic_t finished;
 
-	std::optional<std::string> tmp = std::nullopt;
+	optional<string> tmp = nullopt;
 
 	while(!finished) {
 		try {
-			if (tmp == std::nullopt) {
-				tmp = std::make_optional<std::string>(socket.receive_message());
+			if (tmp == nullopt) {
+				tmp = make_optional<string>(socket.receive_message());
 			}
 
 			request_queue->push(tmp.value());
@@ -61,14 +63,16 @@ void
 Controller::write_loop(
 	void
 ) {
-	extern volatile sig_atomic_t finished;
+	using namespace std;
 
-	std::optional<std::string> tmp = std::nullopt;
+	extern volatile sig_atomic_t finished;
+	
+	optional<string> tmp = nullopt;
 
 	while(!finished) {
 		try {
-			if (tmp == std::nullopt) {
-				tmp = std::make_optional<std::string>(request_queue->pop());
+			if (tmp == nullopt) {
+				tmp = make_optional<string>(request_queue->pop());
 			}
 
 			socket.send_message(tmp.value());
