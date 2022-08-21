@@ -11,13 +11,12 @@
  */
 template<typename ElementType>
 class RingBuffer {
-
 public:
 	// Variables for setup
 	const static int RING_BUFFER_SIZE = 128;
 	const std::chrono::milliseconds TIMEOUT{1000};
 
- private:
+private:
 	ElementType buffer[RING_BUFFER_SIZE];
 
 	// Pointer for reading and writing position
@@ -33,7 +32,6 @@ public:
 	std::counting_semaphore<RING_BUFFER_SIZE> unwritten_elements{RING_BUFFER_SIZE};
 
 public:
-
 	RingBuffer(void) = default;
 	~RingBuffer(void) = default;
 
