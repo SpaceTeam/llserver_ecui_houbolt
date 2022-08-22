@@ -18,7 +18,11 @@ RUN git clone -q https://github.com/google/googletest.git /googletest \
 
 COPY . ./
 
-RUN cmake .; make; make install
+RUN cmake .
+
+RUN make
+
+RUN make install
 
 RUN ./test_llserver_ecui_houbolt
 
