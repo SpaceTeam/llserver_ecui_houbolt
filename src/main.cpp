@@ -161,10 +161,11 @@ main(
 
 	// TODO: read config
 
-	set_scheduling_priority(60);
-	set_latency_target();
+//	set_scheduling_priority(60);
+//	set_latency_target();
 
-	std::shared_ptr<RingBuffer<std::string>> response_queue, request_queue;
+	std::shared_ptr<RingBuffer<std::string>> response_queue(new RingBuffer<std::string>());
+	std::shared_ptr<RingBuffer<std::string>> request_queue(new RingBuffer<std::string>());
 
 	// NOTE(Lukas Karafiat): In a normal web server the dispatcher would
 	//     be integrated into the controller, but if we want to hold more
@@ -172,7 +173,7 @@ main(
 	//     to be done, so I split it up.  Ordering will be done via a
 	//     ring buffer.
 	Dispatcher dispatcher = Dispatcher(response_queue, request_queue);
-	Controller controller = Controller(response_queue, request_queue);
+	Controller controller = Controller("8080", response_queue, request_queue);
 
 	std::jthread dispatcher_thread(&Dispatcher::run, dispatcher);
 	controller.run();

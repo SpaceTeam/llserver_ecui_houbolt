@@ -21,7 +21,7 @@ struct is_chrono_duration<std::chrono::duration<Rep, Period>>
  * Multiple threads can read and write without race-conditions.
  * This class is thread-safe (critical section).
  */
-template<typename ElementType, int ring_buffer_size = 32, typename Duration = std::chrono::milliseconds, int timeout_length = 1000>
+template<typename ElementType, int ring_buffer_size = 32, typename Duration = std::chrono::milliseconds, int timeout_length = 1>
 class RingBuffer {
 private:
 	static_assert(is_chrono_duration<Duration>::value, "duration must be a std::chrono::duration");

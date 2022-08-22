@@ -39,6 +39,7 @@ SocketClient::SocketClient(
 	error = connect(socket_fd, address_info->ai_addr, address_info->ai_addrlen);
 	freeaddrinfo(address_info);
 	if (error != 0) {
+		close(socket_fd);
 		throw std::system_error(errno, std::generic_category(), std::string("could not connect to: ") + hostname + ":" + port);
 	}
 
@@ -73,7 +74,7 @@ SocketClient::receive_message(
 	error = recv(socket_fd, &payload_size, sizeof(payload_size), MSG_DONTWAIT);
 	if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
 		// TODO: find good exception name
-		throw;
+		throw std::exception();
 
 	} else if (error == -1) {
 		throw std::system_error(errno, std::generic_category(), "could not receive data from connection");
@@ -83,7 +84,7 @@ SocketClient::receive_message(
 	error = recv(socket_fd, payload_buffer, payload_size, MSG_DONTWAIT);
 	if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
 		// TODO: find good exception name
-		throw;
+		throw std::exception();
 
 	} else if (error == -1) {
 		throw std::system_error(errno, std::generic_category(), "could not receive data from connection");
