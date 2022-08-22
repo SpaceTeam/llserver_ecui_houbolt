@@ -1,10 +1,10 @@
-#ifndef SOCKET_CLIENT_HPP
-#define SOCKET_CLIENT_HPP
+#ifndef WEB_SOCKET_CLIENT_HPP
+#define WEB_SOCKET_CLIENT_HPP
 
 #include <string>
 #include <climits>
 
-class SocketClient {
+class WebSocketClient {
 private:
 	int socket_fd;
 
@@ -14,12 +14,12 @@ private:
 	char *payload_buffer;
 
 public:
-	SocketClient() = delete;
-	explicit SocketClient(std::string hostname, std::string port);
-	~SocketClient(void);
+	WebSocketClient() = delete;
+	explicit WebSocketClient(std::string hostname, std::string port);
+	~WebSocketClient(void);
 
 	std::string receive_message(void);
 	void send_message(std::string message);
 };
 
-#endif /* SOCKET_CLIENT_HPP */
+#endif /* WEB_SOCKET_CLIENT_HPP */

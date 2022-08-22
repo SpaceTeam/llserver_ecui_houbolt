@@ -1,5 +1,5 @@
-#ifndef CONTROLLER_HPP
-#define CONTROLLER_HPP
+#ifndef WEB_SOCKET_HPP
+#define WEB_SOCKET_HPP
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -14,7 +14,7 @@
 #include "utility/RingBuffer.h"
 
 template<int concurrent_connection_count = 1024>
-class Controller {
+class WebSocket {
 private:
 	int socket_fd;
 	int connection_fds[concurrent_connection_count];
@@ -36,24 +36,24 @@ private:
 	void send_message(int index, std::string message);
 
 public:
-	Controller() = delete;
-	explicit Controller(std::string port, std::shared_ptr<RingBuffer<std::string>>&request_queue, std::shared_ptr<RingBuffer<std::string>>&response_queue);
-	~Controller();
+	WebSocket() = delete;
+	explicit WebSocket(std::string port, std::shared_ptr<RingBuffer<std::string>>&request_queue, std::shared_ptr<RingBuffer<std::string>>&response_queue);
+	~WebSocket();
 
 	// non copyable
-	Controller(Controller const &) = delete;
-	void operator=(Controller const &x) = delete;
+	WebSocket(WebSocket const &) = delete;
+	void operator=(WebSocket const &x) = delete;
 
 	// movable
-	Controller(Controller &&) = default;
-	Controller& operator=(Controller &&x) = default;
+	WebSocket(WebSocket &&) = default;
+	WebSocket& operator=(WebSocket &&x) = default;
 
 	void run(void);
 };
 
 
 template<int concurrent_connection_count>
-Controller<concurrent_connection_count>::Controller(
+WebSocket<concurrent_connection_count>::WebSocket(
 	std::string port,
 	std::shared_ptr<RingBuffer<std::string>>&request_queue,
 	std::shared_ptr<RingBuffer<std::string>>&response_queue
@@ -110,7 +110,7 @@ Controller<concurrent_connection_count>::Controller(
 
 
 template<int concurrent_connection_count>
-Controller<concurrent_connection_count>::~Controller(
+WebSocket<concurrent_connection_count>::~WebSocket(
 	void
 ) {
 	close(socket_fd);
@@ -127,7 +127,7 @@ Controller<concurrent_connection_count>::~Controller(
 
 template<int concurrent_connection_count>
 void
-Controller<concurrent_connection_count>::run(
+WebSocket<concurrent_connection_count>::run(
 	void
 ) {
 	extern volatile sig_atomic_t finished;
@@ -144,7 +144,7 @@ Controller<concurrent_connection_count>::run(
 
 template<int concurrent_connection_count>
 void
-Controller<concurrent_connection_count>::accept_connection(
+WebSocket<concurrent_connection_count>::accept_connection(
 	void
 ) {
 	int connection_fd = accept(socket_fd, NULL, NULL);
@@ -169,7 +169,7 @@ Controller<concurrent_connection_count>::accept_connection(
 
 template<int concurrent_connection_count>
 void
-Controller<concurrent_connection_count>::read_connections(
+WebSocket<concurrent_connection_count>::read_connections(
 	void
 ) {
 	if (request_buffer.has_value()) {
@@ -210,7 +210,7 @@ Controller<concurrent_connection_count>::read_connections(
 
 template<int concurrent_connection_count>
 std::optional<std::string>
-Controller<concurrent_connection_count>::receive_message(
+WebSocket<concurrent_connection_count>::receive_message(
 	int index
 ) {
 	uint16_t payload_size;
@@ -254,7 +254,7 @@ Controller<concurrent_connection_count>::receive_message(
 
 template<int concurrent_connection_count>
 void
-Controller<concurrent_connection_count>::write_connections(
+WebSocket<concurrent_connection_count>::write_connections(
 	void
 ) {
 	std::string message;
@@ -284,7 +284,7 @@ Controller<concurrent_connection_count>::write_connections(
 
 template<int concurrent_connection_count>
 void
-Controller<concurrent_connection_count>::send_message(
+WebSocket<concurrent_connection_count>::send_message(
 	int index,
 	std::string payload
 ) {
@@ -309,4 +309,4 @@ Controller<concurrent_connection_count>::send_message(
 	return;
 }
 
-#endif /* CONTROLLER_HPP */
+#endif /* WEB_SOCKET_HPP */

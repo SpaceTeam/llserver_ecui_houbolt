@@ -1,4 +1,4 @@
-#include "server/SocketClient.h"
+#include "WebSocketClient.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -10,7 +10,7 @@
 #include <system_error>
 #include <stdexcept>
 
-SocketClient::SocketClient(
+WebSocketClient::WebSocketClient(
 	std::string hostname,
 	std::string port
 ) {
@@ -51,7 +51,7 @@ SocketClient::SocketClient(
 }
 
 
-SocketClient::~SocketClient(
+WebSocketClient::~WebSocketClient(
 	void
 ) {
 	close(socket_fd);
@@ -63,7 +63,7 @@ SocketClient::~SocketClient(
 
 
 std::string
-SocketClient::receive_message(
+WebSocketClient::receive_message(
 	void
 ) {
 	uint16_t payload_size;
@@ -96,7 +96,7 @@ SocketClient::receive_message(
 
 
 void
-SocketClient::send_message(
+WebSocketClient::send_message(
 	std::string payload
 ) {
 	if ((size_t) maximum_payload_size < payload.size()) {

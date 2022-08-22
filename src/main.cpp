@@ -11,8 +11,8 @@
 
 #include "control_flag.h"
 
-#include "server/Controller.h"
-#include "server/Dispatcher.h"
+#include "WebSocket.h"
+#include "Dispatcher.h"
 #include "utility/RingBuffer.h"
 
 struct options {
@@ -173,7 +173,7 @@ main(
 	//     to be done, so I split it up.  Ordering will be done via a
 	//     ring buffer.
 	Dispatcher dispatcher = Dispatcher(response_queue, request_queue);
-	Controller controller = Controller("8080", response_queue, request_queue);
+	WebSocket controller = WebSocket("8080", response_queue, request_queue);
 
 	std::jthread dispatcher_thread(&Dispatcher::run, dispatcher);
 	controller.run();

@@ -1,4 +1,4 @@
-#include "server/Dispatcher.h"
+#include "Dispatcher.h"
 
 #include "control_flag.h"
 
