@@ -8,21 +8,19 @@ ENV TZ="Europe/Vienna"
 
 RUN apt-get update -y && apt-get upgrade -y && apt-get install tzdata -y
 
-RUN apt-get install git make cmake g++23 build-essential -y
-
-RUN git clone -q https://github.com/google/googletest.git /googletest \
-  && mkdir -p /googletest/build \
-  && cd /googletest/build \
-  && cmake .. && make && make install \
-  && cd / && rm -rf /googletest
+RUN apt-get install git make cmake g++23 build-essential curl libcurl4-openssl-dev -y
 
 COPY . ./
 
-RUN cmake .
+RUN git clone https://github.com/offa/influxdb-cxx  \
+    && cd influxdb-cxx  \
+    && mkdir build; cd build \
+    && cmake -D INFLUXCXX_TESTING:BOOL=OFF -D INFLUXCXX_WITH_BOOST:BOOL=OFF .. \
+    && make install \
+    && cd ..; cd .. \
+    && rm -r influxdb-cxx
 
-RUN make
-
-RUN make install
+RUN cmake .; make; make install
 
 RUN ./test_llserver_ecui_houbolt
 

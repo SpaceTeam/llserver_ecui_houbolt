@@ -1,0 +1,14 @@
+version: "3.3"
+services:
+  llserver_ecui_houbold:
+   build: .
+
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+      - "8090:8090"
+      - "2003:2003"
+    # if dota should be stored make volumen on real system
