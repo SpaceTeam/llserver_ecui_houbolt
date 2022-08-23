@@ -10,8 +10,6 @@ RUN apt-get update -y && apt-get upgrade -y && apt-get install tzdata -y
 
 RUN apt-get install git make cmake g++23 build-essential curl libcurl4-openssl-dev -y
 
-COPY . ./
-
 RUN git clone https://github.com/offa/influxdb-cxx  \
     && cd influxdb-cxx  \
     && mkdir build; cd build \
@@ -19,6 +17,8 @@ RUN git clone https://github.com/offa/influxdb-cxx  \
     && make install \
     && cd ..; cd .. \
     && rm -r influxdb-cxx
+
+COPY . ./
 
 RUN cmake .; make; make install
 
