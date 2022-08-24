@@ -84,16 +84,20 @@ setup_signal_handling(
 	void
 ) {
 	//extern int errno;
+	struct sigaction signal_action = {
+		.sa_handler = signal_handler,
+		.sa_flags = 0,
+	};
 
-	if (signal(SIGINT, signal_handler) == SIG_ERR) {
+	if (sigaction(SIGINT, signal_action) == SIG_ERR) {
 		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGINT");
 	}
 
-	if (signal(SIGTERM, signal_handler) == SIG_ERR) {
+	if (sigaction(SIGTERM, signal_action) == SIG_ERR) {
 		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGTERM");
 	}
 
-	if (signal(SIGABRT, signal_handler) == SIG_ERR) {
+	if (sigaction(SIGABRT, &signal_action) == SIG_ERR) {
 		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGABRT");
 	}
 

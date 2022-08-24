@@ -225,7 +225,7 @@ WebSocket<concurrent_connection_count>::receive_message(
 
 		return std::nullopt;
 
-	} else if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+	} else if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)) {
 		// TODO: find good exception name
 		throw std::exception();
 
@@ -302,7 +302,10 @@ WebSocket<concurrent_connection_count>::send_message(
 	}
 
 	error = send(connection_fds[index], payload.c_str(), payload.size(), 0);
-	if (error == -1) {
+	if (error == -1 && errno == EINTR) {
+		return;
+
+	} else if (error == -1) {
 		throw std::system_error(errno, std::generic_category(), "could not send data to connection");
 	}
 
