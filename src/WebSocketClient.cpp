@@ -70,19 +70,16 @@ void
 WebSocketClient::read_connections(
 	void
 ) {
-	if (request_buffer.has_value()) {
-		try {
-			request_queue->push(request_buffer.value());
-			request_buffer.reset();
+	if (!request_buffer.has_value()) {
+		request_buffer = receive_message();
 
-		} catch(...) {
-			// NOTE(Lukas Karafiat): the stored message could not be pushed onto
-			//     the queue so we have to try again later
-			return;
+	} else {
+		bool push_successful = request_queue->push(request_buffer.value());
+
+		if (push_successful) {
+			request_buffer.reset();
 		}
 	}
-
-	request_buffer = receive_message();
 
 	return;
 }
@@ -105,8 +102,7 @@ WebSocketClient::receive_message(
 		return std::nullopt;
 
 	} else if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-		// TODO: find good exception name
-		throw std::exception();
+		return std::nullopt;
 
 	} else if (error == -1) {
 		throw std::system_error(errno, std::generic_category(), "could not receive data from connection");
@@ -135,16 +131,11 @@ void
 WebSocketClient::write_connections(
 	void
 ) {
-	std::string message;
-
 	// NOTE(Lukas Karafiat): we could read more than one response from the
 	//     queue, but not infinite as it could result in a life lock
-	try {
-		message = response_queue->pop();
+	std::optional<std::string> message_buffer = response_queue->pop();
 
-	} catch(...) {
-		// NOTE(Lukas Karafiat): could not pop any message of the queue so we
-		//     have to try again later
+	if (!message_buffer.has_value()) {
 		return;
 	}
 
@@ -152,7 +143,7 @@ WebSocketClient::write_connections(
 		return;
 	}
 
-	send_message(message);
+	send_message(message_buffer.value());
 
 	return;
 }

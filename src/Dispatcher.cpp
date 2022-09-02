@@ -38,9 +38,15 @@ Dispatcher::run(
 	std::string message;
 
 	while (!finished) {
-		try {
-			message = request_queue->pop();
+		std::optional<std::string> message_buffer = request_queue->pop();
 
+		if (!message_buffer.has_value()) {
+			continue;
+		}
+
+		message = message_buffer.value();
+
+		try {
 			commands.at(message)(message);
 
 		} catch (const std::out_of_range& e) {
@@ -52,10 +58,6 @@ Dispatcher::run(
 		} catch (const std::exception& e) {
 			// NOTE(Lukas Karafiat): commands can fail, these will be logged and ignored
 			// TODO: logging
-
-		} catch(...) {
-			// NOTE(Lukas Karafiat): due to previous deadlock behaviour of push() and receive_message()
-			//     a timeout will be thrown and finished flag has to be checked again
 		}
 	}
 
