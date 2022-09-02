@@ -6,9 +6,9 @@ LABEL maintainer=christofer.held@spaceteam.at
 
 ENV TZ="Europe/Vienna"
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get install tzdata -y
+RUN apt-get update -y && apt-get upgrade -y && apt-get install tzdata libcurl4-openssl-dev -y
 
-RUN apt-get install git make cmake g++23 build-essential libcurl4-openssl-dev -y
+RUN apt-get install git make cmake g++23 build-essential -y
 
 RUN git clone https://github.com/offa/influxdb-cxx  \
     && cd influxdb-cxx  \
