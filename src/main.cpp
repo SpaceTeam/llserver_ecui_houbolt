@@ -84,20 +84,21 @@ setup_signal_handling(
 	void
 ) {
 	//extern int errno;
-	struct sigaction signal_action = {
-		.sa_handler = signal_handler,
-		.sa_flags = 0,
-	};
 
-	if (sigaction(SIGINT, signal_action) == SIG_ERR) {
+	struct sigaction signal_action{};
+
+	signal_action.sa_handler = signal_handler;
+	signal_action.sa_flags = 0;
+
+	if (sigaction(SIGINT, &signal_action, NULL) == -1) {
 		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGINT");
 	}
 
-	if (sigaction(SIGTERM, signal_action) == SIG_ERR) {
+	if (sigaction(SIGTERM, &signal_action, NULL) == -1) {
 		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGTERM");
 	}
 
-	if (sigaction(SIGABRT, &signal_action) == SIG_ERR) {
+	if (sigaction(SIGABRT, &signal_action, NULL) == -1) {
 		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGABRT");
 	}
 
@@ -175,7 +176,7 @@ main(
 	//     be integrated into the controller, but if we want to hold more
 	//     connections than one, a sequential dispatch of intructions has
 	//     to be done, so I split it up.  Ordering will be done via a
-	//     ring buffer.
+	//     queue (ring buffer).
 	Dispatcher dispatcher = Dispatcher(response_queue, request_queue);
 	WebSocket controller = WebSocket("8080", response_queue, request_queue);
 
