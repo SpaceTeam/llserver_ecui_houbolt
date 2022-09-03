@@ -1,4 +1,4 @@
-#include "WebSocketClient.h"
+#include "utility/WebSocketClient.h"
 
 WebSocketClient::WebSocketClient(
 	std::string hostname,
