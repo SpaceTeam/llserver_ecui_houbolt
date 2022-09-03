@@ -14,6 +14,7 @@
 #include "WebSocket.h"
 #include "Dispatcher.h"
 #include "utility/RingBuffer.h"
+#include "utility/Logger.h"
 
 struct options {
 	std::string config_path = "config";
@@ -102,6 +103,8 @@ setup_signal_handling(
 		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGABRT");
 	}
 
+	log<Severity::DEBUG>("main.cpp", "set signal handlers");
+
 	return;
 }
 
@@ -115,6 +118,8 @@ set_scheduling_priority(
 	scheduling_parameters.sched_priority = 60;
 
 	sched_setscheduler(0, SCHED_FIFO, &scheduling_parameters);
+
+	log<Severity::DEBUG>("main.cpp", "set scheduling priority");
 
 	return;
 }
@@ -142,6 +147,8 @@ set_latency_target(
 		latency_target_file << latency_target_value;
 	}
 
+	log<Severity::DEBUG>("main.cpp", "turned off management");
+
 	// NOTE(Lukas Karafiat): file handle should be left open as power management would be reset
 	return latency_target_file;
 }
@@ -161,6 +168,8 @@ main(
 	if (argc != 0) {
 		usage();
 	}
+
+	log<Severity::DEBUG>("main.cpp", "config path: " + options.config_path);
 
 	setup_signal_handling();
 

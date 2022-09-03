@@ -53,20 +53,20 @@ add_test(Name test_${PROJECT_NAME} COMMAND test_${PROJECT_NAME})
 include(GoogleTest)
 gtest_discover_tests(test_${PROJECT_NAME})
 
-# Libary linking
 
+add_compile_definitions(LOG_CONSOLE)
+
+
+# Libary linking
 if(UNIX AND NOT APPLE)
     if(NO_CANLIB)
-        #target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic -lpython3.8)
         target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic InfluxData::InfluxDB)
     else()
-        #target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic -lcanlib -lpython3.8)
         target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic InfluxData::InfluxDB)
     endif()
 else()
-   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads InfluxData::InfluxDB)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads InfluxData::InfluxDB)
 endif()
 
-target_link_libraries(test_${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_lib GTest::gtest_main -latomic -lpthread -lstdc++fs)
-
+target_link_libraries(test_${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_lib GTest::gtest_main Threads::Threads -latomic -lstdc++fs)
 
