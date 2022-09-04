@@ -1,6 +1,3 @@
-//
-// Created by Christofer Held on 13.08.22.
-//
 #include <gtest/gtest.h>
 
 #include <memory>

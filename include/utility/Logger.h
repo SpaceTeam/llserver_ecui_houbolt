@@ -47,7 +47,7 @@ log(
 		}
 
 		if constexpr (log_to_file) {
-			std::ofstream log_file(LOG_FILE_PATH, std::ios_base::app | std::ios_base::out);
+			std::ofstream log_file(log_file_path, std::ios_base::app | std::ios_base::out);
 			log_file << log_message.str();
 			log_file.close();
 		}

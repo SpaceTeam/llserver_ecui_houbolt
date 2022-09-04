@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   llserver_ecui_houbold:
-   build: .
+    build: .
 
   influxdb:
     image: influxdb:latest
