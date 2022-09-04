@@ -11,4 +11,8 @@ services:
       - "8086:8086"
       - "8090:8090"
       - "2003:2003"
-    # if dota should be stored make volumen on real system
+    expose:
+      - 8083
+      - 8086
+      - 8090
+      - 2003

@@ -22,7 +22,7 @@ find_package(InfluxDB)
 
 #add_subdirectory(${LIB_FILES})
 
-add_executable(${PROJECT_NAME} ${SRC_FILES} ${INCL_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${INCL_FILES} src/logging/Logger.cpp)
 add_library(${PROJECT_NAME}_lib ${SRC_FILES} ${INCL_FILES})
 add_executable(test_${PROJECT_NAME} ${TEST_FILES})
 

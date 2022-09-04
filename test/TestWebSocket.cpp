@@ -9,7 +9,7 @@
 #include <optional>
 
 #include "WebSocket.h"
-#include "WebSocketClient.h"
+#include "utility/WebSocketClient.h"
 #include "control_flag.h"
 
 volatile sig_atomic_t finished = false;
