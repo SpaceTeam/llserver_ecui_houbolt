@@ -32,6 +32,10 @@ log(
 
 	log_message << severity_names[severity] << ":" << source << ":" << iso_time << "\t\t" << message << std::endl;
 
+	if (severity < MINIMUM_SEVERITY) {
+		return;
+	}
+
 #ifdef LOG_CONSOLE
 	if (severity < Severity::WARNING) {
 		std::cout << log_message.str();
@@ -39,6 +43,18 @@ log(
 	} else {
 		std::cerr << log_message.str();
 	}
+#endif
+
+#ifdef LOG_FILE
+	{
+		std::ofstream log_file(LOG_FILE_PATH, std::ios_base::app | std::ios_base::out);
+		log_file << log_message.str();
+		log_file.close();
+	}
+#endif
+
+#ifdef LOG_INFLUX
+	// TODO(Christofer Held): implement this
 #endif
 
 	return;

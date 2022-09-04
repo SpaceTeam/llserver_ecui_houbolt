@@ -4,7 +4,7 @@ project(llserver_ecui_houbolt)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED)
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
 
 include_directories(include)
 
@@ -14,7 +14,7 @@ file(GLOB LIB_FILES lib/[a-zA-Z]*)
 file(GLOB_RECURSE TEST_FILES test/*)
 
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
-    message(FATAL_ERROR "Require at least gcc-10.0")
+	message(FATAL_ERROR "Require at least gcc-10.0")
 endif()
 
 find_package(Threads REQUIRED)
@@ -37,9 +37,9 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC ${LIB_FILES})
 # Google Test stuff
 include(FetchContent)
 FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG release-1.12.1
+		googletest
+		GIT_REPOSITORY https://github.com/google/googletest.git
+		GIT_TAG release-1.12.1
 )
 
 # For Windows: Prevent overriding the parent project's compiler/linker settings
@@ -54,18 +54,20 @@ include(GoogleTest)
 gtest_discover_tests(test_${PROJECT_NAME})
 
 
+add_compile_definitions(MINIMUM_SEVERITY=0)
 add_compile_definitions(LOG_CONSOLE)
+add_compile_definitions(LOG_FILE LOG_FILE_PATH="log")
 
 
 # Libary linking
 if(UNIX AND NOT APPLE)
-    if(NO_CANLIB)
-        target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic InfluxData::InfluxDB)
-    else()
-        target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic InfluxData::InfluxDB)
-    endif()
+	if(NO_CANLIB)
+		target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic InfluxData::InfluxDB)
+	else()
+		target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic InfluxData::InfluxDB)
+	endif()
 else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads InfluxData::InfluxDB)
+	target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads InfluxData::InfluxDB)
 endif()
 
 target_link_libraries(test_${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_lib GTest::gtest_main Threads::Threads -latomic -lstdc++fs)
