@@ -53,12 +53,6 @@ add_test(Name test_${PROJECT_NAME} COMMAND test_${PROJECT_NAME})
 include(GoogleTest)
 gtest_discover_tests(test_${PROJECT_NAME})
 
-
-add_compile_definitions(MINIMUM_SEVERITY=0)
-add_compile_definitions(LOG_CONSOLE)
-add_compile_definitions(LOG_FILE LOG_FILE_PATH="log")
-
-
 # Libary linking
 if(UNIX AND NOT APPLE)
 	if(NO_CANLIB)
