@@ -1,25 +1,23 @@
 #include "Dispatcher.h"
 
-#include "control_flag.h"
+#include "control_flags.h"
 
 Dispatcher::Dispatcher(
 	std::shared_ptr<RingBuffer<std::string>>& request_queue,
-	std::shared_ptr<RingBuffer<std::string>>& response_queue
+	std::shared_ptr<RingBuffer<std::any>>& command_queue
 ) :
 	request_queue(request_queue),
-	response_queue(response_queue)
+	command_queue(command_queue)
 {
-	using namespace std;
-
 	commands = {
 		{ "states-load"         , nullptr                     },
-		{ "states-get"          , get_states                  },
+		{ "states-get"          , nullptr                     },
 		{ "states-set"          , set_states                  },
 		{ "states-start"        , start_periodic_transmission },
 		{ "states-stop"         , stop_periodic_transmission  },
 		{ "sequence-start"      , start_sequence              },
 		{ "abort"               , abort_sequence              },
-		{ "auto-abort-change"   , change_automatic_abort      },
+		{ "auto-abort-change"   , nullptr                     },
 		{ "send-postseq-comment", nullptr                     },
 		{ "gui-mapping-load"    , nullptr                     },
 		{ "commands-load"       , nullptr                     },
@@ -27,6 +25,13 @@ Dispatcher::Dispatcher(
 		{ "pythonScript-start"  , nullptr                     },
 	};
 
+	return;
+}
+
+
+Dispatcher::~Dispatcher(
+	void
+) {
 	return;
 }
 
@@ -65,13 +70,6 @@ Dispatcher::run(
 }
 
 void
-Dispatcher::get_states(
-	std::string message
-) {
-	return;
-}
-
-void
 Dispatcher::set_states(
 	std::string message
 ) {
@@ -82,6 +80,8 @@ void
 Dispatcher::start_periodic_transmission(
 	std::string message
 ) {
+	log_peripherie_data = true;
+
 	return;
 }
 
@@ -89,6 +89,8 @@ void
 Dispatcher::stop_periodic_transmission(
 	std::string message
 ) {
+	log_peripherie_data = false;
+
 	return;
 }
 
@@ -101,13 +103,6 @@ Dispatcher::start_sequence(
 
 void
 Dispatcher::abort_sequence(
-	std::string message
-) {
-	return;
-}
-
-void
-Dispatcher::change_automatic_abort(
 	std::string message
 ) {
 	return;
