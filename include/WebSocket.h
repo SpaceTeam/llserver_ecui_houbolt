@@ -19,8 +19,8 @@ private:
 	int socket_fd;
 	int connection_fds[concurrent_connection_count];
 
-	std::shared_ptr<RingBuffer<std::string>> request_queue;
 	std::shared_ptr<RingBuffer<std::string>> response_queue;
+	std::shared_ptr<RingBuffer<std::string>> request_queue;
 
 	std::optional<std::string> request_buffer;
 
@@ -37,7 +37,11 @@ private:
 
 public:
 	WebSocket() = delete;
-	explicit WebSocket(std::string port, std::shared_ptr<RingBuffer<std::string>>&request_queue, std::shared_ptr<RingBuffer<std::string>>&response_queue);
+	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
+	explicit WebSocket(
+		std::string port,
+		std::shared_ptr<RingBuffer<std::string>>&response_queue,
+		std::shared_ptr<RingBuffer<std::string>>&request_queue);
 	~WebSocket();
 
 	// non copyable
@@ -55,11 +59,11 @@ public:
 template<int concurrent_connection_count>
 WebSocket<concurrent_connection_count>::WebSocket(
 	std::string port,
-	std::shared_ptr<RingBuffer<std::string>>&request_queue,
-	std::shared_ptr<RingBuffer<std::string>>&response_queue
+	std::shared_ptr<RingBuffer<std::string>>&response_queue,
+	std::shared_ptr<RingBuffer<std::string>>&request_queue
 ) :
-	request_queue(request_queue),
-	response_queue(response_queue)
+	response_queue(response_queue),
+	request_queue(request_queue)
 {
 	// build socket
 	struct addrinfo hints = {

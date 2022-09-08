@@ -7,7 +7,7 @@
 
 #include "WebSocket.h"
 #include "utility/WebSocketClient.h"
-#include "control_flag.h"
+#include "control_flags.h"
 
 volatile sig_atomic_t finished = false;
 // NOTE(Lukas Karafiat): these tests should run sequentially as finished is a
