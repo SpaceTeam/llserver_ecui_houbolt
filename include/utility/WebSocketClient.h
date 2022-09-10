@@ -40,8 +40,8 @@ public:
 	explicit WebSocketClient(
 		std::string hostname,
 		std::string port,
-		std::shared_ptr<RingBuffer<std::string>>&response_queue,
-		std::shared_ptr<RingBuffer<std::string>>&request_queue);
+		std::shared_ptr<RingBuffer<std::string>> &response_queue,
+		std::shared_ptr<RingBuffer<std::string>> &request_queue);
 	~WebSocketClient();
 
 	// non copyable

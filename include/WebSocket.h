@@ -6,6 +6,7 @@
 #include <netdb.h>
 
 #include <climits>
+#include <system_error>
 
 #include <string>
 #include <memory>
@@ -40,8 +41,8 @@ public:
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit WebSocket(
 		std::string port,
-		std::shared_ptr<RingBuffer<std::string>>&response_queue,
-		std::shared_ptr<RingBuffer<std::string>>&request_queue);
+		std::shared_ptr<RingBuffer<std::string>> &response_queue,
+		std::shared_ptr<RingBuffer<std::string>> &request_queue);
 	~WebSocket(void);
 
 	// non copyable
@@ -59,8 +60,8 @@ public:
 template<int concurrent_connection_count>
 WebSocket<concurrent_connection_count>::WebSocket(
 	std::string port,
-	std::shared_ptr<RingBuffer<std::string>>&response_queue,
-	std::shared_ptr<RingBuffer<std::string>>&request_queue
+	std::shared_ptr<RingBuffer<std::string>> &response_queue,
+	std::shared_ptr<RingBuffer<std::string>> &request_queue
 ) :
 	response_queue(response_queue),
 	request_queue(request_queue)

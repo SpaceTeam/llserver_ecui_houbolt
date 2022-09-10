@@ -11,20 +11,20 @@
 
 class ControlLoop {
 private:
-	std::shared_ptr<RingBuffer<std::string>> request_queue;
+	std::shared_ptr<RingBuffer<std::any>> command_queue;
 	std::shared_ptr<RingBuffer<std::string>> response_queue;
 
-	std::shared_ptr<RingBuffer<std::string>> input_queue;
-	std::shared_ptr<RingBuffer<std::string>> output_queue;
+	std::shared_ptr<RingBuffer<struct peripherie_frame>> sensor_queue;
+	std::shared_ptr<RingBuffer<struct peripherie_frame>> actuator_queue;
 
 public:
 	ControlLoop(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit ControlLoop(
-		std::shared_ptr<RingBuffer<std::any>>& command_queue,
-		std::shared_ptr<RingBuffer<std::string>>& response_queue,
-		std::shared_ptr<RingBuffer<struct peripherie_frame>>& sensor_queue,
-		std::shared_ptr<RingBuffer<struct peripherie_frame>>& actuator_queue);
+		std::shared_ptr<RingBuffer<std::any>> &command_queue,
+		std::shared_ptr<RingBuffer<std::string>> &response_queue,
+		std::shared_ptr<RingBuffer<struct peripherie_frame>> &sensor_queue,
+		std::shared_ptr<RingBuffer<struct peripherie_frame>> &actuator_queue);
 	~ControlLoop(void);
 
 	// non copyable

@@ -1,10 +1,11 @@
 #include "Dispatcher.h"
 
 #include "control_flags.h"
+#include "utility/Logger.h"
 
 Dispatcher::Dispatcher(
-	std::shared_ptr<RingBuffer<std::string>>& request_queue,
-	std::shared_ptr<RingBuffer<std::any>>& command_queue
+	std::shared_ptr<RingBuffer<std::string>> &request_queue,
+	std::shared_ptr<RingBuffer<std::any>> &command_queue
 ) :
 	request_queue(request_queue),
 	command_queue(command_queue)
@@ -54,15 +55,17 @@ Dispatcher::run(
 		try {
 			commands.at(message)(message);
 
-		} catch (const std::out_of_range& e) {
+		} catch (const std::out_of_range &e) {
+			// TODO(Lukas Karafiat): this should probably be a log message and no fatal exit
 			throw std::runtime_error("command not supported: " + message);
 
-		} catch (const std::bad_function_call& e) {
+		} catch (const std::bad_function_call &e) {
+			// TODO(Lukas Karafiat): this should probably be a log message and no fatal exit
 			throw std::runtime_error("not implemented: " + message);
 
-		} catch (const std::exception& e) {
+		} catch (const std::exception &e) {
 			// NOTE(Lukas Karafiat): commands can fail, these will be logged and ignored
-			// TODO: logging
+			log<WARNING>("dispatcher", "command '" + message + "' failed");
 		}
 	}
 

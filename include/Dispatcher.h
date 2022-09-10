@@ -22,8 +22,8 @@ public:
 	Dispatcher(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit Dispatcher(
-		std::shared_ptr<RingBuffer<std::string>>& request_queue,
-		std::shared_ptr<RingBuffer<std::any>>& command_queue);
+		std::shared_ptr<RingBuffer<std::string>> &request_queue,
+		std::shared_ptr<RingBuffer<std::any>> &command_queue);
 	~Dispatcher(void);
 
 	// non copyable
