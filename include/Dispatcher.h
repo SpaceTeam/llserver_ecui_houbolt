@@ -19,12 +19,12 @@ private:
 	std::unordered_map<std::string, std::function<void(std::string)>> commands;
 
 public:
-	Dispatcher() = delete;
+	Dispatcher(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit Dispatcher(
 		std::shared_ptr<RingBuffer<std::string>>& request_queue,
 		std::shared_ptr<RingBuffer<std::any>>& command_queue);
-	~Dispatcher();
+	~Dispatcher(void);
 
 	// non copyable
 	Dispatcher(Dispatcher const &) = delete;

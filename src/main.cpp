@@ -8,12 +8,16 @@
 #include <thread>
 #include <system_error>
 #include <memory>
+#include <any>
 
-#include "control_flag.h"
+#include "control_flags.h"
 
 #include "WebSocket.h"
 #include "Dispatcher.h"
+#include "ControlLoop.h"
+#include "Peripherie.h"
 #include "utility/RingBuffer.h"
+#include "peripherie/Frame.h"
 #include "utility/Logger.h"
 
 struct options {
@@ -21,6 +25,7 @@ struct options {
 };
 
 volatile sig_atomic_t finished = false;
+volatile sig_atomic_t log_peripherie_data = false;
 
 
 void
@@ -178,19 +183,32 @@ main(
 //	set_scheduling_priority(60);
 //	set_latency_target();
 
-	std::shared_ptr<RingBuffer<std::string>> response_queue(new RingBuffer<std::string>());
-	std::shared_ptr<RingBuffer<std::string>> request_queue(new RingBuffer<std::string>());
 
-	// NOTE(Lukas Karafiat): In a normal web server the dispatcher would
-	//     be integrated into the controller, but if we want to hold more
-	//     connections than one, a sequential dispatch of intructions has
-	//     to be done, so I split it up.  Ordering will be done via a
-	//     queue (ring buffer).
-	Dispatcher dispatcher = Dispatcher(response_queue, request_queue);
-	WebSocket controller = WebSocket("8080", response_queue, request_queue);
+// 	______________      _______________________      ________________      _______________
+//	|            |      |                     |      |              |      |             |
+//	|            |--2-->| command interpreter |##4##>|              |--0-->|             |
+//	|            |      |    and dispatcher   |#####>|              |      | peripherie  |
+//	| web server |      |_____________________|      | control loop |      |             |
+//	|            |                                   |              |      | read/write  |
+//	|            |                                   |              |      | sensor data |
+//	|            |<----------------3-----------------|              |<--1--|             |
+//	|____________|                                   |______________|      |_____________|
 
-	std::jthread dispatcher_thread(&Dispatcher::run, dispatcher);
-	controller.run();
+	auto   sensor_queue = std::make_shared<RingBuffer<struct peripherie_frame>>();
+	auto actuator_queue = std::make_shared<RingBuffer<struct peripherie_frame>>();
+	auto  request_queue = std::make_shared<RingBuffer<std::string>>();
+	auto response_queue = std::make_shared<RingBuffer<std::string>>();
+	auto  command_queue = std::make_shared<RingBuffer<std::any>>();
+
+	auto   web_socket = WebSocket<1024>("8080", response_queue, request_queue);
+	auto   dispatcher = std::make_shared<Dispatcher>(request_queue, command_queue);
+	auto control_loop = std::make_shared<ControlLoop>(command_queue, response_queue, sensor_queue, actuator_queue);
+	auto   peripherie = std::make_shared<Peripherie>(actuator_queue, sensor_queue);
+
+	auto   peripherie_thread = std::jthread(&Peripherie::run, peripherie);
+	auto control_loop_thread = std::jthread(&ControlLoop::run, control_loop);
+	auto   dispatcher_thread = std::jthread(&Dispatcher::run, dispatcher);
+	auto   web_socket_thread = std::jthread(&WebSocket<1024>::run, std::move(web_socket));
 
 	return EXIT_SUCCESS;
 }

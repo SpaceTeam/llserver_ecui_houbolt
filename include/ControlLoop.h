@@ -18,14 +18,14 @@ private:
 	std::shared_ptr<RingBuffer<std::string>> output_queue;
 
 public:
-	ControlLoop() = delete;
+	ControlLoop(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit ControlLoop(
 		std::shared_ptr<RingBuffer<std::any>>& command_queue,
 		std::shared_ptr<RingBuffer<std::string>>& response_queue,
 		std::shared_ptr<RingBuffer<struct peripherie_frame>>& sensor_queue,
 		std::shared_ptr<RingBuffer<struct peripherie_frame>>& actuator_queue);
-	~ControlLoop();
+	~ControlLoop(void);
 
 	// non copyable
 	ControlLoop(ControlLoop const &) = delete;

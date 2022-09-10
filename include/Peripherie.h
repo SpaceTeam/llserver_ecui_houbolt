@@ -4,6 +4,7 @@
 #include "utility/RingBuffer.h"
 
 #include "peripherie/Frame.h"
+#include "peripherie/can/CANSocket.h"
 
 #include <memory>
 #include <string>
@@ -14,12 +15,12 @@ private:
 	std::shared_ptr<RingBuffer<struct peripherie_frame>> output_queue;
 
 public:
-	Peripherie() = delete;
+	Peripherie(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit Peripherie(
 		std::shared_ptr<RingBuffer<struct peripherie_frame>>&input_queue,
 		std::shared_ptr<RingBuffer<struct peripherie_frame>>&output_queue);
-	~Peripherie();
+	~Peripherie(void);
 
 	// non copyable
 	Peripherie(Peripherie const &) = delete;

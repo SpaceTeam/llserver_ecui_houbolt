@@ -36,13 +36,13 @@ private:
 	void send_message(int index, std::string message);
 
 public:
-	WebSocket() = delete;
+	WebSocket(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit WebSocket(
 		std::string port,
 		std::shared_ptr<RingBuffer<std::string>>&response_queue,
 		std::shared_ptr<RingBuffer<std::string>>&request_queue);
-	~WebSocket();
+	~WebSocket(void);
 
 	// non copyable
 	WebSocket(WebSocket const &) = delete;
