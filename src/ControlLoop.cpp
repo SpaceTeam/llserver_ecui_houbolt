@@ -32,11 +32,19 @@ ControlLoop::run(
 	extern volatile sig_atomic_t finished;
 
 	while (!finished) {
+		// read all available peripherie data
 		auto tmp = sensor_queue->pop();
-
 		if (tmp) {
 			log<DEBUG>("control loop", "sensor value from " + std::to_string(tmp.value().id));
 		}
+
+		// transform peripherie data to sensor data
+		// read sequence command or set state
+		// (sensors, states) -> (states)
+		// (sensors, states) -> (actuators)
+		// transform actuator data to peripherie data
+		// write all available actuator data
+		// occasionally write state data to response_queue
 	}
 
 	return;

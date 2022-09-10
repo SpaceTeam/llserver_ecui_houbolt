@@ -7,7 +7,7 @@
 Peripherie::Peripherie(
 	std::shared_ptr<RingBuffer<struct peripherie_frame>> &actuator_queue,
 	std::shared_ptr<RingBuffer<struct peripherie_frame>> &sensor_queue
-) : 
+) :
 	actuator_queue(actuator_queue),
 	sensor_queue(sensor_queue),
 	can_socket("vcan0")
@@ -59,7 +59,7 @@ void
 Peripherie::write_peripherie(
 	void
 ) {
-	std::optional<struct_peripherie_frame> optional_frame = actuator_queue->pop();
+	std::optional<struct peripherie_frame> optional_frame = actuator_queue->pop();
 
 	if (!optional_frame) {
 		return;

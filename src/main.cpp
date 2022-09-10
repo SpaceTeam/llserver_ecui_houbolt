@@ -201,13 +201,13 @@ main(
 	auto  command_queue = std::make_shared<RingBuffer<std::any>>();
 
 	auto   web_socket = WebSocket<1024>("8080", response_queue, request_queue);
-	auto   dispatcher = std::make_shared<Dispatcher>(request_queue, command_queue);
-	auto control_loop = std::make_shared<ControlLoop>(command_queue, response_queue, sensor_queue, actuator_queue);
-	auto   peripherie = std::make_shared<Peripherie>(actuator_queue, sensor_queue);
+	auto   dispatcher = Dispatcher(request_queue, command_queue);
+	auto control_loop = ControlLoop(command_queue, response_queue, sensor_queue, actuator_queue);
+	auto   peripherie = Peripherie(actuator_queue, sensor_queue);
 
-	auto   peripherie_thread = std::jthread(&Peripherie::run, peripherie);
-	auto control_loop_thread = std::jthread(&ControlLoop::run, control_loop);
-	auto   dispatcher_thread = std::jthread(&Dispatcher::run, dispatcher);
+	auto   peripherie_thread = std::jthread(&Peripherie::run, std::move(peripherie));
+	auto control_loop_thread = std::jthread(&ControlLoop::run, std::move(control_loop));
+	auto   dispatcher_thread = std::jthread(&Dispatcher::run, std::move(dispatcher));
 	auto   web_socket_thread = std::jthread(&WebSocket<1024>::run, std::move(web_socket));
 
 	return EXIT_SUCCESS;

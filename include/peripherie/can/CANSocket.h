@@ -1,5 +1,5 @@
-#ifndef CAN_SOCKET_HPP
-#define CAN_SOCKET_HPP
+#ifndef PERIPHERIE_CAN_SOCKET_HPP
+#define PERIPHERIE_CAN_SOCKET_HPP
 
 #include <string>
 
@@ -26,4 +26,4 @@ public:
 	int send_frame(struct peripherie_frame &peripherie_frame);
 };
 
-#endif /* CAN_SOCKET_HPP */
+#endif /* PERIPHERIE_CAN_SOCKET_HPP */
