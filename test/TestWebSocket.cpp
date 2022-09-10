@@ -22,20 +22,20 @@ TEST(WritingAndReadingFromWebSocket, WriteFullReadAll_shouldBeInOrder) {
 	std::shared_ptr<RingBuffer<std::string, size>> client_request_queue(new RingBuffer<std::string, size>());
 	std::shared_ptr<RingBuffer<std::string, size>> client_response_queue(new RingBuffer<std::string, size>());
 
-	std::shared_ptr<WebSocket<1024>> server(new WebSocket("8080", server_request_queue, server_response_queue));
-	std::shared_ptr<WebSocketClient> client(new WebSocketClient("localhost", "8080", client_request_queue, client_response_queue));
+	std::shared_ptr<WebSocket<1024>> server(new WebSocket("8080", server_response_queue, server_request_queue));
+	std::shared_ptr<WebSocketClient> client(new WebSocketClient("localhost", "8080", client_response_queue, client_request_queue));
 
 	std::jthread client_thread(&WebSocketClient::run, client);
 	std::jthread server_thread(&WebSocket<1024>::run, server);
 
 	std::optional<std::string> message_buffer = std::nullopt;
-	
-	while(client_response_queue->push("marco") == false);
+
+	while (client_response_queue->push("marco") == false);
 	while ((message_buffer = server_request_queue->pop()) == std::nullopt);
 
 	ASSERT_EQ(message_buffer.value(), "marco");
 
-	while(server_response_queue->push("polo") == false);
+	while (server_response_queue->push("polo") == false);
 	while ((message_buffer = client_request_queue->pop()) == std::nullopt);
 
 	ASSERT_EQ(message_buffer.value(), "polo");

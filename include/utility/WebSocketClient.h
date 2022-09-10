@@ -18,8 +18,8 @@ class WebSocketClient {
 private:
 	int socket_fd;
 
-	std::shared_ptr<RingBuffer<std::string>> request_queue;
 	std::shared_ptr<RingBuffer<std::string>> response_queue;
+	std::shared_ptr<RingBuffer<std::string>> request_queue;
 
 	std::optional<std::string> request_buffer;
 
@@ -36,7 +36,12 @@ private:
 
 public:
 	WebSocketClient() = delete;
-	explicit WebSocketClient(std::string hostname, std::string port, std::shared_ptr<RingBuffer<std::string>>&request_queue, std::shared_ptr<RingBuffer<std::string>>&response_queue);
+	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
+	explicit WebSocketClient(
+		std::string hostname,
+		std::string port,
+		std::shared_ptr<RingBuffer<std::string>>&response_queue,
+		std::shared_ptr<RingBuffer<std::string>>&request_queue);
 	~WebSocketClient();
 
 	// non copyable

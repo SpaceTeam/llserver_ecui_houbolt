@@ -1,13 +1,15 @@
 #include "utility/WebSocketClient.h"
 
+#include "utility/Logger.h"
+
 WebSocketClient::WebSocketClient(
 	std::string hostname,
 	std::string port,
-	std::shared_ptr<RingBuffer<std::string>>&request_queue,
-	std::shared_ptr<RingBuffer<std::string>>&response_queue
+	std::shared_ptr<RingBuffer<std::string>>&response_queue,
+	std::shared_ptr<RingBuffer<std::string>>&request_queue
 ) :
-	request_queue(request_queue),
-	response_queue(response_queue)
+	response_queue(response_queue),
+	request_queue(request_queue)
 {
 	// build socket
 	struct addrinfo hints = {
