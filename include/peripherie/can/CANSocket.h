@@ -7,6 +7,8 @@
 
 class CANSocket {
 private:
+	std::string interface_name;
+
 	int socket_fd;
 
 public:

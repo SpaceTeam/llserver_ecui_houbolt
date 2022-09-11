@@ -28,7 +28,9 @@ struct address_info {
 
 CANSocket::CANSocket(
 	std::string interface_name
-) {
+) :
+	interface_name(interface_name)
+{
 	struct address_info address_info = {
 		.family = AF_CAN,
 		.type = SOCK_RAW,
@@ -82,26 +84,25 @@ CANSocket::~CANSocket(
 
 int
 CANSocket::receive_frame(
-	struct peripherie_frame &peripherie_frame
+	struct peripherie_frame &frame
 ) {
 	int error;
 
-	struct can_frame frame;
-	error = recv(socket_fd, &frame, sizeof(frame), MSG_DONTWAIT);
+	struct can_frame can_frame;
+	error = recv(socket_fd, &can_frame, sizeof(can_frame), MSG_DONTWAIT);
 	if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)) {
 		return -2;
 
 	} else if (error == -1) {
+		log<ERROR>("can_socket.send_frame", "could not receive frame from '" + interface_name + "': " + strerror(errno));
+
 		return -1;
 	}
 
-	peripherie_frame.id = frame.can_id;
-	peripherie_frame.protocol = CAN;
-
-	peripherie_frame.payload_size = frame.can_dlc;
-	for (int i = 0; i < frame.can_dlc; i++) {
-		peripherie_frame.payload[i] = frame.data[i];
-	}
+	frame.id = frame.can_id;
+	frame.protocol = CAN;
+	frame.payload_size = frame.can_dlc;
+	memcpy(frame.payload, can_frame.data, can_frame.can_dlc);
 
 	return 0;
 }
@@ -109,22 +110,29 @@ CANSocket::receive_frame(
 
 int
 CANSocket::send_frame(
-	struct peripherie_frame &peripherie_frame
+	struct peripherie_frame &frame
 ) {
-	// TODO(Lukas Karafiat): size checking of frame protocol
+	if (8 < frame.payload_size) {
+		log<ERROR>("can_socket.send_frame", "can protocol dictates maximum payload size of 8 bytes");
 
-	struct can_frame frame;
-	frame.can_id = peripherie_frame.id;
-
-	frame.can_dlc = peripherie_frame.payload_size;
-	for (size_t i = 0; i < peripherie_frame.payload_size; i++) {
-		frame.data[i] = peripherie_frame.payload[i];
+		return -1;
 	}
+
+	struct can_frame can_frame;
+
+	can_frame.can_id = frame.id;
+	can_frame.can_dlc = frame.payload_size;
+	memcpy(can_frame.data, frame.payload, frame.payload_size);
 
 	int error;
 
-	error = send(socket_fd, &frame, sizeof(frame), 0);
-	if (error == -1) {
+	error = send(socket_fd, &can_frame, sizeof(can_frame), 0);
+	if (error == -1 && errno == EINTR) {
+		return -2;
+
+	} else if (error == -1) {
+		log<ERROR>("can_socket.send_frame", "could not send frame to '" + interface_name + "': " + strerror(errno));
+
 		return -1;
 	}
 

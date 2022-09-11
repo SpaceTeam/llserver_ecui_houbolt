@@ -28,8 +28,8 @@ public:
 	~ControlLoop(void);
 
 	// non copyable
-	ControlLoop(ControlLoop const &) = delete;
-	void operator=(ControlLoop const &x) = delete;
+	ControlLoop(const ControlLoop &) = delete;
+	void operator=(const ControlLoop &x) = delete;
 
 	// movable
 	ControlLoop(ControlLoop &&) = default;

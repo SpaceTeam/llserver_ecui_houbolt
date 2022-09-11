@@ -1,7 +1,8 @@
 #include "Peripherie.h"
 
-#include "control_flags.h"
+#include <string.h>
 
+#include "control_flags.h"
 #include "utility/Logger.h"
 
 Peripherie::Peripherie(
@@ -49,31 +50,25 @@ Peripherie::read_peripherie(
 		sensor_queue->push(frame);
 
 	} else if(error == -1) {
-		throw std::system_error(errno, std::generic_category(), "could not receive peripherie frame from '" + std::string("vcan0") + "'");
+		log<ERROR>("peripherie-read", "could not receive peripherie frame from '" + std::string("vcan0") + "': " + strerror(errno));
 	}
 
 	return;
 }
 
+
 void
 Peripherie::write_peripherie(
 	void
 ) {
-	std::optional<struct peripherie_frame> optional_frame = actuator_queue->pop();
-
-	if (!optional_frame) {
+	auto frame = actuator_queue->pop(frame);
+	if (!frame.has_value()) {
 		return;
 	}
 
-	int error;
-
-	struct peripherie_frame frame = optional_frame.value();
-	switch (frame.protocol) {
+	switch (frame->protocol) {
 	case CAN:
-		error = can_socket.send_frame(frame);
-		if (error != 0) {
-			throw std::system_error(errno, std::generic_category(), "could not send peripherie frame to '" + std::string("vcan0") + "'");
-		}
+		can_socket.send_frame(*frame);
 		break;
 
 	default:

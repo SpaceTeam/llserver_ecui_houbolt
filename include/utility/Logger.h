@@ -25,8 +25,8 @@ const std::string severity_names[] = { "TRACE", "DEBUG", "INFO", "WARNING", "ERR
 template<Severity severity>
 void
 log(
-	std::string source,
-	std::string message
+	const std::string source,
+	const std::string message
 ) {
 	if constexpr (severity < minimum_severity) {
 		return;

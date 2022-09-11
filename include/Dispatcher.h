@@ -27,8 +27,8 @@ public:
 	~Dispatcher(void);
 
 	// non copyable
-	Dispatcher(Dispatcher const &) = delete;
-	void operator=(Dispatcher const &x) = delete;
+	Dispatcher(const Dispatcher &) = delete;
+	void operator=(const Dispatcher &x) = delete;
 
 	// movable
 	Dispatcher(Dispatcher &&) = default;

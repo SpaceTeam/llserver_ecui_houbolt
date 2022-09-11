@@ -46,8 +46,8 @@ public:
 	~WebSocket(void);
 
 	// non copyable
-	WebSocket(WebSocket const &) = delete;
-	void operator=(WebSocket const &x) = delete;
+	WebSocket(const WebSocket &) = delete;
+	void operator=(const WebSocket &x) = delete;
 
 	// movable
 	WebSocket(WebSocket &&) = default;

@@ -7,7 +7,6 @@
 #include "peripherie/can/CANSocket.h"
 
 #include <memory>
-#include <string>
 
 class Peripherie {
 private:
@@ -25,8 +24,8 @@ public:
 	~Peripherie(void);
 
 	// non copyable
-	Peripherie(Peripherie const &) = delete;
-	void operator=(Peripherie const &x) = delete;
+	Peripherie(const Peripherie &) = delete;
+	void operator=(const Peripherie &x) = delete;
 
 	// movable
 	Peripherie(Peripherie &&) = default;

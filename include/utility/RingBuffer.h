@@ -20,8 +20,8 @@ private:
 	ElementType *write_pointer = buffer;
 
 	// Locks for the critical read and write section.
-	std::mutex write_mutex;
-	std::mutex read_mutex;
+	mutable std::mutex write_mutex;
+	mutable std::mutex read_mutex;
 
 	// Semaphore for reading and writing elements.
 	std::counting_semaphore<ring_buffer_size> unread_elements{0};
@@ -32,11 +32,11 @@ public:
 	~RingBuffer(void) = default;
 
 	// non copyable
-	RingBuffer(RingBuffer const &) = delete;
-	void operator=(RingBuffer const &x) = delete;
+	RingBuffer(const RingBuffer &x) = delete;
+	void operator=(const RingBuffer &x) = delete;
 
 	// movable
-	RingBuffer(RingBuffer &&) = default;
+	RingBuffer(RingBuffer &&x) = default;
 	RingBuffer& operator=(RingBuffer &&x) = default;
 
 	bool push(ElementType value);
