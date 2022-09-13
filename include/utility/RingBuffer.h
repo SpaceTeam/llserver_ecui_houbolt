@@ -2,7 +2,7 @@
 #define QUEUE_HPP
 
 #include <mutex>
-#include <semaphore>
+#include <atomic>
 #include <optional>
 
 /**
@@ -24,8 +24,8 @@ private:
 	mutable std::mutex read_mutex;
 
 	// Semaphore for reading and writing elements.
-	std::counting_semaphore<ring_buffer_size> unread_elements{0};
-	std::counting_semaphore<ring_buffer_size> unwritten_elements{ring_buffer_size};
+	std::atomic<int> unread_elements = 0;
+	std::atomic<int> unwritten_elements = ring_buffer_size;
 
 public:
 	RingBuffer(void) = default;
@@ -45,7 +45,7 @@ public:
 
 
 /**
- * Thread-safe method for adding an element to the ringbuffer.
+ * Thread-safe method for writing and adding an element to the ringbuffer.
  * returns false if the ringbuffer is full and the element was not inserted.
  * The writing is critical, only one thread can write at a time.
  */
@@ -54,27 +54,32 @@ bool
 RingBuffer<ElementType, ring_buffer_size>::push(
 	ElementType value
 ) {
-	if (!unwritten_elements.try_acquire()) {
-		return false;
-	}
-
 	// critical write section till end of function
 	std::lock_guard<std::mutex> lock{write_mutex};
+
+	// if possible decrease counter of unwritten elements else return failure of doing so
+	if (unwritten_elements <= 0) {
+		return false;
+
+	} else {
+		unwritten_elements--;
+	}
+
 	*write_pointer = value;
 
 	// set write_pointer to next element
 	write_pointer = (write_pointer == &buffer[ring_buffer_size - 1]) ? buffer : write_pointer + 1;
 
 	// increase counter of unread elements
-	unread_elements.release();
+	unread_elements++;
 
 	return true;
 }
 
 
 /**
- * Thread-safe method for reading and removing an element from the queue.
- * returns empty optional if queue is empty.
+ * Thread-safe method for reading and removing an element to the ringbuffer.
+ * returns empty optional if ringbuffer is empty and the element was not removed.
  * The reading is critical only one thread can read at a time.
  */
 template<typename ElementType, int ring_buffer_size>
@@ -82,19 +87,24 @@ std::optional<ElementType>
 RingBuffer<ElementType, ring_buffer_size>::pop(
 	void
 ) {
-	if (!unread_elements.try_acquire()) {
+	// critical read section till end of function
+	std::lock_guard<std::mutex> lock{read_mutex};
+
+	// if possible decrease counter of unread elements else return failure of doing so
+	if (unread_elements <= 0) {
 		return std::nullopt;
+
+	} else {
+		unread_elements--;
 	}
 
-	// critical write section till end of function
-	std::lock_guard<std::mutex> lock{read_mutex};
 	ElementType value = *read_pointer;
 
 	// set read_pointer to next element
 	read_pointer = (read_pointer == &buffer[ring_buffer_size - 1]) ? buffer : read_pointer + 1;
 
-	// increase counter of unread elements
-	unwritten_elements.release();
+	// increase counter of written elements
+	unwritten_elements++;
 
 	return std::make_optional(value);
 }
