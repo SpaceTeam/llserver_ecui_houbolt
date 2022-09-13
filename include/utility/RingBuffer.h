@@ -24,8 +24,8 @@ private:
 	mutable std::mutex read_mutex;
 
 	// Semaphore for reading and writing elements.
-	std::atomic<int> unread_elements = 0;
-	std::atomic<int> unwritten_elements = ring_buffer_size;
+	std::atomic<size_t> unread_elements = 0;
+	std::atomic<size_t> unwritten_elements = ring_buffer_size;
 
 public:
 	RingBuffer(void) = default;
@@ -41,6 +41,8 @@ public:
 
 	bool push(ElementType value);
 	std::optional<ElementType> pop(void);
+
+	std::pair<ElementType[ring_buffer_size], size_t> pop_all(void);
 };
 
 
@@ -107,6 +109,46 @@ RingBuffer<ElementType, ring_buffer_size>::pop(
 	unwritten_elements++;
 
 	return std::make_optional(value);
+}
+
+template<typename ElementType, int ring_buffer_size>
+std::pair<ElementType[ring_buffer_size], size_t>
+RingBuffer<ElementType, ring_buffer_size>::pop_all(
+	void
+) {
+	// critical read section till end of function
+	std::lock_guard<std::mutex> lock{read_mutex};
+
+	std::pair<ElementType[ring_buffer_size], size_t> values;
+	values.second = 0;
+
+	// if possible decrease counter of unread elements else return failure of doing so
+	if (unread_elements <= 0) {
+		return values;
+
+	} else {
+		values.second = unread_elements;
+		unread_elements -= values.second;
+	}
+
+	// amount of elements before buffer wrap
+	size_t upfront_element_count = ((buffer + ring_buffer_size) - read_pointer);
+
+	// NOTE(Lukas Karafiat): maybe use move semantics instead of memcpy
+	if (values.second <= upfront_element_count) {
+		memcpy(values.first, read_pointer, values.second * sizeof(ElementType));
+		read_pointer = read_pointer + values.second;
+
+	} else {
+		memcpy(values.first, read_pointer, upfront_element_count * sizeof(ElementType));
+		memcpy(values.first + upfront_element_count, buffer, (values.second - upfront_element_count) * sizeof(ElementType));
+		read_pointer = read_pointer + (values.second - upfront_element_count);
+	}
+
+	// increase counter of written elements
+	unwritten_elements += values.second;
+
+	return values;
 }
 
 #endif /* QUEUE_HPP */
