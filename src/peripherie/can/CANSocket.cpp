@@ -99,9 +99,9 @@ CANSocket::receive_frame(
 		return -1;
 	}
 
-	frame.id = frame.can_id;
+	frame.id = can_frame.can_id;
 	frame.protocol = CAN;
-	frame.payload_size = frame.can_dlc;
+	frame.payload_size = can_frame.can_dlc;
 	memcpy(frame.payload, can_frame.data, can_frame.can_dlc);
 
 	return 0;

@@ -29,6 +29,9 @@ Peripherie::run(
 ) {
 	extern volatile sig_atomic_t finished;
 
+	// NOTE(Lukas Karafiat): use sched_set_scheduler to set scheduler for each thread as non RT-Tasks do not need RT scheduling
+	// NOTE(Lukas Karafiat): lock program from swap
+
 	while (!finished) {
 		read_peripherie();
 		write_peripherie();
@@ -47,6 +50,7 @@ Peripherie::read_peripherie(
 	struct peripherie_frame frame;
 	error = can_socket.receive_frame(frame);
 	if (error == 0) {
+		// TODO: make sure that push is guaranteed somehow
 		sensor_queue->push(frame);
 
 	} else if(error == -1) {
@@ -61,7 +65,7 @@ void
 Peripherie::write_peripherie(
 	void
 ) {
-	auto frame = actuator_queue->pop(frame);
+	auto frame = actuator_queue->pop();
 	if (!frame.has_value()) {
 		return;
 	}
