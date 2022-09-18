@@ -4,6 +4,7 @@
 #include <mutex>
 #include <atomic>
 #include <optional>
+#include <cstring>
 
 /**
  * Multi producer, multi consumer ring buffer as a central repository of relevant data.
@@ -20,8 +21,8 @@ private:
 	ElementType *write_pointer = buffer;
 
 	// Locks for the critical read and write section.
-	mutable std::mutex write_mutex;
-	mutable std::mutex read_mutex;
+	std::mutex mutable write_mutex;
+	std::mutex mutable read_mutex;
 
 	// Semaphore for reading and writing elements.
 	std::atomic<size_t> unread_elements = 0;
@@ -32,8 +33,8 @@ public:
 	~RingBuffer(void) = default;
 
 	// non copyable
-	RingBuffer(const RingBuffer &x) = delete;
-	void operator=(const RingBuffer &x) = delete;
+	RingBuffer(RingBuffer const &x) = delete;
+	void operator=(RingBuffer const &x) = delete;
 
 	// movable
 	RingBuffer(RingBuffer &&x) = default;
@@ -42,6 +43,7 @@ public:
 	bool push(ElementType value);
 	std::optional<ElementType> pop(void);
 
+	bool push_all(std::pair<ElementType[ring_buffer_size], size_t> const values);
 	std::pair<ElementType[ring_buffer_size], size_t> pop_all(void);
 };
 
@@ -111,6 +113,44 @@ RingBuffer<ElementType, ring_buffer_size>::pop(
 	return std::make_optional(value);
 }
 
+
+template<typename ElementType, int ring_buffer_size>
+bool
+RingBuffer<ElementType, ring_buffer_size>::push_all(
+	std::pair<ElementType[ring_buffer_size], size_t> const values
+) {
+	// critical write section till end of function
+	std::lock_guard<std::mutex> lock{write_mutex};
+
+	// if possible decrease counter of unwritten elements else return failure of doing so
+	if (unwritten_elements < values.second) {
+		return false;
+
+	} else {
+		unwritten_elements -= values.second;
+	}
+
+	// amount of elements before buffer wrap
+	size_t upfront_element_count = ((buffer + ring_buffer_size) - write_pointer);
+
+	// NOTE(Lukas Karafiat): maybe use move semantics instead of memcpy
+	if (values.second <= upfront_element_count) {
+		memcpy(write_pointer, values.first, values.second * sizeof(ElementType));
+		write_pointer = write_pointer + values.second;
+
+	} else {
+		memcpy(write_pointer, values.first, upfront_element_count * sizeof(ElementType));
+		memcpy(buffer, values.first + upfront_element_count, (values.second - upfront_element_count) * sizeof(ElementType));
+		write_pointer = buffer + (values.second - upfront_element_count);
+	}
+
+	// increase counter of read elements
+	unread_elements += values.second;
+
+	return true;
+}
+
+
 template<typename ElementType, int ring_buffer_size>
 std::pair<ElementType[ring_buffer_size], size_t>
 RingBuffer<ElementType, ring_buffer_size>::pop_all(
@@ -119,7 +159,7 @@ RingBuffer<ElementType, ring_buffer_size>::pop_all(
 	// critical read section till end of function
 	std::lock_guard<std::mutex> lock{read_mutex};
 
-	std::pair<ElementType[ring_buffer_size], size_t> values;
+	std::pair<ElementType[ring_buffer_size], size_t> values{};
 	values.second = 0;
 
 	// if possible decrease counter of unread elements else return failure of doing so
@@ -142,7 +182,7 @@ RingBuffer<ElementType, ring_buffer_size>::pop_all(
 	} else {
 		memcpy(values.first, read_pointer, upfront_element_count * sizeof(ElementType));
 		memcpy(values.first + upfront_element_count, buffer, (values.second - upfront_element_count) * sizeof(ElementType));
-		read_pointer = read_pointer + (values.second - upfront_element_count);
+		read_pointer = buffer + (values.second - upfront_element_count);
 	}
 
 	// increase counter of written elements

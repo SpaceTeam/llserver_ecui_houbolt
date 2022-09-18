@@ -44,10 +44,10 @@ ControlLoop::run(
 	sched_setscheduler(0, SCHED_RR, &scheduling_parameters);
 
 	while (!finished) {
-		std::pair<struct sensor[32], size_t> sensor_data{};
+		//std::pair<struct sensor[32], size_t> sensor_data{};
 
 		// read all available sensor data
-		sensor_queue->pop_all(sensor_data);
+		auto sensor_data = sensor_queue->pop_all();
 
 		// NOTE(LUKAS KARAFIAT): command data should not be sent every 20ms (this is not a video game!)
 		// read sequence command or set state
