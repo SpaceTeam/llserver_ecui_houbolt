@@ -3,7 +3,10 @@
 
 #include <string>
 
-#include "peripherie/Frame.h"
+#include <optional>
+#include <variant>
+
+#include "State.h"
 
 class CANSocket {
 private:
@@ -24,8 +27,8 @@ public:
 	CANSocket(CANSocket &&) = default;
 	CANSocket& operator=(CANSocket &&x) = default;
 
-	int receive_frame(struct peripherie_frame &peripherie_frame);
-	int send_frame(struct peripherie_frame &peripherie_frame);
+	std::variant<std::optional<struct sensor>, int> receive_frame(void);
+	std::optional<int> send_frame(struct actuator const actuator);
 };
 
 #endif /* PERIPHERIE_CAN_SOCKET_HPP */

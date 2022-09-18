@@ -1,26 +1,28 @@
 #ifndef PERIPHERIE_H
 #define PERIPHERIE_H
 
-#include "utility/RingBuffer.h"
+#include <memory>
+#include <string>
 
-#include "peripherie/Frame.h"
+#include "utility/RingBuffer.h"
 #include "peripherie/can/CANSocket.h"
 
-#include <memory>
+#include "State.h"
 
 class Peripherie {
 private:
-	std::shared_ptr<RingBuffer<struct peripherie_frame>> actuator_queue;
-	std::shared_ptr<RingBuffer<struct peripherie_frame>> sensor_queue;
+	std::shared_ptr<RingBuffer<struct actuator>> actuator_queue;
+	std::shared_ptr<RingBuffer<struct sensor>> sensor_queue;
 
+	std::string can_socket_interface_name;
 	CANSocket can_socket;
 
 public:
 	Peripherie(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit Peripherie(
-		std::shared_ptr<RingBuffer<struct peripherie_frame>> &actuator_queue,
-		std::shared_ptr<RingBuffer<struct peripherie_frame>> &sensor_queue);
+		std::shared_ptr<RingBuffer<struct actuator>> &actuator_queue,
+		std::shared_ptr<RingBuffer<struct sensor>> &sensor_queue);
 	~Peripherie(void);
 
 	// non copyable

@@ -1,7 +1,7 @@
 #include "peripherie/can/CANSocket.h"
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <unistd.h>
 
 #include <net/if.h>
@@ -12,17 +12,27 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 
-#include <string.h>
-
+#include <cstring>
 #include <string>
 #include <system_error>
 
 #include "utility/Logger.h"
 
+#include <map>
+
 struct address_info {
 	int family;
 	int type;
 	int protocol;
+};
+
+struct can_transformation_information {
+	int id;
+	char name[1024];
+};
+
+const std::map<int, struct can_transformation_information> can_transformation_information = {
+	{ 0, { .id = 0, .name = "test" } },
 };
 
 
@@ -31,10 +41,10 @@ CANSocket::CANSocket(
 ) :
 	interface_name(interface_name)
 {
-	struct address_info address_info = {
+	struct address_info address_info{
 		.family = AF_CAN,
 		.type = SOCK_RAW,
-		.protocol = CAN_RAW,
+		.protocol = CAN_RAW
 	};
 
 	// build socket
@@ -46,21 +56,21 @@ CANSocket::CANSocket(
 	int error;
 
 	// get interface info
-	struct ifreq interface_requirements;
-
+	struct ifreq interface_requirements{};
 	strcpy(interface_requirements.ifr_name, interface_name.c_str());
+
 	error = ioctl(socket_fd, SIOCGIFINDEX, &interface_requirements);
 	if (error != 0) {
 		close(socket_fd);
 		throw std::system_error(errno, std::generic_category(), "could not find interface: '" + interface_name + "'");
 	}
 
-	struct sockaddr_can can_socket_address;
+	struct sockaddr_can can_socket_address {
+		.can_family = AF_CAN,
+		.can_ifindex = interface_requirements.ifr_ifindex,
+	};
 
-	can_socket_address.can_family = AF_CAN;
-	can_socket_address.can_ifindex = interface_requirements.ifr_ifindex;
-
-	log<DEBUG>("can socket", "can interface '" + std::string(interface_name) + "' at index " + std::to_string(interface_requirements.ifr_ifindex));
+	log<DEBUG>("can socket", "can interface '" + interface_name + "' at index " + std::to_string(interface_requirements.ifr_ifindex));
 
 	// bind interface to socket
 	error = bind(socket_fd, (struct sockaddr *)&can_socket_address, sizeof(can_socket_address));
@@ -82,60 +92,64 @@ CANSocket::~CANSocket(
 }
 
 
-int
+std::variant<std::optional<struct sensor>, int>
 CANSocket::receive_frame(
-	struct peripherie_frame &frame
+	void
 ) {
 	int error;
 
-	struct can_frame can_frame;
-	error = recv(socket_fd, &can_frame, sizeof(can_frame), MSG_DONTWAIT);
+	struct can_frame frame{};
+	error = recv(socket_fd, &frame, sizeof(frame), MSG_DONTWAIT);
 	if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)) {
-		return -2;
+		return std::nullopt;
 
-	} else if (error == -1) {
-		log<ERROR>("can_socket.send_frame", "could not receive frame from '" + interface_name + "': " + strerror(errno));
-
+	} else if (error == -1 || error != sizeof(struct can_frame)) {
 		return -1;
 	}
 
-	frame.id = can_frame.can_id;
-	frame.protocol = CAN;
-	frame.payload_size = can_frame.can_dlc;
-	memcpy(frame.payload, can_frame.data, can_frame.can_dlc);
+	struct sensor sensor{};
 
-	return 0;
+	// TODO: map frame to sensor
+	{
+		int i;
+
+		i |= frame.data[0] <<  0;
+		i |= frame.data[1] <<  8;
+		i |= frame.data[2] << 16;
+		i |= frame.data[3] << 24;
+
+		sensor.value = i;
+	}
+
+	return std::make_optional(sensor);
 }
 
 
-int
+std::optional<int>
 CANSocket::send_frame(
-	struct peripherie_frame &frame
+	struct actuator actuator
 ) {
-	if (8 < frame.payload_size) {
-		log<ERROR>("can_socket.send_frame", "can protocol dictates maximum payload size of 8 bytes");
+	struct can_frame frame{};
 
-		return -1;
+	// TODO: map actuator to frame
+	{
+		int i = std::get<int>(actuator.value);
+		frame.data[0] = (uint8_t) (i >>  0);
+		frame.data[1] = (uint8_t) (i >>  8);
+		frame.data[2] = (uint8_t) (i >> 16);
+		frame.data[3] = (uint8_t) (i >> 24);
 	}
-
-	struct can_frame can_frame;
-
-	can_frame.can_id = frame.id;
-	can_frame.can_dlc = frame.payload_size;
-	memcpy(can_frame.data, frame.payload, frame.payload_size);
 
 	int error;
 
-	error = send(socket_fd, &can_frame, sizeof(can_frame), 0);
+	error = send(socket_fd, &frame, sizeof(frame), 0);
 	if (error == -1 && errno == EINTR) {
 		return -2;
 
-	} else if (error == -1) {
-		log<ERROR>("can_socket.send_frame", "could not send frame to '" + interface_name + "': " + strerror(errno));
-
+	} else if (error == -1 || error != sizeof(struct can_frame)) {
 		return -1;
 	}
 
-	return 0;
+	return std::nullopt;
 }
 

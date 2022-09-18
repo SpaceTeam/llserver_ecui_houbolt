@@ -3,19 +3,22 @@
 
 #include "utility/RingBuffer.h"
 
-#include "peripherie/Frame.h"
-
 #include <memory>
 #include <string>
 #include <any>
+#include <unordered_map>
+
+#include "State.h"
 
 class ControlLoop {
 private:
 	std::shared_ptr<RingBuffer<std::any>> command_queue;
 	std::shared_ptr<RingBuffer<std::string>> response_queue;
 
-	std::shared_ptr<RingBuffer<struct peripherie_frame>> sensor_queue;
-	std::shared_ptr<RingBuffer<struct peripherie_frame>> actuator_queue;
+	std::shared_ptr<RingBuffer<struct sensor>> sensor_queue;
+	std::shared_ptr<RingBuffer<struct actuator>> actuator_queue;
+
+	std::unordered_map<std::string, state> states;
 
 public:
 	ControlLoop(void) = delete;
@@ -23,8 +26,8 @@ public:
 	explicit ControlLoop(
 		std::shared_ptr<RingBuffer<std::any>> &command_queue,
 		std::shared_ptr<RingBuffer<std::string>> &response_queue,
-		std::shared_ptr<RingBuffer<struct peripherie_frame>> &sensor_queue,
-		std::shared_ptr<RingBuffer<struct peripherie_frame>> &actuator_queue);
+		std::shared_ptr<RingBuffer<struct sensor>> &sensor_queue,
+		std::shared_ptr<RingBuffer<struct actuator>> &actuator_queue);
 	~ControlLoop(void);
 
 	// non copyable

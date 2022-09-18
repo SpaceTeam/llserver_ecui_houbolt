@@ -1,17 +1,18 @@
 #include "Peripherie.h"
 
-#include <string.h>
+#include <cstring>
 
 #include "control_flags.h"
 #include "utility/Logger.h"
 
 Peripherie::Peripherie(
-	std::shared_ptr<RingBuffer<struct peripherie_frame>> &actuator_queue,
-	std::shared_ptr<RingBuffer<struct peripherie_frame>> &sensor_queue
+	std::shared_ptr<RingBuffer<struct actuator>> &actuator_queue,
+	std::shared_ptr<RingBuffer<struct sensor>> &sensor_queue
 ) :
 	actuator_queue(actuator_queue),
 	sensor_queue(sensor_queue),
-	can_socket("vcan0")
+	can_socket_interface_name("vcan0"),
+	can_socket(can_socket_interface_name)
 {
 	return;
 }
@@ -23,14 +24,15 @@ Peripherie::~Peripherie(
 	return;
 }
 
+
 void
 Peripherie::run(
 	void
 ) {
-	extern volatile sig_atomic_t finished;
+	extern sig_atomic_t volatile finished;
 
-	// NOTE(Lukas Karafiat): use sched_set_scheduler to set scheduler for each thread as non RT-Tasks do not need RT scheduling
-	// NOTE(Lukas Karafiat): lock program from swap
+	struct sched_param scheduling_parameters{.sched_priority = 60};
+	sched_setscheduler(0, SCHED_RR, &scheduling_parameters);
 
 	while (!finished) {
 		read_peripherie();
@@ -45,16 +47,22 @@ void
 Peripherie::read_peripherie(
 	void
 ) {
-	int error;
+	auto sensor_or_error = can_socket.receive_frame();
 
-	struct peripherie_frame frame;
-	error = can_socket.receive_frame(frame);
-	if (error == 0) {
-		// TODO: make sure that push is guaranteed somehow
-		sensor_queue->push(frame);
+	if (std::holds_alternative<int>(sensor_or_error)) {
+		log<ERROR>("peripherie.read_peripherie", "could not receive sensor data");
+		return;
+	}
 
-	} else if(error == -1) {
-		log<ERROR>("peripherie-read", "could not receive peripherie frame from '" + std::string("vcan0") + "': " + strerror(errno));
+	auto sensor = std::get<0>(sensor_or_error);
+
+	if (sensor.has_value()) {
+		bool delivered;
+
+		delivered = sensor_queue->push(*sensor);
+		if (!delivered) {
+			log<ERROR>("peripherie.read_peripherie", "could not send sensor data to control loop: sensor buffer full");
+		}
 	}
 
 	return;
@@ -65,18 +73,25 @@ void
 Peripherie::write_peripherie(
 	void
 ) {
-	auto frame = actuator_queue->pop();
-	if (!frame.has_value()) {
+	auto actuator = actuator_queue->pop();
+	if (!actuator.has_value()) {
 		return;
 	}
 
-	switch (frame->protocol) {
-	case CAN:
-		can_socket.send_frame(*frame);
+	std::optional<int> error;
+
+	switch (actuator->peripherie_type) {
+	case CAN_SOCKET:
+		error = can_socket.send_frame(*actuator);
 		break;
 
 	default:
-		log<WARNING>("peripherie write", "protocol not supported");
+		log<WARNING>("peripherie.write_peripherie", "peripherie protocol not supported");
+		break;
+	}
+
+	if (error.has_value()) {
+		log<ERROR>("peripherie.write_peripherie", "could not send actuator data");
 	}
 
 	return;
