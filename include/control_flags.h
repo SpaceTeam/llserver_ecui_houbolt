@@ -1,9 +1,9 @@
 #ifndef CONTROL_FLAG
 #define CONTROL_FLAG
 
-#include <signal.h>
+#include <csignal>
 
-extern volatile sig_atomic_t finished;
-extern volatile sig_atomic_t log_peripherie_data;
+extern sig_atomic_t volatile finished;
+extern sig_atomic_t volatile log_peripherie_data;
 
 #endif /* CONTROL_FLAG */

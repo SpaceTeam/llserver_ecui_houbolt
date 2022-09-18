@@ -5,6 +5,8 @@
 #include <csignal>
 #include <cerrno>
 
+#include <sys/mman.h>
+
 #include <thread>
 #include <system_error>
 #include <memory>
@@ -17,15 +19,16 @@
 #include "ControlLoop.h"
 #include "Peripherie.h"
 #include "utility/RingBuffer.h"
-#include "peripherie/Frame.h"
 #include "utility/Logger.h"
+
+#include "State.h"
 
 struct options {
 	std::string config_path = "config";
 };
 
-volatile sig_atomic_t finished = false;
-volatile sig_atomic_t log_peripherie_data = false;
+sig_atomic_t volatile finished = false;
+sig_atomic_t volatile log_peripherie_data = false;
 
 
 void
@@ -68,7 +71,7 @@ void
 signal_handler(
 	int signal
 ) {
-	extern volatile sig_atomic_t finished;
+	extern sig_atomic_t volatile finished;
 
 	switch (signal) {
 	case SIGINT:
@@ -108,23 +111,7 @@ setup_signal_handling(
 		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGABRT");
 	}
 
-	log<Severity::DEBUG>("main.cpp", "set signal handlers");
-
-	return;
-}
-
-
-// IMPROVE: This makes the Code only compilable on linux. Make it optional for test version. (enables Multiplatform development)
-void
-set_scheduling_priority(
-	int priority
-) {
-	struct sched_param scheduling_parameters{};
-	scheduling_parameters.sched_priority = 60;
-
-	sched_setscheduler(0, SCHED_FIFO, &scheduling_parameters);
-
-	log<Severity::DEBUG>("main.cpp", "set scheduling priority");
+	log<Severity::DEBUG>("main", "set signal handlers");
 
 	return;
 }
@@ -152,12 +139,28 @@ set_latency_target(
 		latency_target_file << latency_target_value;
 	}
 
-	log<Severity::DEBUG>("main.cpp", "turned off management");
+	log<Severity::DEBUG>("main", "turned off management");
 
 	// NOTE(Lukas Karafiat): file handle should be left open as power management would be reset
 	return latency_target_file;
 }
 
+void
+lock_memory(
+	void
+) {
+	int error;
+
+	// NOTE(Lukas Karafiat): Lock memory to ensure no swapping is done.
+	error = mlockall(MCL_FUTURE | MCL_CURRENT);
+	if(error == -1){
+		throw std::system_error(errno, std::generic_category(), "could not lock memory");
+	}
+
+	log<DEBUG>("main","locked all of the program's virtual address space into RAM\n");
+
+	return;
+}
 
 int
 main(
@@ -174,15 +177,14 @@ main(
 		usage();
 	}
 
-	log<Severity::DEBUG>("main.cpp", "config path: " + options.config_path);
+	log<Severity::DEBUG>("main", "config path: " + options.config_path);
 
 	setup_signal_handling();
 
 	// TODO: read config
 
-//	set_scheduling_priority(60);
 //	set_latency_target();
-
+	lock_memory();
 
 // 	______________      _______________________      ________________      _______________
 //	|            |      |                     |      |              |      |             |
@@ -194,8 +196,8 @@ main(
 //	|            |<----------------3-----------------|              |<--1--|             |
 //	|____________|                                   |______________|      |_____________|
 
-	auto   sensor_queue = std::make_shared<RingBuffer<struct peripherie_frame>>();
-	auto actuator_queue = std::make_shared<RingBuffer<struct peripherie_frame>>();
+	auto   sensor_queue = std::make_shared<RingBuffer<struct sensor>>();
+	auto actuator_queue = std::make_shared<RingBuffer<struct actuator>>();
 	auto  request_queue = std::make_shared<RingBuffer<std::string>>();
 	auto response_queue = std::make_shared<RingBuffer<std::string>>();
 	auto  command_queue = std::make_shared<RingBuffer<std::any>>();
