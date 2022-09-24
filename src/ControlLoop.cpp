@@ -79,7 +79,7 @@ ControlLoop::run(
 	return;
 }
 
-
+/*
 std::pair<state[1024], size_t>
 call_user_functions(
 	std::pair<sensor[1024], size_t> sensors,
@@ -87,4 +87,4 @@ call_user_functions(
 	uint64_t timestamp
 ) {
 }
-
+*/
