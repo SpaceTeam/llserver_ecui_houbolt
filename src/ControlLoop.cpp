@@ -43,7 +43,11 @@ ControlLoop::run(
 	struct sched_param scheduling_parameters{.sched_priority = 80};
 	sched_setscheduler(0, SCHED_RR, &scheduling_parameters);
 
+	// get timestamp stuff
+
 	while (!finished) {
+		// get timestamp
+
 		//std::pair<struct sensor[32], size_t> sensor_data{};
 
 		// read all available sensor data
@@ -54,12 +58,9 @@ ControlLoop::run(
 		std::optional<std::any> command = command_queue->pop();
 		// do stuff with command
 
-		// (sensors, states, current_time) -> (states, actuators)
+		// call_user_functions();
 
-		// purely time based sequences -> states
-		// purely input driven states -> states
-		// timed state machine -> states
-		// timed reactive state -> state
+		// check sequence to set states
 
 		std::pair<struct actuator[32], size_t> actuator_data{};
 
@@ -76,5 +77,14 @@ ControlLoop::run(
 	}
 
 	return;
+}
+
+
+std::pair<state[1024], size_t>
+call_user_functions(
+	std::pair<sensor[1024], size_t> sensors,
+	std::pair<state[1024], size_t> &states,
+	uint64_t timestamp
+) {
 }
 

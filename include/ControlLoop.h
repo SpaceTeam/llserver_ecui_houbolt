@@ -8,6 +8,7 @@
 #include <any>
 #include <unordered_map>
 
+#include "config.h"
 #include "State.h"
 
 class ControlLoop {
@@ -18,7 +19,7 @@ private:
 	std::shared_ptr<RingBuffer<struct sensor>> sensor_queue;
 	std::shared_ptr<RingBuffer<struct actuator>> actuator_queue;
 
-	std::unordered_map<std::string, state> states;
+	double states[maximum_node_id][maximum_channel_id][maximum_value_id];
 
 public:
 	ControlLoop(void) = delete;

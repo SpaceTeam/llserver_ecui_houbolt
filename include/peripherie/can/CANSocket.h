@@ -27,8 +27,8 @@ public:
 	CANSocket(CANSocket &&) = default;
 	CANSocket& operator=(CANSocket &&x) = default;
 
-	std::variant<std::optional<struct sensor>, int> receive_frame(void);
-	std::optional<int> send_frame(struct actuator const actuator);
+	std::variant<std::optional<sensor>, int> receive_frame(void);
+	std::optional<int> send_frame(actuator const actuator);
 };
 
 #endif /* PERIPHERIE_CAN_SOCKET_HPP */

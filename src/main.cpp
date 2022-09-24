@@ -24,7 +24,7 @@
 #include "State.h"
 
 struct options {
-	std::string config_path = "config";
+	std::string config_path;
 };
 
 sig_atomic_t volatile finished = false;
@@ -43,19 +43,20 @@ usage(
 }
 
 
-void
+struct options
 get_options(
 	int argc,
-	char **argv,
-	struct options *options
+	char **argv
 ) {
 	extern char *optarg;
+
+	struct options options{.config_path="config"};
 
 	int option;
 	while ((option = getopt(argc, argv, "c:")) != -1) {
 		switch (option) {
 		case 'c':
-			options->config_path = optarg;
+			options.config_path = optarg;
 			break;
 
 		default:
@@ -63,7 +64,7 @@ get_options(
 		};
 	}
 
-	return;
+	return options;
 }
 
 
@@ -92,8 +93,6 @@ void
 setup_signal_handling(
 	void
 ) {
-	//extern int errno;
-
 	struct sigaction signal_action{};
 
 	signal_action.sa_handler = signal_handler;
@@ -111,7 +110,7 @@ setup_signal_handling(
 		throw std::system_error(errno, std::generic_category(), "could not set signal handler for SIGABRT");
 	}
 
-	log<Severity::DEBUG>("main", "set signal handlers");
+	log<Severity::INFO>("main", "set signal handlers");
 
 	return;
 }
@@ -139,7 +138,7 @@ set_latency_target(
 		latency_target_file << latency_target_value;
 	}
 
-	log<Severity::DEBUG>("main", "turned off management");
+	log<Severity::INFO>("main", "turned off management");
 
 	// NOTE(Lukas Karafiat): file handle should be left open as power management would be reset
 	return latency_target_file;
@@ -152,12 +151,12 @@ lock_memory(
 	int error;
 
 	// NOTE(Lukas Karafiat): Lock memory to ensure no swapping is done.
-	error = mlockall(MCL_FUTURE | MCL_CURRENT);
-	if(error == -1){
+	error = mlockall(MCL_CURRENT | MCL_FUTURE);
+	if(error == -1) {
 		throw std::system_error(errno, std::generic_category(), "could not lock memory");
 	}
 
-	log<DEBUG>("main","locked all of the program's virtual address space into RAM\n");
+	log<INFO>("main","locked all of the program's virtual address space into RAM\n");
 
 	return;
 }
@@ -167,9 +166,7 @@ main(
 	int argc,
 	char *argv[]
 ) {
-	struct options options{};
-
-	get_options(argc, argv, &options);
+	auto options = get_options(argc, argv);
 	argc -= optind;
 	argv += optind;
 
@@ -177,12 +174,11 @@ main(
 		usage();
 	}
 
-	log<Severity::DEBUG>("main", "config path: " + options.config_path);
-
-	setup_signal_handling();
+	log<Severity::INFO>("main", "config path: " + options.config_path);
 
 	// TODO: read config
 
+	setup_signal_handling();
 //	set_latency_target();
 	lock_memory();
 

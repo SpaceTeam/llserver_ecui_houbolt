@@ -1,25 +1,30 @@
 #ifndef STATE_H
 #define STATE_H
 
-#include <variant>
-
-using state = std::variant<bool, int, double>;
-
 enum peripherie_type {
 	CAN_SOCKET,
 };
 
 struct actuator {
-	char name[1024];
-	state value;
+	double value;
 
-	// transformation information
+	int node_id;
+	int channel_id;
+	int value_id;
+	int command_id;
+
 	enum peripherie_type peripherie_type;
 };
 
 struct sensor {
-	char name[1024];
-	state value;
+	double value;
+
+	int node_id;
+	int channel_id;
+	int value_id;
+	int command_id;
+
+	enum peripherie_type peripherie_type;
 };
 
 #endif /* STATE_H */
