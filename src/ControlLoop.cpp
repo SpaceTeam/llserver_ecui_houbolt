@@ -45,10 +45,10 @@ ControlLoop::run(
 
 	// get timestamp stuff
 
+	uint64_t timestamp = 0;
+
 	while (!finished) {
 		// get timestamp
-
-		//std::pair<struct sensor[32], size_t> sensor_data{};
 
 		// read all available sensor data
 		auto sensor_data = sensor_queue->pop_all();
@@ -62,7 +62,7 @@ ControlLoop::run(
 
 		// check sequence to set states
 
-		std::pair<struct actuator[32], size_t> actuator_data{};
+		actuator_buffer actuator_data{};
 
 		// write all available actuator data
 		actuator_queue->push_all(actuator_data);

@@ -47,19 +47,19 @@ void
 Peripherie::read_peripherie(
 	void
 ) {
-	auto sensor_or_error = can_socket.receive_frame();
+	auto sensors_or_error = can_socket.receive_frame();
 
-	if (std::holds_alternative<int>(sensor_or_error)) {
+	if (std::holds_alternative<int>(sensors_or_error)) {
 		log<ERROR>("peripherie.read_peripherie", "could not receive sensor data");
 		return;
 	}
 
-	auto sensor = std::get<0>(sensor_or_error);
+	auto sensors = std::get<0>(sensors_or_error);
 
-	if (sensor.has_value()) {
+	if (0 < sensors.second) {
 		bool delivered;
 
-		delivered = sensor_queue->push(*sensor);
+		delivered = sensor_queue->push_all(sensors);
 		if (!delivered) {
 			log<ERROR>("peripherie.read_peripherie", "could not send sensor data to control loop: sensor buffer full");
 		}
