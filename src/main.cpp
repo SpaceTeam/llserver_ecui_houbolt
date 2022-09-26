@@ -21,8 +21,6 @@
 #include "utility/RingBuffer.h"
 #include "utility/Logger.h"
 
-#include "State.h"
-
 struct options {
 	std::string config_path;
 };

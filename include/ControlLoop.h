@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include "config.h"
-#include "State.h"
+#include "state.h"
 
 class ControlLoop {
 private:

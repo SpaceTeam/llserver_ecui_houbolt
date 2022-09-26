@@ -7,7 +7,7 @@ enum peripherie_type : uint32_t {
 
 #include <variant>
 #include <cstddef>
-#include "PayloadTypes.h"
+#include "payload_types.h"
 
 struct actuator {
 	std::variant<get_payload, set_payload, servo_move_payload, rocket_state_payload> value;

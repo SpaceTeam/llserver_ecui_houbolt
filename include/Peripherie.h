@@ -5,9 +5,9 @@
 #include <string>
 
 #include "utility/RingBuffer.h"
-#include "peripherie/can/CANSocket.h"
+#include "peripherie/can/socket.h"
 
-#include "State.h"
+#include "state.h"
 
 class Peripherie {
 private:
@@ -15,7 +15,7 @@ private:
 	std::shared_ptr<RingBuffer<struct sensor>> sensor_queue;
 
 	std::string can_socket_interface_name;
-	CANSocket can_socket;
+	peripherie::can::socket can_socket;
 
 public:
 	Peripherie(void) = delete;
