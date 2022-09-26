@@ -19,7 +19,7 @@ private:
 	std::shared_ptr<RingBuffer<struct sensor>> sensor_queue;
 	std::shared_ptr<RingBuffer<struct actuator>> actuator_queue;
 
-	double states[maximum_node_id][maximum_channel_id][maximum_value_id];
+	double states[maximum_state_id];
 
 public:
 	ControlLoop(void) = delete;
