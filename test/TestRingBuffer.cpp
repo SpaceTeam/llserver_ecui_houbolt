@@ -68,7 +68,7 @@ TEST(WritingAndReadingFromRingBuffer, PopAllInOrder_shouldBeInOrder) {
 		buffer.pop();
 	}
 
-	std::pair<int[32], size_t> test = buffer.pop_all();
+	auto test = buffer.pop_all();
 
 	EXPECT_EQ(test.second, 25);
 
@@ -95,7 +95,7 @@ TEST(WritingAndReadingFromRingBuffer, PopAllOverBorder_shouldBeInOrder) {
 		buffer.push(i);
 	}
 
-	std::pair<int[32], size_t> test = buffer.pop_all();
+	auto test = buffer.pop_all();
 
 	EXPECT_EQ(test.second, 30);
 

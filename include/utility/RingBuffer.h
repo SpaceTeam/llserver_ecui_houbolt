@@ -5,6 +5,8 @@
 #include <atomic>
 #include <optional>
 #include <cstring>
+#include <array>
+#include <algorithm>
 
 /**
  * Multi producer, multi consumer ring buffer as a central repository of relevant data.
@@ -43,8 +45,8 @@ public:
 	bool push(ElementType value);
 	std::optional<ElementType> pop(void);
 
-	bool push_all(std::pair<ElementType[ring_buffer_size], size_t> const values);
-	std::pair<ElementType[ring_buffer_size], size_t> pop_all(void);
+	bool push_all(std::pair<std::array<ElementType, ring_buffer_size>, size_t> const values);
+	std::pair<std::array<ElementType, ring_buffer_size>, size_t> pop_all(void);
 };
 
 
@@ -117,7 +119,7 @@ RingBuffer<ElementType, ring_buffer_size>::pop(
 template<typename ElementType, int ring_buffer_size>
 bool
 RingBuffer<ElementType, ring_buffer_size>::push_all(
-	std::pair<ElementType[ring_buffer_size], size_t> const values
+	std::pair<std::array<ElementType, ring_buffer_size>, size_t> const values
 ) {
 	// critical write section till end of function
 	std::lock_guard<std::mutex> lock{write_mutex};
@@ -135,12 +137,14 @@ RingBuffer<ElementType, ring_buffer_size>::push_all(
 
 	// NOTE(Lukas Karafiat): maybe use move semantics instead of memcpy
 	if (values.second <= upfront_element_count) {
-		memcpy(write_pointer, values.first, values.second * sizeof(ElementType));
+		std::copy_n(values.first.begin(), values.second, write_pointer);
+
 		write_pointer = write_pointer + values.second;
 
 	} else {
-		memcpy(write_pointer, values.first, upfront_element_count * sizeof(ElementType));
-		memcpy(buffer, values.first + upfront_element_count, (values.second - upfront_element_count) * sizeof(ElementType));
+		std::copy_n(values.first.begin(), upfront_element_count, write_pointer);
+		std::copy_n(values.first.begin() + upfront_element_count, values.second - upfront_element_count, buffer);
+
 		write_pointer = buffer + (values.second - upfront_element_count);
 	}
 
@@ -152,14 +156,14 @@ RingBuffer<ElementType, ring_buffer_size>::push_all(
 
 
 template<typename ElementType, int ring_buffer_size>
-std::pair<ElementType[ring_buffer_size], size_t>
+std::pair<std::array<ElementType, ring_buffer_size>, size_t>
 RingBuffer<ElementType, ring_buffer_size>::pop_all(
 	void
 ) {
 	// critical read section till end of function
 	std::lock_guard<std::mutex> lock{read_mutex};
 
-	std::pair<ElementType[ring_buffer_size], size_t> values{};
+	std::pair<std::array<ElementType, ring_buffer_size>, size_t> values{};
 	values.second = 0;
 
 	// if possible decrease counter of unread elements else return failure of doing so
@@ -176,12 +180,14 @@ RingBuffer<ElementType, ring_buffer_size>::pop_all(
 
 	// NOTE(Lukas Karafiat): maybe use move semantics instead of memcpy
 	if (values.second <= upfront_element_count) {
-		memcpy(values.first, read_pointer, values.second * sizeof(ElementType));
+		std::copy_n(read_pointer, values.second, values.first.begin());
+
 		read_pointer = read_pointer + values.second;
 
 	} else {
-		memcpy(values.first, read_pointer, upfront_element_count * sizeof(ElementType));
-		memcpy(values.first + upfront_element_count, buffer, (values.second - upfront_element_count) * sizeof(ElementType));
+		std::copy_n(read_pointer, upfront_element_count, values.first.begin());
+		std::copy_n(buffer, values.second - upfront_element_count, values.first.begin() + upfront_element_count);
+
 		read_pointer = buffer + (values.second - upfront_element_count);
 	}
 
