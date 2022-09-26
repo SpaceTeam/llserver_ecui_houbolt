@@ -9,14 +9,11 @@ const bool log_to_influx_db = false;
 
 const std::string log_file_path = "log";
 
-const size_t maximum_node_id = 64;
-const size_t maximum_channel_id = 64;
-const size_t maximum_value_id = 1024;
+const size_t maximum_state_id = 1024;
 
 enum node_id {
-	STUFF_1,
+	STUFF_1
 };
-
 
 // NOTE(Lukas Karafiat): just keep in mind that you do not give an alias to two integers
 enum node_1_channel_id {
@@ -51,26 +48,12 @@ enum pneumatic_valve_id {
 	valve_on_channel_id,
 	valve_off_channel_id,
 	valve_pos_channel_id,
-	valve_refresh_divider,
-	valve_request_status,
-	valve_reset_all_settings,
 };
 
-struct value_map {
-	double a;
-	double b;
-};
-
-const struct value_map can_state_map[maximum_node_id][maximum_channel_id][maximum_value_id] = {
-	// node_id
-	{
-		// channel_id
-		{
-			// value_id
-			{ .a=1, .b=0 },
-			{},
-		}
-	}
+enum state_id {
+	pneumatic_valve_1_enabled,
+	pneumatic_valve_1_position,
+	pneumatic_valve_1_target_position,
 };
 
 #endif /* CONFIG_H */
