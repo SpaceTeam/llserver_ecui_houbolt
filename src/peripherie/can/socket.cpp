@@ -13,14 +13,14 @@
 #include <linux/can/raw.h>
 
 #include <string>
-#include <string>
 #include <system_error>
 #include <array>
 #include <algorithm>
 
 #include "utility/Logger.h"
 #include "peripherie/can/helper.h"
-#include "peripherie/can/channel/generic.h"
+#include "peripherie/can/node.h"
+#include "peripherie/can/channel_type/generic.h"
 #include "peripherie/can/config.h"
 
 const auto unix_socket = socket;
@@ -76,7 +76,7 @@ namespace peripherie::can {
 		}
 
 		// fill mapping data
-		command_maps = initialize_command_maps();
+		channels = initialize_channels();
 
 		return;
 	}
@@ -100,34 +100,32 @@ namespace peripherie::can {
 		sensor_buffer sensors;
 		sensors.second = 0;
 
-		can_frame frame{};
+		canfd_frame frame{};
 		error = recv(socket_fd, &frame, sizeof(frame), MSG_DONTWAIT);
 		if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)) {
 			return sensors;
 
-		} else if (error == -1 || error != sizeof(can_frame)) {
+		} else if (error == -1 || error != sizeof(frame)) {
 			return -1;
 		}
 
 		{
 			if (frame.len < 2) {
-				// NOTE(Lukas Karafiat): protocol error
+				log<ERROR>("can receive_frame", "protocol error: frame contained less than 2 bytes");
+
 				return -1;
 			}
 
 			can::id const &id = *reinterpret_cast<can::id const *>(&frame.can_id);
-			can::message const &message = *reinterpret_cast<can::message const *>(&frame.data);
+			can::generic_message const &message = *reinterpret_cast<can::generic_message const *>(&frame.data);
 
-			if (message.info.channel_id == channel::generic::id && static_cast<channel::generic::command>(message.command_id) == channel::generic::command::data_response) {
-				// interpret data as sensor data
+			if (message.info.channel_id == channel_type::generic::id && static_cast<channel_type::generic::command>(message.command_id) == channel_type::generic::command::data_response) {
 				can::sensor_message const &sensor_message = *reinterpret_cast<can::sensor_message const *>(&frame.data);
 
-				// call function to interpret sent data
-				sensors = sensor_maps[id.node_id](id, sensor_message);
+				sensors = node::sensor_mapper(id, sensor_message, channels[id.node_id]);
 
 			} else {
-				// interpret data as command response
-				sensors = command_maps[id.node_id][message.info.channel_id](id, message);
+				sensors = node::command_mapper(id, message, channels[id.node_id]);
 			}
 		}
 
@@ -139,18 +137,17 @@ namespace peripherie::can {
 	socket::send_frame(
 		actuator actuator
 	) {
-		can_frame frame{};
+		canfd_frame frame{};
 
 		{
 			// NOTE(Lukas Karafiat): abra, kadabra, the integer is now a structure!
 			can::id &id = *reinterpret_cast<can::id *>(&frame.can_id);
+			can::generic_message &message = *reinterpret_cast<can::generic_message *>(&frame.data);
 
 			id.direction = MASTER2NODE_DIRECTION;
 			id.node_id = actuator.node_id;
 			id.special_command = STANDARD_SPECIAL_COMMAND;
 			id.priority = STANDARD_PRIORITY;
-
-			can::message &message = *reinterpret_cast<can::message *>(&frame.data);
 
 			message.info.channel_id = actuator.channel_id;
 			message.info.buffer_type = DIRECT_BUFFER;
@@ -159,7 +156,7 @@ namespace peripherie::can {
 			// NOTE(Lukas Karafiat): the following is necessary to delete type security
 			if (std::holds_alternative<get_payload>(actuator.value)) {
 				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<get_payload>(actuator.value)), sizeof(get_payload), message.data.begin());
-				frame.len = 2 + sizeof(get_payload);
+				frame.len = sizeof(can::info) + sizeof(can::command_id) + sizeof(get_payload);
 
 			} else if (std::holds_alternative<set_payload>(actuator.value)) {
 				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<set_payload>(actuator.value)), sizeof(set_payload), message.data.begin());
@@ -181,7 +178,7 @@ namespace peripherie::can {
 		if (error == -1 && errno == EINTR) {
 			return -2;
 
-		} else if (error == -1 || error != sizeof(can_frame)) {
+		} else if (error == -1 || error != sizeof(frame)) {
 			return -1;
 		}
 

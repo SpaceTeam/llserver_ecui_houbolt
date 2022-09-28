@@ -1,6 +1,8 @@
 #ifndef STATE_H
 #define STATE_H
 
+#include <cstdint>
+
 enum peripherie_type : uint32_t {
 	CAN_SOCKET,
 };
@@ -30,6 +32,8 @@ struct sensor {
 struct state {
 	std::variant<bool, uint32_t, double> value;
 };
+
+#include <array>
 
 using sensor_buffer = std::pair<std::array<sensor, 32>, size_t>;
 using actuator_buffer = std::pair<std::array<actuator, 32>, size_t>;

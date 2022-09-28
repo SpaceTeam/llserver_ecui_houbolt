@@ -2,19 +2,22 @@
 #define PERIPHERIE_CAN_CHANNEL_ADC16_H
 
 #include "peripherie/can/helper.h"
+#include "peripherie/can/channel.h"
 #include "state.h"
 
-namespace peripherie::can::channel {
-	class adc16 {
+namespace peripherie::can::channel_type {
+	class adc16 : public channel {
 	private:
-		enum class variable {
+		enum class variable : uint32_t {
 			measurement,
 			refresh_divider,
 
-			reset_settings
+			reset_settings,
+			status,
+			calibrate
 		};
 
-		enum class command {			// payload:
+		enum class command : uint32_t {		// payload:
 			reset_settings_request,		// -
 			reset_settings_response,	// -
 			status_request,			// -
@@ -28,7 +31,8 @@ namespace peripherie::can::channel {
 		};
 
 	public:
-		static sensor_buffer command_mapper(can::id const, can::message const);
+		virtual sensor_buffer command_mapper(can::id const, can::generic_message const);
+		virtual std::pair<sensor, size_t> sensor_mapper(can::id const, can::sensor_message const, size_t const);
 	};
 }
 

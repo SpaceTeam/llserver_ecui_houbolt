@@ -6,18 +6,12 @@
 #include <functional>
 
 #include "state.h"
+#include "peripherie/can/node.h"
+#include "peripherie/can/channel.h"
 #include "peripherie/can/helper.h"
 
-
 namespace peripherie::can {
-	const uint32_t maximum_node_id = 64;
-	const uint32_t maximum_channel_id = 64;
-	const uint32_t maximum_variable_id = 256;
-
-	using command_mapper = std::function<sensor_buffer(can::id const, can::message const)>;
-	using sensor_mapper = std::function<sensor_buffer(can::id const, can::sensor_message const)>;
-
-	std::array<std::array<command_mapper, maximum_channel_id>, maximum_node_id> initialize_command_maps(void);
+	std::array<std::array<channel *, channel::maximum_id>, node::maximum_id> initialize_channels(void);
 }
 
 #endif /* PERIPHERIE_CAN_CONFIG_H */

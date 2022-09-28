@@ -4,12 +4,13 @@
 #include <cstdint>
 
 #include "peripherie/can/helper.h"
+#include "peripherie/can/channel.h"
 #include "state.h"
 
-namespace peripherie::can::channel {
-	class generic {
+namespace peripherie::can::channel_type {
+	class generic : public channel {
 	private:
-		enum class variable {
+		enum class variable : uint32_t {
 			bus1_voltage,
 			bus2_voltage,
 			power_voltage,
@@ -19,13 +20,14 @@ namespace peripherie::can::channel {
 			refresh_rate,
 			logging_enabled,
 
-			reset_all_settings
+			reset_settings,
+			status
 		};
 
 	public:
-		enum class command {		// payload:
-			reset_all_settings_request,	// -
-			reset_all_settings_response,	// -
+		enum class command : uint32_t {		// payload:
+			reset_settings_request,		// -
+			reset_settings_response,	// -
 			status_request,			// -
 			status_response,		// TODO
 			set_variable_request,		// set_payload
@@ -50,7 +52,8 @@ namespace peripherie::can::channel {
 
 		static uint32_t const id = 63;
 
-		static sensor_buffer command_mapper(can::id const, can::message const);
+		virtual sensor_buffer command_mapper(can::id const, can::generic_message const);
+		virtual std::pair<sensor, size_t> sensor_mapper(can::sensor_data const, size_t const);
 	};
 }
 

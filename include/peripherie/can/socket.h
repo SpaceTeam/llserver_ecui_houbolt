@@ -10,6 +10,8 @@
 
 #include "state.h"
 #include "peripherie/can/helper.h"
+#include "peripherie/can/node.h"
+#include "peripherie/can/channel.h"
 #include "config.h"
 #include "peripherie/can/config.h"
 
@@ -21,8 +23,7 @@ namespace peripherie::can {
 
 		int socket_fd;
 
-		std::array<std::array<command_mapper, maximum_channel_id>, maximum_node_id> command_maps;
-		std::array<sensor_mapper, maximum_node_id> sensor_maps;
+		std::array<std::array<channel *, channel::maximum_id>, node::maximum_id> channels;
 
 	public:
 		socket(void) = delete;

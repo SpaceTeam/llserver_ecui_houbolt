@@ -6,8 +6,8 @@
 #include "utility/Logger.h"
 
 Peripherie::Peripherie(
-	std::shared_ptr<RingBuffer<struct actuator>> &actuator_queue,
-	std::shared_ptr<RingBuffer<struct sensor>> &sensor_queue
+	std::shared_ptr<RingBuffer<actuator>> &actuator_queue,
+	std::shared_ptr<RingBuffer<sensor>> &sensor_queue
 ) :
 	actuator_queue(actuator_queue),
 	sensor_queue(sensor_queue),

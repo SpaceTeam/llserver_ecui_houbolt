@@ -1,12 +1,12 @@
-#include "peripherie/can/channel/adc16.h"
+#include "peripherie/can/channel_type/generic.h"
 
 #include "utility/Logger.h"
 
-namespace peripherie::can::channel {
+namespace peripherie::can::channel_type {
 	sensor_buffer
-	adc16::command_mapper(
+	generic::command_mapper(
 		can::id const id,
-		can::message const message
+		can::generic_message const message
 	) {
 		sensor_buffer sensor_buffer;
 
@@ -15,44 +15,17 @@ namespace peripherie::can::channel {
 		case command::set_variable_response: {
 			set_payload const &payload = *reinterpret_cast<set_payload const *>(&message.data);
 
-			uint32_t value = payload.value;
-
-			sensor_buffer.first[0] = sensor{ .value=value, .node_id=id.node_id, .channel_id=message.info.channel_id, .variable_id=payload.variable_id };
+			sensor_buffer.first[0] = sensor{ .value=payload.value, .node_id=id.node_id, .channel_id=message.info.channel_id, .variable_id=payload.variable_id };
 			sensor_buffer.second = 1;
 			break;
-		}
-
-		case command::status_response:
-			log<WARNING>("can command mapper", "GENERIC_NODE_STATUS_RESPONSE: not implemented");
-			break;
-
-		case command::reset_settings_response:
-			sensor_buffer.first[0] = sensor{ .value=true, .node_id=id.node_id, .channel_id=message.info.channel_id, .variable_id=(uint32_t)variable::reset_settings };
-			sensor_buffer.second = 1;
-			break;
-	/*
-		case ADC16_RES_CALIBRATE:
-			CalibrateResponse(canMsg, canMsgLength, timestamp);
-			break;
-
-		case ADC16_REQ_RESET_SETTINGS:
-		case ADC16_REQ_STATUS:
-		case ADC16_REQ_SET_VARIABLE:
-		case ADC16_REQ_GET_VARIABLE:
-		case ADC16_REQ_CALIBRATE:
-			log<ERROR>("can command mapper", "request message type has been received, major fault in protocol");
-			break;
-
-		default:
-			log<ERROR>("can command mapper", "ADC16 specific command with command id not supported: " + std::to_string(message.command_id));
 		}
 
 		case command::node_status_response:
 			log<WARNING>("can command mapper", "GENERIC_NODE_STATUS_RESPONSE: not implemented");
 			break;
 
-		case command::reset_all_settings_response:
-			sensor_buffer.first[0] = sensor{ .value=true, .node_id=id.node_id, .channel_id=adc16_channel::id, .variable_id=(uint32_t)variable::reset };
+		case command::reset_settings_response:
+			sensor_buffer.first[0] = sensor{ .value=true, .node_id=id.node_id, .channel_id=message.info.channel_id, .variable_id=(uint32_t)variable::reset_settings };
 			sensor_buffer.second = 1;
 			break;
 
@@ -66,16 +39,27 @@ namespace peripherie::can::channel {
 		case command::data_request:
 		case command::speaker_request:
 		case command::node_info_request:
-		case command::reset_all_settings_request:
+		case command::reset_settings_request:
 		case command::sync_clock_request:
 			log<ERROR>("can command mapper", "request message type has been received, major fault in protocol");
 			break;
-	*/
+
 		default:
 			log<ERROR>("can command mapper", "node specific command with command id not supported: " + std::to_string(message.command_id));
 		}
 
 		return sensor_buffer;
+	}
+	
+
+	std::pair<sensor, size_t>
+	generic::sensor_mapper(
+		can::sensor_data const data,
+		size_t const offset
+	) {
+		log<WARNING>("generic_channel", "sensor mapping: not implemented");
+
+		return std::make_pair<sensor, size_t>(sensor{}, 0);
 	}
 }
 

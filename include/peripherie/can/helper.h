@@ -3,9 +3,16 @@
 
 #include <cstdint>
 #include <array>
+#include <functional>
+#include <state.h>
 
 namespace peripherie::can {
-	using message_data = std::array<uint8_t, 62>;
+	using command_id = uint8_t;
+	using channel_mask = uint32_t;
+
+	using channel_id = uint32_t;
+
+	using generic_data = std::array<uint8_t, 62>;
 	using sensor_data = std::array<uint8_t, 58>;
 
 	enum direction : uint32_t {
@@ -47,22 +54,25 @@ namespace peripherie::can {
 	} __attribute__((__packed__));
 
 	struct info {
-		uint32_t channel_id :6;		// bit:  0-5 | Channel ID: 0 - 63
-		uint32_t buffer_type :2;	// bit:  6-7
+		can::channel_id  channel_id  :6;	// bit:  0-5 | Channel ID: 0 - 63
+		can::buffer_type buffer_type :2;	// bit:  6-7
 	} __attribute__((__packed__));
 
-	struct message {
-		can::info info;
-		uint8_t command_id;
-		message_data data;
+	struct generic_message {
+		can::info         info;
+		can::command_id   command_id;
+		can::generic_data data;
 	} __attribute__((__packed__));
 
 	struct sensor_message {
-		can::info info;
-		uint8_t command_id;
-		uint32_t channel_mask;
-		sensor_data data;
+		can::info         info;
+		can::command_id   command_id;
+		can::channel_mask channel_mask;
+		can::sensor_data  data;
 	} __attribute__((__packed__));
+
+	using command_mapper = std::function<sensor_buffer(can::id const, can::generic_message const)>;
+	using sensor_mapper = std::function<std::pair<sensor, size_t>(can::id const, can::sensor_message const, size_t const)>;
 }
 
 #endif /* PERIPHERIE_CAN_HELPER_H */

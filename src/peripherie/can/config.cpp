@@ -3,18 +3,25 @@
 #include "utility/Logger.h"
 #include "payload_types.h"
 
-#include "peripherie/can/channel/generic.h"
+#include "peripherie/can/node.h"
+
+#include "peripherie/can/channel.h"
+#include "peripherie/can/channel_type/generic.h"
+#include "peripherie/can/channel_type/adc16.h"
 
 namespace peripherie::can {
-	std::array<std::array<command_mapper, maximum_channel_id>, maximum_node_id>
-	initialize_command_maps(
+
+	channel_type::adc16 adc16_1;
+
+	std::array<std::array<channel *, channel::maximum_id>, node::maximum_id>
+	initialize_channels(
 		void
 	) {
-		std::array<std::array<command_mapper, maximum_channel_id>, maximum_node_id> command_maps;
+		std::array<std::array<channel *, channel::maximum_id>, node::maximum_id> channels;
 
-		command_maps[0][channel::generic::id] = channel::generic::command_mapper;
+		channels[0][0] = &adc16_1;
 
-		return command_maps;
+		return channels;
 	}
 }
 
