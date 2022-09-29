@@ -16,6 +16,7 @@
 #include "can/IMU.h"
 #include "can/Rocket.h"
 #include "StateController.h"
+#include <unistd.h>
 
 const std::vector<std::string> Node::states =
         {
@@ -778,5 +779,6 @@ void Node::RequestCurrentState()
     for (auto &channel : channelMap)
     {
         channel.second->RequestCurrentState();
+        usleep(10000);
     }
 }
