@@ -40,7 +40,7 @@ namespace peripherie::can {
 		address_info address_info{
 			.family = AF_CAN,
 			.type = SOCK_RAW,
-			.protocol = CAN_RAW_FD_FRAMES
+			.protocol = CAN_RAW,
 		};
 
 		// build socket
@@ -50,6 +50,13 @@ namespace peripherie::can {
 		}
 
 		int error;
+
+		int enable_canfd = 1;
+		error = setsockopt(socket_fd, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd, sizeof(enable_canfd));
+		if (error != 0) {
+			close(socket_fd);
+			throw std::system_error(errno, std::generic_category(), "could not enable can fd");
+		}
 
 		// get interface info
 		ifreq interface_requirements{};
@@ -166,9 +173,13 @@ namespace peripherie::can {
 				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<servo_move_payload>(actuator.value)), sizeof(servo_move_payload), message.data.begin());
 				frame.len = 2 + sizeof(servo_move_payload);
 
-			} else if (std::holds_alternative<rocket_state_payload>(actuator.value)) {
-				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<rocket_state_payload>(actuator.value)), sizeof(rocket_state_payload), message.data.begin());
-				frame.len = 2 + sizeof(rocket_state_payload);
+			} else if (std::holds_alternative<get_rocket_state_payload>(actuator.value)) {
+				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<get_rocket_state_payload>(actuator.value)), sizeof(get_rocket_state_payload), message.data.begin());
+				frame.len = 2 + sizeof(get_rocket_state_payload);
+
+			} else if (std::holds_alternative<set_rocket_state_payload>(actuator.value)) {
+				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<set_rocket_state_payload>(actuator.value)), sizeof(set_rocket_state_payload), message.data.begin());
+				frame.len = 2 + sizeof(set_rocket_state_payload);
 			}
 		}
 

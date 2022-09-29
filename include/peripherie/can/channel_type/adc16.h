@@ -1,5 +1,5 @@
-#ifndef PERIPHERIE_CAN_CHANNEL_ADC16_H
-#define PERIPHERIE_CAN_CHANNEL_ADC16_H
+#ifndef PERIPHERIE_CAN_CHANNEL_TYPE_ADC16_H
+#define PERIPHERIE_CAN_CHANNEL_TYPE_ADC16_H
 
 #include "peripherie/can/helper.h"
 #include "peripherie/can/channel.h"
@@ -36,4 +36,4 @@ namespace peripherie::can::channel_type {
 	};
 }
 
-#endif /* PERIPHERIE_CAN_CHANNEL_ADC16_H */
+#endif /* PERIPHERIE_CAN_CHANNEL_TYPE_ADC16_H */

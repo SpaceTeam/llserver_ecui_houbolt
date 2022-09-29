@@ -1,10 +1,10 @@
-#include "peripherie/can/channel_type/adc16.h"
+#include "peripherie/can/channel_type/servo.h"
 
 #include "utility/Logger.h"
 
 namespace peripherie::can::channel_type {
 	sensor_buffer
-	adc16::command_mapper(
+	servo::command_mapper(
 		can::id const id,
 		can::generic_message const message
 	) {
@@ -31,21 +31,15 @@ namespace peripherie::can::channel_type {
 			sensor_buffer.second = 1;
 			break;
 
-		case command::calibrate_response:
-			sensor_buffer.first[0] = sensor{ .value=true, .node_id=id.node_id, .channel_id=message.info.channel_id, .variable_id=(uint32_t)variable::calibrate };
-			sensor_buffer.second = 1;
-			break;
-
 		case command::reset_settings_request:
 		case command::status_request:
 		case command::set_variable_request:
 		case command::get_variable_request:
-		case command::calibrate_request:
 			log<ERROR>("can command mapper", "request message type has been received, major fault in protocol");
 			break;
 
 		default:
-			log<ERROR>("can command mapper", "adc16 specific command with command id not supported: " + std::to_string(message.command_id));
+			log<ERROR>("can command mapper", "servo specific command with command id not supported: " + std::to_string(message.command_id));
 		}
 
 		return sensor_buffer;
@@ -53,7 +47,7 @@ namespace peripherie::can::channel_type {
 
 
 	std::pair<sensor, size_t>
-	adc16::sensor_mapper(
+	servo::sensor_mapper(
 		can::id const id,
 		can::sensor_message const message,
 		size_t const offset
@@ -62,15 +56,17 @@ namespace peripherie::can::channel_type {
 
 		uint32_t value = 0;
 
-		value |= message.data[offset + 0] << 0;
-		value |= message.data[offset + 1] << 8;
+		value |= message.data[offset + 0] <<  0;
+		value |= message.data[offset + 1] <<  8;
+		value |= message.data[offset + 2] << 16;
+		value |= message.data[offset + 3] << 24;
 
 		sensor.value = value;
 		sensor.node_id = id.node_id;
 		sensor.channel_id = message.info.channel_id;
 //		sensor.variable_id = static_cast<int32_t>(variable::measurement);
 
-		return std::make_pair(sensor, 2);
+		return std::make_pair(sensor, 4);
 	}
 }
 

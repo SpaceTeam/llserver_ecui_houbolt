@@ -15,8 +15,13 @@ struct servo_move_payload {
 	uint32_t interval;
 } __attribute__ ((__packed__));
 
-struct rocket_state_payload {
+struct get_rocket_state_payload {
 	uint32_t state;
+} __attribute__ ((__packed__));
+
+struct set_rocket_state_payload {
+	uint32_t state;
+	uint32_t status;
 } __attribute__ ((__packed__));
 
 #endif /* PAYLOAD_TYPES_H */

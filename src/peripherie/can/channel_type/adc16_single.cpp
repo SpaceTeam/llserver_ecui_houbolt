@@ -1,10 +1,10 @@
-#include "peripherie/can/channel_type/adc16.h"
+#include "peripherie/can/channel_type/adc16_single.h"
 
 #include "utility/Logger.h"
 
 namespace peripherie::can::channel_type {
 	sensor_buffer
-	adc16::command_mapper(
+	adc16_single::command_mapper(
 		can::id const id,
 		can::generic_message const message
 	) {
@@ -23,7 +23,7 @@ namespace peripherie::can::channel_type {
 		}
 
 		case command::status_response:
-			log<WARNING>("can command mapper", "ADC16_STATUS_RESPONSE: not implemented");
+			log<WARNING>("can command mapper", "ADC16_SINGLE_STATUS_RESPONSE: not implemented");
 			break;
 
 		case command::reset_settings_response:
@@ -45,7 +45,7 @@ namespace peripherie::can::channel_type {
 			break;
 
 		default:
-			log<ERROR>("can command mapper", "adc16 specific command with command id not supported: " + std::to_string(message.command_id));
+			log<ERROR>("can command mapper", "adc16_single specific command with command id not supported: " + std::to_string(message.command_id));
 		}
 
 		return sensor_buffer;
@@ -53,7 +53,7 @@ namespace peripherie::can::channel_type {
 
 
 	std::pair<sensor, size_t>
-	adc16::sensor_mapper(
+	adc16_single::sensor_mapper(
 		can::id const id,
 		can::sensor_message const message,
 		size_t const offset

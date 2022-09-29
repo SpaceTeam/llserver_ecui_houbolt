@@ -12,7 +12,7 @@ enum peripherie_type : uint32_t {
 #include "payload_types.h"
 
 struct actuator {
-	std::variant<get_payload, set_payload, servo_move_payload, rocket_state_payload> value;
+	std::variant<get_payload, set_payload, servo_move_payload, get_rocket_state_payload, set_rocket_state_payload> value;
 
 	uint32_t node_id;
 	uint32_t channel_id;

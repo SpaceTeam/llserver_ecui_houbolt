@@ -1,5 +1,5 @@
-#ifndef PERIPHERIE_CAN_CHANNEL_GENERIC_H
-#define PERIPHERIE_CAN_CHANNEL_GENERIC_H
+#ifndef PERIPHERIE_CAN_CHANNEL_TYPE_GENERIC_H
+#define PERIPHERIE_CAN_CHANNEL_TYPE_GENERIC_H
 
 #include <cstdint>
 
@@ -57,4 +57,4 @@ namespace peripherie::can::channel_type {
 	};
 }
 
-#endif /* PERIPHERIE_CAN_CHANNEL_GENERIC_H */
+#endif /* PERIPHERIE_CAN_CHANNEL_TYPE_GENERIC_H */
