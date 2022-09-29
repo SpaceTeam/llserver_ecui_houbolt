@@ -28,7 +28,7 @@ log(
 	const std::string source,
 	const std::string message
 ) {
-	if constexpr (severity < minimum_severity) {
+	if constexpr (severity < minimum_severity || (!log_to_console && !log_to_file && !log_to_influx_db)) {
 		return;
 
 	} else {

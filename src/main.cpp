@@ -190,8 +190,8 @@ main(
 //	|            |<----------------3-----------------|              |<--1--|             |
 //	|____________|                                   |______________|      |_____________|
 
-	auto   sensor_queue = std::make_shared<RingBuffer<struct sensor>>();
-	auto actuator_queue = std::make_shared<RingBuffer<struct actuator>>();
+	auto   sensor_queue = std::make_shared<RingBuffer<struct sensor, sensor_buffer_capacity>>();
+	auto actuator_queue = std::make_shared<RingBuffer<struct actuator, actuator_buffer_capacity>>();
 	auto  request_queue = std::make_shared<RingBuffer<std::string>>();
 	auto response_queue = std::make_shared<RingBuffer<std::string>>();
 	auto  command_queue = std::make_shared<RingBuffer<std::any>>();

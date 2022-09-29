@@ -28,11 +28,11 @@ private:
 	void write_connections(void);
 
 	// NOTE(Lukas Karafiat): 64kiByte - 1 Byte for NULL-terminator
-	static const int maximum_payload_size = USHRT_MAX;
+	static const size_t maximum_payload_size = USHRT_MAX;
 	char payload_buffer[maximum_payload_size];
 
 	std::optional<std::string> receive_message();
-	void send_message(std::string message);
+	void send_message(std::string);
 
 public:
 	WebSocketClient() = delete;
@@ -40,17 +40,17 @@ public:
 	explicit WebSocketClient(
 		std::string hostname,
 		std::string port,
-		std::shared_ptr<RingBuffer<std::string>> &response_queue,
-		std::shared_ptr<RingBuffer<std::string>> &request_queue);
+		std::shared_ptr<RingBuffer<std::string>>,
+		std::shared_ptr<RingBuffer<std::string>>);
 	~WebSocketClient();
 
 	// non copyable
 	WebSocketClient(WebSocketClient const &) = delete;
-	void operator=(WebSocketClient const &x) = delete;
+	void operator=(WebSocketClient const &) = delete;
 
 	// movable
 	WebSocketClient(WebSocketClient &&) = default;
-	WebSocketClient& operator=(WebSocketClient &&x) = default;
+	WebSocketClient& operator=(WebSocketClient &&) = default;
 
 	void run(void);
 };

@@ -4,8 +4,8 @@
 #include "utility/Logger.h"
 
 Dispatcher::Dispatcher(
-	std::shared_ptr<RingBuffer<std::string>> &request_queue,
-	std::shared_ptr<RingBuffer<std::any>> &command_queue
+	std::shared_ptr<RingBuffer<std::string>> request_queue,
+	std::shared_ptr<RingBuffer<std::any>> command_queue
 ) :
 	request_queue(request_queue),
 	command_queue(command_queue)

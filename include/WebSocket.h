@@ -33,25 +33,25 @@ private:
 	static const int maximum_payload_size = USHRT_MAX;
 	char payload_buffer[maximum_payload_size];
 
-	std::optional<std::string> receive_message(int index);
-	void send_message(int index, std::string message);
+	std::optional<std::string> receive_message(int);
+	void send_message(int, std::string);
 
 public:
 	WebSocket(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit WebSocket(
-		std::string port,
-		std::shared_ptr<RingBuffer<std::string>> &response_queue,
-		std::shared_ptr<RingBuffer<std::string>> &request_queue);
+		std::string,
+		std::shared_ptr<RingBuffer<std::string>>,
+		std::shared_ptr<RingBuffer<std::string>>);
 	~WebSocket(void);
 
 	// non copyable
 	WebSocket(const WebSocket &) = delete;
-	void operator=(const WebSocket &x) = delete;
+	void operator=(const WebSocket &) = delete;
 
 	// movable
 	WebSocket(WebSocket &&) = default;
-	WebSocket& operator=(WebSocket &&x) = default;
+	WebSocket& operator=(WebSocket &&) = default;
 
 	void run(void);
 };
@@ -60,8 +60,8 @@ public:
 template<int concurrent_connection_count>
 WebSocket<concurrent_connection_count>::WebSocket(
 	std::string port,
-	std::shared_ptr<RingBuffer<std::string>> &response_queue,
-	std::shared_ptr<RingBuffer<std::string>> &request_queue
+	std::shared_ptr<RingBuffer<std::string>> response_queue,
+	std::shared_ptr<RingBuffer<std::string>> request_queue
 ) :
 	response_queue(response_queue),
 	request_queue(request_queue)

@@ -6,10 +6,10 @@
 #include "utility/Logger.h"
 
 ControlLoop::ControlLoop(
-	std::shared_ptr<RingBuffer<std::any>> &command_queue,
-	std::shared_ptr<RingBuffer<std::string>> &response_queue,
-	std::shared_ptr<RingBuffer<struct sensor>> &sensor_queue,
-	std::shared_ptr<RingBuffer<struct actuator>> &actuator_queue
+	std::shared_ptr<RingBuffer<std::any>> command_queue,
+	std::shared_ptr<RingBuffer<std::string>> response_queue,
+	std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity>> sensor_queue,
+	std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity>> actuator_queue
 ) :
 	command_queue(command_queue),
 	response_queue(response_queue),

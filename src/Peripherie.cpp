@@ -6,8 +6,8 @@
 #include "utility/Logger.h"
 
 Peripherie::Peripherie(
-	std::shared_ptr<RingBuffer<actuator>> &actuator_queue,
-	std::shared_ptr<RingBuffer<sensor>> &sensor_queue
+	std::shared_ptr<RingBuffer<actuator>> actuator_queue,
+	std::shared_ptr<RingBuffer<sensor>> sensor_queue
 ) :
 	actuator_queue(actuator_queue),
 	sensor_queue(sensor_queue),
@@ -81,7 +81,7 @@ Peripherie::write_peripherie(
 	std::optional<int> error;
 
 	switch (actuator->peripherie_type) {
-	case CAN_SOCKET:
+	case peripherie::type::can_socket:
 		error = can_socket.send_frame(*actuator);
 		break;
 

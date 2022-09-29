@@ -23,6 +23,7 @@
 #include "peripherie/can/channel_type/generic.h"
 #include "peripherie/can/config.h"
 
+// NOTE(Lukas Karafiat): needed as socket is already defined as a function
 const auto unix_socket = socket;
 
 namespace peripherie::can {
@@ -51,6 +52,7 @@ namespace peripherie::can {
 
 		int error;
 
+		// enable can fd support
 		int enable_canfd = 1;
 		error = setsockopt(socket_fd, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd, sizeof(enable_canfd));
 		if (error != 0) {

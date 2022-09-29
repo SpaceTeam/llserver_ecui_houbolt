@@ -22,26 +22,26 @@ public:
 	Dispatcher(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit Dispatcher(
-		std::shared_ptr<RingBuffer<std::string>> &request_queue,
-		std::shared_ptr<RingBuffer<std::any>> &command_queue);
+		std::shared_ptr<RingBuffer<std::string>>,
+		std::shared_ptr<RingBuffer<std::any>>);
 	~Dispatcher(void);
 
 	// non copyable
 	Dispatcher(const Dispatcher &) = delete;
-	void operator=(const Dispatcher &x) = delete;
+	void operator=(const Dispatcher &) = delete;
 
 	// movable
 	Dispatcher(Dispatcher &&) = default;
-	Dispatcher& operator=(Dispatcher &&x) = default;
+	Dispatcher& operator=(Dispatcher &&) = default;
 
 	void run(void);
 
 private:
-	static void set_states(std::string message);
-	static void start_periodic_transmission(std::string message);
-	static void stop_periodic_transmission(std::string message);
-	static void start_sequence(std::string message);
-	static void abort_sequence(std::string message);
+	static void set_states(std::string);
+	static void start_periodic_transmission(std::string);
+	static void stop_periodic_transmission(std::string);
+	static void start_sequence(std::string);
+	static void abort_sequence(std::string);
 };
 
 #endif /* DISPATCHER_HPP */

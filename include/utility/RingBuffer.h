@@ -35,17 +35,17 @@ public:
 	~RingBuffer(void) = default;
 
 	// non copyable
-	RingBuffer(RingBuffer const &x) = delete;
-	void operator=(RingBuffer const &x) = delete;
+	RingBuffer(RingBuffer const &) = delete;
+	void operator=(RingBuffer const &) = delete;
 
 	// movable
-	RingBuffer(RingBuffer &&x) = default;
-	RingBuffer& operator=(RingBuffer &&x) = default;
+	RingBuffer(RingBuffer &&) = default;
+	RingBuffer& operator=(RingBuffer &&) = default;
 
-	bool push(ElementType value);
+	bool push(ElementType);
 	std::optional<ElementType> pop(void);
 
-	bool push_all(std::pair<std::array<ElementType, ring_buffer_size>, size_t> const values);
+	bool push_all(std::pair<std::array<ElementType, ring_buffer_size>, size_t> const);
 	std::pair<std::array<ElementType, ring_buffer_size>, size_t> pop_all(void);
 };
 
@@ -135,7 +135,6 @@ RingBuffer<ElementType, ring_buffer_size>::push_all(
 	// amount of elements before buffer wrap
 	size_t upfront_element_count = ((buffer + ring_buffer_size) - write_pointer);
 
-	// NOTE(Lukas Karafiat): maybe use move semantics instead of memcpy
 	if (values.second <= upfront_element_count) {
 		std::copy_n(values.first.begin(), values.second, write_pointer);
 
@@ -178,7 +177,6 @@ RingBuffer<ElementType, ring_buffer_size>::pop_all(
 	// amount of elements before buffer wrap
 	size_t upfront_element_count = ((buffer + ring_buffer_size) - read_pointer);
 
-	// NOTE(Lukas Karafiat): maybe use move semantics instead of memcpy
 	if (values.second <= upfront_element_count) {
 		std::copy_n(read_pointer, values.second, values.first.begin());
 

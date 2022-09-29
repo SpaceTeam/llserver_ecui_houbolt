@@ -3,12 +3,14 @@
 
 #include <cstdint>
 
-enum peripherie_type : uint32_t {
-	CAN_SOCKET,
-};
+namespace peripherie {
+	enum class type : uint32_t {
+		can_socket,
+	};
+}
+
 
 #include <variant>
-#include <cstddef>
 #include "payload_types.h"
 
 struct actuator {
@@ -18,7 +20,7 @@ struct actuator {
 	uint32_t channel_id;
 	uint32_t command_id;
 
-	uint32_t peripherie_type;
+	peripherie::type peripherie_type;
 };
 
 struct sensor {
@@ -33,6 +35,8 @@ struct state {
 	std::variant<bool, uint32_t, double> value;
 };
 
+
+#include <cstddef>
 #include <array>
 
 using sensor_buffer = std::pair<std::array<sensor, 32>, size_t>;
