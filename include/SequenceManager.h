@@ -92,4 +92,6 @@ class SequenceManager : public Singleton<SequenceManager>
 
 		LLInterface *llInterface = nullptr;
 		EventManager *eventManager = nullptr;
+		
+		std::thread sequenceThread;
 };

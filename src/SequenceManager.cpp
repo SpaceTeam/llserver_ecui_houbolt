@@ -18,6 +18,8 @@ SequenceManager::~SequenceManager()
             usleep(100000);
         }
     }
+    if (sequenceThread.joinable())
+    	sequenceThread.join();
 }
 
 void SequenceManager::plotMaps(uint8_t option=2)
@@ -107,10 +109,12 @@ void SequenceManager::AbortSequence(std::string abortMsg)
 
         sequenceToStop = true;
 		Debug::print("Asked sequence to stop...");
+		
+	sequenceThread.join();
 
-		while(sequenceRunning);
-
-        abortSequence();
+	while(sequenceRunning); // Todo probably remove since it does not work with thread
+		
+	abortSequence();
     }
     else
     {
@@ -218,6 +222,8 @@ bool SequenceManager::LoadSequence(nlohmann::json jsonSeq)
 
 void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments)
 {
+    if (sequenceThread.joinable())
+    	sequenceThread.join();
     if (!sequenceRunning && !isAbortRunning)
     {
         jsonSequence = jsonSeq;
@@ -269,8 +275,8 @@ void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonA
             EcuiSocket::SendJson("timer-start");
 
             sequenceRunning = true;
-            std::thread sequenceThread = std::thread(&SequenceManager::sequenceLoop, this, interval_us);
-            sequenceThread.detach();
+            sequenceThread = std::thread(&SequenceManager::sequenceLoop, this, interval_us);
+            //sequenceThread.detach();
 
             Debug::print("Sequence Started");
         }
@@ -515,10 +521,10 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 }
 
 void SequenceManager::abortSequence()
-{
+{	
     if (!sequenceRunning && !isAbortRunning)
     {
-        isAbortRunning = true;
+    	isAbortRunning = true;
 
         syncMtx.lock();
 
@@ -526,7 +532,7 @@ void SequenceManager::abortSequence()
         {
             if (it.key().compare("timestamp") != 0)
             {
-                std::vector<double> valueList = it.value();
+            	std::vector<double> valueList = it.value();
                 //TODO: potential undefined state when exception is thrown
                 try
                 {
