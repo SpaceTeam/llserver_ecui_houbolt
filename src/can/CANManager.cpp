@@ -80,9 +80,9 @@ CANResult CANManager::Init()
             	throw std::runtime_error("Can driver \"" + can_driver + "\" specified in config not found!");
             }
 
-			bool use_lora = std::get<bool>(Config::getData("use_lora"));
+			useLora = std::get<bool>(Config::getData("use_lora"));
 
-            if(use_lora)
+            if(useLora)
 			{
 				Debug::print("Initializing LoRa...");
 				loraDriver = new CANDriverUDP(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6),
@@ -93,7 +93,7 @@ CANResult CANManager::Init()
 			Debug::print("---Press enter to send node request---");
     		std::cin.get();
             RequestCANInfo(canDriver, canBusChannelIDs);
-			if (use_lora)
+			if (useLora)
 			{
 				std::vector<uint32_t> loraBusChannels = {0};
 				//RequestCANInfo(loraDriver, loraBusChannels);
@@ -150,7 +150,7 @@ CANResult CANManager::Init()
             initialized = true;
 
 			Debug::print("Request current state and config from nodes...\n");
-			RequestCurrentState();
+			//RequestCurrentState();
 
         }
         catch (std::exception& e)
@@ -302,15 +302,19 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
 				InitializeNode(canBusChannelID, nodeID, nodeInfo, canDriver);
 
-				//WHAT THE HACK? Exactly that's a hack, because Andi doesn't want to implement it properly!!!
-				std::vector<int> nodeIDsRefInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDsRef"));
-				std::vector<int> nodeIDsInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDs"));
-				auto foundIt = std::find(nodeIDsRefInt.begin(), nodeIDsRefInt.end(), nodeID); 
-				if (foundIt != nodeIDsRefInt.end()) 
+				if(useLora)
 				{
-					uint8_t loraNodeID = nodeIDsInt[foundIt - nodeIDsRefInt.begin()];
-					Debug::print("Found lora equivalent with nodeID %d; can bus nodeID %d", loraNodeID, nodeID);
-					InitializeNode(0, loraNodeID, nodeInfo, loraDriver);
+
+					//WHAT THE HACK? Exactly that's a hack, because Andi doesn't want to implement it properly!!!
+					std::vector<int> nodeIDsRefInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDsRef"));
+					std::vector<int> nodeIDsInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDs"));
+					auto foundIt = std::find(nodeIDsRefInt.begin(), nodeIDsRefInt.end(), nodeID); 
+					if (foundIt != nodeIDsRefInt.end()) 
+					{
+						uint8_t loraNodeID = nodeIDsInt[foundIt - nodeIDsRefInt.begin()];
+						Debug::print("Found lora equivalent with nodeID %d; can bus nodeID %d", loraNodeID, nodeID);
+						InitializeNode(0, loraNodeID, nodeInfo, loraDriver);
+				}
 				}
 				
 			}
@@ -353,7 +357,7 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 			bool found = nodeMap.find(nodeID) != nodeMap.end();
 			if (!found)
 			{
-				throw std::runtime_error("Node not found, ignoring msg...");
+				throw std::runtime_error("Node: " + std::to_string(nodeID) + " not found, ignoring msg...");
 			}
 			Node *node = nodeMap[nodeID];
 			if (payloadLength <= 0)

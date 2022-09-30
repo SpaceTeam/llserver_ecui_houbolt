@@ -48,7 +48,7 @@ class CANManager : public Singleton<CANManager>
 	private:
 
 
-		CANDriver *canDriver;
+		
 		CANDriver *loraDriver;
 		CANMapping *mapping;
 
@@ -62,6 +62,7 @@ class CANManager : public Singleton<CANManager>
 		std::map<uint16_t, std::tuple<std::string, std::vector<double>>> sensorInfoMap;
 
 		std::atomic_bool initialized = false;
+		std::atomic_bool useLora = false;
 
 		CANResult RequestCANInfo(CANDriver *driver, std::vector<uint32_t> &canBusChannelIDs);
 		static inline uint8_t GetNodeID(uint32_t &canID);
@@ -73,6 +74,7 @@ class CANManager : public Singleton<CANManager>
 
 		~CANManager();
 	public:
+		CANDriver *canDriver;
 
 		CANResult Init();
 

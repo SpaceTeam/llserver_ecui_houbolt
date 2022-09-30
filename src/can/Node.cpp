@@ -359,6 +359,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                     {
                         std::lock_guard<std::mutex> lock(loggerMtx);
                         logger->log(ch->GetSensorName(), currValue, timestamp);
+                        //logger->flush();
                     }
                     //buffer.push_back(sensor); //TODO: uncomment if implemented
                 }
