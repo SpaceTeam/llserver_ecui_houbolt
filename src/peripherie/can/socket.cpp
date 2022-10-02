@@ -171,10 +171,6 @@ namespace peripherie::can {
 				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<set_payload>(actuator.value)), sizeof(set_payload), message.data.begin());
 				frame.len = 2 + sizeof(set_payload);
 
-			} else if (std::holds_alternative<servo_move_payload>(actuator.value)) {
-				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<servo_move_payload>(actuator.value)), sizeof(servo_move_payload), message.data.begin());
-				frame.len = 2 + sizeof(servo_move_payload);
-
 			} else if (std::holds_alternative<get_rocket_state_payload>(actuator.value)) {
 				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<get_rocket_state_payload>(actuator.value)), sizeof(get_rocket_state_payload), message.data.begin());
 				frame.len = 2 + sizeof(get_rocket_state_payload);
@@ -182,6 +178,14 @@ namespace peripherie::can {
 			} else if (std::holds_alternative<set_rocket_state_payload>(actuator.value)) {
 				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<set_rocket_state_payload>(actuator.value)), sizeof(set_rocket_state_payload), message.data.begin());
 				frame.len = 2 + sizeof(set_rocket_state_payload);
+
+			} else if (std::holds_alternative<servo_move_payload>(actuator.value)) {
+				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<servo_move_payload>(actuator.value)), sizeof(servo_move_payload), message.data.begin());
+				frame.len = 2 + sizeof(servo_move_payload);
+
+			} else if (std::holds_alternative<speaker_payload>(actuator.value)) {
+				std::copy_n(reinterpret_cast<uint8_t *>(&std::get<speaker_payload>(actuator.value)), sizeof(speaker_payload), message.data.begin());
+				frame.len = 2 + sizeof(speaker_payload);
 			}
 		}
 

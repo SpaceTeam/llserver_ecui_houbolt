@@ -15,7 +15,7 @@ namespace peripherie::can::channel_type {
 
 			reset_settings,
 			status,
-			calibrate
+			calibrate,
 
 			sensor_value,
 		};
