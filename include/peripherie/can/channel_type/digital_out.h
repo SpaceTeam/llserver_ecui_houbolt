@@ -13,10 +13,12 @@ namespace peripherie::can::channel_type {
 			duty_cycle,
 			frequency,
 			measurement,
-			refresh_divider,
+			sensor_refresh_divider,
 
 			reset_settings,
 			status,
+
+			sensor_value,
 		};
 
 		enum class command : uint32_t {		// payload:

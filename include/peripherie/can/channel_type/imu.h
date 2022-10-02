@@ -9,14 +9,14 @@ namespace peripherie::can::channel_type {
 	class imu : public channel {
 	private:
 		enum class variable : uint32_t {
-			state,
-			duty_cycle,
-			frequency,
 			measurement,
 			refresh_divider,
 
 			reset_settings,
 			status,
+			calibrate,
+
+			sensor_value,
 		};
 
 		enum class command : uint32_t {		// payload:
@@ -28,6 +28,8 @@ namespace peripherie::can::channel_type {
 			set_variable_response,		// set_payload
 			get_variable_request,		// get_payload
 			get_variable_response,		// set_payload
+			calibrate_request,		// -
+			calibrate_response,		// -
 		};
 
 	public:

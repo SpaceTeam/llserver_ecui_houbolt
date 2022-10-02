@@ -62,7 +62,7 @@ namespace peripherie::can::channel_type {
 		sensor.value = value;
 		sensor.node_id = id.node_id;
 		sensor.channel_id = message.info.channel_id;
-//		sensor.variable_id = static_cast<int32_t>(variable::position);
+		sensor.variable_id = static_cast<int32_t>(variable::sensor_value);
 
 		return std::make_pair(sensor, 2);
 	}

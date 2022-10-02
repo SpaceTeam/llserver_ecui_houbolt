@@ -94,7 +94,7 @@ namespace peripherie::can::channel_type {
 		sensor.node_id = id.node_id;
 		sensor.channel_id = message.info.channel_id;
 		// TODO: find out what the rocket channel does with this function
-		// sensor.variable_id = static_cast<int32_t>(variable::measurement);
+		sensor.variable_id = static_cast<int32_t>(variable::sensor_value);
 
 		return std::make_pair(sensor, 2);
 	}

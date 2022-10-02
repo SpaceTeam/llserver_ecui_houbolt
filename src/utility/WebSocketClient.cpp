@@ -40,6 +40,8 @@ WebSocketClient::WebSocketClient(
 		throw std::system_error(errno, std::generic_category(), "could not connect to: " + hostname + ":" + port);
 	}
 
+	log<INFO>("web client", "connected to '" + hostname + "' on port '" + port + "'");
+
 	return;
 }
 
@@ -79,6 +81,7 @@ WebSocketClient::read_connections(
 		bool push_successful = request_queue->push(request_buffer.value());
 
 		if (push_successful) {
+			log<DEBUG>("web client", "received message: '" + request_buffer.value() + "'");
 			request_buffer.reset();
 		}
 	}
@@ -135,9 +138,9 @@ WebSocketClient::write_connections(
 ) {
 	// NOTE(Lukas Karafiat): we could read more than one response from the
 	//     queue, but not infinite as it could result in a life lock
-	std::optional<std::string> message_buffer = response_queue->pop();
+	std::optional<std::string> response_buffer = response_queue->pop();
 
-	if (!message_buffer.has_value()) {
+	if (!response_buffer.has_value()) {
 		return;
 	}
 
@@ -145,7 +148,8 @@ WebSocketClient::write_connections(
 		return;
 	}
 
-	send_message(message_buffer.value());
+	send_message(response_buffer.value());
+	log<DEBUG>("web client", "received message: '" + response_buffer.value() + "'");
 
 	return;
 }

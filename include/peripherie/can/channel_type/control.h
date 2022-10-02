@@ -9,7 +9,6 @@ namespace peripherie::can::channel_type {
 	class control : public channel {
 	private:
 		enum class variable : uint32_t {
-			measurement,
 			enabled,
 			target,
 			threshold,
@@ -20,6 +19,8 @@ namespace peripherie::can::channel_type {
 
 			reset_settings,
 			status,
+
+			sensor_value,
 		};
 
 		enum class command : uint32_t {		// payload:

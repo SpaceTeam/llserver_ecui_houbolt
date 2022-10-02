@@ -43,6 +43,8 @@ ControlLoop::run(
 	struct sched_param scheduling_parameters{.sched_priority = 80};
 	sched_setscheduler(0, SCHED_RR, &scheduling_parameters);
 
+	log<INFO>("control loop", "set scheduler to round robin");
+
 	// get timestamp stuff
 
 	uint64_t timestamp = 0;

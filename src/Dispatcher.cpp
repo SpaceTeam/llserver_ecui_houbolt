@@ -52,6 +52,8 @@ Dispatcher::run(
 
 		message = message_buffer.value();
 
+		log<DEBUG>("dispatcher", "got command '" + message + "'");
+
 		try {
 			commands.at(message)(message);
 

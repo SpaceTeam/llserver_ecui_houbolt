@@ -15,6 +15,8 @@ namespace peripherie::can::channel_type {
 		case command::set_variable_response: {
 			set_payload const &payload = *reinterpret_cast<set_payload const *>(&message.data);
 
+			// TODO: findout what type variable::measurement and variable::refresh_divider have
+
 			uint32_t value = payload.value;
 
 			sensor_buffer.first[0] = sensor{ .value=value, .node_id=id.node_id, .channel_id=message.info.channel_id, .variable_id=payload.variable_id };
@@ -31,10 +33,16 @@ namespace peripherie::can::channel_type {
 			sensor_buffer.second = 1;
 			break;
 
+		case command::calibrate_response:
+			sensor_buffer.first[0] = sensor{ .value=true, .node_id=id.node_id, .channel_id=message.info.channel_id, .variable_id=(uint32_t)variable::calibrate };
+			sensor_buffer.second = 1;
+			break;
+
 		case command::reset_settings_request:
 		case command::status_request:
 		case command::set_variable_request:
 		case command::get_variable_request:
+		case command::calibrate_request:
 			log<ERROR>("can command mapper", "request message type has been received, major fault in protocol");
 			break;
 
@@ -52,19 +60,9 @@ namespace peripherie::can::channel_type {
 		can::sensor_message const message,
 		size_t const offset
 	) {
-		sensor sensor{};
+		log<ERROR>("imu sensor mapper", "unexpected sensor value");
 
-		uint32_t value = 0;
-
-		value |= message.data[offset + 0] << 0;
-		value |= message.data[offset + 1] << 8;
-
-		sensor.value = value;
-		sensor.node_id = id.node_id;
-		sensor.channel_id = message.info.channel_id;
-//		sensor.variable_id = static_cast<int32_t>(variable::measurement);
-
-		return std::make_pair(sensor, 2);
+		return std::make_pair(sensor{}, 12);
 	}
 }
 

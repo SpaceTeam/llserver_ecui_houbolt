@@ -15,6 +15,9 @@ namespace peripherie::can::channel_type {
 		case command::set_variable_response: {
 			set_payload const &payload = *reinterpret_cast<set_payload const *>(&message.data);
 
+			// TODO: findout what type variable::state, variable::duty_cycle, variable::frequency, variable::measurement, variable::refresh_divider have
+
+
 			sensor_buffer.first[0] = sensor{ .value=payload.value, .node_id=id.node_id, .channel_id=message.info.channel_id, .variable_id=payload.variable_id };
 			sensor_buffer.second = 1;
 			break;

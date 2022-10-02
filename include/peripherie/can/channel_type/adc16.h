@@ -14,7 +14,9 @@ namespace peripherie::can::channel_type {
 
 			reset_settings,
 			status,
-			calibrate
+			calibrate,
+
+			sensor_value,
 		};
 
 		enum class command : uint32_t {		// payload:

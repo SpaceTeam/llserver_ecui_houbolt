@@ -13,7 +13,8 @@ namespace peripherie::can::channel_type {
 			minimum_fuel_pressure,
 			minimum_oxygen_pressure,
 			holddown_timeout,
-			refresh_divider,
+			state_refresh_divider,
+
 			state,
 			state_status,
 			internal_control,
@@ -22,6 +23,8 @@ namespace peripherie::can::channel_type {
 
 			reset_settings,
 			status,
+
+			sensor_value,
 		};
 
 		enum class command : uint32_t {		// payload:

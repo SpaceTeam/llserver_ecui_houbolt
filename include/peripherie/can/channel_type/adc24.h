@@ -9,7 +9,6 @@ namespace peripherie::can::channel_type {
 	class adc24 : public channel {
 	private:
 		enum class variable : uint32_t {
-			measurement,
 			lower_threshold,
 			upper_threshold,
 			refresh_divider,
@@ -17,6 +16,8 @@ namespace peripherie::can::channel_type {
 			reset_settings,
 			status,
 			calibrate
+
+			sensor_value,
 		};
 
 		enum class command : uint32_t {		// payload:

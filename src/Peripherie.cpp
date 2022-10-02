@@ -34,6 +34,8 @@ Peripherie::run(
 	struct sched_param scheduling_parameters{.sched_priority = 60};
 	sched_setscheduler(0, SCHED_RR, &scheduling_parameters);
 
+	log<INFO>("peripherie", "set scheduler to round robin");
+
 	while (!finished) {
 		read_peripherie();
 		write_peripherie();

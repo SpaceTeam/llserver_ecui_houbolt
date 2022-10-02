@@ -20,8 +20,13 @@ namespace peripherie::can::channel_type {
 			refresh_rate,
 			logging_enabled,
 
+			speaker_tone_frequency,
+			speaker_on_time,
+			speaker_off_time,
+			speaker_count,
+
 			reset_settings,
-			status
+			status,
 		};
 
 	public:

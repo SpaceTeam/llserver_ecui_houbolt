@@ -13,8 +13,9 @@
 #include <optional>
 
 #include "utility/RingBuffer.h"
+#include "utility/Logger.h"
 
-template<int concurrent_connection_count = 1024>
+template<uint32_t concurrent_connection_count = 1024>
 class WebSocket {
 private:
 	int socket_fd;
@@ -30,7 +31,7 @@ private:
 	void write_connections(void);
 
 	// NOTE(Lukas Karafiat): 64kiByte - 1 Byte for NULL-terminator
-	static const int maximum_payload_size = USHRT_MAX;
+	static const size_t maximum_payload_size = USHRT_MAX;
 	char payload_buffer[maximum_payload_size];
 
 	std::optional<std::string> receive_message(int);
@@ -57,7 +58,7 @@ public:
 };
 
 
-template<int concurrent_connection_count>
+template<uint32_t concurrent_connection_count>
 WebSocket<concurrent_connection_count>::WebSocket(
 	std::string port,
 	std::shared_ptr<RingBuffer<std::string>> response_queue,
@@ -109,18 +110,20 @@ WebSocket<concurrent_connection_count>::WebSocket(
 		throw std::system_error(errno, std::generic_category(), "could not listen on port: " + port);
 	}
 
+	log<INFO>("web server", "listening on port " + port);
+
 	// clear connection_fd buffer
 	std::fill_n(connection_fds, concurrent_connection_count, -1);
 }
 
 
-template<int concurrent_connection_count>
+template<uint32_t concurrent_connection_count>
 WebSocket<concurrent_connection_count>::~WebSocket(
 	void
 ) {
 	close(socket_fd);
 
-	for (int i = 0; i < concurrent_connection_count; i++) {
+	for (uint32_t i = 0; i < concurrent_connection_count; i++) {
 		if (0 <= connection_fds[i]) {
 			close(connection_fds[i]);
 		}
@@ -130,7 +133,7 @@ WebSocket<concurrent_connection_count>::~WebSocket(
 }
 
 
-template<int concurrent_connection_count>
+template<uint32_t concurrent_connection_count>
 void
 WebSocket<concurrent_connection_count>::run(
 	void
@@ -147,7 +150,7 @@ WebSocket<concurrent_connection_count>::run(
 }
 
 
-template<int concurrent_connection_count>
+template<uint32_t concurrent_connection_count>
 void
 WebSocket<concurrent_connection_count>::accept_connection(
 	void
@@ -161,9 +164,12 @@ WebSocket<concurrent_connection_count>::accept_connection(
 	}
 
 	// put connection file descriptor in list
-	for (int i = 0; i < concurrent_connection_count; i++) {
+	for (uint32_t i = 0; i < concurrent_connection_count; i++) {
 		if (connection_fds[i] < 0) {
 			connection_fds[i] = connection_fd;
+
+			log<DEBUG>("web server", "accepted connection at lot " + std::to_string(i));
+
 			break;
 		}
 	}
@@ -172,7 +178,7 @@ WebSocket<concurrent_connection_count>::accept_connection(
 }
 
 
-template<int concurrent_connection_count>
+template<uint32_t concurrent_connection_count>
 void
 WebSocket<concurrent_connection_count>::read_connections(
 	void
@@ -187,7 +193,7 @@ WebSocket<concurrent_connection_count>::read_connections(
 		return;
 	}
 
-	for (int i = 0; i < concurrent_connection_count; i++) {
+	for (uint32_t i = 0; i < concurrent_connection_count; i++) {
 		if (connection_fds[i] < 0) {
 			continue;
 		}
@@ -195,6 +201,8 @@ WebSocket<concurrent_connection_count>::read_connections(
 		request_buffer = receive_message(i);
 
 		if (request_buffer.has_value()) {
+			log<DEBUG>("web server", "received message: '" + request_buffer.value() + "'");
+
 			bool push_successful = request_queue->push(request_buffer.value());
 
 			if (push_successful) {
@@ -209,7 +217,7 @@ WebSocket<concurrent_connection_count>::read_connections(
 }
 
 
-template<int concurrent_connection_count>
+template<uint32_t concurrent_connection_count>
 std::optional<std::string>
 WebSocket<concurrent_connection_count>::receive_message(
 	int index
@@ -252,34 +260,36 @@ WebSocket<concurrent_connection_count>::receive_message(
 }
 
 
-template<int concurrent_connection_count>
+template<uint32_t concurrent_connection_count>
 void
 WebSocket<concurrent_connection_count>::write_connections(
 	void
 ) {
-	std::optional<std::string> message_buffer;
+	std::optional<std::string> response_buffer;
 
 	// NOTE(Lukas Karafiat): we could read more than one response from the
 	//     queue, but not infinite as it could result in a life lock
-	message_buffer = response_queue->pop();
+	response_buffer = response_queue->pop();
 
-	if (!message_buffer.has_value()) {
+	if (!response_buffer.has_value()) {
 		return;
 	}
 
-	for (int i = 0; i < concurrent_connection_count; i++) {
+	for (uint32_t i = 0; i < concurrent_connection_count; i++) {
 		if (connection_fds[i] < 0) {
 			continue;
 		}
 
-		send_message(i, message_buffer.value());
+		send_message(i, response_buffer.value());
 	}
+
+	log<DEBUG>("web server", "sent message: '" + response_buffer.value() + "'");
 
 	return;
 }
 
 
-template<int concurrent_connection_count>
+template<uint32_t concurrent_connection_count>
 void
 WebSocket<concurrent_connection_count>::send_message(
 	int index,

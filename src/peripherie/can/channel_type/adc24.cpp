@@ -15,6 +15,8 @@ namespace peripherie::can::channel_type {
 		case command::set_variable_response: {
 			set_payload const &payload = *reinterpret_cast<set_payload const *>(&message.data);
 
+			// TODO: findout what type variable::lower_threshold, variable::upper_threshold and variable::refresh_divider have
+
 			uint32_t value = payload.value;
 
 			sensor_buffer.first[0] = sensor{ .value=value, .node_id=id.node_id, .channel_id=message.info.channel_id, .variable_id=payload.variable_id };
@@ -73,7 +75,7 @@ namespace peripherie::can::channel_type {
 		sensor.value = value;
 		sensor.node_id = id.node_id;
 		sensor.channel_id = message.info.channel_id;
-//		sensor.variable_id = static_cast<int32_t>(variable::measurement);
+		sensor.variable_id = static_cast<int32_t>(variable::sensor_value);
 
 		return std::make_pair(sensor, 3);
 	}
