@@ -2,6 +2,7 @@
 #define DISPATCHER_HPP
 
 #include "utility/RingBuffer.h"
+#include "utility/json.h"
 
 #include <memory>
 #include <string>
@@ -9,14 +10,39 @@
 #include <functional>
 #include <any>
 
-// command = ( sequence | state )
+enum command_names {
+  set_states,
+  start_periodic_transmission,
+  stop_periodic_transmission,
+  start_sequence,
+  abort_sequence
+};
+
+struct set_states_info {
+  std::vector<std::string> stateNames;
+  std::vector<double> values;
+  std::vector<uint64_t> timestamps;
+};
+
+
+struct start_sequence_info{
+  std::string commends;
+  // TODO: implement
+};
+
+// std::variant
+struct command{
+  command_names command_name;
+  std::variant<nullptr_t, set_states_info, start_sequence_info> additional_info;
+};
+
 
 class Dispatcher {
 private:
 	std::shared_ptr<RingBuffer<std::string>> request_queue;
 	std::shared_ptr<RingBuffer<std::any>> command_queue;
 
-	std::unordered_map<std::string, std::function<void(std::string)>> commands;
+	std::unordered_map<std::string, std::function<void(nlohmann::json)>> commands;
 
 public:
 	Dispatcher(void) = delete;
@@ -37,11 +63,11 @@ public:
 	void run(void);
 
 private:
-	static void set_states(std::string);
-	static void start_periodic_transmission(std::string);
-	static void stop_periodic_transmission(std::string);
-	static void start_sequence(std::string);
-	static void abort_sequence(std::string);
+	static void set_states(nlohmann::json message);
+	static void start_periodic_transmission(nlohmann::json message);
+	static void stop_periodic_transmission(nlohmann::json message);
+	static void start_sequence(nlohmann::json message);
+	static void abort_sequence(nlohmann::json message);
 };
 
 #endif /* DISPATCHER_HPP */

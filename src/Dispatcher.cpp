@@ -3,6 +3,7 @@
 #include "control_flags.h"
 #include "utility/Logger.h"
 
+
 Dispatcher::Dispatcher(
 	std::shared_ptr<RingBuffer<std::string>> request_queue,
 	std::shared_ptr<RingBuffer<std::any>> command_queue
@@ -44,19 +45,22 @@ Dispatcher::run(
 	std::string message;
 
 	while (!finished) {
+        // TODO: (Lukas Karafiat) REMOVE BUSY WAITING!!!
 		std::optional<std::string> message_buffer = request_queue->pop();
 
 		if (!message_buffer.has_value()) {
 			continue;
 		}
+        message = message_buffer.value();
+        log<DEBUG>("dispatcher", "got command '" + message + "'");
 
-		message = message_buffer.value();
-
-		log<DEBUG>("dispatcher", "got command '" + message + "'");
-
-		try {
-			commands.at(message)(message);
-
+        nlohmann::json json_msg = nlohmann::json::parse(message);
+        try
+        {
+            if(json_msg.find("type") != json_msg.end() ){
+                std::string type = json_msg["type"];
+                commands.at(type)(json_msg);
+            }
 		} catch (const std::out_of_range &e) {
 			// TODO(Lukas Karafiat): this should probably be a log message and no fatal exit
 			throw std::runtime_error("command not supported: " + message);
@@ -70,46 +74,63 @@ Dispatcher::run(
 			log<WARNING>("dispatcher", "command '" + message + "' failed");
 		}
 	}
-
 	return;
 }
 
+
+
 void
 Dispatcher::set_states(
-	std::string message
+	nlohmann::json message
 ) {
-	return;
+    // TODO: (Christofer Held) figure out if additional information is needed
+    std::vector<std::string> stateNames;
+    std::vector<double> values;
+    std::vector<uint64_t> timestamps;
+    for (auto state : message["content"])
+    {
+      stateNames.push_back(state["name"]);
+      values.push_back(state["value"]);
+      timestamps.push_back(state["timestamp"]);
+    }
+    return;
 }
 
 void
 Dispatcher::start_periodic_transmission(
-	std::string message
+    nlohmann::json message
 ) {
+    // TODO: (Christofer Held) build command and add to queue
 	log_peripherie_data = true;
-
 	return;
 }
 
 void
 Dispatcher::stop_periodic_transmission(
-	std::string message
+    nlohmann::json message
 ) {
+    // TODO: (Christofer Held) build command and add to queue
 	log_peripherie_data = false;
-
 	return;
 }
 
 void
 Dispatcher::start_sequence(
-	std::string message
+    nlohmann::json message
 ) {
-	return;
+    // TODO: (Christofer Held) build command and add to queue
+    nlohmann::json seq = message["content"][0];
+    nlohmann::json abortSeq = message["content"][1];
+    nlohmann::json comments = message["content"][2];
+    //TODO: (Christofer Held) check seq inputs from Sequence Handler
+    return;
 }
 
 void
 Dispatcher::abort_sequence(
-	std::string message
+    nlohmann::json message
 ) {
+   // TODO: Send manual abort
 	return;
 }
 
