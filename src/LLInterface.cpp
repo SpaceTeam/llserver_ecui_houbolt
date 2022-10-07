@@ -283,6 +283,22 @@ void LLInterface::FilterSensors(int64_t microTime)
         filteredSensors["rcu_altitude:sensor"] = {height, timestamp};
     }
 
+    if (filteredSensors.find("lora:pmu_barometer:sensor") != filteredSensors.end())
+    {
+        uint64_t timestamp = utils::getCurrentTimestamp();
+        double baro = std::get<0>(filteredSensors["lora:pmu_barometer:sensor"]);
+        double height = 0.3048 * (1 - pow((baro / 1013.25), 0.190284)) * 145366.45;
+        filteredSensors["lora:pmu_altitude:sensor"] = {height, timestamp};
+    }
+
+    if (filteredSensors.find("lora:rcu_barometer:sensor") != filteredSensors.end())
+    {
+        uint64_t timestamp = utils::getCurrentTimestamp();
+        double baro = std::get<0>(filteredSensors["lora:rcu_barometer:sensor"]);
+        double height = 0.3048 * (1 - pow((baro / 1013.25), 0.190284)) * 145366.45;
+        filteredSensors["lora:rcu_altitude:sensor"] = {height, timestamp};
+    }
+
     //TODO: reconsider if states should be iterated here or 
     //sent directly to a new setStates of the state controller
     for (auto &sensor : filteredSensors)

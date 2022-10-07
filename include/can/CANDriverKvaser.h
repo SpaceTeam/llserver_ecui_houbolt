@@ -17,8 +17,8 @@ class CANDriverKvaser : public CANDriver
     private:
         std::map<uint32_t, canHandle> canHandlesMap = std::map<uint32_t, canHandle>();
 
-		CANParams arbitrationParams;
-		CANParams dataParams;
+		std::map<uint32_t, CANParams> arbitrationParamsMap = std::map<uint32_t, CANParams>();
+		std::map<uint32_t, CANParams> dataParamsMap = std::map<uint32_t, CANParams>();
 
         uint64_t blockingTimeout;
 
