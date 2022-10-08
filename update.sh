@@ -4,8 +4,8 @@ cd "$(dirname "$0")"
 
 git pull
 
-cmake . -DCMAKE_BUILD_TYPE:STRING=Release -DNO_CANLIB:BOOL=True -DTEST=OFF
+cmake . -DCMAKE_BUILD_TYPE:STRING=Debug -DNO_CANLIB:BOOL=True -DNO_PYTHON:BOOL=True
 
-make -j
+make -j3
 
 sudo systemctl restart ecui-llserver.service

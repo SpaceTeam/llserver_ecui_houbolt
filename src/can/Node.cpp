@@ -773,7 +773,10 @@ void Node::RequestResetAllSettings(std::vector<double> &params, bool testOnly)
 
 void Node::FlushLogger()
 {
-    logger->flush();
+    if (logger != nullptr)
+    {
+        logger->flush();
+    }
 }
 
 std::vector<double> Node::ResetSensorOffset(std::vector<double> &params, bool testOnly)
