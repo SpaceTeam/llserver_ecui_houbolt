@@ -15,7 +15,24 @@ namespace peripherie::can::channel_type {
 		case command::set_variable_response: {
 			set_payload const &payload = *reinterpret_cast<set_payload const *>(&message.data);
 
-			uint32_t value = payload.value;
+			std::variant<bool, uint32_t, double> value;
+
+			switch (static_cast<variable>(payload.variable_id)) {
+			case variable::minimum_chamber_pressure:
+				value = 0.0037 * static_cast<double>(payload.value);
+				break;
+
+			case variable::minimum_fuel_pressure:
+				value = 0.00367 * static_cast<double>(payload.value);
+				break;
+
+			case variable::minimum_oxygen_pressure:
+				value = 0.003735 * static_cast<double>(payload.value);
+				break;
+
+			default:
+				value = (uint32_t)payload.value;
+			}
 
 			sensor_buffer.first[0] = sensor{ .value=value, .node_id=id.node_id, .channel_id=message.info.channel_id, .variable_id=payload.variable_id };
 			sensor_buffer.second = 1;
