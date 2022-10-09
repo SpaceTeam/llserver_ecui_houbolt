@@ -2,6 +2,7 @@
 #define QUEUE_HPP
 
 #include "semaphore.h"
+#include "time.h"
 
 #include <mutex>
 #include <atomic>
@@ -90,7 +91,14 @@ RingBuffer<ElementType, ring_buffer_size, input_blocking, output_blocking>::push
 
 	// if possible decrease counter of unwritten elements else return failure of doing so
 	if constexpr (input_blocking) {
-		struct timespec waiting_time = {.tv_sec = 0, .tv_nsec = 200'000'000};
+		struct timespec waiting_time{};
+		timespec_get(&waiting_time, TIME_UTC);
+		waiting_time.tv_nsec += 200'000'000;
+		if (waiting_time.tv_nsec >= 1'000'000'000) {
+			waiting_time.tv_nsec %= 1'000'000'000;
+			waiting_time.tv_sec += 1;
+		}
+
 		error = sem_timedwait(&unwritten_elements_semaphore, &waiting_time);
 
 	} else {
@@ -131,7 +139,14 @@ RingBuffer<ElementType, ring_buffer_size, input_blocking, output_blocking>::pop(
 
 	// if possible decrease counter of unread elements else return failure of doing so
 	if constexpr (output_blocking) {
-		struct timespec waiting_time = {.tv_sec = 0, .tv_nsec = 200'000'000};
+		struct timespec waiting_time{};
+		timespec_get(&waiting_time, TIME_UTC);
+		waiting_time.tv_nsec += 200'000'000;
+		if (waiting_time.tv_nsec >= 1'000'000'000) {
+			waiting_time.tv_nsec %= 1'000'000'000;
+			waiting_time.tv_sec += 1;
+		}
+
 		error = sem_timedwait(&unread_elements_semaphore, &waiting_time);
 
 	} else {
@@ -159,7 +174,7 @@ int
 sem_timedwaitn(
 	sem_t *mutex,
 	uint32_t count,
-	struct timespec * waiting_time
+	struct timespec *waiting_time
 ) {
 	int error;
 
@@ -242,7 +257,14 @@ RingBuffer<ElementType, ring_buffer_size, input_blocking, output_blocking>::push
 	// if possible decrease counter of unwritten elements else return failure of doing so
 	if constexpr (input_blocking) {
 		// NOTE(Lukas Karafiat): we are the only thread in here and can acquire all elements in peace
-		struct timespec waiting_time = {.tv_sec = 0, .tv_nsec = 200'000'000};
+		struct timespec waiting_time{};
+		timespec_get(&waiting_time, TIME_UTC);
+		waiting_time.tv_nsec += 200'000'000;
+		if (waiting_time.tv_nsec >= 1'000'000'000) {
+			waiting_time.tv_nsec %= 1'000'000'000;
+			waiting_time.tv_sec += 1;
+		}
+
 		error = sem_timedwaitn(&unwritten_elements_semaphore, values.second, &waiting_time);
 
 	} else {
@@ -296,7 +318,14 @@ RingBuffer<ElementType, ring_buffer_size, input_blocking, output_blocking>::pop_
 	// if possible decrease counter of unread elements else return failure of doing so
 	if constexpr (output_blocking) {
 		// NOTE(Lukas Karafiat): we are the only thread in here and can acquire all elements in peace
-		struct timespec waiting_time = {.tv_sec = 0, .tv_nsec = 200'000'000};
+		struct timespec waiting_time{};
+		timespec_get(&waiting_time, TIME_UTC);
+		waiting_time.tv_nsec += 200'000'000;
+		if (waiting_time.tv_nsec >= 1'000'000'000) {
+			waiting_time.tv_nsec %= 1'000'000'000;
+			waiting_time.tv_sec += 1;
+		}
+
 		error = sem_timedwaitn(&unread_elements_semaphore, unread_elements, &waiting_time);
 
 	} else {
