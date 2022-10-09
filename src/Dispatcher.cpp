@@ -4,8 +4,8 @@
 #include "utility/Logger.h"
 
 Dispatcher::Dispatcher(
-	std::shared_ptr<RingBuffer<std::string>> request_queue,
-	std::shared_ptr<RingBuffer<std::any>> command_queue
+	std::shared_ptr<RingBuffer<std::string, request_buffer_capacity, false, true>> request_queue,
+	std::shared_ptr<RingBuffer<std::any, command_buffer_capacity, true, false>> command_queue
 ) :
 	request_queue(request_queue),
 	command_queue(command_queue)
@@ -74,12 +74,14 @@ Dispatcher::run(
 	return;
 }
 
+
 void
 Dispatcher::set_states(
 	std::string message
 ) {
 	return;
 }
+
 
 void
 Dispatcher::start_periodic_transmission(
@@ -90,6 +92,7 @@ Dispatcher::start_periodic_transmission(
 	return;
 }
 
+
 void
 Dispatcher::stop_periodic_transmission(
 	std::string message
@@ -99,12 +102,14 @@ Dispatcher::stop_periodic_transmission(
 	return;
 }
 
+
 void
 Dispatcher::start_sequence(
 	std::string message
 ) {
 	return;
 }
+
 
 void
 Dispatcher::abort_sequence(

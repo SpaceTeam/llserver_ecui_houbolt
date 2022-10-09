@@ -12,18 +12,18 @@
 
 class Peripherie {
 private:
-	std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity>> actuator_queue;
-	std::shared_ptr<RingBuffer<sensor, actuator_buffer_capacity>> sensor_queue;
+	std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity, false, true>> actuator_queue;
+	std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity, true, false>> sensor_queue;
 
 	std::string can_socket_interface_name;
-	peripherie::can::socket can_socket;
+	std::shared_ptr<peripherie::can::socket> can_socket;
 
 public:
 	Peripherie(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit Peripherie(
-		std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity>>,
-		std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity>>);
+		std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity, false, true>>,
+		std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity, true, false>>);
 	~Peripherie(void);
 
 	// non copyable
@@ -35,10 +35,6 @@ public:
 	Peripherie& operator=(Peripherie &&) = default;
 
 	void run(void);
-
-private:
-	void read_peripherie(void);
-	void write_peripherie(void);
 };
 
 #endif /* PERIPHERIE_H */

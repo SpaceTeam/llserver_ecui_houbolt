@@ -13,11 +13,11 @@
 
 class ControlLoop {
 private:
-	std::shared_ptr<RingBuffer<std::any>> command_queue;
-	std::shared_ptr<RingBuffer<std::string>> response_queue;
+	std::shared_ptr<RingBuffer<std::any, command_buffer_capacity, true, false>> command_queue;
+	std::shared_ptr<RingBuffer<std::string, response_buffer_capacity>> response_queue;
 
-	std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity>> sensor_queue;
-	std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity>> actuator_queue;
+	std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity, true, false>> sensor_queue;
+	std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity, false, true>> actuator_queue;
 
 	double states[maximum_state_id];
 
@@ -25,10 +25,10 @@ public:
 	ControlLoop(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit ControlLoop(
-		std::shared_ptr<RingBuffer<std::any>>,
-		std::shared_ptr<RingBuffer<std::string>>,
-		std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity>>,
-		std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity>>);
+		std::shared_ptr<RingBuffer<std::any, command_buffer_capacity, true, false>>,
+		std::shared_ptr<RingBuffer<std::string, response_buffer_capacity>>,
+		std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity, true, false>>,
+		std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity, false, true>>);
 	~ControlLoop(void);
 
 	// non copyable

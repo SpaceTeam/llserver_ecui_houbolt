@@ -9,12 +9,14 @@
 #include <functional>
 #include <any>
 
+#include "config.h"
+
 // command = ( sequence | state )
 
 class Dispatcher {
 private:
-	std::shared_ptr<RingBuffer<std::string>> request_queue;
-	std::shared_ptr<RingBuffer<std::any>> command_queue;
+	std::shared_ptr<RingBuffer<std::string, request_buffer_capacity, false, true>> request_queue;
+	std::shared_ptr<RingBuffer<std::any, command_buffer_capacity, true, false>> command_queue;
 
 	std::unordered_map<std::string, std::function<void(std::string)>> commands;
 
@@ -22,8 +24,8 @@ public:
 	Dispatcher(void) = delete;
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit Dispatcher(
-		std::shared_ptr<RingBuffer<std::string>>,
-		std::shared_ptr<RingBuffer<std::any>>);
+		std::shared_ptr<RingBuffer<std::string, request_buffer_capacity, false, true>>,
+		std::shared_ptr<RingBuffer<std::any, command_buffer_capacity, true, false>>);
 	~Dispatcher(void);
 
 	// non copyable

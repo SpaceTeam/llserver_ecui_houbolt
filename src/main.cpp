@@ -28,7 +28,6 @@ struct options {
 sig_atomic_t volatile finished = false;
 sig_atomic_t volatile log_peripherie_data = false;
 
-
 void
 usage(
 	void
@@ -91,8 +90,9 @@ void
 setup_signal_handling(
 	void
 ) {
-	struct sigaction signal_action{};
+	struct sigaction signal_action;
 
+	sigemptyset(&signal_action.sa_mask);
 	signal_action.sa_handler = signal_handler;
 	signal_action.sa_flags = 0;
 
@@ -177,24 +177,25 @@ main(
 	// TODO: read config
 
 	setup_signal_handling();
+
 //	set_latency_target();
 	lock_memory();
 
-// 	______________      _______________________      ________________      _______________
-//	|            |      |                     |      |              |      |             |
-//	|            |--2-->| command interpreter |##4##>|              |--0-->|             |
-//	|            |      |    and dispatcher   |#####>|              |      | peripherie  |
-//	| web server |      |_____________________|      | control loop |      |             |
-//	|            |                                   |              |      | read/write  |
-//	|            |                                   |              |      | sensor data |
-//	|            |<----------------3-----------------|              |<--1--|             |
-//	|____________|                                   |______________|      |_____________|
+// 	______________      _______________________      ________________        _______________
+//	|            |      |                     |      |              |        |             |
+//	|            |N-2-B>| command interpreter |B-4-N>|              |N--0--B>|             |
+//	|            |      |    and dispatcher   |      |              |        | peripherie  |
+//	| web server |      |_____________________|      | control loop |        |             |
+//	|            |                                   |              |        | read/write  |
+//	|            |                                   |              |        | sensor data |
+//	|            |<N---------------3----------------N|              |<N--1--B|             |
+//	|____________|                                   |______________|        |_____________|
 
-	auto   sensor_queue = std::make_shared<RingBuffer<struct sensor, sensor_buffer_capacity>>();
-	auto actuator_queue = std::make_shared<RingBuffer<struct actuator, actuator_buffer_capacity>>();
-	auto  request_queue = std::make_shared<RingBuffer<std::string>>();
-	auto response_queue = std::make_shared<RingBuffer<std::string>>();
-	auto  command_queue = std::make_shared<RingBuffer<std::any>>();
+	auto   sensor_queue = std::make_shared<RingBuffer<sensor, sensor_buffer_capacity, true, false>>();
+	auto actuator_queue = std::make_shared<RingBuffer<actuator, actuator_buffer_capacity, false, true>>();
+	auto  request_queue = std::make_shared<RingBuffer<std::string, request_buffer_capacity, false, true>>();
+	auto response_queue = std::make_shared<RingBuffer<std::string, response_buffer_capacity, false, false>>();
+	auto  command_queue = std::make_shared<RingBuffer<std::any, command_buffer_capacity, true, false>>();
 
 	auto   web_socket = WebSocket<1024>("8080", response_queue, request_queue);
 	auto   dispatcher = Dispatcher(request_queue, command_queue);

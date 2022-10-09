@@ -16,11 +16,11 @@ volatile sig_atomic_t finished = false;
 TEST(WritingAndReadingFromWebSocket, WriteFullReadAll_shouldBeInOrder) {
 	const int size = 32;
 
-	std::shared_ptr<RingBuffer<std::string, size>> server_request_queue(new RingBuffer<std::string, size>());
-	std::shared_ptr<RingBuffer<std::string, size>> server_response_queue(new RingBuffer<std::string, size>());
+	std::shared_ptr<RingBuffer<std::string, size, false, true>> server_request_queue(new RingBuffer<std::string, size, false, true>());
+	std::shared_ptr<RingBuffer<std::string, size, false, false>> server_response_queue(new RingBuffer<std::string, size, false, false>());
 
-	std::shared_ptr<RingBuffer<std::string, size>> client_request_queue(new RingBuffer<std::string, size>());
-	std::shared_ptr<RingBuffer<std::string, size>> client_response_queue(new RingBuffer<std::string, size>());
+	std::shared_ptr<RingBuffer<std::string, size, false, false>> client_request_queue(new RingBuffer<std::string, size, false, false>());
+	std::shared_ptr<RingBuffer<std::string, size, false, false>> client_response_queue(new RingBuffer<std::string, size, false, false>());
 
 	std::shared_ptr<WebSocket<1024>> server(new WebSocket("8080", server_response_queue, server_request_queue));
 	std::shared_ptr<WebSocketClient> client(new WebSocketClient("localhost", "8080", client_response_queue, client_request_queue));

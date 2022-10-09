@@ -21,8 +21,8 @@ private:
 	int socket_fd;
 	int connection_fds[concurrent_connection_count];
 
-	std::shared_ptr<RingBuffer<std::string>> response_queue;
-	std::shared_ptr<RingBuffer<std::string>> request_queue;
+	std::shared_ptr<RingBuffer<std::string, response_buffer_capacity, false, false>> response_queue;
+	std::shared_ptr<RingBuffer<std::string, request_buffer_capacity, false, true>> request_queue;
 
 	std::optional<std::string> request_buffer;
 
@@ -42,8 +42,8 @@ public:
 	// NOTE(Lukas Karafiat): the function declaration got out of hand, had to shorten it quite a bit
 	explicit WebSocket(
 		std::string,
-		std::shared_ptr<RingBuffer<std::string>>,
-		std::shared_ptr<RingBuffer<std::string>>);
+		std::shared_ptr<RingBuffer<std::string, response_buffer_capacity, false, false>>,
+		std::shared_ptr<RingBuffer<std::string, request_buffer_capacity, false, true>>);
 	~WebSocket(void);
 
 	// non copyable
@@ -61,8 +61,8 @@ public:
 template<uint32_t concurrent_connection_count>
 WebSocket<concurrent_connection_count>::WebSocket(
 	std::string port,
-	std::shared_ptr<RingBuffer<std::string>> response_queue,
-	std::shared_ptr<RingBuffer<std::string>> request_queue
+	std::shared_ptr<RingBuffer<std::string, response_buffer_capacity, false, false>> response_queue,
+	std::shared_ptr<RingBuffer<std::string, request_buffer_capacity, false, true>> request_queue
 ) :
 	response_queue(response_queue),
 	request_queue(request_queue)

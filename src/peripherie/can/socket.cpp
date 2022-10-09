@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <poll.h>
 
 #include <linux/can.h>
 #include <linux/can/raw.h>
@@ -109,9 +110,19 @@ namespace peripherie::can {
 		sensor_buffer sensors;
 		sensors.second = 0;
 
+		// NOTE(Lukas Karafiat): signal handler not called in this thread so recv() never gets interrupted. Instead we have to poll.
+		struct pollfd poll_fd{ .fd = socket_fd, .events = POLLIN };
+		error = poll(&poll_fd, 1, 200);
+		if (error < 0) {
+			return -2;
+
+		} else if (error == 0) {
+			return sensors;
+		}
+
 		canfd_frame frame{};
-		error = recv(socket_fd, &frame, sizeof(frame), MSG_DONTWAIT);
-		if (error == -1 && (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)) {
+		error = recv(socket_fd, &frame, sizeof(frame), 0);
+		if (error == -1 && errno == EINTR) {
 			return sensors;
 
 		} else if (error == -1 || error != sizeof(frame)) {
