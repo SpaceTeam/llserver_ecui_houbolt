@@ -41,6 +41,8 @@ void
 Dispatcher::run(
 	void
 ) {
+	pthread_setname_np(pthread_self(), "dispatcher");
+
 	std::string message;
 
 	while (!finished) {

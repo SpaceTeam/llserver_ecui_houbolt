@@ -36,6 +36,8 @@ void
 ControlLoop::run(
 	void
 ) {
+	pthread_setname_np(pthread_self(), "control_loop");
+
 	extern sig_atomic_t volatile finished;
 
 	// NOTE(Lukas Karafiat): how much time do we actually have? 20 ms = 20'000us = 20'000'000ns

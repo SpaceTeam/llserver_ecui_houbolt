@@ -33,7 +33,8 @@ Peripherie::run(
 	void
 ) {
 	auto read_thread = std::jthread(read_peripherie, can_socket, sensor_queue);
-	auto write_thread = std::jthread(write_peripherie, can_socket, actuator_queue);
+
+	write_peripherie(can_socket, actuator_queue);
 
 	return;
 }
@@ -43,6 +44,8 @@ read_peripherie(
 	std::shared_ptr<peripherie::can::socket> can_socket,
 	std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity, true, false>> sensor_queue
 ) {
+	pthread_setname_np(pthread_self(), "can read");
+
 	extern sig_atomic_t volatile finished;
 
 	struct sched_param scheduling_parameters{.sched_priority = 60};
@@ -78,6 +81,9 @@ write_peripherie(
 	std::shared_ptr<peripherie::can::socket> can_socket,
 	std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity, false, true>> actuator_queue
 ) {
+	log<DEBUG>("peripherie_write", "wtf");
+	pthread_setname_np(pthread_self(), "can write");
+
 	extern sig_atomic_t volatile finished;
 
 	struct sched_param scheduling_parameters{.sched_priority = 60};

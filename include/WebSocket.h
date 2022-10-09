@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <poll.h>
 
 #include <climits>
 #include <system_error>
@@ -138,9 +139,36 @@ void
 WebSocket<concurrent_connection_count>::run(
 	void
 ) {
+	pthread_setname_np(pthread_self(), "web_server");
+
 	extern volatile sig_atomic_t finished;
 
+	pollfd poll_fds[concurrent_connection_count + 1];
+	poll_fds[0] = {.fd=socket_fd, .events=POLL_IN};
+
 	while (!finished) {
+
+		uint32_t poll_fd_count = 1;
+
+		for (uint32_t i = 0, j = 1; i < concurrent_connection_count; i++) {
+			if (connection_fds[i] != -1) {
+				poll_fds[j] = {.fd=connection_fds[i], .events=POLL_IN};
+				poll_fd_count++;
+			}
+		}
+
+		int error;
+
+		// NOTE(Lukas Karafiat): signal handler not called in this thread so recv() never gets interrupted. Instead we have to poll.
+		error = poll(poll_fds, poll_fd_count, 200);
+		if (error < 0) {
+			log<WARNING>("web_server", "could not poll web socket or connections");
+			continue;
+
+		} else if (error == 0) {
+			continue;
+		}
+
 		accept_connection();
 		read_connections();
 		write_connections();
