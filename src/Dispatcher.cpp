@@ -3,6 +3,7 @@
 #include "control_flags.h"
 #include "utility/Logger.h"
 
+
 Dispatcher::Dispatcher(
 	std::shared_ptr<RingBuffer<std::string, request_buffer_capacity, false, true>> request_queue,
 	std::shared_ptr<RingBuffer<std::any, command_buffer_capacity, true, false>> command_queue
@@ -53,12 +54,14 @@ Dispatcher::run(
 		}
 
 		message = message_buffer.value();
-
 		log<DEBUG>("dispatcher", "got command '" + message + "'");
 
+		nlohmann::json json_msg = nlohmann::json::parse(message);
 		try {
-			commands.at(message)(message);
-
+			if(json_msg.find("type") != json_msg.end() ) {
+				std::string type = json_msg["type"];
+				commands.at(type)(json_msg);
+			}
 		} catch (const std::out_of_range &e) {
 			// TODO(Lukas Karafiat): this should probably be a log message and no fatal exit
 			throw std::runtime_error("command not supported: " + message);
@@ -79,16 +82,27 @@ Dispatcher::run(
 
 void
 Dispatcher::set_states(
-	std::string message
+	nlohmann::json message
 ) {
+	// TODO(Christofer Held): figure out if additional information is needed
+	std::vector<std::string> stateNames;
+	std::vector<double> values;
+	std::vector<uint64_t> timestamps;
+	for (auto state : message["content"]) {
+		stateNames.push_back(state["name"]);
+		values.push_back(state["value"]);
+		timestamps.push_back(state["timestamp"]);
+	}
+
 	return;
 }
 
 
 void
 Dispatcher::start_periodic_transmission(
-	std::string message
+	nlohmann::json message
 ) {
+	// TODO(Christofer Held): build command and add to queue
 	log_peripherie_data = true;
 
 	return;
@@ -97,8 +111,9 @@ Dispatcher::start_periodic_transmission(
 
 void
 Dispatcher::stop_periodic_transmission(
-	std::string message
+	nlohmann::json message
 ) {
+	// TODO(Christofer Held): build command and add to queue
 	log_peripherie_data = false;
 
 	return;
@@ -107,16 +122,23 @@ Dispatcher::stop_periodic_transmission(
 
 void
 Dispatcher::start_sequence(
-	std::string message
+	nlohmann::json message
 ) {
+	// TODO: (Christofer Held) build command and add to queue
+	nlohmann::json seq = message["content"][0];
+	nlohmann::json abortSeq = message["content"][1];
+	nlohmann::json comments = message["content"][2];
+	//TODO(Christofer Held): check seq inputs from Sequence Handler
+
 	return;
 }
 
 
 void
 Dispatcher::abort_sequence(
-	std::string message
+	nlohmann::json message
 ) {
+	// TODO: Send manual abort
 	return;
 }
 
