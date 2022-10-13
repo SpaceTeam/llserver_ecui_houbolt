@@ -150,7 +150,7 @@ CANResult CANManager::Init()
             initialized = true;
 
 			Debug::print("Request current state and config from nodes...\n");
-			//RequestCurrentState();
+			RequestCurrentState();
 
         }
         catch (std::exception& e)
@@ -205,6 +205,7 @@ void CANManager::RequestCurrentState()
     {
         currNode = it.second;
         currNode->RequestCurrentState();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
 
@@ -257,6 +258,7 @@ void CANManager::InitializeNode(uint8_t canBusChannelID, uint8_t nodeID, NodeInf
 	eventManager->AddChannelTypes(channelTypeMap);
 	eventManager->AddCommands(node->GetCommands());
 	eventManager->AddCommands({{"Tare", {std::bind(&CANManager::ResetOffset, this, std::placeholders::_1, std::placeholders::_2),{"NodeID","ChannelID","Current Sensor Value"}}}});
+	eventManager->AddCommands({{"FlushDatabase", {std::bind(&CANManager::FlushDatabase, this, std::placeholders::_1, std::placeholders::_2),{}}}});
 
 	Debug::print("Node %s with ID %d on CAN Bus %d detected\n\t\t\tfirmware version 0x%08x", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID, node->GetFirmwareVersion());
 }
@@ -424,6 +426,20 @@ void CANManager::ResetOffset(std::vector<double> &params, bool testOnly)
     catch (std::exception &e)
     {
         throw std::runtime_error("CANManager - ResetOffset: " + std::string(e.what()));
+    }
+}
+
+void CANManager::FlushDatabase(std::vector<double> &params, bool testOnly)
+{
+	try
+    {
+		Debug::print("flush database");
+        Node::FlushLogger();
+
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("CANManager - FlushDatabase: " + std::string(e.what()));
     }
 }
 

@@ -94,4 +94,5 @@ class CANManager : public Singleton<CANManager>
 		//-------------------------------Utility Functions-------------------------------//
 
 		void ResetOffset(std::vector<double> &params, bool testOnly);
+		void FlushDatabase(std::vector<double> &params, bool testOnly);
 };
