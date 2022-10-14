@@ -220,15 +220,15 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                     stat = canReadStatus(handle, &statFlags);
                     if (statFlags & canSTAT_SW_OVERRUN)
                     {
-                        Debug::error("CANDriver - OnCANCallback: Software Overrun...");
+                        Debug::error("CANDriver - OnCANCallback: Software Overrun on can bus %d...", canBusChannelID);
                     }
                     else if (statFlags & canSTAT_HW_OVERRUN)
                     {
-                        Debug::error("CANDriver - OnCANCallback: Hardware Overrun...");
+                        Debug::error("CANDriver - OnCANCallback: Hardware Overrun on can bus %d...", canBusChannelID);
                     }
                     else
                     {
-                        Debug::error("CANDriver - OnCANCallback: canID: %d, dlc: %d, invalid msg detected, ignoring...", id, dlc);
+                        Debug::error("CANDriver - OnCANCallback: canID: %d, dlc: %d, invalid msg on can bus %d detected, ignoring...", id, dlc, canBusChannelID);
                     }
                     Debug::print("\t\tCAN Status Flags: 0x%016x", statFlags);
                 }
