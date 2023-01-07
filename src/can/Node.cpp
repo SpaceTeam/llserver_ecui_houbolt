@@ -10,6 +10,7 @@
 #include "can/ADC16.h"
 #include "can/ADC16Single.h"
 #include "can/ADC24.h"
+#include "can/DATA32.h"
 #include "can/Servo.h"
 #include "can/PneumaticValve.h"
 #include "can/Control.h"
@@ -28,8 +29,9 @@ const std::vector<std::string> Node::states =
             "RefreshRate",
             "UARTEnabled",
             "ResetAllSettings",
-            "Logging_Enabled",
+            "LoggingEnabled",
             "FlashStatus",
+            "LoraEnabled"
         };
 
 const std::map<std::string, std::vector<double>> Node::scalingMap =
@@ -46,7 +48,8 @@ const std::map<std::string, std::vector<double>> Node::scalingMap =
             {"SpeakerOffTime", {1.0, 0.0}},
             {"SpeakerCount", {1.0, 0.0}},
             {"LoggingEnabled", {1.0, 0.0}},
-            {"FlashStatus", {1.0, 0.0}}
+            {"FlashStatus", {1.0, 0.0}},
+            {"LoraEnabled", {1.0, 0.0}}
         };
 
 const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
@@ -59,6 +62,7 @@ const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
             {GENERIC_REFRESH_RATE, "RefreshRate"},
             {GENERIC_UART_ENABLED, "UARTEnabled"},
             {GENERIC_LOGGING_ENABLED, "LoggingEnabled"},
+            {GENERIC_LORA_ENABLED, "LoraEnabled"},
         };
 
 InfluxDbLogger *Node::logger = nullptr;
@@ -112,6 +116,8 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
         {"GetUARTEnabled", {std::bind(&Node::GetUARTEnabled, this, std::placeholders::_1, std::placeholders::_2),{}}},
         {"SetLoggingEnabled", {std::bind(&Node::SetLoggingEnabled, this, std::placeholders::_1, std::placeholders::_2),{"Value"}}},
         {"GetLoggingEnabled", {std::bind(&Node::GetLoggingEnabled, this, std::placeholders::_1, std::placeholders::_2),{}}},
+        {"SetLoraEnabled", {std::bind(&Node::SetLoraEnabled, this, std::placeholders::_1, std::placeholders::_2),{"Value"}}},
+        {"GetLoraEnabled", {std::bind(&Node::GetLoraEnabled, this, std::placeholders::_1, std::placeholders::_2),{}}},
         {"RequestSetSpeaker", {std::bind(&Node::RequestSetSpeaker, this, std::placeholders::_1, std::placeholders::_2),{"ToneFrequency","OnTime","OffTime","Count"}}},
         {"RequestData", {std::bind(&Node::RequestData, this, std::placeholders::_1, std::placeholders::_2),{}}},
         {"RequestNodeStatus", {std::bind(&Node::RequestNodeStatus, this, std::placeholders::_1, std::placeholders::_2),{}}},
@@ -151,6 +157,9 @@ void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<st
     			    break;
                 case CHANNEL_TYPE_ADC24:
                     ch = new ADC24(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
+                    break;
+                case CHANNEL_TYPE_DATA32:
+                    ch = new DATA32(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                     break;
                 case CHANNEL_TYPE_DIGITAL_OUT:
                     ch = new DigitalOut(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
@@ -356,6 +365,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                     {
                         std::lock_guard<std::mutex> lock(loggerMtx);
                         logger->log(ch->GetSensorName(), currValue, timestamp);
+                        //logger->flush();
                     }
                     //buffer.push_back(sensor); //TODO: uncomment if implemented
                 }
@@ -630,9 +640,10 @@ void Node::GetUARTEnabled(std::vector<double> &params, bool testOnly)
 
 void Node::SetLoggingEnabled(std::vector<double> &params, bool testOnly)
 {
+    std::vector<double> scalingParams = scalingMap.at("LoggingEnabled");
     try
     {
-        GetVariable(GENERIC_REQ_GET_VARIABLE, this->nodeID, GENERIC_LOGGING_ENABLED, params, this->canBusChannelID, driver, testOnly);
+        SetVariable(GENERIC_REQ_SET_VARIABLE, this->nodeID, GENERIC_LOGGING_ENABLED, scalingParams, params, this->canBusChannelID, driver, testOnly);
     }
     catch (std::exception &e)
     {
@@ -649,6 +660,31 @@ void Node::GetLoggingEnabled(std::vector<double> &params, bool testOnly)
     catch (std::exception &e)
     {
         throw std::runtime_error("Node - GetLoggingEnabled: " + std::string(e.what()));
+    }
+}
+
+void Node::SetLoraEnabled(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("LoraEnabled");
+    try
+    {
+        SetVariable(GENERIC_REQ_SET_VARIABLE, this->nodeID, GENERIC_LORA_ENABLED, scalingParams, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - SetLoraEnabled: " + std::string(e.what()));
+    }
+}
+
+void Node::GetLoraEnabled(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(GENERIC_REQ_GET_VARIABLE, this->nodeID, GENERIC_LORA_ENABLED, params, this->canBusChannelID, driver, testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Node - GetLoraEnabled: " + std::string(e.what()));
     }
 }
 
@@ -736,6 +772,14 @@ void Node::RequestResetAllSettings(std::vector<double> &params, bool testOnly)
 //-----------------------------Utility Functions------------------------------//
 //----------------------------------------------------------------------------//
 
+void Node::FlushLogger()
+{
+    if (logger != nullptr)
+    {
+        logger->flush();
+    }
+}
+
 std::vector<double> Node::ResetSensorOffset(std::vector<double> &params, bool testOnly)
 {
     try
@@ -775,6 +819,7 @@ void Node::RequestCurrentState()
 	GetRefreshRate(params, false);
 	GetUARTEnabled(params, false);
     GetLoggingEnabled(params, false);
+    GetLoraEnabled(params, false);
 
     for (auto &channel : channelMap)
     {

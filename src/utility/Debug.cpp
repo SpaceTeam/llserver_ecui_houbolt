@@ -45,7 +45,7 @@ std::string Debug::getTimeString()
     char time_string[100];
 
     struct timespec curr_time_struct;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &curr_time_struct);
+    clock_gettime(CLOCK_REALTIME, &curr_time_struct);
 
     curr_tm = localtime(&curr_time_struct.tv_sec);
 
@@ -94,7 +94,7 @@ int32_t Debug::print(std::string fmt, ...)
     va_end(args);
 
     if(initialized) {
-//        logger->log("Class:Debug", msg, time_ms, DEBUG); //FIXME causes crash sometimes
+        //logger->log("Class:Debug", msg, time_ms, DEBUG);
     }
 
     printed = fprintf(stderr, "%s %s\n", time_str.c_str(), msg);
@@ -120,7 +120,7 @@ int32_t Debug::info(std::string fmt, ...)
         va_end(args);
 
         if(initialized) {
-//            logger->log("Class:Debug", msg, time_ms, INFO); //FIXME causes crash sometimes
+            //logger->log("Class:Debug", msg, time_ms, INFO);
         }
 
         printed = fprintf(stderr, "%sinfo: %s\n", time_str.c_str(), msg);
@@ -149,7 +149,7 @@ int32_t Debug::warning(std::string fmt, ...)
         va_end(args);
 
         if(initialized) {
-//            logger->log("Class:Debug", msg, time_ms, WARNING); //FIXME causes crash sometimes
+            //logger->log("Class:Debug", msg, time_ms, WARNING);
         }
 
         printed = fprintf(stderr, "%swarning: %s\n", time_str.c_str(), msg);
@@ -282,7 +282,7 @@ int32_t Debug::error(std::string fmt, ...)
     va_end(args);
 
     if(initialized) {
-//        logger->log("Class:Debug", msg, time_ms, ERROR); //FIXME causes crash sometimes
+        //logger->log("Class:Debug", msg, time_ms, ERROR);
     }
 
     printed = fprintf(stderr, "%serror: %s\n", time_str.c_str(), msg);

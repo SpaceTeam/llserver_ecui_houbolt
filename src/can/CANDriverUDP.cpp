@@ -7,6 +7,7 @@
 #include "can_houbolt/channels/generic_channel_def.h"
 #include "utility/utils.h"
 #include "utility/Config.h"
+#include "can/Node.h"
 
 
 CANDriverUDP::CANDriverUDP(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
@@ -115,6 +116,7 @@ void CANDriverUDP::AsyncListen()
 							canID.info.node_id = nodeIDs[i];
 							std::memcpy(command.bit.data.uint8, &payload[CAN_MSG_HEADER_SIZE], canMsgSizes[i]);
 							onRecvCallback(canBusChannelID, canID.uint32, command.uint8, canMsgSizes[i], timestamp, this);
+							//Node::FlushLogger();
 						}
 						break;
 					case (uint8_t)CanMessageOption::EMPTY:

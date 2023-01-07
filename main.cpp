@@ -34,11 +34,11 @@ sig_atomic_t signum = 0;
 #include <string>
 #include "utility/utils.h"
 
-#define CAN_TEST_NODE_ID 12
+#define CAN_TEST_NODE_ID 8
 
 #define TEST_NODE_INIT
 //#define TEST_SPEAKER
-#define TEST_DATA
+//#define TEST_DATA
 
 std::thread *testThread = nullptr;
 
@@ -60,21 +60,28 @@ void testFnc()
     msg.bit.info.channel_id = GENERIC_CHANNEL_ID;
     msg.bit.cmd_id = GENERIC_RES_NODE_INFO;
     NodeInfoMsg_t *info = (NodeInfoMsg_t *)msg.bit.data.uint8;
-    info->firmware_version = 0xafb32dac;
-    info->channel_mask = 0x0000001F;
-    info->channel_type[0] = CHANNEL_TYPE_ADC24;
+    info->firmware_version = 0xdeadbeef;
+    info->channel_mask = 0x00000FFF;
+    info->channel_type[0] = CHANNEL_TYPE_ADC16;
     // info->channel_type[1] = CHANNEL_TYPE_ADC16;
-    info->channel_type[1] = CHANNEL_TYPE_DIGITAL_OUT;
-    info->channel_type[2] = CHANNEL_TYPE_DIGITAL_OUT;
-    info->channel_type[3] = CHANNEL_TYPE_DIGITAL_OUT;
-    info->channel_type[4] = CHANNEL_TYPE_PNEUMATIC_VALVE;
+    info->channel_type[1] = CHANNEL_TYPE_ADC16;
+    info->channel_type[2] = CHANNEL_TYPE_ADC24;
+    info->channel_type[3] = CHANNEL_TYPE_ADC16;
+    info->channel_type[4] = CHANNEL_TYPE_ADC16;
+    info->channel_type[5] = CHANNEL_TYPE_ADC16;
+    info->channel_type[6] = CHANNEL_TYPE_ADC16;
+    info->channel_type[7] = CHANNEL_TYPE_ADC16;
+    info->channel_type[8] = CHANNEL_TYPE_ADC16;
+    info->channel_type[9] = CHANNEL_TYPE_ADC16;
+    info->channel_type[10] = CHANNEL_TYPE_ADC16;
+    info->channel_type[11] = CHANNEL_TYPE_ADC16;
     Can_MessageId_t canID = {0};
     canID.info.direction = 0;
     canID.info.priority = STANDARD_PRIORITY;
     canID.info.special_cmd = STANDARD_SPECIAL_CMD;
     canID.info.node_id = CAN_TEST_NODE_ID;
 
-    //manager->OnCANInit(0, canID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp());
+    manager->OnCANRecv(0, canID.uint32, msg.uint8, sizeof(msg), utils::getCurrentTimestamp(), manager->canDriver);
 
    std::this_thread::sleep_for(1000ms);
 

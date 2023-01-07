@@ -80,6 +80,7 @@ public:
 
 	//-------------------------------Utility Functions-------------------------------//
 
+	static void FlushLogger();
 	std::vector<double> ResetSensorOffset(std::vector<double> &params, bool testOnly) override;
 
     //-------------------------------RECEIVE Functions-------------------------------//
@@ -113,6 +114,9 @@ public:
 
 	void SetLoggingEnabled(std::vector<double> &params, bool testOnly);
 	void GetLoggingEnabled(std::vector<double> &params, bool testOnly);
+
+	void SetLoraEnabled(std::vector<double> &params, bool testOnly);
+	void GetLoraEnabled(std::vector<double> &params, bool testOnly);
 
 	void RequestSetSpeaker(std::vector<double> &params, bool testOnly);
 

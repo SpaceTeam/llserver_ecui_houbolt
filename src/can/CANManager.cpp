@@ -80,9 +80,13 @@ CANResult CANManager::Init()
             	throw std::runtime_error("Can driver \"" + can_driver + "\" specified in config not found!");
             }
 
+<<<<<<< HEAD
 			use_lora = std::get<bool>(Config::getData("use_lora"));
+=======
+			useLora = std::get<bool>(Config::getData("use_lora"));
+>>>>>>> devEuroc
 
-            if(use_lora)
+            if(useLora)
 			{
 				Debug::print("Initializing LoRa...");
 				loraDriver = new CANDriverUDP(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6),
@@ -108,7 +112,7 @@ CANResult CANManager::Init()
             }
 
             RequestCANInfo(canDriver, canBusChannelIDs);
-			if (use_lora)
+			if (useLora)
 			{
 				std::vector<uint32_t> loraBusChannels = {0};
 				//RequestCANInfo(loraDriver, loraBusChannels);
@@ -242,6 +246,7 @@ void CANManager::RequestCurrentState()
     {
         currNode = it.second;
         currNode->RequestCurrentState();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
 
@@ -294,6 +299,7 @@ void CANManager::InitializeNode(uint8_t canBusChannelID, uint8_t nodeID, NodeInf
 	eventManager->AddChannelTypes(channelTypeMap);
 	eventManager->AddCommands(node->GetCommands());
 	eventManager->AddCommands({{"Tare", {std::bind(&CANManager::ResetOffset, this, std::placeholders::_1, std::placeholders::_2),{"NodeID","ChannelID","Current Sensor Value"}}}});
+	eventManager->AddCommands({{"FlushDatabase", {std::bind(&CANManager::FlushDatabase, this, std::placeholders::_1, std::placeholders::_2),{}}}});
 
 	Debug::print("Node %s with ID %d on CAN Bus %d detected\n\t\t\tfirmware version 0x%08x", node->GetChannelName().c_str(), node->GetNodeID(), canBusChannelID, node->GetFirmwareVersion());
 }
@@ -339,9 +345,10 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 
 				InitializeNode(canBusChannelID, nodeID, nodeInfo, canDriver);
 
-				//FixMe WHAT THE HACK? Exactly that's a hack, because Andi doesn't want to implement it properly!!!
-				if(use_lora)
+				if(useLora)
 				{
+
+					//WHAT THE HACK? Exactly that's a hack, because Andi doesn't want to implement it properly!!!
 					std::vector<int> nodeIDsRefInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDsRef"));
 					std::vector<int> nodeIDsInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDs"));
 					auto foundIt = std::find(nodeIDsRefInt.begin(), nodeIDsRefInt.end(), nodeID); 
@@ -393,7 +400,7 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 			bool found = nodeMap.find(nodeID) != nodeMap.end();
 			if (!found)
 			{
-				throw std::runtime_error("Node not found, ignoring msg...");
+				throw std::runtime_error("Node: " + std::to_string(nodeID) + " not found, ignoring msg...");
 			}
 			Node *node = nodeMap[nodeID];
 			if (payloadLength <= 0)
@@ -460,6 +467,20 @@ void CANManager::ResetOffset(std::vector<double> &params, bool testOnly)
     catch (std::exception &e)
     {
         throw std::runtime_error("CANManager - ResetOffset: " + std::string(e.what()));
+    }
+}
+
+void CANManager::FlushDatabase(std::vector<double> &params, bool testOnly)
+{
+	try
+    {
+		Debug::print("flush database");
+        Node::FlushLogger();
+
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("CANManager - FlushDatabase: " + std::string(e.what()));
     }
 }
 

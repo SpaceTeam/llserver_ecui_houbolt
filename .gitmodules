@@ -1,3 +1,0 @@
-[submodule "include/can_houbolt"]
-	path = include/can_houbolt
-	url = git@github.com:SpaceTeam/can_houbolt.git

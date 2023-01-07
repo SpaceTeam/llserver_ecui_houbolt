@@ -17,20 +17,49 @@ CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8
     int32_t tseg2 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_segment_2"));
     int32_t sjw = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/sync_jump_width"));
     int32_t noSamp = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/no_sampling_points"));
-    arbitrationParams = {bitrate, tseg1, tseg2, sjw, noSamp};
+    CANParams arbitrationParams = {bitrate, tseg1, tseg2, sjw, noSamp};
 
     //data bus parameters
     int64_t bitrateData = std::get<int>(Config::getData("CAN/BUS/DATA/bitrate"));
     int32_t tseg1Data = std::get<int>(Config::getData("CAN/BUS/DATA/time_segment_1"));
     int32_t tseg2Data = std::get<int>(Config::getData("CAN/BUS/DATA/time_segment_2"));
     int32_t sjwData = std::get<int>(Config::getData("CAN/BUS/DATA/sync_jump_width"));
-    dataParams = {bitrateData, tseg1Data, tseg2Data, sjwData};
+    CANParams dataParams = {bitrateData, tseg1Data, tseg2Data, sjwData};
 
     blockingTimeout = std::get<int>(Config::getData("CAN/blocking_timeout"));
+
+    nlohmann::json busExtra = std::get<nlohmann::json>(Config::getData("CAN/BUS_EXTRA"));
 
     canStatus stat;
     for (auto &channelID : canBusChannelIDs)
     {
+        std::string channelIDStr = std::to_string(channelID);
+        if (utils::keyExists(busExtra, channelIDStr))
+        {
+            int32_t bitrateExtra = busExtra[channelIDStr]["ARBITRATION"]["bitrate"];
+            int32_t tseg1Extra = busExtra[channelIDStr]["ARBITRATION"]["time_segment_1"];
+            int32_t tseg2Extra = busExtra[channelIDStr]["ARBITRATION"]["time_segment_2"];
+            int32_t sjwExtra = busExtra[channelIDStr]["ARBITRATION"]["sync_jump_width"];
+            int32_t noSampExtra = busExtra[channelIDStr]["ARBITRATION"]["no_sampling_points"];
+            CANParams arbitrationParamsExtra = {bitrateExtra, tseg1Extra, tseg2Extra, sjwExtra, noSampExtra};
+
+            //data bus parameters
+            int64_t bitrateDataExtra = busExtra[channelIDStr]["DATA"]["bitrate"];
+            int32_t tseg1DataExtra = busExtra[channelIDStr]["DATA"]["time_segment_1"];
+            int32_t tseg2DataExtra = busExtra[channelIDStr]["DATA"]["time_segment_2"];
+            int32_t sjwDataExtra = busExtra[channelIDStr]["DATA"]["sync_jump_width"];
+            CANParams dataParamsExtra = {bitrateDataExtra, tseg1DataExtra, tseg2DataExtra, sjwDataExtra};
+
+            arbitrationParamsMap[channelID] = arbitrationParamsExtra;
+            dataParamsMap[channelID] = dataParamsExtra;
+        }
+        else
+        {
+            arbitrationParamsMap[channelID] = arbitrationParams;
+            dataParamsMap[channelID] = dataParams;
+        }
+
+        
         stat = InitializeCANChannel(channelID);
         if (stat < 0) {
             std::ostringstream stringStream;
@@ -191,15 +220,15 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                     stat = canReadStatus(handle, &statFlags);
                     if (statFlags & canSTAT_SW_OVERRUN)
                     {
-                        Debug::error("CANDriver - OnCANCallback: Software Overrun...");
+                        Debug::error("CANDriver - OnCANCallback: Software Overrun on can bus %d...", canBusChannelID);
                     }
                     else if (statFlags & canSTAT_HW_OVERRUN)
                     {
-                        Debug::error("CANDriver - OnCANCallback: Hardware Overrun...");
+                        Debug::error("CANDriver - OnCANCallback: Hardware Overrun on can bus %d...", canBusChannelID);
                     }
                     else
                     {
-                        Debug::error("CANDriver - OnCANCallback: canID: %d, dlc: %d, invalid msg detected, ignoring...", id, dlc);
+                        Debug::error("CANDriver - OnCANCallback: canID: %d, dlc: %d, invalid msg on can bus %d detected, ignoring...", id, dlc, canBusChannelID);
                     }
                     Debug::print("\t\tCAN Status Flags: 0x%016x", statFlags);
                 }
@@ -246,31 +275,28 @@ canStatus CANDriverKvaser::InitializeCANChannel(uint32_t canBusChannelID) {
         return stat;
     }
 
+    Debug::print("can channel bus %d: arb-bitrate %d", canBusChannelID, arbitrationParamsMap[canBusChannelID].bitrate);
     stat = canSetBusParams(canHandlesMap[canBusChannelID],
-            arbitrationParams.bitrate,
-            arbitrationParams.timeSegment1,
-            arbitrationParams.timeSeqment2,
-            arbitrationParams.syncJumpWidth,
-            arbitrationParams.noSamplingPoints, 0); //sycmode Unsupported and ignored.
+            arbitrationParamsMap[canBusChannelID].bitrate,
+            arbitrationParamsMap[canBusChannelID].timeSegment1,
+            arbitrationParamsMap[canBusChannelID].timeSeqment2,
+            arbitrationParamsMap[canBusChannelID].syncJumpWidth,
+            arbitrationParamsMap[canBusChannelID].noSamplingPoints, 0); //sycmode Unsupported and ignored.
     if(stat < 0){
         return stat;
 
     }
 
     stat = canSetBusParamsFd(canHandlesMap[canBusChannelID],
-            dataParams.bitrate,
-            dataParams.timeSegment1,
-            dataParams.timeSeqment2,
-            dataParams.syncJumpWidth);
+            dataParamsMap[canBusChannelID].bitrate,
+            dataParamsMap[canBusChannelID].timeSegment1,
+            dataParamsMap[canBusChannelID].timeSeqment2,
+            dataParamsMap[canBusChannelID].syncJumpWidth);
 
     if(stat < 0){
         return stat;
     }
-
-    /*stat = canSetBusParamsFdTq(canHandles[canBusChannelID], arbitrationParams, dataParams);
-    if(stat < 0) {
-        return stat;
-    }*/
+    
 
     stat = canSetBusOutputControl(canHandlesMap[canBusChannelID], canDRIVER_NORMAL);
     if(stat < 0) {
