@@ -263,10 +263,6 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
 #ifdef NO_PYTHON
                 Debug::warning("Python features not enabled in build settings");
 #else
-<<<<<<< HEAD
-=======
-
->>>>>>> devEuroc
                 std::string scriptPath = msg["content"];
                 PythonController *pyController = PythonController::Instance();
                 pyController->StartPythonScript(scriptPath);
