@@ -80,11 +80,7 @@ CANResult CANManager::Init()
             	throw std::runtime_error("Can driver \"" + can_driver + "\" specified in config not found!");
             }
 
-<<<<<<< HEAD
-			use_lora = std::get<bool>(Config::getData("use_lora"));
-=======
 			useLora = std::get<bool>(Config::getData("use_lora"));
->>>>>>> devEuroc
 
             if(useLora)
 			{
