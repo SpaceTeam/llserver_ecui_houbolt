@@ -9,13 +9,12 @@
 #include <variant>
 
 
-#define CONFIG_FILE_NAME "config.json"
-#define MAPPING_FILE_NAME "mapping.json"
-
-
 class Config
 {
 	private:
+	    static const std::string CONFIG_FILE_NAME;
+    	static const std::string MAPPING_FILE_NAME;
+
 		static nlohmann::json data;
 		static std::string configFilePath;
 		static std::string mappingFilePath;

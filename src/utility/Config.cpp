@@ -6,6 +6,8 @@
 nlohmann::json Config::data;
 std::string Config::configFilePath = "";
 std::string Config::mappingFilePath = "";
+const std::string Config::CONFIG_FILE_NAME = "config.json";
+const std::string Config::MAPPING_FILE_NAME = "mapping.json";
 
 
 void Config::Init(std::string configPath)
