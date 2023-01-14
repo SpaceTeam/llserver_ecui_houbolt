@@ -89,9 +89,13 @@ CANResult CANManager::Init()
 				                            std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
 			}
 
+			bool waitForUserInput = std::get<bool>(Config::getData("CAN/wait_for_user_input"));
+
             Debug::print("Retreiving CANHardware info...");
-			Debug::print("---Press enter to send node request---");
-    		std::cin.get();
+			if (waitForUserInput) {
+				Debug::print("---Press enter to send node request---");
+				std::cin.get();
+			}
             RequestCANInfo(canDriver, canBusChannelIDs);
 			if (useLora)
 			{
@@ -100,20 +104,28 @@ CANResult CANManager::Init()
 			}
             using namespace std::chrono_literals;
             //TODO: wait for user input or expected node count to continue
+			
             uint32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
             uint32_t currNodeCount = 0;
 
             bool canceled = false;
-            std::future<bool> future = std::async([](){
-                    std::cin.get();
-                    return true;
-                });
+			std::future<bool> future;
+			if (waitForUserInput) {
+				future = std::async([](){
+						std::cin.get();
+						return true;
+					});
+			}
 			
 			uint32_t counter = 0;
             do {
                 Debug::print("Waiting for nodes %d of %d, press enter to continue...", currNodeCount, nodeCount);
-                if (future.wait_for(500ms) == std::future_status::ready)
-                    canceled = true;
+				if (waitForUserInput) {
+					if (future.wait_for(500ms) == std::future_status::ready)
+						canceled = true;
+				} else {
+					std::this_thread::sleep_for(500ms);
+				}
                 nodeMapMtx.lock();
                 currNodeCount = nodeMap.size();
                 nodeMapMtx.unlock();
