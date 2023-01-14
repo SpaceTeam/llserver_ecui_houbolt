@@ -80,7 +80,15 @@ CANResult CANManager::Init()
             	throw std::runtime_error("Can driver \"" + can_driver + "\" specified in config not found!");
             }
 
-			useLora = std::get<bool>(Config::getData("use_lora"));
+			useLora = false;
+            try
+            {
+            	useLora = std::get<bool>(Config::getData("use_lora"));
+            }
+            catch(std::exception& e)
+            {
+            	Debug::print("use_lora not found in config, using default false");
+            }
 
             if(useLora)
 			{
@@ -89,19 +97,19 @@ CANResult CANManager::Init()
 				                            std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
 			}
 
-            bool noUserInputStart = false;
+            bool autoStart = true;
             try
             {
-            	noUserInputStart = std::get<bool>(Config::getData("no_user_input_start"));
+            	autoStart = std::get<bool>(Config::getData("auto_start"));
             }
             catch(std::exception& e)
             {
-            	Debug::print("no_user_input_start not found in config, using default false");
+            	Debug::print("auto_start not found in config, using default true");
             }
 
             Debug::print("Retreiving CANHardware info...");
 
-            if(!noUserInputStart)
+            if(!autoStart)
             {
 				Debug::print("---Press enter to send node request---");
 				std::cin.get();
@@ -121,7 +129,7 @@ CANResult CANManager::Init()
 
             bool canceled = false;
             std::future<bool> future;
-            if(!noUserInputStart)
+            if(!autoStart)
             {
 				future = std::async([](){
 						std::cin.get();
@@ -132,7 +140,7 @@ CANResult CANManager::Init()
 			uint32_t counter = 0;
 			uint32_t counterTimeout = 0;
             do {
-                if(noUserInputStart)
+                if(autoStart)
 				{
                 	Debug::print("Waiting for nodes %d of %d...", currNodeCount, nodeCount);
                 	std::this_thread::sleep_for(500ms);
@@ -152,7 +160,7 @@ CANResult CANManager::Init()
 					RequestCANInfo(canDriver, canBusChannelIDs);
 					counter = 0;
 				}
-				if(noUserInputStart)
+				if(autoStart)
 				{
 					if(++counterTimeout > 10) canceled = true;
 				}
@@ -179,7 +187,7 @@ CANResult CANManager::Init()
 
             Debug::print("Initialized all nodes. \n");
 
-            if(!noUserInputStart)
+            if(!autoStart)
 			{
             	Debug::print("Press enter to continue...\n");
             	std::cin.get();
