@@ -115,6 +115,7 @@ CANResult CANManager::Init()
 			}
             using namespace std::chrono_literals;
             //TODO: wait for user input or expected node count to continue
+			
             uint32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
             uint32_t currNodeCount = 0;
 
@@ -134,7 +135,7 @@ CANResult CANManager::Init()
                 if(noUserInputStart)
 				{
                 	Debug::print("Waiting for nodes %d of %d...", currNodeCount, nodeCount);
-                	usleep(500000);
+                	std::this_thread::sleep_for(500ms);
                 }
                 else
                 {
