@@ -9,7 +9,6 @@
 
 #include "StateController.h"
 
-#include "utility/Config.h"
 #include "utility/utils.h"
 
 EventManager::~EventManager()
@@ -21,18 +20,18 @@ EventManager::~EventManager()
     }
 }
 
-void EventManager::Init()
+void EventManager::Init(Config &config)
 {
     if (!initialized)
     {
         Debug::print("Initializing EventManager...");
         try
         {
-            defaultMapping = new JSONMapping(Config::getMappingFilePath(), "DefaultEventMapping");
+            defaultMapping = new JSONMapping(config.getMappingFilePath(), "DefaultEventMapping");
             defaultMappingJSON = *defaultMapping->GetJSONMapping();
             Debug::print("DefaultEventMapping initialized");
 
-            mapping = new JSONMapping(Config::getMappingFilePath(), "EventMapping");
+            mapping = new JSONMapping(config.getMappingFilePath(), "EventMapping");
             mappingJSON = *mapping->GetJSONMapping();
             Debug::print("EventMapping initialized");
             initialized = true;

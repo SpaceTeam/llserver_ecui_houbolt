@@ -3,7 +3,6 @@
 //
 
 #include "StateController.h"
-#include "utility/Config.h"
 
 StateController::~StateController()
 {
@@ -14,18 +13,18 @@ StateController::~StateController()
     }
 }
 
-void StateController::Init(std::function<void(std::string, double, double)> onStateChangeCallback)
+void StateController::Init(std::function<void(std::string, double, double)> onStateChangeCallback, Config &config)
 {
     if (!initialized)
     {
         this->onStateChangeCallback = std::move(onStateChangeCallback);
         logger = new InfluxDbLogger();
-        logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
-                     std::get<int>(Config::getData("INFLUXDB/database_port")),
-                     std::get<std::string>(Config::getData("INFLUXDB/database_name")),
-                     std::get<std::string>(Config::getData("INFLUXDB/state_measurement")), MICROSECONDS,
-                     std::get<int>(Config::getData("INFLUXDB/buffer_size")));
-        // logger->Init("127.0.0.1", 8086, "testDb", "states", MICROSECONDS, 65536);
+        logger->Init(config["/INFLUXDB/database_ip"],
+                     config["/INFLUXDB/database_port"],
+                     config["/INFLUXDB/database_name"],
+                     config["/INFLUXDB/state_measurement"], MICROSECONDS,
+                     config["/INFLUXDB/buffer_size"]);
+                     
         initialized = true;
     }
 }

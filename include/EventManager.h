@@ -8,6 +8,7 @@
 #include "common.h"
 
 #include "utility/json.hpp"
+#include "utility/Config.h"
 
 #include <map>
 #include <functional>
@@ -53,7 +54,7 @@ private:
     ~EventManager();
 public:
 
-    void Init();
+    void Init(Config &config);
 
     /**
      * this is used, so mapping and command loading don't need to be done at the same time,

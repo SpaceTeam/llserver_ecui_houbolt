@@ -7,6 +7,8 @@
 
 #include "utility/json.hpp"
 #include "utility/JSONMapping.h"
+#include "utility/Config.h"
+
 #include "can/CANManager.h"
 #include "DataFilter.h"
 #include "EventManager.h"
@@ -47,13 +49,13 @@ class LLInterface : public Singleton<LLInterface>
 		~LLInterface();
 
 	public:
-		void Init();
+		void Init(Config &config);
 
 		nlohmann::json GetGUIMapping();
 
 		void TransmitStates(int64_t microTime, std::map<std::string, std::tuple<double, uint64_t>> &states);
 
-		void StartStateTransmission();
+		void StartStateTransmission(Config &config);
 		void StopStateTransmission();
 
 		nlohmann::json GetAllStates();

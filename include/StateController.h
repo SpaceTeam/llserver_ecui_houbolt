@@ -14,6 +14,7 @@
 #include "common.h"
 
 #include "utility/Singleton.h"
+#include "utility/Config.h"
 
 #include "logging/InfluxDbLogger.h"
 
@@ -35,7 +36,7 @@ public:
 
     std::size_t count = 0;
     //TODO: MP Maybe add timestamp to callback argument as well
-    void Init(std::function<void(std::string, double, double)> onStateChangeCallback);
+    void Init(std::function<void(std::string, double, double)> onStateChangeCallback, Config &config);
 
     /**
      * blocks until all map entries have a timestamp != 0

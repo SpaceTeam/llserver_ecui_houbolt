@@ -39,6 +39,11 @@ std::string Config::getMappingFilePath()
     return mappingFilePath;
 }
 
+nlohmann::json &Config::operator[](const std::string &path)
+{
+    auto pointer = nlohmann::json_pointer<nlohmann::json>(path);
+    return Config::data[pointer];
+}
 
 std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>, std::vector<int>> Config::getData(std::vector<std::string> keyChain) {
     nlohmann::json obj = data;

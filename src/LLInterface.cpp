@@ -5,7 +5,6 @@
 #include <utility/utils.h>
 
 #include "EcuiSocket.h"
-#include "utility/Config.h"
 
 
 void LLInterface::CalcThrustTransformMatrix()
@@ -27,18 +26,18 @@ void LLInterface::CalcThrustTransformMatrix()
     };
 }
 
-void LLInterface::Init()
+void LLInterface::Init(Config &config)
 {
     if (!isInitialized)
     {
         Debug::print("Initializing EventManager...");
         eventManager = EventManager::Instance();
-        eventManager->Init();
+        eventManager->Init(config);
         Debug::print("Initializing EventManager done\n");
 
         Debug::print("Initializing StateController...");
         stateController = StateController::Instance();
-        stateController->Init(std::bind(&EventManager::OnStateChange, eventManager, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+        stateController->Init(std::bind(&EventManager::OnStateChange, eventManager, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), config);
         Debug::print("Initializing StateController done\n");
 
         Debug::print("Initializing CANManager...");
@@ -47,7 +46,7 @@ void LLInterface::Init()
         Debug::print("Initializing CANManager done\n");
 
         Debug::print("Initializing GUIMapping...");
-        guiMapping = new JSONMapping(Config::getMappingFilePath(), "GUIMapping");
+        guiMapping = new JSONMapping(config.getMappingFilePath(), "GUIMapping");
         LoadGUIStates();
         Debug::print("GUIMapping initialized\n");
 
@@ -56,21 +55,21 @@ void LLInterface::Init()
         Debug::print("All States initialized\n");
 
         Debug::print("Initializing Thrust Matrix...");
-        thrustVariables["alpha"] = std::get<double>(Config::getData("THRUST/alpha"));
-        thrustVariables["beta"] = std::get<double>(Config::getData("THRUST/beta"));
-        thrustVariables["gamma"] = std::get<double>(Config::getData("THRUST/gamma"));
-        thrustVariables["d"] = std::get<double>(Config::getData("THRUST/d"));
-        thrustVariables["r"] = std::get<double>(Config::getData("THRUST/r"));
+        thrustVariables["alpha"] = config["/THRUST/alpha"];
+        thrustVariables["beta"] = config["/THRUST/beta"];
+        thrustVariables["gamma"] = config["/THRUST/gamma"];
+        thrustVariables["d"] = config["/THRUST/d"];
+        thrustVariables["r"] = config["/THRUST/r"];
         CalcThrustTransformMatrix();
         Debug::print("Initializing Thrust Matrix done\n");
 
         Debug::print("Initializing DataFilter...");
-        double sensorsSmoothingFactor = std::get<double>(Config::getData("WEBSERVER/sensors_smoothing_factor"));
+        double sensorsSmoothingFactor = config["/WEBSERVER/sensors_smoothing_factor"];
         dataFilter = new DataFilter(sensorsSmoothingFactor);
         Debug::print("Initializing DataFilter done\n");
 
         Debug::print("Starting filterSensorsThread...");
-        uint32_t filterSensorsInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("LLSERVER/sensor_state_sampling_rate")));
+        uint32_t filterSensorsInterval = (uint32_t)(1e6 / (double)config["/LLSERVER/sensor_state_sampling_rate"]);
         filterSensorsRunning = true;
         filterSensorsThread = new std::thread(&LLInterface::filterSensorsLoop, this, filterSensorsInterval);
         Debug::print("FilterSensorsThread started\n");
@@ -167,12 +166,12 @@ nlohmann::json LLInterface::GetGUIMapping()
     return *guiMapping->GetJSONMapping();
 }
 
-void LLInterface::StartStateTransmission()
+void LLInterface::StartStateTransmission(Config &config)
 {
     if (!transmitStatesRunning)
     {
         Debug::print("Starting transmitStatesThread...");
-        uint32_t transmitStatesInterval = (uint32_t)(1e6 / std::get<double>(Config::getData("WEBSERVER/state_transmission_rate")));
+        uint32_t transmitStatesInterval = (uint32_t)(1e6 / (double)config["/WEBSERVER/state_transmission_rate"]);
         transmitStatesRunning = true;
 		transmitStatesThread = new std::thread(&LLInterface::transmitStatesLoop, this, transmitStatesInterval);
 		Debug::print("TransmitStatesThread started\n");

@@ -32,20 +32,21 @@ void LLController::Init(std::string &configPath)
     try
     {
         Config::Init(configPath);
+        config = Config();
 
         Debug::Init();
 
         //LLInterface needs to be initialized first to ensure proper initialization before receiving
         //aynchronous commands from the web server
         PrintLogo();
-        std::string version = std::get<std::string>(Config::getData("version"));
+        std::string version = config["/version"];
 
         Debug::printNoTime("Version: " + version);
         Debug::printNoTime("\n----------------------");
 
         Debug::print("Initializing LLInterface...");
         llInterface = LLInterface::Instance();
-        llInterface->Init();
+        llInterface->Init(config);
         Debug::print("Initializing LLInterface done\n");
 
         Debug::print("Initializing ECUISocket...");
@@ -194,7 +195,7 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
             else if (type.compare("states-start") == 0)
             {
                 Debug::print("state transmission started");
-                llInterface->StartStateTransmission();
+                llInterface->StartStateTransmission(config);
             }
             else if (type.compare("states-stop") == 0)
             {

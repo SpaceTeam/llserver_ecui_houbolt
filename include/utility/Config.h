@@ -24,6 +24,8 @@ class Config
 	public:
 		static void Init(std::string configPath);
 
+		nlohmann::json &operator[](const std::string &path);
+
 		//getData either with a vector of the data tree (eg: {"ECUI", "version"}) or a string with '/' as separators
 		//(eg: "ECUI/version"). At the end you have to extract the result from the std::variant with std::get<0>(std::variant)
 		static std::variant<int, double, std::string, bool, nlohmann::json, std::vector<std::string>, std::vector<int>> getData(std::vector<std::string> keyChain); //each step of the access is a separate vector element

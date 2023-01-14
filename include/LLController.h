@@ -13,6 +13,7 @@
 #include "utility/Singleton.h"
 
 #include "utility/json.hpp"
+#include "utility/Config.h"
 
 class LLController : public Singleton<LLController>
 {
@@ -21,6 +22,8 @@ private:
 
     LLInterface *llInterface;
     SequenceManager *seqManager;
+
+    Config config;
 
     std::atomic_bool initialized = false;
 
