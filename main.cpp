@@ -18,9 +18,6 @@
 #include "LLController.h"
 #include "utility/Config.h"
 
-
-#define CONFIG_PATH_FILE "configPath.txt"
-
 //#define TEST_LLSERVER
 
 #ifdef TEST_LLSERVER
@@ -236,14 +233,14 @@ int main(int argc, char const *argv[])
 	}
     else
     {
-    	std::ifstream configPathFile(CONFIG_PATH_FILE);
-    	if(configPathFile.fail())
-    	{
-            std::cerr << "Config path file " << CONFIG_PATH_FILE << " is missing or could not be read!" << std::endl;
+        if(const char* configPathFile = std::getenv("ECUI_CONFIG_PATH")) {
+            std::cout << "Config path env variable found: " << configPathFile << '\n';
+            configPath = std::string(configPathFile);
+        }
+        else {
+            std::cerr << "Config path is missing, try to add as an argument configure docker env variable 'ECUI_CONFIG_PATH=<your_path>' or use 'echo \"ECUI_CONFIG_PATH=<your_path>\" >> /etc/environment'!" << std::endl;
             exit(EXIT_FAILURE);
-		}
-    	std::getline(configPathFile, configPath);
-        ss << "Using config path in " << CONFIG_PATH_FILE << "\n";
+        }
     }
 
     ss << "Config path: " << configPath << "\n";
@@ -261,7 +258,6 @@ int main(int argc, char const *argv[])
     // wait for signal handler to complete
     initialized = true;
     int signum = ft_signal_handler.get();
-    std::cout << "received signal " << signal << "\n";
 
     #ifdef TEST_LLSERVER
         if (testThread != nullptr && testThread->joinable())

@@ -142,7 +142,6 @@ CANResult CANManager::Init(Config &config)
             }
 			
 			uint32_t counter = 0;
-			uint32_t counterTimeout = 0;
             do {
                 if(autoStart)
 				{
@@ -163,10 +162,6 @@ CANResult CANManager::Init(Config &config)
 					Debug::print("Resending node info...");
 					RequestCANInfo(canDriver, canBusChannelIDs);
 					counter = 0;
-				}
-				if(autoStart)
-				{
-					if(++counterTimeout > 10) canceled = true;
 				}
             }
             while((currNodeCount < nodeCount) && !canceled);
