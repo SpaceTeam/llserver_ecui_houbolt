@@ -216,7 +216,7 @@ void signalHandler(int signum)
 
 int main(int argc, char const *argv[])
 {
-    system("clear");
+    // system("clear");
     
 	struct sched_param sp;
 	sp.sched_priority = 60;

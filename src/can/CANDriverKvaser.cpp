@@ -5,30 +5,29 @@
 #include <string>
 #include "can_houbolt/can_cmds.h"
 #include "utility/utils.h"
-#include "utility/Config.h"
 
 CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
-								 std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs) :
+								 std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs, Config &config) :
 	CANDriver(onRecvCallback, onErrorCallback)
 {
     //arbitration bus parameters
-    int32_t bitrate = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/bitrate"));
-    int32_t tseg1 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_segment_1"));
-    int32_t tseg2 = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/time_segment_2"));
-    int32_t sjw = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/sync_jump_width"));
-    int32_t noSamp = std::get<int>(Config::getData("CAN/BUS/ARBITRATION/no_sampling_points"));
+    int32_t bitrate = config["/CAN/BUS/ARBITRATION/bitrate"];
+    int32_t tseg1 = config["/CAN/BUS/ARBITRATION/time_segment_1"];
+    int32_t tseg2 = config["/CAN/BUS/ARBITRATION/time_segment_2"];
+    int32_t sjw = config["/CAN/BUS/ARBITRATION/sync_jump_width"];
+    int32_t noSamp = config["/CAN/BUS/ARBITRATION/no_sampling_points"];
     CANParams arbitrationParams = {bitrate, tseg1, tseg2, sjw, noSamp};
 
     //data bus parameters
-    int64_t bitrateData = std::get<int>(Config::getData("CAN/BUS/DATA/bitrate"));
-    int32_t tseg1Data = std::get<int>(Config::getData("CAN/BUS/DATA/time_segment_1"));
-    int32_t tseg2Data = std::get<int>(Config::getData("CAN/BUS/DATA/time_segment_2"));
-    int32_t sjwData = std::get<int>(Config::getData("CAN/BUS/DATA/sync_jump_width"));
+    int64_t bitrateData = config["/CAN/BUS/DATA/bitrate"];
+    int32_t tseg1Data = config["/CAN/BUS/DATA/time_segment_1"];
+    int32_t tseg2Data = config["/CAN/BUS/DATA/time_segment_2"];
+    int32_t sjwData = config["/CAN/BUS/DATA/sync_jump_width"];
     CANParams dataParams = {bitrateData, tseg1Data, tseg2Data, sjwData};
 
-    blockingTimeout = std::get<int>(Config::getData("CAN/blocking_timeout"));
+    blockingTimeout = config["/CAN/blocking_timeout"];
 
-    nlohmann::json busExtra = std::get<nlohmann::json>(Config::getData("CAN/BUS_EXTRA"));
+    nlohmann::json busExtra = config["/CAN/BUS_EXTRA"];
 
     canStatus stat;
     for (auto &channelID : canBusChannelIDs)

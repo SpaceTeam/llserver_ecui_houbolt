@@ -16,8 +16,12 @@ private:
 
     std::atomic_bool running = false;
     std::vector<std::thread *> pyThreads;
+
+    static std::string pyEnv;
     
 public:
+
+    static void SetPythonEnvironment(std::string pyEnv);
 
     void StartPythonScript(std::string scriptPath);
     void StartPythonScript(std::string scriptPath, std::vector<std::string> args);

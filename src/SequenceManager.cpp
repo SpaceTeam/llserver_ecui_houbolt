@@ -5,9 +5,11 @@
 
 #include "utility/json.hpp"
 #include "utility/utils.h"
-#include "utility/Config.h"
 
 #include "EcuiSocket.h"
+
+std::string SequenceManager::configFilePath = "";
+
 SequenceManager::~SequenceManager()
 {
     if (isInitialized)
@@ -74,14 +76,16 @@ void SequenceManager::plotMaps(uint8_t option=2)
 
 }
 
-void SequenceManager::Init()
+void SequenceManager::Init(Config &config)
 {
     llInterface = LLInterface::Instance();
     eventManager = EventManager::Instance();
 
-    autoAbortEnabled = std::get<bool>(Config::getData("autoabort"));
+    autoAbortEnabled = config["/autoabort"];
 
-    timerSyncInterval = 1000000/std::get<int>(Config::getData("WEBSERVER/timer_sync_rate"));
+    timerSyncInterval = (int32_t)(1000000.0/(double)config["/WEBSERVER/timer_sync_rate"]);
+
+    configFilePath = config.getConfigFilePath();
 
     isInitialized = true;
 }
@@ -144,7 +148,7 @@ void SequenceManager::SetupLogging()
     utils::saveFile(currentDirPath + "/AbortSequence.json", jsonAbortSequence.dump(4));
     utils::saveFile(currentDirPath + "/comments.txt", comments);
 
-    std::experimental::filesystem::copy(Config::getConfigFilePath(), currentDirPath + "/");
+    std::experimental::filesystem::copy(configFilePath, currentDirPath + "/");
 
 }
 
@@ -412,7 +416,7 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 		syncMtx.lock();
 
 		//log nominal ranges
-		for (const auto sensor : sensorsNominalRangeMap)
+		for (const auto &sensor : sensorsNominalRangeMap)
 		{
 			msg += std::to_string(sensor.second.begin()->second[0]) + ";";
 			msg += std::to_string(sensor.second.begin()->second[1]) + ";";

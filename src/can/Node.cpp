@@ -67,6 +67,12 @@ const std::map<GENERIC_VARIABLES, std::string> Node::variableMap =
 
 InfluxDbLogger *Node::logger = nullptr;
 bool Node::enableFastLogging;
+std::string Node::influxIP;
+int Node::influxPort;
+std::string Node::databaseName;
+std::string Node::measurementName;
+int Node::influxBufferSize;
+
 std::mutex Node::loggerMtx;
 
 /**
@@ -82,16 +88,16 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
 
     if (logger == nullptr)
     {
-        enableFastLogging = std::get<bool>(Config::getData("INFLUXDB/enable_fast_sensor_logging"));
+        Debug::info("%d, %s, %d, %s, %s, %d", enableFastLogging, influxIP.c_str(), influxPort, databaseName.c_str(), measurementName.c_str(), influxBufferSize);
         if (enableFastLogging)
         {
             Debug::print("Fast logging enabled");
             logger = new InfluxDbLogger();
-            logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
-                        std::get<int>(Config::getData("INFLUXDB/database_port")),
-                        std::get<std::string>(Config::getData("INFLUXDB/database_name")),
-                        std::get<std::string>(Config::getData("INFLUXDB/fast_sensor_measurement")), MICROSECONDS,
-                        std::get<int>(Config::getData("INFLUXDB/fast_sensor_buffer_size")));
+            logger->Init(influxIP,
+                        influxPort,
+                        databaseName,
+                        measurementName, MICROSECONDS,
+                        influxBufferSize);
         }
         else
         {
@@ -129,6 +135,15 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
     //init latest sensor buffer with largest channel id
     latestSensorBufferLength = channelMap.rbegin()->first + 1;
     latestSensorBuffer = new SensorData_t[latestSensorBufferLength]{{0}};
+}
+
+void Node::InitConfig(Config &config) {
+    enableFastLogging = config["/INFLUXDB/enable_fast_sensor_logging"];
+    influxIP = config["/INFLUXDB/database_ip"];
+    influxPort = config["/INFLUXDB/database_port"];
+    databaseName = config["/INFLUXDB/database_name"];
+    measurementName = config["/INFLUXDB/fast_sensor_measurement"];
+    influxBufferSize = config["/INFLUXDB/fast_sensor_buffer_size"];
 }
 
 /**
@@ -196,7 +211,7 @@ void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<st
 
 Node::~Node()
 {
-    delete &channelMap;
+
 }
 
 //---------------------------------------------------------------------------------------//

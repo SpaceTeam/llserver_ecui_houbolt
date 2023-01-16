@@ -28,6 +28,8 @@ typedef struct __attribute__((__packed__))
 #include "can_houbolt/channels/generic_channel_def.h"
 #include "logging/InfluxDbLogger.h"
 
+#include "utility/Config.h"
+
 class Node : public Channel
 {
 private:
@@ -37,6 +39,12 @@ private:
     static const std::map<GENERIC_VARIABLES, std::string> variableMap;
 	
     static bool enableFastLogging;
+	static std::string influxIP;
+	static int influxPort;
+	static std::string databaseName;
+	static std::string measurementName;
+	static int influxBufferSize;
+
     static InfluxDbLogger *logger;
     static std::mutex loggerMtx;
 
@@ -61,6 +69,8 @@ private:
 
 public:
     std::atomic_uint64_t count = 0;
+
+	static void InitConfig(Config &config);
 
     //TODO: MP consider if putting channelid as parameter is necessary adapt initializer list if so
 	Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo, uint8_t canBusChannelID, CANDriver *driver);

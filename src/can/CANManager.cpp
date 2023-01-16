@@ -7,7 +7,6 @@
 #include <future>
 #include <utility>
 
-#include "utility/Config.h"
 #include "can/CANManager.h"
 #include "can/CANDriverKvaser.h"
 #include "can/CANDriverSocketCAN.h"
@@ -40,7 +39,7 @@ inline uint16_t CANManager::MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &ch
 }
 
 
-CANResult CANManager::Init()
+CANResult CANManager::Init(Config &config)
 {
     if (!initialized)
     {
@@ -48,14 +47,19 @@ CANResult CANManager::Init()
 
         try
         {
-            mapping = new CANMapping(Config::getMappingFilePath(), "CANMapping");
+            mapping = new CANMapping(config.getMappingFilePath(), "CANMapping");
             Debug::print("CANMapping initialized");
 
             Debug::print("Initializing CANDriver...");
 
-            std::string can_driver = std::get<std::string>(Config::getData("CAN/DRIVER"));
-			std::vector<int> canBusChannelIDsInt = std::get<std::vector<int>>(Config::getData("CAN/canBusChannelIDs"));
+            std::string can_driver = config["/CAN/DRIVER"];
+			std::vector<int> canBusChannelIDsInt = config["/CAN/canBusChannelIDs"];
 			std::vector<uint32_t> canBusChannelIDs(canBusChannelIDsInt.begin(), canBusChannelIDsInt.end());
+
+			nodeIDsRefInt= (std::vector<int>)config["/LORA/nodeIDsRef"];
+			nodeIDsInt= (std::vector<int>)config["/LORA/nodeIDs"];
+
+			Node::InitConfig(config);
 
             if(can_driver == "Kvaser")
             {
@@ -65,14 +69,14 @@ CANResult CANManager::Init()
 				#else
             	Debug::print("Using Kvaser CAN driver");
 				canDriver = new CANDriverKvaser(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6),
-				                                std::bind(&CANManager::OnCANError, this, std::placeholders::_1), canBusChannelIDs);
+				                                std::bind(&CANManager::OnCANError, this, std::placeholders::_1), canBusChannelIDs, config);
 				#endif
             }
             else if(can_driver == "SocketCAN")
 			{
             	Debug::print("Using SocketCAN driver");
             	canDriver = new CANDriverSocketCAN(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6),
-				                                   std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
+				                                   std::bind(&CANManager::OnCANError, this, std::placeholders::_1), config);
 			}
             else
             {
@@ -83,7 +87,7 @@ CANResult CANManager::Init()
 			useLora = false;
             try
             {
-            	useLora = std::get<bool>(Config::getData("use_lora"));
+            	useLora = config["/use_lora"];
             }
             catch(std::exception& e)
             {
@@ -94,13 +98,13 @@ CANResult CANManager::Init()
 			{
 				Debug::print("Initializing LoRa...");
 				loraDriver = new CANDriverUDP(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6),
-				                            std::bind(&CANManager::OnCANError, this, std::placeholders::_1));
+				                            std::bind(&CANManager::OnCANError, this, std::placeholders::_1), config);
 			}
 
             bool autoStart = true;
             try
             {
-            	autoStart = std::get<bool>(Config::getData("auto_start"));
+            	autoStart = config["/auto_start"];
             }
             catch(std::exception& e)
             {
@@ -124,7 +128,7 @@ CANResult CANManager::Init()
             using namespace std::chrono_literals;
             //TODO: wait for user input or expected node count to continue
 			
-            uint32_t nodeCount = std::get<int>(Config::getData("CAN/node_count"));
+            uint32_t nodeCount = config["/CAN/node_count"];
             uint32_t currNodeCount = 0;
 
             bool canceled = false;
@@ -354,8 +358,6 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 				{
 
 					//WHAT THE HACK? Exactly that's a hack, because Andi doesn't want to implement it properly!!!
-					std::vector<int> nodeIDsRefInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDsRef"));
-					std::vector<int> nodeIDsInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDs"));
 					auto foundIt = std::find(nodeIDsRefInt.begin(), nodeIDsRefInt.end(), nodeID); 
 					if (foundIt != nodeIDsRefInt.end()) 
 					{

@@ -7,6 +7,7 @@
 #include <vector>
 #include "common.h"
 #include "utility/Singleton.h"
+#include "utility/Config.h"
 #include "can/Node.h"
 #include "can/CANMapping.h"
 
@@ -47,8 +48,6 @@ class CANManager : public Singleton<CANManager>
     
 	private:
 
-		bool use_lora = false;
-
 		
 		CANDriver *loraDriver;
 		CANMapping *mapping;
@@ -65,6 +64,9 @@ class CANManager : public Singleton<CANManager>
 		std::atomic_bool initialized = false;
 		std::atomic_bool useLora = false;
 
+		std::vector<int> nodeIDsRefInt= std::vector<int>();
+		std::vector<int> nodeIDsInt= std::vector<int>();
+
 		CANResult RequestCANInfo(CANDriver *driver, std::vector<uint32_t> &canBusChannelIDs);
 		static inline uint8_t GetNodeID(uint32_t &canID);
 		static inline uint16_t MergeNodeIDAndChannelID(uint8_t &nodeId, uint8_t &channelId);
@@ -77,7 +79,7 @@ class CANManager : public Singleton<CANManager>
 	public:
 		CANDriver *canDriver;
 
-		CANResult Init();
+		CANResult Init(Config &config);
 
 		bool IsInitialized();
 

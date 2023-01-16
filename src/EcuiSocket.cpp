@@ -4,8 +4,6 @@
 
 #include "EcuiSocket.h"
 
-#include "utility/Config.h"
-
 Socket* EcuiSocket::socket;
 
 std::atomic_bool EcuiSocket::connectionActive = false;
@@ -14,12 +12,12 @@ std::atomic_bool EcuiSocket::shallClose = false;
 std::thread* EcuiSocket::asyncListenThread;
 std::function<void()> EcuiSocket::onCloseCallback;
 
-void EcuiSocket::Init(std::function<void(nlohmann::json)> onMsgCallback, std::function<void()> onCloseCallback)
+void EcuiSocket::Init(std::function<void(nlohmann::json)> onMsgCallback, std::function<void()> onCloseCallback, Config &config)
 {
     EcuiSocket::onCloseCallback = onCloseCallback;
 
-    std::string ip = std::get<std::string>(Config::getData("WEBSERVER/ip"));
-    int32_t port = std::get<int>(Config::getData("WEBSERVER/port"));
+    std::string ip = config["/WEBSERVER/ip"];
+    int32_t port = config["/WEBSERVER/port"];
 
     socket = new Socket("EcuiSocket", Close, ip, port);
     while(socket->Connect()!=0);

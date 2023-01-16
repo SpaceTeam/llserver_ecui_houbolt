@@ -6,6 +6,7 @@
 #include <string>
 #include <thread>
 #include "common.h"
+#include "utility/Config.h"
 #include "CANDriver.h"
 
 
@@ -21,7 +22,7 @@ class CANDriverSocketCAN : public CANDriver
 
     public:
         CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
-					   	   std::function<void(std::string *)> onErrorCallback);
+					   	   std::function<void(std::string *)> onErrorCallback, Config &config);
         ~CANDriverSocketCAN();
 
         void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking);

@@ -42,7 +42,7 @@ void LLInterface::Init(Config &config)
 
         Debug::print("Initializing CANManager...");
         canManager = CANManager::Instance();
-        canManager->Init();
+        canManager->Init(config);
         Debug::print("Initializing CANManager done\n");
 
         Debug::print("Initializing GUIMapping...");

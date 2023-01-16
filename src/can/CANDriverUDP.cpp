@@ -6,18 +6,17 @@
 #include "can_houbolt/can_cmds.h"
 #include "can_houbolt/channels/generic_channel_def.h"
 #include "utility/utils.h"
-#include "utility/Config.h"
 #include "can/Node.h"
 
 
 CANDriverUDP::CANDriverUDP(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
-									   std::function<void(std::string *)> onErrorCallback) :
+									   std::function<void(std::string *)> onErrorCallback, Config &config) :
 	CANDriver(onRecvCallback, onErrorCallback)
 {
-	std::string sendIP = std::get<std::string>(Config::getData("LORA/ip"));
-    int32_t sendPort = std::get<int>(Config::getData("LORA/port"));
-	std::vector<int> canIDSInt= std::get<std::vector<int>>(Config::getData("LORA/nodeIDs"));
-	std::vector<int> canMsgSizesInt = std::get<std::vector<int>>(Config::getData("LORA/canMsgSizes"));
+	std::string sendIP = config["/LORA/ip"];
+    int32_t sendPort = config["/LORA/port"];
+	std::vector<int> canIDSInt= config["/LORA/nodeIDs"];
+	std::vector<int> canMsgSizesInt = config["/LORA/canMsgSizes"];
 
 	for (auto &size : canMsgSizesInt)
 	{

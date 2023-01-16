@@ -8,6 +8,12 @@
 #include <stdio.h>
 #include <Python.h>
 
+static std::string PythonController::pyEnv = "";
+
+static void PythonController::SetPythonEnvironment(std::string pyEnv) {
+    PythonController::pyEnv = pyEnv;
+}
+
 static PyObject * get_state_value(PyObject *self, PyObject *args)
 {
     const char *stateName;
@@ -213,8 +219,7 @@ void PythonController::SetupImports()
 
     Py_Initialize();
 
-    std::string pyenvStr = std::get<std::string>(Config::getData("pyenv"));
-    const char *importPath = pyenvStr.c_str();
+    const char *importPath = pyEnv.c_str();
     PyObject *pyImportPath = PyUnicode_FromString(importPath);
     const char *name = "path";
     PyObject *path = PySys_GetObject(name);

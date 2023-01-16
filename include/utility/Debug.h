@@ -16,6 +16,8 @@
 #include <sstream>
 
 #include "common.h"
+#include "utility/Config.h"
+
 #include "logging/InfluxDbLogger.h"
 
 class Debug {
@@ -41,7 +43,7 @@ private:
     static std::unique_ptr<InfluxDbLogger> logger;
 
 public:
-    static void Init();
+    static void Init(Config &config);
 
     static void close();
     static void flush();

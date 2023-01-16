@@ -10,6 +10,7 @@
 #include "common.h"
 
 #include "utility/json.hpp"
+#include "utility/Config.h"
 
 #include "driver/Socket.h"
 
@@ -40,7 +41,7 @@ private:
 
 public:
 
-    static void Init(std::function<void(nlohmann::json)> onMsgCallback, std::function<void()> onCloseCallback);
+    static void Init(std::function<void(nlohmann::json)> onMsgCallback, std::function<void()> onCloseCallback, Config &config);
 
     static void SendJson(std::string type);
     static void SendJson(std::string type, nlohmann::json content);

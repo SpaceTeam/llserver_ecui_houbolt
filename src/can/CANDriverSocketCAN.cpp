@@ -11,14 +11,13 @@
 #include <poll.h>
 #include "can_houbolt/can_cmds.h"
 #include "utility/utils.h"
-#include "utility/Config.h"
 
 
 CANDriverSocketCAN::CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
-									   std::function<void(std::string *)> onErrorCallback) :
+									   std::function<void(std::string *)> onErrorCallback, Config &config) :
 	CANDriver(onRecvCallback, onErrorCallback)
 {
-	canDevices = std::get<std::vector<std::string>>(Config::getData("CAN/DEVICE"));
+	canDevices = (std::vector<std::string>)config["/CAN/DEVICE"];
 
 	// create can socket
 	canSocket = socket(PF_CAN, SOCK_RAW, CAN_RAW);

@@ -11,6 +11,7 @@
 #include <string>
 #include <canlib.h>
 #include "common.h"
+#include "utility/Config.h"
 
 class CANDriverKvaser : public CANDriver
 {
@@ -28,7 +29,7 @@ class CANDriverKvaser : public CANDriver
 
     public:
         CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
-						std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs);
+						std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs, Config &config);
         ~CANDriverKvaser();
 
         void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking);

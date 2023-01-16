@@ -31,10 +31,9 @@ void LLController::Init(std::string &configPath)
 {
     try
     {
-        Config::Init(configPath);
-        config = Config();
+        config = Config(configPath);
 
-        Debug::Init();
+        Debug::Init(config);
 
         //LLInterface needs to be initialized first to ensure proper initialization before receiving
         //aynchronous commands from the web server
@@ -51,18 +50,22 @@ void LLController::Init(std::string &configPath)
 
         Debug::print("Initializing ECUISocket...");
         EcuiSocket::Init(std::bind(&LLController::OnECUISocketRecv, this, std::placeholders::_1),
-                std::bind(&LLController::OnECUISocketClose, this));
+                std::bind(&LLController::OnECUISocketClose, this), config);
         //TODO: new thread with periodic keep alive messages
         Debug::print("Initializing ECUISocket done\n");
 
         //TODO: MP maybe move to llInterface
         Debug::print("Initializing Sequence Manager...");
         seqManager = SequenceManager::Instance();
-        seqManager->Init();
+        seqManager->Init(config);
         Debug::print("Initializing Sequence Manager done\n");
 
         Debug::printNoTime("----------------------");
         Debug::print("Low-Level Server started!\n");
+
+#ifndef NO_PYTHON
+        PythonController::SetPythonEnvironment(config["/pyenv"]);
+#endif
 
         initialized = true;
     }

@@ -12,8 +12,6 @@
 
 #include "utility/Debug.h"
 
-#include "utility/Config.h"
-
 std::recursive_mutex Debug::_outMutex;
 std::mutex Debug::outFileMutex;
 std::stringstream Debug::logStream;
@@ -24,17 +22,17 @@ bool Debug::printInfos = false;
 bool Debug::initialized = false;
 std::unique_ptr<InfluxDbLogger> Debug::logger = nullptr;
 
-void Debug::Init()  
+void Debug::Init(Config &config)  
 {
     if (!initialized) {
-        printWarnings = std::get<bool>(Config::getData("DEBUG/printWarnings"));
-        printInfos = std::get<bool>(Config::getData("DEBUG/printInfos"));
+        printWarnings = config["/DEBUG/printWarnings"];
+        printInfos = config["/DEBUG/printInfos"];
         logger.reset(new InfluxDbLogger());
-        logger->Init(std::get<std::string>(Config::getData("INFLUXDB/database_ip")),
-                     std::get<int>(Config::getData("INFLUXDB/database_port")),
-                     std::get<std::string>(Config::getData("INFLUXDB/database_name")),
-                     std::get<std::string>(Config::getData("INFLUXDB/debug_measurement")), MILLISECONDS,
-                     std::get<int>(Config::getData("INFLUXDB/buffer_size")));
+        logger->Init(config["/INFLUXDB/database_ip"],
+                     config["/INFLUXDB/database_port"],
+                     config["/INFLUXDB/database_name"],
+                     config["/INFLUXDB/debug_measurement"], MILLISECONDS,
+                     config["/INFLUXDB/buffer_size"]);
         initialized = true;
     }
 }

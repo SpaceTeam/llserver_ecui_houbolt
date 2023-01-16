@@ -5,6 +5,7 @@
 
 #include "utility/json.hpp"
 #include "utility/Logging.h"
+#include "utility/Config.h"
 
 #include "LLInterface.h"
 #include "EventManager.h"
@@ -30,7 +31,7 @@ class SequenceManager : public Singleton<SequenceManager>
 	public:
 		~SequenceManager();
 
-		void Init();
+		void Init(Config &config);
 
 		bool GetAutoAbort();
 		void SetAutoAbort(bool active);
@@ -43,6 +44,8 @@ class SequenceManager : public Singleton<SequenceManager>
 		bool IsSequenceRunning();
 
 	private:
+		static std::string configFilePath;
+
 		void SetupLogging();
 
 		void LoadInterpolationMap();
