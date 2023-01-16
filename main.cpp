@@ -4,6 +4,8 @@
 #include <sched.h>
 #include <csignal>
 #include <fstream>
+#include <condition_variable>
+#include <future>
 
 #include <sys/stat.h>
 
@@ -18,10 +20,6 @@
 
 
 #define CONFIG_PATH_FILE "configPath.txt"
-
-
-sig_atomic_t running = 1;
-sig_atomic_t signum = 0;
 
 //#define TEST_LLSERVER
 
@@ -184,35 +182,6 @@ static void set_latency_target(void)
     }
 }
 
-void signalHandler(int signum)
-{
-    running = 0;
-    signum = signum;
-
-    #ifdef TEST_LLSERVER
-        if (testThread != nullptr && testThread->joinable())
-        {
-            testThread->join();
-            delete testThread;
-        }
-
-    #endif
-
-    Debug::error("posix signal fired: %d, shutting down...", signum);
-
-    try
-    {
-        LLController::Destroy();
-    }
-    catch (std::exception &e)
-    {
-        Debug::error("signal handler: failed to shutdown LLController, %s", e.what());
-    }
-
-    Debug::close();
-
-    exit(signum);
-}
 
 int main(int argc, char const *argv[])
 {
@@ -225,10 +194,36 @@ int main(int argc, char const *argv[])
 
     set_latency_target();
 
-    // register signal SIGINT and signal handler
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
-    signal(SIGABRT, signalHandler);
+    sigset_t sigset;
+    sigemptyset(&sigset);
+    sigaddset(&sigset, SIGINT);
+    sigaddset(&sigset, SIGTERM);
+    sigaddset(&sigset, SIGABRT);
+    pthread_sigmask(SIG_BLOCK, &sigset, nullptr);
+
+    std::atomic<bool> shutdown_requested(false);
+    std::atomic<bool> initialized(false);
+    std::mutex cv_mutex;
+    std::condition_variable cv;
+
+    auto signal_handler = [&shutdown_requested, &initialized, &cv, &sigset]() {
+        int signum = 0;
+        // wait until a signal is delivered:
+        sigwait(&sigset, &signum);
+        shutdown_requested = true;
+        
+        //signal before initialization done, kill early (NOT SIGNAL SAFE but QOL)
+        if (!initialized) {
+            std::cout << "\nearly shutdown, NOT SIGNAL SAFE\n" << std::endl;
+            LLController::Destroy();
+            exit(signum);
+        }
+
+        // notify all waiting workers to check their predicate:
+        cv.notify_all();
+        return signum;
+    };
+    auto ft_signal_handler = std::async(std::launch::async, signal_handler);
 
     std::string configPath = "";
 
@@ -262,10 +257,34 @@ int main(int argc, char const *argv[])
 
     std::cout << ss.str() << std::endl;
 
-    std::string inputStr;
-    while (running)
+    
+    // wait for signal handler to complete
+    initialized = true;
+    int signum = ft_signal_handler.get();
+    std::cout << "received signal " << signal << "\n";
+
+    #ifdef TEST_LLSERVER
+        if (testThread != nullptr && testThread->joinable())
+        {
+            testThread->join();
+            delete testThread;
+        }
+
+    #endif
+
+    Debug::print("posix signal fired: %d, shutting down...", signum);
+
+    try
     {
-	    sleep(1);
+        LLController::Destroy();
     }
+    catch (std::exception &e)
+    {
+        Debug::error("signal handler: failed to shutdown LLController, %s", e.what());
+    }
+
+    Debug::close();
+
+    return signum;
 }
 
