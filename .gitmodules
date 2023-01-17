@@ -1,3 +1,6 @@
 [submodule "include/can_houbolt"]
 	path = include/can_houbolt
 	url = git@github.com:SpaceTeam/can_houbolt.git
+[submodule "doc/doxygen-awesome-css"]
+	path = doc/doxygen-awesome-css
+	url = https://github.com/jothepro/doxygen-awesome-css.git
