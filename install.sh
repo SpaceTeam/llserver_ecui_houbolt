@@ -13,4 +13,4 @@ sudo docker run \
     -v /dev:/dev \
     -v /lib/modules:/lib/modules \
     -e "ECUI_CONFIG_PATH=/home/config_ecui" \
-    -it --name llserver-ecui llserver_ecui
+    --rm -it --name llserver-ecui llserver_ecui
