@@ -8,6 +8,7 @@ WORKDIR /home
 ### KVASER Driver
 
 RUN apt-get update
+RUN apt-get install -y git
 RUN apt-get install -y build-essential 
 RUN apt-get install -y linux-headers-`uname -r` 
 RUN apt-get install -y cmake make
