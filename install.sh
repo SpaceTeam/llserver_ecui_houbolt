@@ -2,16 +2,15 @@
 
 cd "$(dirname "$0")"
 
-[ ! -d "./.git/logs" ] && echo "/.git/logs directory doesn't exist! Create it!" && exit 1
+#llserver ecui
+sudo DOCKER_BUILDKIT=0 docker build \
+    -t llserver_ecui -f Dockerfile .
 
-sudo apt install -y cmake
-
-sudo cp ecui-llserver.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable ecui-llserver.service
-sudo systemctl start ecui-llserver.service
-sudo systemctl status ecui-llserver.service
-
-sudo chmod +x update.sh
-bash update.sh
-
+sudo docker run \
+    -v $CONFIG_DIR:/home/config_ecui/ \
+    --privileged \
+    --cap-add=ALL \
+    -v /dev:/dev \
+    -v /lib/modules:/lib/modules \
+    -e "ECUI_CONFIG_PATH=/home/config_ecui" \
+    -it --name llserver-ecui llserver_ecui
