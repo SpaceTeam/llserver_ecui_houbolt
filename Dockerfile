@@ -26,6 +26,9 @@ WORKDIR /home/
 ADD ./ /home/llserver_ecui_houbolt
 WORKDIR /home/llserver_ecui_houbolt
 
+RUN git submodule init
+RUN git submodule update
+
 RUN mkdir -p build
 WORKDIR /home/llserver_ecui_houbolt/build
 
