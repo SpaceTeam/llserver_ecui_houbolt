@@ -1,17 +1,37 @@
-FROM ubuntu:20.04
+# specify the node base image with your desired version node:<version>
+FROM ubuntu
 
-# Replace shell with bash so we can source files
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-# Set debconf to run non-interactively
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+WORKDIR /home
 
-# Install base dependencies
-RUN apt-get update && apt-get install -y -q --no-install-recommends \
-        git \
-        cmake \
-        build-essential 
 
-WORKDIR /llserver_ecui_houbolt
+### KVASER Driver
 
-CMD ["bash"]
+RUN apt-get update
+RUN apt-get install -y build-essential 
+RUN apt-get install -y linux-headers-`uname -r` 
+RUN apt-get install -y cmake make
+RUN apt-get install -y wget
+
+RUN wget --content-disposition "https://www.kvaser.com/downloads-kvaser/?utm_source=software&utm_ean=7330130980754&utm_status=latest"
+RUN tar xvzf linuxcan.tar.gz
+WORKDIR /home/linuxcan/canlib
+RUN make
+RUN make install
+RUN /usr/doc/canlib/examples/listChannels
+
+WORKDIR /home/
+
+# Clone the conf files into the docker container
+ADD ./ /home/llserver_ecui_houbolt
+WORKDIR /home/llserver_ecui_houbolt
+
+RUN mkdir -p build
+WORKDIR /home/llserver_ecui_houbolt/build
+
+RUN cmake -D NO_PYTHON=true -S ../ -B  ./
+RUN make -j
+
+ENV ECUI_CONFIG_PATH=/home/config_ecui
+
+ENTRYPOINT ./llserver_ecui_houbolt
