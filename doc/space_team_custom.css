@@ -1,0 +1,9 @@
+html #projectlogo img {
+    /* override light-mode variables here */
+    content: url("Space_Team_Logo_black.png");
+}
+
+html.dark-mode #projectlogo img {
+    /* define dark-mode variable overrides here if you DO use doxygen-awesome-darkmode-toggle.js */
+    content: url("Space_Team_Logo_white.png");
+}
