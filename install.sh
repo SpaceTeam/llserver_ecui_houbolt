@@ -2,6 +2,9 @@
 
 cd "$(dirname "$0")"
 
+CONFIG_DIR="../config_ecui"
+
+mkdir -p $CONFIG_DIR
 #llserver ecui
 sudo DOCKER_BUILDKIT=0 docker build \
     -t llserver_ecui -f Dockerfile .
