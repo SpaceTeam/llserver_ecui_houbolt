@@ -8,12 +8,12 @@
   - [Overview](#overview)
   - [Requirements](#requirements)
   - [Low Level Server](#low-level-server)
+  - [CAN Protocol](#can-protocol)
   - [The importance of States](#the-importance-of-states)
   - [Events](#events)
     - [State to CAN Command](#state-to-can-command)
     - [State to State](#state-to-state)
     - [Trigger Types](#trigger-types)
-  - [CAN Protocol](#can-protocol)
   - [Configuration](#configuration)
     - [config.json](#configjson)
     - [mapping.json](#mappingjson)
@@ -78,6 +78,12 @@ The config file directory path can be set either by passing it on start as an ar
 or by setting the environment variable **ECUI_CONFIG_PATH**. The argument has
 priority over the environment variable.
 
+## CAN Protocol
+As many terms from the [CAN Protocol](https://github.com/SpaceTeam/can_houbolt) 
+are also used to describe many functionalities 
+in the llserver, it is recommended to read through this documentation first before
+you continue.
+
 ## The importance of States
 The llserver manages a hashmap filled with states which is called the
 **State Controller**. Basically every variable inside the system is represented 
@@ -110,7 +116,8 @@ html. Hence all `:` are translated to `-` when received at the web client.
 Another key feature of the llserver is the event system. An event can be triggered
 when a specific state changes its value. This is used for translating user inputs
 to CAN commands that are transmitted over the CAN bus for example. But it is also
-possible to trigger an event based on a sensor value of a specific node (since they
+possible to trigger an event based on a sensor value or actuator state
+of a specific hardware channel (since they
 are all represented as states). For this behaviour to work there are two types of events
 
 ### State to CAN Command
@@ -129,7 +136,7 @@ are all represented as states). For this behaviour to work there are two types o
         "command": "rcu:RequestFlashClear",
         "parameters": []
     }
-],
+]
 ```
 In this example the `gui:Flash:Clear` state indicates a button press on the user interface. When it is pressed, a request to clear the flash of each electronics board
 (ecu, pmu, rcu) shall be transmitted. The `parameters` entry allows for additional
@@ -147,7 +154,7 @@ useful for analog user inputs.
         "triggerValue": 0,
         "value": 0
     }       	
-],
+]
 ```
 
 In bot cases it is possible to trigger multiple actions in one go as seen in the
@@ -166,13 +173,45 @@ Possible trigger types are:
 - `>` --> triggers when the state value greater than the `triggerValue`
 - `<` --> triggers when the state value smaller than the `triggerValue`
 
-## CAN Protocol
-Please refer to the documentation in our [CAN Protocol](https://github.com/SpaceTeam/can_houbolt) repository.
+>NOTE: An event with a triggerType is only triggered when the previous value
+was outside the trigger range! In this way the event only gets triggered when
+the value changes from outside the trigger range to the inside of the trigger range which
+means that if the value remains inside the trigger range over a long period the event
+only gets triggered once. 
+
+Example:
+```
+"gui:fuel_main_valve:checkbox": [
+    {
+        "command": "fuel_main_valve:SetTargetPosition",
+        "triggerType": "==",
+        "triggerValue": 0,
+        "parameters": [0]
+    },
+    {
+        "command": "fuel_main_valve:SetTargetPosition",
+        "triggerType": "!=",
+        "triggerValue": 0,
+        "parameters": [65535]
+    }
+]
+```
+In this case the gui element for the fuel main valve is represented as a checkbox.
+when the checkbox gets pressed, the fuel main valve opens completely. Otherwise
+the valve closes completely. When multiple actions per state exist, the program
+processes them step by step, as defined in the json array. **So be reminded that
+different ordering can cause different behaviours for more complex event mappings.**
+
+>NOTE: the fuel_main_valve gui button and hardware channel have no relation at the
+beginning. Only an entry in the EventMapping links them together.
+
 ## Configuration
 
 ### config.json
 
-
+In the config.json file all variables are defined that are important for the
+initialization process of the llserver. A complete example config file with
+all possible entries can be viewed in the [config_ecui](https://github.com/SpaceTeam/config_ecui) repo.
 
 ### mapping.json
 
@@ -216,7 +255,7 @@ Since in a CAN Network multiple **Nodes** comunicate with each other using IDs,
 we want to assign readable names to each node and each channel, so we
 can work with them more easily.
 A node entry starts with its unique identifier as a key and contains an object,
-with arbitrary many channel entries. Each channel has a sensor state that
+with arbitrary many channel entries. Each channel has a `<channel_name>:sensor` state that
 can be scaled with the two entries `offset` and `slope`. The readable name
 is defined with `stringID`.
 A specification of the channel type is not needed since this information is loaded
@@ -224,8 +263,79 @@ when the nodes get initialized.
 
 
 #### DefaultEventMapping
+
+The default event mapping can be used to define generic behaviour for gui elements
+acting on hardware channels.
+```
+"DefaultEventMapping": {
+    "DigitalOut": [
+        {
+            "command": "DigitalOut:SetState",
+            "parameters": [
+                "DigitalOut"
+            ]
+        }
+    ],
+    "Servo": [
+        {
+            "command": "Servo:SetTargetPosition",
+            "parameters": [
+                "Servo"
+            ]
+        }
+    ]
+}
+```
+The default behaviour for a gui element can be overwritten by an entry
+in the event mapping. The key of an action may be an hardware channel type
+which defines an action for each hardware channel of this type. The 
+channel type name can be also used to describe the command and parameters.
+This gets then replaced with the actual channel name that is currently processed.
+
 #### EventMapping
+```
+"EventMapping": {
+    "gui:Flash:Clear": [
+        {
+            "command": "ecu:RequestFlashClear",
+            "parameters": []
+        },
+        {
+            "command": "pmu:RequestFlashClear",
+            "parameters": []
+        },
+        {
+            "command": "rcu:RequestFlashClear",
+            "parameters": []
+        }
+    ]
+}
+```
+An entry in the event mapping prevents default behaviours defined in the
+DefaultEventMapping from being triggered. For further information about
+events go to the [Events](#events) section.
 #### GUIMapping
+```
+"GUIMapping": [
+    {
+        "label": "Fuel Tank Pressure",
+        "state": "fuel_tank_pressure:sensor"
+    },
+    {
+        "label": "Ox Tank Pressure",
+        "state": "ox_tank_pressure:sensor"
+    },
+    {
+        "label": "Supercharge Valve",
+        "state": "supercharge_valve:sensor"
+    }
+]
+```
+
+The GUI Mapping is a config option to tell the user interface, how a gui element
+with a certain state shall be named in an even more human readable way as state names.
+This information only gets transmitted to the user interface and has no implications
+on the llserver.
 
 ## Troubleshooting
 
