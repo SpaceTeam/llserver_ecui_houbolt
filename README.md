@@ -1,37 +1,34 @@
-# Low Level Server for the SpaceTeam Mission Control System
+<h1>Low Level Server for the SpaceTeam Mission Control System</h1>
 
-## Table of Contents
+<h2>Table of Contents</h2>
 
 
-- [Low Level Server for the SpaceTeam Mission Control System](#low-level-server-for-the-spaceteam-mission-control-system)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Requirements](#requirements)
-  - [Installation](#installation)
-    - [Build options](#build-options)
-    - [Supported CAN Drivers](#supported-can-drivers)
-  - [Low Level Server](#low-level-server)
-  - [CAN Protocol](#can-protocol)
-  - [The importance of States](#the-importance-of-states)
-  - [Events](#events)
-    - [State to CAN Command](#state-to-can-command)
-    - [State to State](#state-to-state)
-    - [Trigger Types](#trigger-types)
-  - [Configuration](#configuration)
-    - [config.json](#configjson)
-    - [mapping.json](#mappingjson)
-      - [CANMapping](#canmapping)
-      - [DefaultEventMapping](#defaulteventmapping)
-      - [EventMapping](#eventmapping)
-      - [GUIMapping](#guimapping)
-  - [Autonomous Control Test Sequence](#autonomous-control-test-sequence)
-    - [`globals` section](#globals-section)
-    - [`data` section](#data-section)
-    - [Abort Sequence Format](#abort-sequence-format)
-  - [TCP Socket Message Types](#tcp-socket-message-types)
-  - [UDP Socket Endpoint for LoRa](#udp-socket-endpoint-for-lora)
-    - [LoRa Config](#lora-config)
-  - [Troubleshooting](#troubleshooting)
+- [Overview](#overview)
+- [Requirements](#requirements)
+- [Installation](#installation)
+  - [Build options](#build-options)
+  - [Supported CAN Drivers](#supported-can-drivers)
+- [CAN Protocol](#can-protocol)
+- [The importance of States](#the-importance-of-states)
+- [Events](#events)
+  - [State to CAN Command](#state-to-can-command)
+  - [State to State](#state-to-state)
+  - [Trigger Types](#trigger-types)
+- [Configuration](#configuration)
+  - [config.json](#configjson)
+  - [mapping.json](#mappingjson)
+    - [CANMapping](#canmapping)
+    - [DefaultEventMapping](#defaulteventmapping)
+    - [EventMapping](#eventmapping)
+    - [GUIMapping](#guimapping)
+- [Autonomous Control Test Sequence](#autonomous-control-test-sequence)
+  - [`globals` section](#globals-section)
+  - [`data` section](#data-section)
+  - [Abort Sequence Format](#abort-sequence-format)
+- [TCP Socket Message Types](#tcp-socket-message-types)
+- [UDP Socket Endpoint for LoRa](#udp-socket-endpoint-for-lora)
+  - [LoRa Config](#lora-config)
+- [Troubleshooting](#troubleshooting)
 
 ## Overview
 
@@ -39,6 +36,32 @@ The SpaceTeam Mission Control System (STMC) Suite consists of multiple programms
 form a system for Monitoring and Remote Control Purposes. Historically it was developed
 for Testing Rocket Engines and has then been further extended to be usable as a MissionControl
 Interface. For further information follow [SpaceTeam Mission Control System](...)
+
+**The Low Level Server is responsible for handling and processing all time critical tasks**
+
+This includes the implementation of 
+- our own [CAN Protocol](https://github.com/SpaceTeam/can_houbolt)
+- a possible UDP endpoint for using our CAN Protocol in an optimized way using
+  our custom LoRa shield with a custom LoRa Driver (will get public soon)
+- the Database Interface (influxDB) 
+- the Control Sequence Logic
+- the Interface to our own [Webserver](https://github.com/SpaceTeam/web_ecui_houbolt) 
+  
+The complexity of this program lies in the various configurable
+options for initialization and during runtime. They are split into two files that 
+**must** must reside in the same directory:
+
+- config.json - the config file for socket endpoints, sampling rates, CAN bus params, etc.
+- mapping.json 
+  - [CANMapping](#canmapping)
+  - [DefaultEventMapping](#defaulteventmapping)
+  - [EventMapping](#eventmapping)
+  - [GUIMapping](#guimapping)
+
+In our setup these files can be found in [config_ecui](https://github.com/SpaceTeam/config_ecui), but this is not mandatory.
+The config file directory path can be set either by passing it on start as an argument
+or by setting the environment variable **ECUI_CONFIG_PATH**. The argument has
+priority over the environment variable.
 
 ## Requirements
 
@@ -85,34 +108,6 @@ Currently two drivers are supported namely
   
 the preferred driver can be selected inside the [config.json](#configjson).
 The Dockerfile also installs all required kvaser canlib library files automatically.
-
-## Low Level Server
-
-**The Low Level Server is responsible for handling and processing all time critical tasks**
-
-This includes the implementation of 
-- our own [CAN Protocol](https://github.com/SpaceTeam/can_houbolt)
-- a possible UDP endpoint for using our CAN Protocol in an optimized way using
-  our custom LoRa shield with a custom LoRa Driver (will get public soon)
-- the Database Interface (influxDB) 
-- the Control Sequence Logic
-- the Interface to our own [Webserver](https://github.com/SpaceTeam/web_ecui_houbolt) 
-  
-The complexity of this program lies in the various configurable
-options for initialization and during runtime. They are split into two files that 
-**must** must reside in the same directory:
-
-- config.json - the config file for socket endpoints, sampling rates, CAN bus params, etc.
-- mapping.json 
-  - [CANMapping](#canmapping)
-  - [DefaultEventMapping](#defaulteventmapping)
-  - [EventMapping](#eventmapping)
-  - [GUIMapping](#guimapping)
-
-In our setup these files can be found in [config_ecui](https://github.com/SpaceTeam/config_ecui), but this is not mandatory.
-The config file directory path can be set either by passing it on start as an argument
-or by setting the environment variable **ECUI_CONFIG_PATH**. The argument has
-priority over the environment variable.
 
 ## CAN Protocol
 As many terms from the [CAN Protocol](https://github.com/SpaceTeam/can_houbolt) 
@@ -433,7 +428,7 @@ Each number in actions except the timestamp is double on the LLServer.
 
 > Note: The keywords "START" or "END" are only allowed in the Group Commands (objects inside data array).
 >
-Example.
+Example:
 ```
 {
 	"globals":
