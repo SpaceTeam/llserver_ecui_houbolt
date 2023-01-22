@@ -7,6 +7,9 @@
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Requirements](#requirements)
+  - [Installation](#installation)
+    - [Build options](#build-options)
+    - [Supported CAN Drivers](#supported-can-drivers)
   - [Low Level Server](#low-level-server)
   - [CAN Protocol](#can-protocol)
   - [The importance of States](#the-importance-of-states)
@@ -21,6 +24,11 @@
       - [DefaultEventMapping](#defaulteventmapping)
       - [EventMapping](#eventmapping)
       - [GUIMapping](#guimapping)
+  - [Autonomous Control Test Sequence](#autonomous-control-test-sequence)
+    - [`globals` section](#globals-section)
+    - [`data` section](#data-section)
+    - [Abort Sequence Format](#abort-sequence-format)
+    - [TCP Socket Message Types](#tcp-socket-message-types)
   - [Troubleshooting](#troubleshooting)
 
 ## Overview
@@ -43,7 +51,9 @@ in that case docker engine needs to be preinstalled.
 
 First you need to install an influxdb (docker container recommended)
 
-Then you can run 
+## Installation
+
+To install the llserver using docker you can run 
 ```
 sudo chmod +x install.sh
 ./install.sh
@@ -52,12 +62,36 @@ sudo chmod +x install.sh
 This script generates and mounts a config folder in the parent directory named
 config_ecui where the [config.json](#configjson) and [mapping.json](#mappingjson) files must be present.
 
+### Build options
+The project uses cmake for compiling. You can provide different build options to
+cmake using the `-D` option:
+
+- `-D NO_PYTHON=[true | false]`
+- `-D NO_CANLIB=[true | false]`
+
+Setting one of these build flags result in not binding the corresponding libraries
+to avoid a compile error. If you would like to change one of these settings checkout
+the Entrypoint line in the Dockerfile 
+
+>NOTE: different build modes require different config variables, make sure you
+have definded all of them properly. See [config_ecui](https://github.com/SpaceTeam/config_ecui).
+
+### Supported CAN Drivers
+Currently two drivers are supported namely
+- [Kvaser CANLIB](https://www.kvaser.com/canlib-webhelp/page_canlib.html)
+- [SocketCAN](https://docs.kernel.org/networking/can.html)
+  
+the preferred driver can be selected inside the [config.json](#configjson).
+The Dockerfile also installs all required kvaser canlib library files automatically.
+
 ## Low Level Server
 
 **The Low Level Server is responsible for handling and processing all time critical tasks**
 
 This includes the implementation of 
 - our own [CAN Protocol](https://github.com/SpaceTeam/can_houbolt)
+- a possible UDP endpoint for using our CAN Protocol in an optimized way using
+  our custom LoRa shield with a custom LoRa Driver (will get public soon)
 - the Database Interface (influxDB) 
 - the Control Sequence Logic
 - the Interface to our own [Webserver](https://github.com/SpaceTeam/web_ecui_houbolt) 
@@ -83,6 +117,10 @@ As many terms from the [CAN Protocol](https://github.com/SpaceTeam/can_houbolt)
 are also used to describe many functionalities 
 in the llserver, it is recommended to read through this documentation first before
 you continue.
+
+The llserver keeps a hashmap of all commands that are supported of the connected
+channels. These are used in the event mapping and control sequences to
+send commands to the hardware.
 
 ## The importance of States
 The llserver manages a hashmap filled with states which is called the
@@ -335,6 +373,212 @@ The GUI Mapping is a config option to tell the user interface, how a gui element
 with a certain state shall be named in an even more human readable way as state names.
 This information only gets transmitted to the user interface and has no implications
 on the llserver.
+
+## Autonomous Control Test Sequence
+
+To be able to test a liquid engine it is normally required to execute multiple commands
+in a very short amount of time (pressurization, ignition, engine ramp-up, etc.).
+
+For this purpose a sequence manager has been developed for automatic test sequences.
+
+Test Sequences are defined inside the `$ECUI_CONFIG_PATH/sequences/` folder.
+Each sequence uses the JSON format and consists of two main objects:
+- `globals` - general definitions used for the sequence processing
+- `data` - the actual sequence
+
+### `globals` section
+Inside the `globals` section following entries are needed
+
+| key               | type   | value                                                                                                                      |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `"startTime"`     | float  | relative start of the squence (may also be negative)                                                                       |
+| `"endTime"`       | float  | relative end of the sequence                                                                                               |
+| `"interpolation"` | object | object with command name as key and either `"none"`(step function behaviour) or `"linear"`(linear interpolation) as values |
+| `"interval"`      | float  | time precision of each iteration step                                                                                      |
+| `"ranges"`        | array  | list of state names used for range checking                                                                                |
+
+The interpolation entry specifies the behaviour between datapoints of the sequence.
+The range entry is used to specify each state used for range checking. This means that at each datapoint a range can be
+set in which the specified sensor must reside. If the sensor value gets out of range and **autoabort** is active inside the config.json
+the sequence gets aborted instantly.
+
+### `data` section
+
+The data section includes a list of **command group**. These can be
+used to group multiple datapoints relatively to one timestamp in order
+to be moved more easily along the time axis if for example the burntime changes.
+
+Each group command includes
+ | key           | type            | value                                                                                                                         |
+ | ------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+ | `"timestamp"` | string or float | if timestamp is string only `"START"` or `"END"` are allowed which get replace by `"startTime"` and `"endTime"` respectively. |
+ | `"name"`      | string          | name of the command group                                                                                                     |
+ | `"desc"`      | string          | description                                                                                                                   |
+ | `"actions"`   | array           | list of datapoints with relative timestamp to command group                                                                   |
+ |               |
+
+
+Each datapoint may include
+ | key                    | type            | value                                                                                                            |
+ | ---------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------- |
+ | `"timestamp"`          | float           | timestamp relative to command group (here **only floats are valid!**)                                            |
+ | `"<command_name>"`     | array of floats | parameters for the specific command                                                                              |
+ | `"sensorNominalRange"` | object          | states as keys and array of two elements with range as values (must be defined in the global section `"ranges"`) |
+ 
+
+The first datapoint of the first command group **HAS TO** include all commands used in the sequence for proper initialization!
+Each number in actions except the timestamp is double on the LLServer.
+
+> Note: The keywords "START" or "END" are only allowed in the Group Commands (objects inside data array).
+>
+Example.
+```
+{
+	"globals":
+	{
+		"endTime": 15,
+		"interpolation":
+		{
+			"fuel_main_valve:SetTargetPosition": "linear",
+			"ox_main_valve:SetTargetPosition": "linear",
+			"igniter:SetState": "none"
+		},
+		"interval": 0.01,
+		"ranges":
+		[
+			"chamberPressure:sensor"
+		],
+		"startTime": -10
+	},
+	"data":
+	[
+		{
+			"timestamp": "START",
+			"name": "start",
+			"desc": "set all to initial state",
+			"actions":
+			[
+				{
+					"timestamp": 0.0,
+					"fuel_main_valve:SetTargetPosition": [0],
+                    "ox_main_valve:SetTargetPosition": [0],
+					"igniter:SetState": [0], 
+					"sensorsNominalRange":
+					{
+						"chamberPressure:sensor": [-5, 20]
+					}
+				}
+			]
+		},
+		{
+			"timestamp": -3.0,
+			"name": "ignition",
+			"desc": "lets light this candle",
+			"actions":
+			[
+				{
+					"timestamp": 0,
+					"igniter:SetState": [65000]
+				}
+			]
+		},
+		{
+			"timestamp": 0.0,
+			"name": "engine startup",
+			"desc": "ramp up engine",
+			"actions":
+			[
+				{
+					"timestamp": 0,
+					"fuel_main_valve:SetTargetPosition": [0],
+					"ox_main_valve:SetTargetPosition": [0]
+				},
+				{
+					"timestamp": 0.5,
+					"ox_main_valve:SetTargetPosition": [15000],
+					"fuel_main_valve:SetTargetPosition": [15000]
+				},
+				{
+					"timestamp": 1.2,
+					"fuel_main_valve:SetTargetPosition": [25000],
+					"ox_main_valve:SetTargetPosition": [25000]
+				},
+				{
+					"timestamp": 1.5,
+					"igniter:SetState": [0]
+				},
+				{
+					"timestamp": 1.7,
+					"fuel_main_valve:SetTargetPosition": [65000],
+					"ox_main_valve:SetTargetPosition": [65000]	
+				}
+			]
+		},
+		{
+			"timestamp": 10.0,
+			"name": "shutdown",
+			"desc": "engine shutdown",
+			"actions":
+			[
+				{
+					"timestamp": 0,
+					"fuel_main_valve:SetTargetPosition": [65000],
+					"ox_main_valve:SetTargetPosition": [65000]
+				},
+                {
+					"timestamp": 0.7,
+					"fuel_main_valve:SetTargetPosition": [0],
+					"ox_main_valve:SetTargetPosition": [0]
+				}
+			]
+		},
+		{
+			"timestamp": "END",
+			"name": "end",
+			"desc": "the end",
+			"actions":
+			[
+				{
+					"timestamp": 0.0,
+					"fuel_main_valve:SetTargetPosition": [0],
+					"ox_main_valve:SetTargetPosition": [0]
+				}
+			]
+		}
+	]
+}
+```
+
+### Abort Sequence Format
+
+Another feature is the ability to define a **"safe state"** to be
+executed in order the test control sequence fails or gets aborted.
+
+Test Abort Sequence is defined inside the `$ECUI_CONFIG_PATH/sequences/abort_sequences/` folder. Currently only one abort sequence is supported and
+must be named `AbortSequence.json`.
+
+For now exactly one object with all commands to be executed.
+The `"endTime"` key in `"globals"` is used to describe for how long the logging should continue
+in case of an abort.
+
+	{  
+	    "globals": {
+            "endTime": 3.2                              //double
+        },
+	    "actions" : {  
+	        "fuel_main_valve:SetTargetPosition": [0],  	//array[double]
+		    "igniter:SetState": [0],  				    //array[double]
+		    "ox_main_valve:SetTargetPosition": [0]      //array[double]
+	    }  
+	}
+
+### TCP Socket Message Types
+
+In order to communicate with the webserver, a tcp socket connection is 
+established. **It is mandatory to send the llserver specific messages
+to initate state transmission and start test control sequences.**
+
+For the whole API documentation refer to [Webserver](https://github.com/SpaceTeam/web_ecui_houbolt) 
 
 ## Troubleshooting
 
