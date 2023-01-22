@@ -228,29 +228,28 @@ declared as an empty object, i.e.
 ```
 #### CANMapping
 
->Example:
->```
->"CANMapping": {
->    "7": {
->            "0": {
->                "offset": 0,
->                "slope": 0.00010071,
->                "stringID": "pmu_5V_voltage"
->            },
->            "1": {
->                "offset": 0,
->                "slope": 0.00010071,
->                "stringID": "pmu_5V_high_load_voltage"
->            },
->            "2": {
->                "offset": 0,
->                "slope": 0.00033234,
->                "stringID": "pmu_12V_voltage"
->            }
->            "stringID": "pmu"
->        }
->    },
->```
+```
+"CANMapping": {
+    "7": {
+            "0": {
+                "offset": 0,
+                "slope": 0.00010071,
+                "stringID": "pmu_5V_voltage"
+            },
+            "1": {
+                "offset": 0,
+                "slope": 0.00010071,
+                "stringID": "pmu_5V_high_load_voltage"
+            },
+            "2": {
+                "offset": 0,
+                "slope": 0.00033234,
+                "stringID": "pmu_12V_voltage"
+            }
+            "stringID": "pmu"
+        }
+    },
+```
 Since in a CAN Network multiple **Nodes** comunicate with each other using IDs, 
 we want to assign readable names to each node and each channel, so we
 can work with them more easily.
