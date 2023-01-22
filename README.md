@@ -1,9 +1,9 @@
-# Low Level Server for the Engine Control User Interface
+# Low Level Server for the SpaceTeam Mission Control System
 
 ## Table of Contents
 
 
-- [Low Level Server for the Engine Control User Interface](#low-level-server-for-the-engine-control-user-interface)
+- [Low Level Server for the SpaceTeam Mission Control System](#low-level-server-for-the-spaceteam-mission-control-system)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Requirements](#requirements)
@@ -28,12 +28,14 @@
     - [`globals` section](#globals-section)
     - [`data` section](#data-section)
     - [Abort Sequence Format](#abort-sequence-format)
-    - [TCP Socket Message Types](#tcp-socket-message-types)
+  - [TCP Socket Message Types](#tcp-socket-message-types)
+  - [UDP Socket Endpoint for LoRa](#udp-socket-endpoint-for-lora)
+    - [LoRa Config](#lora-config)
   - [Troubleshooting](#troubleshooting)
 
 ## Overview
 
-The Engine Control User Interface (ECUI) Suite consists of multiple programms that
+The SpaceTeam Mission Control System (STMC) Suite consists of multiple programms that
 form a system for Monitoring and Remote Control Purposes. Historically it was developed
 for Testing Rocket Engines and has then been further extended to be usable as a MissionControl
 Interface. For further information follow [SpaceTeam Mission Control System](...)
@@ -238,7 +240,7 @@ In this case the gui element for the fuel main valve is represented as a checkbo
 when the checkbox gets pressed, the fuel main valve opens completely. Otherwise
 the valve closes completely. When multiple actions per state exist, the program
 processes them step by step, as defined in the json array. **So be reminded that
-different ordering can cause different behaviours for more complex event mappings.**
+a different order can cause different behaviours for more complex event mappings.**
 
 >NOTE: the fuel_main_valve gui button and hardware channel have no relation at the
 beginning. Only an entry in the EventMapping links them together.
@@ -572,13 +574,77 @@ in case of an abort.
 	    }  
 	}
 
-### TCP Socket Message Types
+## TCP Socket Message Types
 
 In order to communicate with the webserver, a tcp socket connection is 
 established. **It is mandatory to send the llserver specific messages
 to initate state transmission and start test control sequences.**
 
 For the whole API documentation refer to [Webserver](https://github.com/SpaceTeam/web_ecui_houbolt) 
+
+## UDP Socket Endpoint for LoRa
+
+This protocol is based on our [CAN Protocol](#can-protocol).
+
+This implementation uses LoRa as an unidirectional method for receiving
+data from the rocket during flight. For receiving LoRa messages a custom
+LoRa shield is used on a raspberry pi. (Repo coming soon)
+A UDP socket connection is used for data transmission between llserver and 
+raspberry pi.
+
+After the internal control
+of the rocket takes over and no further commands are sent to the rocket
+the only message type that the rocket sends automatically and periodically
+is the `DataMsg_t` of each Generic Channel. This means we can strip the LoRa
+message down to only data messages and can even combine them into one large
+message. This is done on our RCU (Radio Control Unit) which listens to the
+CAN FD bus for any data messages and updates a buffer which is split into
+as many regions as generic channels exists inside the rocket (number of CAN
+nodes). 
+
+Since the data message length is highly variable and considered to be 
+specified within the channel_mask, the header alone takes up an unnessesary 
+large amount of bytes that can be considered "constant" during 
+flight. Therefore the CAN header + data message header gets removed 
+for the LoRa messages
+and is statically entered inside the [config.json](#configjson).
+
+There is only one additional byte for each generic channel which indicates if the 
+section contains valid data. **THIS BYTE IS NOT INCLUDED IN THE CONFIG canMsgSize ENTRY!**
+
+### LoRa Config
+
+The `LORA` section in the [config.json](#configjson) includes
+
+```
+"LORA": {
+    "ip": "192.168.1.7",
+    "port": 5001,
+    "nodeIDsRef": [6, 8],
+    "nodeIDs": [16, 18],
+    "canMsgSizes": [54, 39]
+}
+```
+
+The `ip` and `port` describe the udp endpoint to the raspberry pi.
+
+The `nodeIDsRef` array defines the corresponding node ids on the CAN FD bus. This
+is needed since the LoRa messages are injected in the CAN Manager as normal CAN messages
+and therefore need to load the correct CAN header before the message is injected. This
+means that the hardware **MUST** be connected over the CAN FD bus for the initialization 
+of the llserver in order to initialize the nodes correctly. Otherwise the LoRa messages cannot
+be decoded and are lost!
+
+The `nodeIDs` array contains the node ids for the LoRa channels (in this case CAN FD bus node ids
+prepended with 1)
+
+The `canMsgSizes` array contains the message size of each can data message (**HEADER BYTE EXCLUDED**)
+
+
+>NOTE: that depending on the total message length, the LoRa driver on
+the raspberrypi must be configured correctly as well. See (LoRa doc coming
+soon...)
+
 
 ## Troubleshooting
 
