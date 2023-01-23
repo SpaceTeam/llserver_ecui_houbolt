@@ -8,9 +8,9 @@
 #include <stdio.h>
 #include <Python.h>
 
-static std::string PythonController::pyEnv = "";
+std::string PythonController::pyEnv = "";
 
-static void PythonController::SetPythonEnvironment(std::string pyEnv) {
+void PythonController::SetPythonEnvironment(std::string pyEnv) {
     PythonController::pyEnv = pyEnv;
 }
 
@@ -230,7 +230,8 @@ void PythonController::RunPyScript(std::string scriptPath)
 {
     PythonController::SetupImports();
 
-    FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
+    std::wstring path = std::wstring(scriptPath.begin(), scriptPath.end());
+    FILE *fp = _Py_wfopen(path.c_str(), L"r");
 
     StateController::Instance() -> SetState((std::string) "python_running", 1, utils::getCurrentTimestamp());
     
@@ -270,7 +271,8 @@ void PythonController::RunPyScriptWithArgvWChar(std::string scriptPath, int pyAr
 
     PySys_SetArgv(pyArgc, pyArgv);
 
-    FILE *fp = _Py_fopen(scriptPath.c_str(), "r");
+    std::wstring path = std::wstring(scriptPath.begin(), scriptPath.end());
+    FILE *fp = _Py_wfopen(path.c_str(), L"r");
 
     StateController::Instance() -> SetState((std::string) "python_running", 1, utils::getCurrentTimestamp());
 
