@@ -147,7 +147,6 @@ WebSocket<concurrent_connection_count>::run(
 	poll_fds[0] = {.fd=socket_fd, .events=POLL_IN};
 
 	while (!finished) {
-
 		uint32_t poll_fd_count = 1;
 
 		for (uint32_t i = 0, j = 1; i < concurrent_connection_count; i++) {

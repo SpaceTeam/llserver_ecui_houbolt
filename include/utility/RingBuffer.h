@@ -104,8 +104,11 @@ RingBuffer<ElementType, ring_buffer_size, input_blocking, output_blocking>::push
 	} else {
 		error = sem_trywait(&unwritten_elements_semaphore);
 	}
-	if (error == -1) {
+	if (error == -1 && (errno == EINTR || errno == EAGAIN || errno == ETIMEDOUT)) {
 		return false;
+
+	} else if (error == -1) {
+		throw std::system_error(errno, std::generic_category(), "could not get ringbuffer semaphore for unwritten elements");
 	}
 	unwritten_elements--;
 
@@ -152,8 +155,11 @@ RingBuffer<ElementType, ring_buffer_size, input_blocking, output_blocking>::pop(
 	} else {
 		error = sem_trywait(&unread_elements_semaphore);
 	}
-	if (error == -1) {
+	if (error == -1 && (errno == EINTR || errno == EAGAIN || errno == ETIMEDOUT)) {
 		return std::nullopt;
+
+	} else if (error == -1) {
+		throw std::system_error(errno, std::generic_category(), "could not get ringbuffer semaphore for unread elements");
 	}
 	unread_elements--;
 
@@ -274,8 +280,11 @@ RingBuffer<ElementType, ring_buffer_size, input_blocking, output_blocking>::push
 		// NOTE(Lukas Karafiat): this should never fail to decrement as we checked counter that is synchronized with semaphore
 		error = sem_trywaitn(&unwritten_elements_semaphore, values.second);
 	}
-	if (error == -1) {
+	if (error == -1 && (errno == EINTR || errno == EAGAIN || errno == ETIMEDOUT)) {
 		return false;
+
+	} else if (error == -1) {
+		throw std::system_error(errno, std::generic_category(), "could not get ringbuffer semaphore for unwritten elements");
 	}
 	unwritten_elements -= values.second;
 
@@ -335,8 +344,11 @@ RingBuffer<ElementType, ring_buffer_size, input_blocking, output_blocking>::pop_
 		// NOTE(Lukas Karafiat): this should never fail as we checked counter that is synchronized with semaphore
 		error = sem_trywaitn(&unread_elements_semaphore, unread_elements);
 	}
-	if (error == -1) {
+	if (error == -1 && (errno == EINTR || errno == EAGAIN || errno == ETIMEDOUT)) {
 		return values;
+
+	} else if (error == -1) {
+		throw std::system_error(errno, std::generic_category(), "could not get ringbuffer semaphore for unread elements");
 	}
 	unread_elements -= values.second;
 

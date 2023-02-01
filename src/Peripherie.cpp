@@ -25,22 +25,9 @@ Peripherie::~Peripherie(
 	return;
 }
 
-static void read_peripherie(std::shared_ptr<peripherie::can::socket>, std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity, true, false>>);
-static void write_peripherie(std::shared_ptr<peripherie::can::socket>, std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity, false, true>>);
-
+static inline
 void
-Peripherie::run(
-	void
-) {
-	auto read_thread = std::jthread(read_peripherie, can_socket, sensor_queue);
-
-	write_peripherie(can_socket, actuator_queue);
-
-	return;
-}
-
-void
-read_peripherie(
+read_can_peripherie(
 	std::shared_ptr<peripherie::can::socket> can_socket,
 	std::shared_ptr<RingBuffer<sensor, sensor_buffer_capacity, true, false>> sensor_queue
 ) {
@@ -76,12 +63,12 @@ read_peripherie(
 	return;
 }
 
+static inline
 void
-write_peripherie(
+write_can_peripherie(
 	std::shared_ptr<peripherie::can::socket> can_socket,
 	std::shared_ptr<RingBuffer<actuator, actuator_buffer_capacity, false, true>> actuator_queue
 ) {
-	log<DEBUG>("peripherie_write", "wtf");
 	pthread_setname_np(pthread_self(), "can write");
 
 	extern sig_atomic_t volatile finished;
@@ -113,6 +100,17 @@ write_peripherie(
 			log<ERROR>("peripherie.write_peripherie", "could not send actuator data");
 		}
 	}
+
+	return;
+}
+
+void
+Peripherie::run(
+	void
+) {
+	auto read_thread = std::jthread(read_can_peripherie, can_socket, sensor_queue);
+
+	write_can_peripherie(can_socket, actuator_queue);
 
 	return;
 }

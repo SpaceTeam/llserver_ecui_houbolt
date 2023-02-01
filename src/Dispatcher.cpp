@@ -85,11 +85,11 @@ Dispatcher::set_states(
 	nlohmann::json message
 ) {
 	// TODO(Christofer Held): figure out if additional information is needed
-	std::vector<std::string> stateNames;
+	std::vector<std::string> state_names;
 	std::vector<double> values;
 	std::vector<uint64_t> timestamps;
 	for (auto state : message["content"]) {
-		stateNames.push_back(state["name"]);
+		state_names.push_back(state["name"]);
 		values.push_back(state["value"]);
 		timestamps.push_back(state["timestamp"]);
 	}

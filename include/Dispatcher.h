@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <functional>
 #include <any>
+#include <variant>
 
 #include "config.h"
 
@@ -21,14 +22,14 @@ enum command_names {
 };
 
 struct set_states_info {
-	std::vector<std::string> stateNames;
+	std::vector<std::string> state_names;
 	std::vector<double> values;
 	std::vector<uint64_t> timestamps;
 };
 
 
 struct start_sequence_info{
-	std::string commends;
+	std::string commands;
 	// TODO: implement
 };
 

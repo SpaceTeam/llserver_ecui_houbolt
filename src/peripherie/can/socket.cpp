@@ -114,7 +114,7 @@ namespace peripherie::can {
 		struct pollfd poll_fd{ .fd = socket_fd, .events = POLLIN };
 		error = poll(&poll_fd, 1, 200);
 		if (error < 0) {
-			return -2;
+			throw std::system_error(errno, std::generic_category(), "could not poll from can interface: '" + interface_name + "'");
 
 		} else if (error == 0) {
 			return sensors;
@@ -126,7 +126,7 @@ namespace peripherie::can {
 			return sensors;
 
 		} else if (error == -1 || error != sizeof(frame)) {
-			return -1;
+			throw std::system_error(errno, std::generic_category(), "could not receive data from can interface: '" + interface_name + "'");
 		}
 
 		{
@@ -207,7 +207,7 @@ namespace peripherie::can {
 			return -2;
 
 		} else if (error == -1 || error != sizeof(frame)) {
-			return -1;
+			throw std::system_error(errno, std::generic_category(), "could not send data to can interface: '" + interface_name + "'");
 		}
 
 		return std::nullopt;
