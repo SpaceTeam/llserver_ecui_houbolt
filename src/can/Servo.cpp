@@ -27,8 +27,8 @@ const std::vector<std::string> Servo::states =
 
 const std::map<std::string, std::vector<double>> Servo::scalingMap =
         {
-            {"Position", {1.0, 0.0}},
-            {"TargetPosition", {1.0, 0.0}},
+            {"Position", {0.00152590219, 0.0}},
+            {"TargetPosition", {0.00152590219, 0.0}},
             {"TargetPressure", {1.0, 0.0}},
             {"MaxSpeed", {1.0, 0.0}},
             {"MaxAccel", {1.0, 0.0}},
