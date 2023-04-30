@@ -475,7 +475,7 @@ Example:
 			[
 				{
 					"timestamp": 0,
-					"igniter:SetState": [65000]
+					"igniter:SetState": [100]
 				}
 			]
 		},
@@ -506,8 +506,8 @@ Example:
 				},
 				{
 					"timestamp": 1.7,
-					"fuel_main_valve:SetTargetPosition": [65000],
-					"ox_main_valve:SetTargetPosition": [65000]	
+					"fuel_main_valve:SetTargetPosition": [100],
+					"ox_main_valve:SetTargetPosition": [100]	
 				}
 			]
 		},
@@ -519,8 +519,8 @@ Example:
 			[
 				{
 					"timestamp": 0,
-					"fuel_main_valve:SetTargetPosition": [65000],
-					"ox_main_valve:SetTargetPosition": [65000]
+					"fuel_main_valve:SetTargetPosition": [100],
+					"ox_main_valve:SetTargetPosition": [100]
 				},
                 {
 					"timestamp": 0.7,
