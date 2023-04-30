@@ -274,7 +274,7 @@ canStatus CANDriverKvaser::InitializeCANChannel(uint32_t canBusChannelID) {
         return stat;
     }
 
-    Debug::print("can channel bus %d: arb-bitrate %d", canBusChannelID, arbitrationParamsMap[canBusChannelID].bitrate);
+    Debug::print("can channel bus %d: bitrate %d, arb-bitrate %d", canBusChannelID, dataParamsMap[canBusChannelID].bitrate, arbitrationParamsMap[canBusChannelID].bitrate);
     stat = canSetBusParams(canHandlesMap[canBusChannelID],
             arbitrationParamsMap[canBusChannelID].bitrate,
             arbitrationParamsMap[canBusChannelID].timeSegment1,
