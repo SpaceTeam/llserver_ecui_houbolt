@@ -5,68 +5,67 @@
 #include "can/Servo.h"
 
 const std::vector<std::string> Servo::states =
-        {
-            "Position",
-            "TargetPosition",
-            "TargetPressure",
-            "MaxSpeed",
-            "MaxAccel",
-            "MaxTorque",
-            "P",
-            "I",
-            "D",
-            "SensorChannelID",
-            "Startpoint",
-            "Endpoint",
-            "PWMEnabled",
-            "PositionRaw",
-            "RefreshDivider",
-            "RequestStatus",
-            "ResetAllSettings"
-        };
+    {
+        "Position",
+        "TargetPosition",
+        "TargetPressure",
+        "MaxSpeed",
+        "MaxAccel",
+        "MaxTorque",
+        "P",
+        "I",
+        "D",
+        "SensorChannelID",
+        "Startpoint",
+        "Endpoint",
+        "PWMEnabled",
+        "PositionRaw",
+        "RefreshDivider",
+        "RequestStatus",
+        "ResetAllSettings"};
 
 const std::map<std::string, std::vector<double>> Servo::scalingMap =
-        {
-            {"Position", {0.00152590219, 0.0}},
-            {"TargetPosition", {0.00152590219, 0.0}},
-            {"TargetPressure", {1.0, 0.0}},
-            {"MaxSpeed", {1.0, 0.0}},
-            {"MaxAccel", {1.0, 0.0}},
-            {"MaxTorque", {1.0, 0.0}},
-            {"P", {1.0, 0.0}},
-            {"I", {1.0, 0.0}},
-            {"D", {1.0, 0.0}},
-            {"SensorChannelID", {1.0, 0.0}},
-            {"Startpoint", {1.0, 0.0}},
-            {"Endpoint", {1.0, 0.0}},
-            {"PWMEnabled", {1.0, 0.0}},
-            {"PositionRaw", {1.0, 0.0}},
-            {"MovePosition", {1.0, 0.0}},
-            {"MoveInterval", {1.0, 0.0}},
-            {"RefreshDivider", {1.0, 0.0}},
-        };
+    {
+        {"Position", {0.00152590219, 0.0}},
+        {"TargetPosition", {0.00152590219, 0.0}},
+        {"TargetPressure", {1.0, 0.0}},
+        {"MaxSpeed", {1.0, 0.0}},
+        {"MaxAccel", {1.0, 0.0}},
+        {"MaxTorque", {1.0, 0.0}},
+        {"P", {1.0, 0.0}},
+        {"I", {1.0, 0.0}},
+        {"D", {1.0, 0.0}},
+        {"SensorChannelID", {1.0, 0.0}},
+        {"Startpoint", {1.0, 0.0}},
+        {"Endpoint", {1.0, 0.0}},
+        {"PWMEnabled", {1.0, 0.0}},
+        {"PositionRaw", {1.0, 0.0}},
+        {"MovePosition", {1.0, 0.0}},
+        {"MoveInterval", {1.0, 0.0}},
+        {"RefreshDivider", {1.0, 0.0}},
+};
 
-const std::map<SERVO_VARIABLES , std::string> Servo::variableMap =
-        {
-            {SERVO_POSITION, "Position"},
-            {SERVO_TARGET_POSITION, "TargetPosition"},
-            {SERVO_TARGET_PRESSURE, "TargetPressure"},
-            {SERVO_MAX_SPEED, "MaxSpeed"},
-            {SERVO_MAX_ACCEL, "MaxAccel"},
-            {SERVO_MAX_TORQUE, "MaxTorque"},
-            {SERVO_P_PARAM, "P"},
-            {SERVO_I_PARAM, "I"},
-            {SERVO_D_PARAM, "D"},
-            {SERVO_SENSOR_CHANNEL_ID, "SensorChannelID"},
-            {SERVO_POSITION_STARTPOINT, "Startpoint"},
-            {SERVO_POSITION_ENDPOINT, "Endpoint"},
-            {SERVO_PWM_ENABLED, "PWMEnabled"},
-            {SERVO_POSITION_RAW, "PositionRaw"},
-            {SERVO_SENSOR_REFRESH_DIVIDER, "RefreshDivider"},
-        };
+const std::map<SERVO_VARIABLES, std::string> Servo::variableMap =
+    {
+        {SERVO_POSITION, "Position"},
+        {SERVO_TARGET_POSITION, "TargetPosition"},
+        {SERVO_TARGET_PRESSURE, "TargetPressure"},
+        {SERVO_MAX_SPEED, "MaxSpeed"},
+        {SERVO_MAX_ACCEL, "MaxAccel"},
+        {SERVO_MAX_TORQUE, "MaxTorque"},
+        {SERVO_P_PARAM, "P"},
+        {SERVO_I_PARAM, "I"},
+        {SERVO_D_PARAM, "D"},
+        {SERVO_SENSOR_CHANNEL_ID, "SensorChannelID"},
+        {SERVO_POSITION_STARTPOINT, "Startpoint"},
+        {SERVO_POSITION_ENDPOINT, "Endpoint"},
+        {SERVO_PWM_ENABLED, "PWMEnabled"},
+        {SERVO_POSITION_RAW, "PositionRaw"},
+        {SERVO_SENSOR_REFRESH_DIVIDER, "RefreshDivider"},
+};
 
 Servo::Servo(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
-        : Channel("Servo", channelID, std::move(channelName), sensorScaling, parent, SERVO_DATA_N_BYTES), NonNodeChannel(parent)
+    : Channel("Servo", channelID, std::move(channelName), sensorScaling, parent, SERVO_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {
         {"SetPosition", {std::bind(&Servo::SetPosition, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
@@ -101,7 +100,7 @@ Servo::Servo(uint8_t channelID, std::string channelName, std::vector<double> sen
         {"GetRefreshDivider", {std::bind(&Servo::GetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"RequestStatus", {std::bind(&Servo::RequestStatus, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"RequestResetSettings", {std::bind(&Servo::RequestResetSettings, this, std::placeholders::_1, std::placeholders::_2), {}}},
-        {"RequestMove", {std::bind(&Servo::RequestMove, this, std::placeholders::_1, std::placeholders::_2),{"Position","TimeInterval"}}},
+        {"RequestMove", {std::bind(&Servo::RequestMove, this, std::placeholders::_1, std::placeholders::_2), {"Position", "TimeInterval"}}},
     };
 }
 
@@ -129,25 +128,25 @@ void Servo::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength,
     {
         switch (canMsg->bit.cmd_id)
         {
-            case SERVO_RES_GET_VARIABLE:
-            case SERVO_RES_SET_VARIABLE:
-                GetSetVariableResponse<SERVO_VARIABLES>(canMsg, canMsgLength, timestamp, variableMap, scalingMap);
-                break;
-            case SERVO_RES_STATUS:
-                StatusResponse(canMsg, canMsgLength, timestamp);
-                break;
-            case SERVO_RES_RESET_SETTINGS:
-                ResetSettingsResponse(canMsg, canMsgLength, timestamp);
-                break;
-            case SERVO_REQ_RESET_SETTINGS:
-            case SERVO_REQ_STATUS:
-            case SERVO_REQ_SET_VARIABLE:
-            case SERVO_REQ_GET_VARIABLE:
-                //TODO: comment out after testing
-                //throw std::runtime_error("request message type has been received, major fault in protocol");
-                break;
-            default:
-                throw std::runtime_error("Servo specific command with command id not supported: " + std::to_string(canMsg->bit.cmd_id));
+        case SERVO_RES_GET_VARIABLE:
+        case SERVO_RES_SET_VARIABLE:
+            GetSetVariableResponse<SERVO_VARIABLES>(canMsg, canMsgLength, timestamp, variableMap, scalingMap);
+            break;
+        case SERVO_RES_STATUS:
+            StatusResponse(canMsg, canMsgLength, timestamp);
+            break;
+        case SERVO_RES_RESET_SETTINGS:
+            ResetSettingsResponse(canMsg, canMsgLength, timestamp);
+            break;
+        case SERVO_REQ_RESET_SETTINGS:
+        case SERVO_REQ_STATUS:
+        case SERVO_REQ_SET_VARIABLE:
+        case SERVO_REQ_GET_VARIABLE:
+            // TODO: comment out after testing
+            // throw std::runtime_error("request message type has been received, major fault in protocol");
+            break;
+        default:
+            throw std::runtime_error("Servo specific command with command id not supported: " + std::to_string(canMsg->bit.cmd_id));
         }
     }
     catch (std::exception &e)
@@ -271,7 +270,6 @@ void Servo::GetTargetPressure(std::vector<double> &params, bool testOnly)
         throw std::runtime_error("Servo - GetTargetPressure: " + std::string(e.what()));
     }
 }
-
 
 void Servo::SetMaxSpeed(std::vector<double> &params, bool testOnly)
 {
@@ -585,7 +583,7 @@ void Servo::RequestMove(std::vector<double> &params, bool testOnly)
 {
     try
     {
-        if (params.size() != 2) //number of required parameters
+        if (params.size() != 2) // number of required parameters
         {
             throw std::runtime_error("2 parameters expected, but " + std::to_string(params.size()) + " were provided");
         }
@@ -593,10 +591,10 @@ void Servo::RequestMove(std::vector<double> &params, bool testOnly)
         std::vector<double> scalingInterval = scalingMap.at("MoveInterval");
 
         ServoMoveMsg_t moveMsg = {0};
-        moveMsg.position = Channel::ScaleAndConvertInt32(params[0],scalingPosition[0],scalingPosition[1]);
-        moveMsg.interval = Channel::ScaleAndConvertInt32(params[1],scalingInterval[0],scalingInterval[1]);
+        moveMsg.position = Channel::ScaleAndConvertInt32(params[0], scalingPosition[0], scalingPosition[1]);
+        moveMsg.interval = Channel::ScaleAndConvertInt32(params[1], scalingInterval[0], scalingInterval[1]);
 
-        SendStandardCommand(parent->GetNodeID(), SERVO_REQ_MOVE, (uint8_t *) &moveMsg, sizeof(moveMsg), parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+        SendStandardCommand(parent->GetNodeID(), SERVO_REQ_MOVE, (uint8_t *)&moveMsg, sizeof(moveMsg), parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
     }
     catch (std::exception &e)
     {
@@ -632,19 +630,19 @@ void Servo::RequestCurrentState()
 {
     std::vector<double> params;
 
-	GetPosition(params, false);
+    GetPosition(params, false);
     GetPositionRaw(params, false);
-	GetTargetPosition(params, false);
-	GetTargetPressure(params, false);
-	GetMaxSpeed(params, false);
-	GetMaxAccel(params, false);
-	GetMaxTorque(params, false);
-	GetP(params, false);
-	GetI(params, false);
-	GetD(params, false);
-	GetSensorChannelID(params, false);
-	GetStartpoint(params, false);
-	GetEndpoint(params, false);
-	GetPWMEnabled(params, false);
-	GetRefreshDivider(params, false);
+    GetTargetPosition(params, false);
+    GetTargetPressure(params, false);
+    GetMaxSpeed(params, false);
+    GetMaxAccel(params, false);
+    GetMaxTorque(params, false);
+    GetP(params, false);
+    GetI(params, false);
+    GetD(params, false);
+    GetSensorChannelID(params, false);
+    GetStartpoint(params, false);
+    GetEndpoint(params, false);
+    GetPWMEnabled(params, false);
+    GetRefreshDivider(params, false);
 }

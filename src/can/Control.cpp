@@ -5,43 +5,42 @@
 #include "can/Control.h"
 
 const std::vector<std::string> Control::states =
-        {
-            "Enabled",
-            "Target",
-            "Threshold",
-            "Hysteresis",
-            "ActuatorChannelID",
-            "SensorChannelID",
-            "RefreshDivider",
-            "RequestStatus",
-            "ResetAllSettings"
-        };
+    {
+        "Enabled",
+        "Target",
+        "Threshold",
+        "Hysteresis",
+        "ActuatorChannelID",
+        "SensorChannelID",
+        "RefreshDivider",
+        "RequestStatus",
+        "ResetAllSettings"
+    };
 
 const std::map<std::string, std::vector<double>> Control::scalingMap =
-        {
-            {"Enabled", {1.0, 0.0}},
-            {"Position", {1.0, 0.0}},
-            {"Target", {0.003735, 0.0}},
-            {"Threshold", {1.0, 0.0}},
-            {"Hysteresis", {0.003735, 0.0}},
-            {"ActuatorChannelID", {1.0, 0.0}},
-            {"SensorChannelID", {1.0, 0.0}},
-            {"RefreshDivider", {1.0, 0.0}},
-        };
+    {
+        {"Enabled", {1.0, 0.0}},
+        {"Target", {0.001189720812, -15.19667413}},
+        {"Threshold", {1.0, 0.0}},
+        {"Hysteresis", {0.001189720812, -15.19667413}},
+        {"ActuatorChannelID", {1.0, 0.0}},
+        {"SensorChannelID", {1.0, 0.0}},
+        {"RefreshDivider", {1.0, 0.0}},
+    };
 
-const std::map<CONTROL_VARIABLES , std::string> Control::variableMap =
-        {
-            {CONTROL_ENABLED, "Enabled"},
-            {CONTROL_TARGET, "Target"},
-            {CONTROL_THRESHOLD, "Threshold"},
-            {CONTROL_HYSTERESIS, "Hysteresis"},
-            {CONTROL_ACTUATOR_CHANNEL_ID, "ActuatorChannelID"},
-            {CONTROL_SENSOR_CHANNEL_ID, "SensorChannelID"},
-            {CONTROL_REFRESH_DIVIDER, "RefreshDivider"},
-        };
+const std::map<CONTROL_VARIABLES, std::string> Control::variableMap =
+    {
+        {CONTROL_ENABLED, "Enabled"},
+        {CONTROL_TARGET, "Target"},
+        {CONTROL_THRESHOLD, "Threshold"},
+        {CONTROL_HYSTERESIS, "Hysteresis"},
+        {CONTROL_ACTUATOR_CHANNEL_ID, "ActuatorChannelID"},
+        {CONTROL_SENSOR_CHANNEL_ID, "SensorChannelID"},
+        {CONTROL_REFRESH_DIVIDER, "RefreshDivider"},
+    };
 
 Control::Control(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
-        : Channel("Control", channelID, std::move(channelName), sensorScaling, parent, CONTROL_DATA_N_BYTES), NonNodeChannel(parent)
+    : Channel("Control", channelID, std::move(channelName), sensorScaling, parent, CONTROL_DATA_N_BYTES), NonNodeChannel(parent)
 {
     commandMap = {
         {"SetEnabled", {std::bind(&Control::SetEnabled, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
@@ -87,25 +86,25 @@ void Control::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLengt
     {
         switch (canMsg->bit.cmd_id)
         {
-            case CONTROL_RES_GET_VARIABLE:
-            case CONTROL_RES_SET_VARIABLE:
-                GetSetVariableResponse<CONTROL_VARIABLES>(canMsg, canMsgLength, timestamp, variableMap, scalingMap);
-                break;
-            case CONTROL_RES_STATUS:
-                StatusResponse(canMsg, canMsgLength, timestamp);
-                break;
-            case CONTROL_RES_RESET_SETTINGS:
-                ResetSettingsResponse(canMsg, canMsgLength, timestamp);
-                break;
-            case CONTROL_REQ_RESET_SETTINGS:
-            case CONTROL_REQ_STATUS:
-            case CONTROL_REQ_SET_VARIABLE:
-            case CONTROL_REQ_GET_VARIABLE:
-                //TODO: comment out after testing
-                //throw std::runtime_error("request message type has been received, major fault in protocol");
-                break;
-            default:
-                throw std::runtime_error("Control specific command with command id not supported: " + std::to_string(canMsg->bit.cmd_id));
+        case CONTROL_RES_GET_VARIABLE:
+        case CONTROL_RES_SET_VARIABLE:
+            GetSetVariableResponse<CONTROL_VARIABLES>(canMsg, canMsgLength, timestamp, variableMap, scalingMap);
+            break;
+        case CONTROL_RES_STATUS:
+            StatusResponse(canMsg, canMsgLength, timestamp);
+            break;
+        case CONTROL_RES_RESET_SETTINGS:
+            ResetSettingsResponse(canMsg, canMsgLength, timestamp);
+            break;
+        case CONTROL_REQ_RESET_SETTINGS:
+        case CONTROL_REQ_STATUS:
+        case CONTROL_REQ_SET_VARIABLE:
+        case CONTROL_REQ_GET_VARIABLE:
+            // TODO: comment out after testing
+            // throw std::runtime_error("request message type has been received, major fault in protocol");
+            break;
+        default:
+            throw std::runtime_error("Control specific command with command id not supported: " + std::to_string(canMsg->bit.cmd_id));
         }
     }
     catch (std::exception &e)
@@ -341,12 +340,12 @@ void Control::RequestResetSettings(std::vector<double> &params, bool testOnly)
 void Control::RequestCurrentState()
 {
     std::vector<double> params;
-    
-	GetEnabled(params, false);
-	GetTarget(params, false);
-	GetThreshold(params, false);
-	GetHysteresis(params, false);
-	GetActuatorChannelID(params, false);
-	GetSensorChannelID(params, false);
-	GetRefreshDivider(params, false);
+
+    GetEnabled(params, false);
+    GetTarget(params, false);
+    GetThreshold(params, false);
+    GetHysteresis(params, false);
+    GetActuatorChannelID(params, false);
+    GetSensorChannelID(params, false);
+    GetRefreshDivider(params, false);
 }

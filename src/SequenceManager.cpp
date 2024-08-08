@@ -281,8 +281,9 @@ void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonA
             sequenceRunning = true;
             sequenceThread = std::thread(&SequenceManager::sequenceLoop, this, interval_us);
             //sequenceThread.detach();
+            std::string sequence_name = jsonSeq["data"][0]["desc"];
 
-            Debug::print("Sequence Started");
+            Debug::print("Sequence Started " + sequence_name);
         }
 
     }

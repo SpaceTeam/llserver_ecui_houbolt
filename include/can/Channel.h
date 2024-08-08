@@ -56,7 +56,7 @@ protected:
         double result = value;
         if (a != 1 || b != 0)
         {
-            result = value / a + b;
+            result = (value - b) / a;
         }
         return result;
     };
