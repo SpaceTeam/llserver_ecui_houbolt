@@ -138,8 +138,10 @@ void SequenceManager::SetupLogging()
     strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
 
     currentDirPath = "logs/" + std::string(dateTime_string);
+
     this->lastDir = currentDirPath;
     logFileName = std::string(dateTime_string) + ".csv";
+    std::experimental::filesystem::create_directory("logs");
     std::experimental::filesystem::create_directory(currentDirPath);
     Debug::changeOutputFile(currentDirPath + "/" + std::string(dateTime_string) + ".csv");
 
@@ -403,7 +405,7 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 		if(sequenceTime_us >= nextTimePrint_us)
 		{
 			Debug::info("Sequence Time: %dus", sequenceTime_us);
-			nextTimePrint_us += 500000;
+			nextTimePrint_us += 300000;
 		}
 
 		static int32_t nextTimerSync_us = startTime_us;
