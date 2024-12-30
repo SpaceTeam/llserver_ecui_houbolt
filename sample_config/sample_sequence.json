@@ -1,0 +1,51 @@
+{
+  "globals": {
+    "endTime": 10,
+    "interpolation": {
+      "doStuff": "none"
+    },
+    "interval": 0.01,
+    "startTime": -3
+  },
+  "data": [
+    {
+      "timestamp": "START",
+      "name": "start",
+      "desc": "start",
+      "actions": [
+        {
+          "timestamp": 0.0,
+          "doStuff": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": 4.0,
+      "name": "start",
+      "desc": "start",
+      "actions": [
+        {
+          "timestamp": 0.0,
+          "doStuff": [
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": "END",
+      "name": "end",
+      "desc": "end",
+      "actions": [
+        {
+          "timestamp": 0.0,
+          "doStuff": [
+            15
+          ]
+        }
+      ]
+    }
+  ]
+}
