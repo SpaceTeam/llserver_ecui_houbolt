@@ -18,13 +18,14 @@ void StateController::Init(std::function<void(std::string, double, double)> onSt
     if (!initialized)
     {
         this->onStateChangeCallback = std::move(onStateChangeCallback);
+#ifndef NO_INFLUX
         logger = new InfluxDbLogger();
         logger->Init(config["/INFLUXDB/database_ip"],
                      config["/INFLUXDB/database_port"],
                      config["/INFLUXDB/database_name"],
                      config["/INFLUXDB/state_measurement"], MICROSECONDS,
                      config["/INFLUXDB/buffer_size"]);
-                     
+#endif
         initialized = true;
     }
 }
@@ -121,7 +122,9 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
             std::get<1>(*state) = timestamp;
             std::get<2>(*state) = true;
             //Debug::print("%zd: %s, %zd", count, stateName.c_str(), count);
+#ifndef NO_INFLUX
             logger->log(stateName, value, timestamp);
+#endif
             if(timestamp != 0) {
                 count++;
             }

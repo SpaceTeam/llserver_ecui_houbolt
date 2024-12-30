@@ -31,6 +31,10 @@ if(NO_CANLIB)
   add_compile_definitions(NO_CANLIB)
 endif()
 
+if(NO_INFLUX)
+    MESSAGE(STATUS "InfluxDB is not used")
+    add_compile_definitions(NO_INFLUX)
+endif()
 
 if(UNIX AND NOT APPLE)
    set(LINUX TRUE)
