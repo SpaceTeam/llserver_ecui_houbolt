@@ -90,6 +90,7 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
     if (logger == nullptr)
     {
         Debug::info("%d, %s, %d, %s, %s, %d", enableFastLogging, influxIP.c_str(), influxPort, databaseName.c_str(), measurementName.c_str(), influxBufferSize);
+#ifndef NO_INFLUX
         if (enableFastLogging)
         {
             Debug::print("Fast logging enabled");
@@ -102,8 +103,12 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
         }
         else
         {
+#endif
             Debug::print("Fast logging disabled");
+#ifndef NO_INFLUX
         }
+#endif
+
     }
 
     commandMap = {
@@ -380,12 +385,14 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
 
                     latestSensorBuffer[channelID] = {currValue, timestamp};
 
+#ifndef NO_INFLUX
                     if (enableFastLogging)
                     {
                         std::lock_guard<std::mutex> lock(loggerMtx);
                         logger->log(ch->GetSensorName(), currValue, timestamp);
                         //logger->flush();
                     }
+#endif
                     //buffer.push_back(sensor); //TODO: uncomment if implemented
                 }
 
