@@ -27,13 +27,15 @@ void Debug::Init(Config &config)
     if (!initialized) {
         printWarnings = config["/DEBUG/printWarnings"];
         printInfos = config["/DEBUG/printInfos"];
+#ifndef NO_INFLUX
         logger.reset(new InfluxDbLogger());
         logger->Init(config["/INFLUXDB/database_ip"],
                      config["/INFLUXDB/database_port"],
                      config["/INFLUXDB/database_name"],
                      config["/INFLUXDB/debug_measurement"], MILLISECONDS,
                      config["/INFLUXDB/buffer_size"]);
-        initialized = true;
+#endif
+         initialized = true;
     }
 }
 
@@ -172,7 +174,10 @@ void Debug::close()
         info("in Debug close: log output file is not open yet, try Debug::changeOutputFile");
     }
     if (initialized) {
+#ifndef NO_INFLUX
+
         logger->flush();
+#endif
     }
 }
 
@@ -190,7 +195,9 @@ void Debug::flush()
     }
 
     if (initialized) {
+#ifndef NO_INFLUX
         logger->flush();
+#endif
     }
 }
 
