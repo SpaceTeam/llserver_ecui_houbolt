@@ -36,11 +36,17 @@ public:
     void SetTarget(std::vector<double> &params, bool testOnly);
 	void GetTarget(std::vector<double> &params, bool testOnly);
 
-    void SetP(std::vector<double> &params, bool testOnly);
-	void GetP(std::vector<double> &params, bool testOnly);
+    void SetP_POS(std::vector<double> &params, bool testOnly);
+	void GetP_POS(std::vector<double> &params, bool testOnly);
 
-    void SetI(std::vector<double> &params, bool testOnly);
-	void GetI(std::vector<double> &params, bool testOnly);
+    void SetI_POS(std::vector<double> &params, bool testOnly);
+	void GetI_POS(std::vector<double> &params, bool testOnly);
+
+    void SetP_NEG(std::vector<double> &params, bool testOnly);
+	void GetP_NEG(std::vector<double> &params, bool testOnly);
+
+    void SetI_NEG(std::vector<double> &params, bool testOnly);
+	void GetI_NEG(std::vector<double> &params, bool testOnly);
 
     void SetSensorSlope(std::vector<double> &params, bool testOnly);
 	void GetSensorSlope(std::vector<double> &params, bool testOnly);
