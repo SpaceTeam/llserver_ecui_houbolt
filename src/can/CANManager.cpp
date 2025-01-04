@@ -195,7 +195,7 @@ CANResult CANManager::Init(Config &config)
             initialized = true;
 
 			Debug::print("Request current state and config from nodes...\n");
-			RequestCurrentState();
+			//RequestCurrentState();
 
         }
         catch (std::exception& e)
@@ -387,7 +387,17 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 		{
 			if (canIDStruct->info.direction == 0)
 			{
-				Debug::print("Direction bit master to node from node %d on bus %d, delegating msg...", nodeID, canBusChannelID);
+				Debug::print("Direction bit master to node %d on bus %d, delegating msg...", nodeID, canBusChannelID);
+				std::string msg;
+				msg += "\nNode ID: " + std::to_string(nodeID) + "\n";
+				msg += "Channel ID: " + std::to_string(canMsg->bit.info.channel_id) + "\n";
+				msg += "CMD ID: " + std::to_string(canMsg->bit.cmd_id) + "\n";
+				for (int i = 0; i < payloadLength; i++)
+				{
+				    msg += std::to_string(canMsg->bit.data.uint8[i]) + " ";
+				}
+				msg += "\n";
+				Debug::print(msg);
 				//TODO: DIRTY HOTFIX, remove it
 				std::vector<uint8_t> channels = {0,1,2,3};
 				channels.erase(channels.begin()+canBusChannelID);

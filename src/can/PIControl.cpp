@@ -8,8 +8,10 @@ const std::vector<std::string> PIControl::states =
     {
         "Enabled",
         "Target",
-        "P",
-        "I",
+        "P_POS",
+        "I_POS",
+        "P_NEG",
+        "I_NEG",
         "SensorSlope",
         "SensorOffset",
         "OperatingPoint",
@@ -24,8 +26,10 @@ const std::map<std::string, std::vector<double>> PIControl::scalingMap =
     {
         {"Enabled", {1.0, 0.0}},
         {"Target", {0.001, 0.0}},
-        {"P", {0.001, 0.0}},
-        {"I", {0.001, 0.0}},
+        {"P_POS", {0.001, 0.0}},
+        {"I_POS", {0.001, 0.0}},
+        {"P_NEG", {0.001, 0.0}},
+        {"I_NEG", {0.001, 0.0}},
         {"SensorSlope", {0.001, 0.0}},
         {"SensorOffset", {0.001, 0.0}},
         {"OperatingPoint", {0.001, 0.0}},
@@ -38,8 +42,10 @@ const std::map<PI_CONTROL_VARIABLES, std::string> PIControl::variableMap =
     {
         {PI_CONTROL_ENABLED, "Enabled"},
         {PI_CONTROL_TARGET, "Target"},
-        {PI_CONTROL_P, "P"},
-        {PI_CONTROL_I, "I"},
+        {PI_CONTROL_P_POS, "P_POS"},
+        {PI_CONTROL_I_POS, "I_POS"},
+        {PI_CONTROL_P_NEG, "P_NEG"},
+        {PI_CONTROL_I_NEG, "I_NEG"},
         {PI_CONTROL_SENSOR_SLOPE, "SensorSlope"},
         {PI_CONTROL_SENSOR_OFFSET, "SensorOffset"},
         {PI_CONTROL_OPERATING_POINT, "OperatingPoint"},
@@ -56,10 +62,14 @@ PIControl::PIControl(uint8_t channelID, std::string channelName, std::vector<dou
         {"GetEnabled", {std::bind(&PIControl::GetEnabled, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetTarget", {std::bind(&PIControl::SetTarget, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetTarget", {std::bind(&PIControl::GetTarget, this, std::placeholders::_1, std::placeholders::_2), {}}},
-        {"SetP", {std::bind(&PIControl::SetP, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
-        {"GetP", {std::bind(&PIControl::GetP, this, std::placeholders::_1, std::placeholders::_2), {}}},
-        {"SetI", {std::bind(&PIControl::SetI, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
-        {"GetI", {std::bind(&PIControl::GetI, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetP_POS", {std::bind(&PIControl::SetP_POS, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetP_POS", {std::bind(&PIControl::GetP_POS, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetI_POS", {std::bind(&PIControl::SetI_POS, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetI_POS", {std::bind(&PIControl::GetI_POS, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetP_NEG", {std::bind(&PIControl::SetP_NEG, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetP_NEG", {std::bind(&PIControl::GetP_NEG, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetI_NEG", {std::bind(&PIControl::SetI_NEG, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetI_NEG", {std::bind(&PIControl::GetI_NEG, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetSensorSlope", {std::bind(&PIControl::SetSensorSlope, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetSensorSlope", {std::bind(&PIControl::GetSensorSlope, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetSensorOffset", {std::bind(&PIControl::SetSensorOffset, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
@@ -188,59 +198,115 @@ void PIControl::GetTarget(std::vector<double> &params, bool testOnly)
     }
 }
 
-void PIControl::SetP(std::vector<double> &params, bool testOnly)
+void PIControl::SetP_POS(std::vector<double> &params, bool testOnly)
 {
-    std::vector<double> scalingParams = scalingMap.at("P");
+    std::vector<double> scalingParams = scalingMap.at("P_POS");
 
     try
     {
-        SetVariable(PI_CONTROL_REQ_SET_VARIABLE, parent->GetNodeID(), PI_CONTROL_P,
+        SetVariable(PI_CONTROL_REQ_SET_VARIABLE, parent->GetNodeID(), PI_CONTROL_P_POS,
                     scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("PIControl - SetP: " + std::string(e.what()));
+        throw std::runtime_error("PIControl - SetP_POS: " + std::string(e.what()));
     }
 }
 
-void PIControl::GetP(std::vector<double> &params, bool testOnly)
+void PIControl::GetP_POS(std::vector<double> &params, bool testOnly)
 {
     try
     {
-        GetVariable(PI_CONTROL_REQ_GET_VARIABLE, parent->GetNodeID(), PI_CONTROL_P,
+        GetVariable(PI_CONTROL_REQ_GET_VARIABLE, parent->GetNodeID(), PI_CONTROL_P_POS,
                     params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("PIControl - GetP: " + std::string(e.what()));
+        throw std::runtime_error("PIControl - GetP_POS: " + std::string(e.what()));
     }
 }
 
-void PIControl::SetI(std::vector<double> &params, bool testOnly)
+void PIControl::SetI_POS(std::vector<double> &params, bool testOnly)
 {
-    std::vector<double> scalingParams = scalingMap.at("I");
+    std::vector<double> scalingParams = scalingMap.at("I_POS");
 
     try
     {
-        SetVariable(PI_CONTROL_REQ_SET_VARIABLE, parent->GetNodeID(), PI_CONTROL_I,
+        SetVariable(PI_CONTROL_REQ_SET_VARIABLE, parent->GetNodeID(), PI_CONTROL_I_POS,
                     scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("PIControl - SetI: " + std::string(e.what()));
+        throw std::runtime_error("PIControl - SetI_POS: " + std::string(e.what()));
     }
 }
 
-void PIControl::GetI(std::vector<double> &params, bool testOnly)
+void PIControl::GetI_POS(std::vector<double> &params, bool testOnly)
 {
     try
     {
-        GetVariable(PI_CONTROL_REQ_GET_VARIABLE, parent->GetNodeID(), PI_CONTROL_I,
+        GetVariable(PI_CONTROL_REQ_GET_VARIABLE, parent->GetNodeID(), PI_CONTROL_I_POS,
                     params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
     }
     catch (std::exception &e)
     {
-        throw std::runtime_error("PIControl - GetI: " + std::string(e.what()));
+        throw std::runtime_error("PIControl - GetI_POS: " + std::string(e.what()));
+    }
+}
+
+void PIControl::SetP_NEG(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("P_NEG");
+
+    try
+    {
+        SetVariable(PI_CONTROL_REQ_SET_VARIABLE, parent->GetNodeID(), PI_CONTROL_P_NEG,
+                    scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("PIControl - SetP_NEG: " + std::string(e.what()));
+    }
+}
+
+void PIControl::GetP_NEG(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(PI_CONTROL_REQ_GET_VARIABLE, parent->GetNodeID(), PI_CONTROL_P_NEG,
+                    params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("PIControl - GetP_NEG: " + std::string(e.what()));
+    }
+}
+
+void PIControl::SetI_NEG(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("I_NEG");
+
+    try
+    {
+        SetVariable(PI_CONTROL_REQ_SET_VARIABLE, parent->GetNodeID(), PI_CONTROL_I_NEG,
+                    scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("PIControl - SetI_NEG: " + std::string(e.what()));
+    }
+}
+
+void PIControl::GetI_NEG(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(PI_CONTROL_REQ_GET_VARIABLE, parent->GetNodeID(), PI_CONTROL_I_NEG,
+                    params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("PIControl - GetI_NEG: " + std::string(e.what()));
     }
 }
 
@@ -442,8 +508,10 @@ void PIControl::RequestCurrentState()
 
     GetEnabled(params, false);
     GetTarget(params, false);
-    GetP(params, false);
-    GetI(params, false);
+    GetP_POS(params, false);
+    GetI_POS(params, false);
+    GetP_NEG(params, false);
+    GetI_NEG(params, false);
     GetSensorSlope(params, false);
     GetSensorOffset(params, false);
     GetOperatingPoint(params, false);
