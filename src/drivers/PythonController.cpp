@@ -231,7 +231,7 @@ void PythonController::RunPyScript(std::string scriptPath)
     PythonController::SetupImports();
 
     std::wstring path = std::wstring(scriptPath.begin(), scriptPath.end());
-    FILE *fp = _Py_wfopen(path.c_str(), L"r");
+    FILE *fp = fopen(reinterpret_cast<const char *>(path.c_str()), "r");
 
     StateController::Instance() -> SetState((std::string) "python_running", 1, utils::getCurrentTimestamp());
     
@@ -272,7 +272,7 @@ void PythonController::RunPyScriptWithArgvWChar(std::string scriptPath, int pyAr
     PySys_SetArgv(pyArgc, pyArgv);
 
     std::wstring path = std::wstring(scriptPath.begin(), scriptPath.end());
-    FILE *fp = _Py_wfopen(path.c_str(), L"r");
+    FILE *fp = fopen(reinterpret_cast<const char *>(path.c_str()), "r");
 
     StateController::Instance() -> SetState((std::string) "python_running", 1, utils::getCurrentTimestamp());
 
