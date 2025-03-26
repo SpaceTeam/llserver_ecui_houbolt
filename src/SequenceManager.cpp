@@ -138,6 +138,9 @@ void SequenceManager::SetupLogging()
     strftime(dateTime_string, 100, "%Y_%m_%d__%H_%M_%S", curr_tm);
 
     currentDirPath = "logs/" + std::string(dateTime_string);
+    std::experimental::filesystem::create_directory("logs");
+    std::experimental::filesystem::create_directory(currentDirPath);
+
     this->lastDir = currentDirPath;
     logFileName = std::string(dateTime_string) + ".csv";
     std::experimental::filesystem::create_directory(currentDirPath);
@@ -199,10 +202,14 @@ bool SequenceManager::LoadSequence(nlohmann::json jsonSeq)
                     {
                         if (sensorsIt.value().type() == nlohmann::json::value_t::array && sensorsIt.value().size() == 2)
                         {
-                            sensorsNominalRangeMap[sensorsIt.key()][timestampMicros][0] = sensorsIt.value()[0];
-                            sensorsNominalRangeMap[sensorsIt.key()][timestampMicros][1] = sensorsIt.value()[1];
-                            sensorsNominalRangeTimeMap[timestampMicros][sensorsIt.key()][0] = sensorsIt.value()[0];
-                            sensorsNominalRangeTimeMap[timestampMicros][sensorsIt.key()][1] = sensorsIt.value()[1];
+                            if(jsonSeq["globals"]["ranges"].contains(sensorsIt.key())) {
+                                sensorsNominalRangeMap[sensorsIt.key()][timestampMicros][0] = sensorsIt.value()[0];
+                                sensorsNominalRangeMap[sensorsIt.key()][timestampMicros][1] = sensorsIt.value()[1];
+                                sensorsNominalRangeTimeMap[timestampMicros][sensorsIt.key()][0] = sensorsIt.value()[0];
+                                sensorsNominalRangeTimeMap[timestampMicros][sensorsIt.key()][1] = sensorsIt.value()[1];
+                            } else{
+                                Debug::warning("Sensor Ranges set for %s but not defined in globals", sensorsIt.key().c_str());
+                            }
                         }
                         else
                         {
@@ -248,19 +255,11 @@ void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonA
             // }
             // msg += "Status;";
             msg += "SequenceTime;";
-            for (auto rangeName : jsonSeq["globals"]["ranges"])
+            for (const auto& rangeName: sensorsNominalRangeMap)
             {
-                Debug::info("Sensor nominal range found: %s", ((std::string) rangeName).c_str());
-                if (rangeName.type() == nlohmann::json::value_t::string)
-                {
-                    msg += (std::string) rangeName + "Min;";
-                    msg += (std::string) rangeName + "Max;";
-                }
-                else
-                {
-                    Debug::error("range name in sequence globals not a string");
-                }
-
+                Debug::info("Sensor nominal range found: %s", ((std::string) rangeName.first).c_str());
+                msg += rangeName.first + "Min;";
+                msg += rangeName.first + "Max;";
             }
             for (auto &item : deviceMap)
             {
@@ -403,7 +402,7 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 		if(sequenceTime_us >= nextTimePrint_us)
 		{
 			Debug::info("Sequence Time: %dus", sequenceTime_us);
-			nextTimePrint_us += 500000;
+			nextTimePrint_us += 300000;
 		}
 
 		static int32_t nextTimerSync_us = startTime_us;
@@ -417,7 +416,8 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 		syncMtx.lock();
 
 		//log nominal ranges
-		for (const auto &sensor : sensorsNominalRangeMap)
+
+        for (const auto &sensor : sensorsNominalRangeMap)
 		{
 			msg += std::to_string(sensor.second.begin()->second[0]) + ";";
 			msg += std::to_string(sensor.second.begin()->second[1]) + ";";
