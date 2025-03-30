@@ -11,7 +11,7 @@
 
 class Config
 {
-	private:
+	protected:
 	    static const std::string CONFIG_FILE_NAME;
     	static const std::string MAPPING_FILE_NAME;
 

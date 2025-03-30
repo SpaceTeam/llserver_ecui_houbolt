@@ -76,10 +76,10 @@ class SequenceManager : public Singleton<SequenceManager>
 		nlohmann::json jsonSequence = nlohmann::json::object();
 		nlohmann::json jsonAbortSequence = nlohmann::json::object();
 
-		std::string comments = "";
-		std::string currentDirPath = "";
-		std::string logFileName = "";
-		std::string lastDir = "";
+		std::string comments;
+		std::string currentDirPath;
+		std::string logFileName;
+		std::string lastDir;
 
 		std::atomic_bool isInitialized = false;
 

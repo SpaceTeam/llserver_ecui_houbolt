@@ -360,16 +360,19 @@ double SequenceManager::GetTimestamp(nlohmann::json obj)
             else if (timeStr.compare("END") == 0)
             {
                 time = jsonSequence["globals"]["endTime"];
+            } else {
+	            Debug::error("in GetTimestamp: string timestamps have to be START or END. It was: %s", obj["timestamp"]);
             }
-        }
-        else
-        {
-            time = obj["timestamp"];
+        } else if (obj["timestamp"].type() == nlohmann::json::value_t::number_float
+                   || obj["timestamp"].type() == nlohmann::json::value_t::number_integer
+                   || obj["timestamp"].type() == nlohmann::json::value_t::number_unsigned) {
+	        time = obj["timestamp"];
+        } else {
+        	Debug::error("in SequenceManager GetTimestamp: timestamp has to be a string or a number. It was: %s",obj["timestamp"]);
         }
     }
-    else
-    {
-        Debug::error("in GetTimestamp: timestamp key of object does not exist");
+    else {
+	    Debug::error("in SequenceManager GetTimestamp: timestamp key of object does not exist");
     }
 
     return time;
@@ -397,14 +400,14 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 			break;
 		}
 
-		static int32_t nextTimePrint_us = startTime_us;
+		static int64_t nextTimePrint_us = startTime_us;
 		if(sequenceTime_us >= nextTimePrint_us)
 		{
 			Debug::info("Sequence Time: %dus", sequenceTime_us);
 			nextTimePrint_us += 300000;
 		}
 
-		static int32_t nextTimerSync_us = startTime_us;
+		static int64_t nextTimerSync_us = startTime_us;
 		if(sequenceTime_us >= nextTimerSync_us)
 		{
 			EcuiSocket::SendJson("timer-sync", ((sequenceTime_us/1000) / 1000.0));
