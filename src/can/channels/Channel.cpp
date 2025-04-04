@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-#include "can_houbolt/can_cmds.h"
+#include "../../../include/can_houbolt/can_cmds.h"
 
 const std::vector<std::string> Channel::states = {};
 const std::map<std::string, std::vector<double>> Channel::sensorScalingMap = {};
