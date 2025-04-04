@@ -5,7 +5,7 @@
 #ifndef LLSERVER_ECUI_HOUBOLT_ROCKET_H
 #define LLSERVER_ECUI_HOUBOLT_ROCKET_H
 
-#include "can/Channel.h"
+#include "can/channels/Channel.h"
 #include "can/Node.h"
 #include "can_houbolt/channels/rocket_channel_def.h"
 

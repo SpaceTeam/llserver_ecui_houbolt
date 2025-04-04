@@ -2,7 +2,7 @@
 // Created by Markus on 03.09.21.
 //
 
-#include "can/Control.h"
+#include "can/channels/Control.h"
 
 const std::vector<std::string> Control::states =
     {

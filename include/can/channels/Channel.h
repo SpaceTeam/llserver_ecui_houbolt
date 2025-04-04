@@ -17,7 +17,7 @@
 
 #include "StateController.h"
 #include "can_houbolt/cmds.h"
-#include "CANDriver.h"
+#include "../CANDriver.h"
 #include "EventManager.h"
 
 class Channel

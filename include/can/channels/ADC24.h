@@ -9,7 +9,7 @@
 
 #include "common.h"
 
-#include "can/Channel.h"
+#include "can/channels/Channel.h"
 #include "can/Node.h"
 #include "can_houbolt/channels/adc24_channel_def.h"
 

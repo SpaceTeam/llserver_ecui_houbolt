@@ -1,23 +1,23 @@
-#include "can/Node.h"
+#include "../../include/can/Node.h"
 
 #include <map>
 #include <cstring>
 #include <string>
 #include <functional>
 #include <utility>
-#include "utility/Config.h"
-#include "can/DigitalOut.h"
-#include "can/ADC16.h"
-#include "can/ADC16Single.h"
-#include "can/ADC24.h"
-#include "can/DATA32.h"
-#include "can/Servo.h"
-#include "can/PneumaticValve.h"
-#include "can/Control.h"
-#include "can/PIControl.h"
-#include "can/IMU.h"
-#include "can/Rocket.h"
-#include "StateController.h"
+#include "../../include/utility/Config.h"
+#include "../../include/can/channels/DigitalOut.h"
+#include "../../include/can/channels/ADC16.h"
+#include "../../include/can/channels/ADC16Single.h"
+#include "../../include/can/channels/ADC24.h"
+#include "../../include/can/channels/DATA32.h"
+#include "../../include/can/channels/Servo.h"
+#include "../../include/can/channels/PneumaticValve.h"
+#include "../../include/can/channels/Control.h"
+#include "../../include/can/channels/PIControl.h"
+#include "../../include/can/channels/IMU.h"
+#include "../../include/can/channels/Rocket.h"
+#include "../../include/StateController.h"
 #include <unistd.h>
 
 const std::vector<std::string> Node::states =

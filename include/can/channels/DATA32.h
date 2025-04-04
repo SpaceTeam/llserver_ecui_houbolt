@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-#include "can/Channel.h"
+#include "can/channels/Channel.h"
 #include "can/Node.h"
 #include "can_houbolt/channels/data32_channel_def.h"
 

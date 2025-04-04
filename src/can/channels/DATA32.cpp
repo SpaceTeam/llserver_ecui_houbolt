@@ -2,7 +2,7 @@
 // Created by Markus on 31.03.21.
 //
 
-#include "can/DATA32.h"
+#include "can/channels/DATA32.h"
 #include "../../../include/StateController.h"
 
 #include <vector>

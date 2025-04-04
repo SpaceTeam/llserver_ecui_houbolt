@@ -5,7 +5,7 @@
 #ifndef LLSERVER_ECUI_HOUBOLT_CONTROL_H
 #define LLSERVER_ECUI_HOUBOLT_CONTROL_H
 
-#include "can/Channel.h"
+#include "can/channels/Channel.h"
 #include "can/Node.h"
 #include "can_houbolt/channels/control_channel_def.h"
 

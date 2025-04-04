@@ -2,7 +2,7 @@
 // Created by Markus on 31.08.21.
 //
 
-#include "can/Rocket.h"
+#include "can/channels/Rocket.h"
 
 const std::vector<std::string> Rocket::states =
         {

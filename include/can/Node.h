@@ -8,7 +8,7 @@
 #include <mutex>
 #include <atomic>
 
-#include "common.h"
+#include "../common.h"
 
 typedef struct
 {
@@ -23,12 +23,12 @@ typedef struct __attribute__((__packed__))
 	uint8_t channel_data[60];
 } SensorMsg_t;
 
-#include "can/Channel.h"
+#include "channels/Channel.h"
 #include "CANDriverKvaser.h"
-#include "can_houbolt/channels/generic_channel_def.h"
-#include "logging/InfluxDbLogger.h"
+#include "../can_houbolt/channels/generic_channel_def.h"
+#include "../logging/InfluxDbLogger.h"
 
-#include "utility/Config.h"
+#include "../utility/Config.h"
 
 class Node : public Channel
 {

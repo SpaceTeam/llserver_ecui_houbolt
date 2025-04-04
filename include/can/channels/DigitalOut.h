@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "can/Channel.h"
+#include "can/channels/Channel.h"
 #include "can/Node.h"
 #include "can_houbolt/channels/digital_out_channel_def.h"
 

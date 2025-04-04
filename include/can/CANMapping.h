@@ -5,7 +5,7 @@
 #ifndef LLSERVER_ECUI_HOUBOLT_CANMAPPING_H
 #define LLSERVER_ECUI_HOUBOLT_CANMAPPING_H
 
-#include "utility/JSONMapping.h"
+#include "../utility/JSONMapping.h"
 
 class CANMappingObj
 {

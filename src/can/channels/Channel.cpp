@@ -2,7 +2,7 @@
 // Created by Markus on 10.04.21.
 //
 
-#include "can/Channel.h"
+#include "can/channels/Channel.h"
 
 #include <algorithm>
 
