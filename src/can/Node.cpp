@@ -17,6 +17,7 @@
 #include "can/PIControl.h"
 #include "can/IMU.h"
 #include "can/Rocket.h"
+#include "can/Overpressure.h"
 #include "StateController.h"
 #include <unistd.h>
 
@@ -197,6 +198,9 @@ void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<st
                     break;
                 case CHANNEL_TYPE_ROCKET:
                     ch = new Rocket(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
+                    break;
+                case CHANNEL_TYPE_OVERPRESSURE:
+                    ch = new Overpressure(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
                     break;
                 default:
                     throw std::runtime_error("channel type not recognized");
