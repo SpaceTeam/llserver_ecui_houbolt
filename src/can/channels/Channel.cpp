@@ -86,9 +86,10 @@ void Channel::ResetSettingsResponse(Can_MessageData_t *canMsg, uint32_t &canMsgL
  * assumes pointer has valid data!!!
  * @param valuePtr points to array which includes value data
  * @param valueLength returns number of bytes used for value
- * @param value
+ * @param nameValueMap returns name/value pairs for sensor values. Expects the vector to be empty
+ * the first item is the main channelSensor
  */
-void Channel::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &value)
+void Channel::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, std::vector<std::pair<std::string, double>> &nameValueMap)
 {
     valueLength = this->typeSize;
     int32_t intValue = 0;
@@ -114,7 +115,7 @@ void Channel::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &va
         default:
             throw std::logic_error("Channel - GetSensorValue: channel type has more than 4 bytes\n\tgood luck if this exception happens");
     }
-    value = (double)(intValue);
+    double value = (intValue);
 
     scalingMtx.lock();
     double slope = sensorScaling[0];
@@ -122,6 +123,7 @@ void Channel::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &va
     scalingMtx.unlock();
 
     value = ScaleSensor(value, slope, offset);
+    nameValueMap.push_back(std::make_pair(this->GetSensorName(), value));
 }
 
 void Channel::SendStandardCommand(uint8_t nodeID, uint8_t cmdID, uint8_t *command, uint32_t commandLength,

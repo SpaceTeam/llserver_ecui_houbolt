@@ -57,6 +57,8 @@ private:
     SensorData_t *latestSensorBuffer;
     size_t latestSensorBufferLength = 0;
     std::mutex bufferMtx;
+	std::vector<std::pair<std::string,double>> nameValueMap;
+
 
 	void InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<std::string, std::vector<double>>> &channelInfo);
 

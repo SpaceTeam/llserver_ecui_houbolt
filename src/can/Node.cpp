@@ -373,7 +373,8 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                 }
                 ch = channelMap[channelID];
 
-                ch->GetSensorValue(valuePtr, currValueLength, currValue);
+                ch->GetSensorValue(valuePtr, currValueLength, nameValueMap);
+
                 // Debug::print("Hello chid %d, value %f", channelID, currValue);
                 if (currValueLength <= 0)
                 {
@@ -381,15 +382,19 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                 }
 
                 {
-                    std::lock_guard<std::mutex> lock(bufferMtx);
+                    std::lock_guard lock(bufferMtx);
 
-                    latestSensorBuffer[channelID] = {currValue, timestamp};
+                    latestSensorBuffer[nodeID] = {nameValueMap[0].second, timestamp};
 
 #ifndef NO_INFLUX
                     if (enableFastLogging)
                     {
-                        std::lock_guard<std::mutex> lock(loggerMtx);
-                        logger->log(ch->GetSensorName(), currValue, timestamp);
+                        std::lock_guard loglock(loggerMtx);
+                        for (auto it = nameValueMap.begin(); it != nameValueMap.end();) {
+                            logger->log(it->first, it->second, timestamp);
+                            nameValueMap.erase(it);
+                        }
+
                         //logger->flush();
                     }
 #endif
