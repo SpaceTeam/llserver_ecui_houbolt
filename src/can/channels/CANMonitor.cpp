@@ -47,8 +47,25 @@ std::vector<std::string> CANMonitor::GetStates()
 }
 
 void CANMonitor::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, std::vector<std::pair<std::string, double>> &nameValueMap) {
-    Channel::GetSensorValue(valuePtr, valueLength, nameValueMap);
+    valueLength = this->typeSize;
+    auto registers = reinterpret_cast<FDCAN_StatusRegisters_t*>(valuePtr);
+    nameValueMap.emplace_back(std::make_pair(this->GetSensorName(), registers->raw.ecr));
 
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "TEC", registers->bits.TEC));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "REC", registers->bits.REC));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "RP", registers->bits.RP));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "CEL", registers->bits.CEL));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "LEC", registers->bits.LEC));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "ACT", registers->bits.ACT));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "EP", registers->bits.EP));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "EW", registers->bits.EW));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "DLEC", registers->bits.DLEC));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "RESI", registers->bits.RESI));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "RBRS", registers->bits.RBRS));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "REDL", registers->bits.REDL));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "PXE", registers->bits.PXE));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "PXE", registers->bits.PXE));
+    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "TDCV", registers->bits.TDCV));
 }
 
 
