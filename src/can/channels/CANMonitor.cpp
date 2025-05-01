@@ -6,10 +6,9 @@
 
 #include <vector>
 
-#include "channels/can_monitor_channel_def.h"
 
 CANMonitor::CANMonitor(uint8_t channelID, std::string channelName, Node *parent)
-    : Channel("CANMonitor", channelID, std::move(channelName), parent, CAN_MONITOR_CONTROL_DATA_N_BYTES), NonNodeChannel(parent) {
+    : Channel("CANMonitor", channelID, std::move(channelName),sensorScaling, parent, CAN_MONITOR_DATA_N_BYTES), NonNodeChannel(parent) {
     commandMap = {
         {"SetRefreshDivider", {std::bind(&CANMonitor::SetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetRefreshDivider", {std::bind(&CANMonitor::GetRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {}}},
@@ -48,24 +47,23 @@ std::vector<std::string> CANMonitor::GetStates()
 
 void CANMonitor::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, std::vector<std::pair<std::string, double>> &nameValueMap) {
     valueLength = this->typeSize;
-    auto registers = reinterpret_cast<FDCAN_StatusRegisters_t*>(valuePtr);
-    nameValueMap.emplace_back(std::make_pair(this->GetSensorName(), registers->raw.ecr));
+    nameValueMap.emplace_back(this->GetSensorName(), FDCAN_StatusRegisters::ECR.get(*valuePtr));
 
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "TEC", registers->bits.TEC));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "REC", registers->bits.REC));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "RP", registers->bits.RP));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "CEL", registers->bits.CEL));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "LEC", registers->bits.LEC));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "ACT", registers->bits.ACT));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "EP", registers->bits.EP));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "EW", registers->bits.EW));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "DLEC", registers->bits.DLEC));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "RESI", registers->bits.RESI));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "RBRS", registers->bits.RBRS));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "REDL", registers->bits.REDL));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "PXE", registers->bits.PXE));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "PXE", registers->bits.PXE));
-    nameValueMap.emplace_back(std::make_pair(this->GetStatePrefix()+ "TDCV", registers->bits.TDCV));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "TEC", FDCAN_StatusRegisters::ECR_Fields::TEC.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "REC", FDCAN_StatusRegisters::ECR_Fields::REC.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "RP", FDCAN_StatusRegisters::ECR_Fields::RP.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "CEL", FDCAN_StatusRegisters::ECR_Fields::CEL.get(*valuePtr));
+
+    nameValueMap.emplace_back(this->GetStatePrefix() + "LEC", FDCAN_StatusRegisters::PSR_Fields::LEC.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "ACT", FDCAN_StatusRegisters::PSR_Fields::ACT.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "EP", FDCAN_StatusRegisters::PSR_Fields::EP.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "EW", FDCAN_StatusRegisters::PSR_Fields::EW.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "DLEC", FDCAN_StatusRegisters::PSR_Fields::DLEC.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "RESI", FDCAN_StatusRegisters::PSR_Fields::RESI.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "RBRS", FDCAN_StatusRegisters::PSR_Fields::RBRS.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "REDL", FDCAN_StatusRegisters::PSR_Fields::REDL.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "PXE", FDCAN_StatusRegisters::PSR_Fields::PXE.get(*valuePtr));
+    nameValueMap.emplace_back(this->GetStatePrefix() + "TDCV", FDCAN_StatusRegisters::PSR_Fields::TDCV.get(*valuePtr));
 }
 
 

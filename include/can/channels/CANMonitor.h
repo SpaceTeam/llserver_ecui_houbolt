@@ -8,7 +8,7 @@
 
 #include "can/channels/Channel.h"
 #include "../Node.h"
-#include "channels/can_monitor_channel_def.h"
+#include "channels/can_monitor_channel_def.hpp"
 
 class CANMonitor : public Channel, public NonNodeChannel
 {
