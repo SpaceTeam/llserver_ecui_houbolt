@@ -389,7 +389,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                 {
                     std::lock_guard lock(bufferMtx);
 
-                    latestSensorBuffer[nodeID] = {nameValueMap[0].second, timestamp};
+                    latestSensorBuffer[channelID] = {nameValueMap[0].second, timestamp};
 
 #ifndef NO_INFLUX
                     if (enableFastLogging)
