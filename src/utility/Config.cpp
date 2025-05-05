@@ -1,4 +1,7 @@
 #include "utility/Config.h"
+
+#include <utility/FileSystemAbstraction.h>
+
 #include "utility/utils.h"
 #include "common.h"
 
@@ -13,7 +16,7 @@ Config::Config(std::string configPath)
 
 	try
 	{
-		data = nlohmann::json::parse(utils::loadFile(configFilePath));
+		data = nlohmann::json::parse(FileSystemAbstraction::Instance()->LoadFile(configFilePath));
 	}
 	catch(const std::exception& e)
 	{

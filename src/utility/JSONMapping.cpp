@@ -4,6 +4,8 @@
 
 #include "utility/JSONMapping.h"
 
+#include <utility/FileSystemAbstraction.h>
+
 #include "utility/utils.h"
 
 void JSONMapping::LoadMapping()
@@ -12,7 +14,7 @@ void JSONMapping::LoadMapping()
     try
     {
         Debug::print("loading mapping...");
-        this->mapping = nlohmann::json::parse(utils::loadFile(this->mappingPath));
+        this->mapping = nlohmann::json::parse(FileSystemAbstraction::Instance()->LoadFile(this->mappingPath));
         if (!mappingID.empty())
         {
             this->mapping = this->mapping[mappingID];
@@ -32,12 +34,12 @@ void JSONMapping::SaveMapping()
     try
     {
         Debug::print("saving mapping...");
-        nlohmann::json mappingJson = nlohmann::json::parse(utils::loadFile(this->mappingPath));
+        nlohmann::json mappingJson = nlohmann::json::parse(FileSystemAbstraction::Instance()->LoadFile(this->mappingPath));
         if (!mappingID.empty())
         {
             mappingJson[mappingID] = this->mapping;
         }
-        utils::saveFile(this->mappingPath, mappingJson.dump(4));
+        FileSystemAbstraction::Instance()->SaveFile(this->mappingPath, mappingJson.dump(4));
         Debug::print("mapping saved");
     }
     catch(std::exception& e)

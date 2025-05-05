@@ -46,26 +46,26 @@ class LLInterface : public Singleton<LLInterface>
 		static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t>> &states);
 		static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t, bool>> &states);
 
-		~LLInterface();
+public:
+		virtual ~LLInterface();
 
-	public:
-		void Init(Config &config);
+		virtual void Init(Config &config);
 
-		nlohmann::json GetGUIMapping();
+		virtual nlohmann::json GetGUIMapping();
 
-		void TransmitStates(int64_t microTime, std::map<std::string, std::tuple<double, uint64_t>> &states);
+		virtual void TransmitStates(int64_t microTime, std::map<std::string, std::tuple<double, uint64_t>> &states);
 
-		void StartStateTransmission(Config &config);
-		void StopStateTransmission();
+		virtual void StartStateTransmission(Config &config);
+		virtual void StopStateTransmission();
 
-		nlohmann::json GetAllStates();
-		nlohmann::json GetAllStateLabels();
+		virtual nlohmann::json GetAllStates();
+		virtual nlohmann::json GetAllStateLabels();
 
-		nlohmann::json GetStates(nlohmann::json &stateNames);
-		void SetState(std::string stateName, double value, uint64_t timestamp);
+		virtual nlohmann::json GetStates(nlohmann::json &stateNames);
+		virtual void SetState(std::string stateName, double value, uint64_t timestamp);
 
-		void ExecuteCommand(std::string &commandName, std::vector<double> &params, bool testOnly);
-		std::map<std::string, command_t> GetCommands();
+		virtual void ExecuteCommand(std::string &commandName, std::vector<double> &params, bool testOnly);
+		virtual std::map<std::string, command_t> GetCommands();
 
-		std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
+		virtual std::map<std::string, std::tuple<double, uint64_t>> GetLatestSensorData();
 };

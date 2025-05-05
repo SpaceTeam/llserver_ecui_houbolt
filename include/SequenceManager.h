@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include <atomic>
+#include <utility/FileSystemAbstraction.h>
 
 #include "utility/json.hpp"
 #include "utility/Logging.h"
@@ -95,6 +96,7 @@ class SequenceManager : public Singleton<SequenceManager>
 
 		LLInterface *llInterface = nullptr;
 		EventManager *eventManager = nullptr;
+		FileSystemAbstraction *fileSystem = nullptr;
 		
 		std::thread sequenceThread;
 };
