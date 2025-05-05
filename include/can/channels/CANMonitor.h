@@ -19,7 +19,7 @@ class CANMonitor : public Channel, public NonNodeChannel
 public:
     CANMonitor(uint8_t channelID, std::string channelName, Node *parent);
 
-    void CANMonitor::GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, std::vector<std::pair<std::string, double>> &nameValueMap) override;
+    void GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, std::vector<std::pair<std::string, double>> &nameValueMap) override;
 
     //-------------------------------RECEIVE Functions-------------------------------//
 
