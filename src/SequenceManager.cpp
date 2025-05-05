@@ -88,6 +88,7 @@ void SequenceManager::Init(Config &config)
     configFilePath = config.getConfigFilePath();
 
     isInitialized = true;
+	fileSystem = FileSystemAbstraction::Instance();
 }
 
 bool SequenceManager::GetAutoAbort()
@@ -141,21 +142,21 @@ void SequenceManager::SetupLogging()
 
     this->lastDir = currentDirPath;
     logFileName = std::string(dateTime_string) + ".csv";
-    std::experimental::filesystem::create_directory("logs");
-    std::experimental::filesystem::create_directory(currentDirPath);
+    fileSystem->CreateDirectory("logs");
+    fileSystem->CreateDirectory(currentDirPath);
     Debug::changeOutputFile(currentDirPath + "/" + std::string(dateTime_string) + ".csv");
 
     //save Sequence files
-    utils::saveFile(currentDirPath + "/Sequence.json", jsonSequence.dump(4));
-    utils::saveFile(currentDirPath + "/AbortSequence.json", jsonAbortSequence.dump(4));
-    utils::saveFile(currentDirPath + "/comments.txt", comments);
+    fileSystem->SaveFile(currentDirPath + "/Sequence.json", jsonSequence.dump(4));
+    fileSystem->SaveFile(currentDirPath + "/AbortSequence.json", jsonAbortSequence.dump(4));
+    fileSystem->SaveFile(currentDirPath + "/comments.txt", comments);
 
-    std::experimental::filesystem::copy(configFilePath, currentDirPath + "/");
+    fileSystem->CopyFile(configFilePath, currentDirPath + "/");
 
 }
 
 void SequenceManager::WritePostSeqComment(std::string msg){
-    utils::saveFile(lastDir + "/postseq-comments.txt", msg);
+    fileSystem->SaveFile(lastDir + "/postseq-comments.txt", msg);
 }
 
 bool SequenceManager::LoadSequence(nlohmann::json jsonSeq)
@@ -311,6 +312,9 @@ void SequenceManager::LoadInterpolationMap()
 
 void SequenceManager::CheckSensors(int64_t microTime)
 {
+	if (!autoAbortEnabled) {
+		return;
+	}
     std::map<std::string, std::tuple<double, uint64_t>> sensors = llInterface->GetLatestSensorData();
 
     for (const auto& sensor : sensors)
