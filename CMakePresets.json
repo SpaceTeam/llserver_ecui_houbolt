@@ -1,0 +1,23 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "local-dev",
+      "displayName": "Local Development",
+      "description": "Preset for local development with NO_PYTHON, NO_CANLIB, NO_INFLUX enabled",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "NO_PYTHON": "ON",
+        "NO_CANLIB": "ON",
+        "NO_INFLUX": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  ]
+}
