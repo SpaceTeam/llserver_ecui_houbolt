@@ -31,7 +31,7 @@ public:
 
     ~Socket();
 
-    void Send(std::string msg);
+    void Send(const std::string &msg);
     std::string Recv();
     // std::vector<uint8_t> RecvBytes();
     bool isConnectionActive();
