@@ -42,6 +42,7 @@ logs/
 .idea/
 .vscode/
 cmake-build-debug/
+build/
 *.cmake
 
 *.cpb
@@ -53,3 +54,6 @@ cmake-build-debug/
 
 # Config Path File
 configPath.txt
+
+# CMake Presets
+CmakeUserPresets.json
