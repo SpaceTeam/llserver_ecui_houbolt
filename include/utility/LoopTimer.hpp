@@ -12,8 +12,8 @@ class LoopTimer
 
 		void init();
 		int wait();
-		uint64_t getTimePoint_us();
-		uint64_t getTimeElapsed_us();
+		uint64_t getTimePoint_us() const;
+		uint64_t getTimeElapsed_us() const;
 
 	private:
 		uint32_t interval_us;

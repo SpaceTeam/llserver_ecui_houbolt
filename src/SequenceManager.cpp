@@ -384,16 +384,26 @@ double SequenceManager::GetTimestamp(nlohmann::json obj)
 
 void SequenceManager::sequenceLoop(int64_t interval_us)
 {
-	struct sched_param param;
+	sched_param param{};
 	param.sched_priority = 40;
 	sched_setscheduler(0, SCHED_FIFO, &param);
 
 	LoopTimer sequenceLoopTimer(interval_us, "sequenceThread");
 	sequenceLoopTimer.init();
 
+	int64_t nextTimePrint_us = startTime_us;
+	int64_t nextTimerSync_us = startTime_us;
+
+	bool firstIteration = true;
+
 	while(!sequenceToStop)
 	{
-		sequenceLoopTimer.wait();
+		if (!firstIteration) {
+			//We only wait if the loop already ran once
+			sequenceLoopTimer.wait();
+		}
+		firstIteration = false;
+
 
 		int64_t sequenceTime_us = sequenceLoopTimer.getTimeElapsed_us() + startTime_us;
 
@@ -404,21 +414,19 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 			sequenceToStop = true;
 		}
 
-		static int64_t nextTimePrint_us = startTime_us;
 		if(sequenceTime_us >= nextTimePrint_us)
 		{
 			Debug::info("Sequence Time: %dus", sequenceTime_us);
 			nextTimePrint_us += 300000;
 		}
 
-		static int64_t nextTimerSync_us = startTime_us;
 		if(sequenceTime_us >= nextTimerSync_us)
 		{
-			EcuiSocket::SendJson("timer-sync", ((sequenceTime_us/1000) / 1000.0));
+			EcuiSocket::SendJson("timer-sync", ((sequenceTime_us/1000.0) / 1000.0));
 			nextTimerSync_us += timerSyncInterval;
 		}
 
-		std::string msg = std::to_string(sequenceTime_us / 1000000.0) + ";";
+		std::string msg = std::to_string(sequenceTime_us / 1000000) + ";";
 		syncMtx.lock();
 
 		//log nominal ranges
