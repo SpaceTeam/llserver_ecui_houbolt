@@ -400,8 +400,8 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 		if(sequenceTime_us > endTime_us)
 		{
 			EcuiSocket::SendJson("timer-done");
+
 			sequenceToStop = true;
-			break;
 		}
 
 		static int64_t nextTimePrint_us = startTime_us;
@@ -439,12 +439,12 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 
 			if (devItem.second.size() > 1)
 			{
-				auto prevIt = devItem.second.begin();
-				auto nextIt = std::next(devItem.second.begin());
+				auto currentItem = devItem.second.begin();
+				auto nextItem = std::next(devItem.second.begin());
 
-				if (sequenceTime_us >= nextIt->first)
+				if (sequenceTime_us >= nextItem->first)
 				{
-					nextValue = nextIt->second;
+					nextValue = nextItem->second;
 					deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
 				}
 				else
@@ -462,16 +462,21 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 					{
 						case Interpolation::LINEAR:
 						{
-							nextValue = prevIt->second;
-							double scale = ((nextIt->second[0] - prevIt->second[0]) * 1.0) / (nextIt->first - prevIt->first);
-							nextValue[0] = (scale * (sequenceTime_us - prevIt->first)) + prevIt->second[0];
+							nextValue = currentItem->second;
+							double scale = ((nextItem->second[0] - currentItem->second[0]) * 1.0) / (nextItem->first - currentItem->first);
+							nextValue[0] = (scale * (sequenceTime_us - currentItem->first)) + currentItem->second[0];
 							break;
 						}
 						case Interpolation::NONE:
 						default:
-							nextValue = prevIt->second;
-							if (sequenceStartTime != prevIt->first)
+							nextValue = currentItem->second;
+							if (sequenceStartTime == currentItem->first)
 							{
+								shallExec = true;
+								deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
+
+							}
+							else {
 								shallExec = false;
 							}
 					}
@@ -490,9 +495,14 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 					}
 				}
 			}
-			else
+			else if (devItem.second.size() ==1)
 			{
-				Debug::info("no interval found, keeping the same value");
+				auto currentItem = devItem.second.begin();
+				if (sequenceTime_us >= currentItem->first) {
+					nextValue = currentItem->second;
+					deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
+					eventManager->ExecuteCommand(devItem.first, nextValue, false);
+				}
 			}
 
 			std::stringstream nextValueStringStream;
