@@ -122,3 +122,46 @@ TEST_F(SequenceManagerTest, StartIsExecutedOnlyOnce) {
 
 }
 
+TEST_F(SequenceManagerTest, LinearInterpolationIsCorrect) {
+    using ::testing::_;
+    using ::testing::Invoke;
+    using ::testing::NiceMock;
+
+    // We expect 100 calls, one every 0.01s for 1s
+    const int expected_calls = 100;
+    const double interval = 0.01;
+    const double duration = 1.0;
+    const double start_value = 0.0;
+    const double end_value = 100.0;
+    int call_count = 0;
+
+    std::vector<std::pair<double, double>> observed;
+
+    EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_1", _, false))
+        .WillRepeatedly(Invoke([&](const std::string&, const std::vector<double>& params, bool) {
+            double value = params[0];
+            double t = call_count * interval;
+            EXPECT_GE(value, start_value);
+            EXPECT_LE(value, end_value);
+
+            observed.emplace_back(t, value);
+            call_count++;
+        }));
+
+    nlohmann::json sequence = LinearInterpolationTest1;
+    sequenceManager->StartSequence(sequence, nlohmann::json(), "");
+
+    // Wait for sequence to finish
+    while (sequenceManager->IsSequenceRunning()) {}
+
+    // We should have approximatly 100 calls.
+    EXPECT_NEAR(observed.size(), expected_calls,1);
+    // Check linearity: value should be start_value + (end_value - start_value) * (t/duration)
+    for (int i = 0; i < expected_calls; ++i) {
+        double t = observed[i].first;
+        double value = observed[i].second;
+        double expected = start_value + (end_value - start_value) * (t / duration);
+        // Allow a small epsilon due to floating point and timing inaccuracies
+        EXPECT_NEAR(value, expected, 5e-1) << "at t=" << t;
+    }
+}
