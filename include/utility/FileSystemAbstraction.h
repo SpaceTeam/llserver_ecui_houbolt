@@ -1,7 +1,3 @@
-//
-// Created by raffael on 04.05.25.
-//
-
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 

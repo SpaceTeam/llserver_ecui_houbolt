@@ -2,10 +2,10 @@
 // Created by Markus on 2019-09-27.
 //
 
-#include <string.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdarg.h>
+#include <cstring>
+#include <cstdint>
+#include <cstdio>
+#include <cstdarg>
 #include <unistd.h>
 #include <mutex>
 #include <thread>
@@ -44,7 +44,7 @@ std::string Debug::getTimeString()
     tm * curr_tm;
     char time_string[100];
 
-    struct timespec curr_time_struct;
+    timespec curr_time_struct{};
     clock_gettime(CLOCK_REALTIME, &curr_time_struct);
 
     curr_tm = localtime(&curr_time_struct.tv_sec);
@@ -55,7 +55,7 @@ std::string Debug::getTimeString()
 }
 
 std::size_t Debug::getTime() {
-    struct timespec curr_time_struct;
+    timespec curr_time_struct{};
     clock_gettime(CLOCK_REALTIME, &curr_time_struct);
 
     return curr_time_struct.tv_sec * 1000 + curr_time_struct.tv_nsec / 1000000;
@@ -77,14 +77,13 @@ int32_t Debug::printNoTime(std::string fmt, ...)
     return printed;
 }
 
-int32_t Debug::print(std::string fmt, ...)
+int32_t Debug::print(const std::string &fmt, ...)
 {
     std::lock_guard<std::recursive_mutex> lock(_outMutex);
 
     int printed;
     va_list args;
     char msg[1024];
-    std::size_t time_ms = getTime();
     std::string time_str = getTimeString();
 
     va_start(args, fmt);
@@ -102,7 +101,7 @@ int32_t Debug::print(std::string fmt, ...)
     return printed;
 }
 
-int32_t Debug::info(std::string fmt, ...)
+int32_t Debug::info(const std::string &fmt, ...)
 {
     if (printInfos)
     {
@@ -110,7 +109,6 @@ int32_t Debug::info(std::string fmt, ...)
         int printed;
         va_list args;
         char msg[1024];
-        std::size_t time_ms = getTime();
         std::string time_str = getTimeString();
 
         va_start(args, fmt);
@@ -131,7 +129,7 @@ int32_t Debug::info(std::string fmt, ...)
 	return 0;
 }
 
-int32_t Debug::warning(std::string fmt, ...)
+int32_t Debug::warning(const std::string& fmt, ...)
 {
     if (printWarnings)
     {
@@ -201,7 +199,7 @@ void Debug::flush()
     }
 }
 
-void Debug::changeOutputFile(std::string outFilePath)
+void Debug::changeOutputFile(const std::string &outFilePath)
 {
     std::lock_guard<std::mutex> lock(outFileMutex);
     if (logFile.is_open())
@@ -223,7 +221,7 @@ void Debug::changeOutputFile(std::string outFilePath)
     }
 }
 
-void Debug::log(std::string msg)
+void Debug::log(const std::string &msg)
 {
     std::lock_guard<std::mutex> lock(outFileMutex);
     logStream << msg;
@@ -271,13 +269,12 @@ void Debug::writeToFile()
     }
 }
 
-int32_t Debug::error(std::string fmt, ...)
+int32_t Debug::error(const std::string &fmt, ...)
 {
     std::lock_guard<std::recursive_mutex> lock(_outMutex);
     int printed;
     va_list args;
     char msg[1024];
-    std::size_t time_ms = getTime();
     std::string time_str = getTimeString();
 
     va_start(args, fmt);
