@@ -83,4 +83,11 @@ inline nlohmann::json LinearInterpolationTest1_json = R"(
   ]
 }
 )"_json;
+inline nlohmann::json SimpleAbortScenario_json = R"(
+{
+  "actions": {
+    "valve_1": [10]
+  }
+}
+)"_json;
 #endif //SEQUENCEMANAGERTESTDATA_H
