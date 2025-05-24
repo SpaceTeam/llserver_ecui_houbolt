@@ -148,7 +148,7 @@ TEST_F(SequenceManagerTest, LinearInterpolationIsCorrect) {
             call_count++;
         }));
 
-    nlohmann::json sequence = LinearInterpolationTest1;
+    nlohmann::json sequence = LinearInterpolationTest1_json;
     sequenceManager->StartSequence(sequence, nlohmann::json(), "");
 
     // Wait for sequence to finish
@@ -164,4 +164,39 @@ TEST_F(SequenceManagerTest, LinearInterpolationIsCorrect) {
         // Allow a small epsilon due to floating point and timing inaccuracies
         EXPECT_NEAR(value, expected, 5e-1) << "at t=" << t;
     }
+}
+
+TEST_F(SequenceManagerTest, AbortSequenceSetsValueAndStopsQuickly) {
+    using ::testing::_;
+    using ::testing::Invoke;
+    using ::testing::Args;
+    using ::testing::ElementsAre;
+    using ::testing::Eq;
+
+    // This matches the first argument as "valve_1" and the second as a vector with 10
+    EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_1", ElementsAre(10), false))
+        .Times(1);
+    EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_1", ElementsAre(2), false));
+
+    nlohmann::json sequence = StartIsExecutedOnlyOnce_json;
+    nlohmann::json abort_sequence = SimpleAbortScenario_json;
+
+    sequenceManager->StartSequence(sequence, abort_sequence, "");
+
+    // Wait 0.5s, then abort
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    sequenceManager->AbortSequence("test abort");
+
+    // Wait for sequence to stop, but not forever
+    auto abort_time = std::chrono::steady_clock::now();
+    int waited_ms = 0;
+    while (sequenceManager->IsSequenceRunning() && waited_ms < 1000) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        waited_ms += 10;
+    }
+    auto end = std::chrono::steady_clock::now();
+
+    // Check that abort happened within a reasonable time (e.g., < 10ms after abort)
+    auto abort_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - abort_time).count();
+    EXPECT_LT(abort_duration, 10) << "Abort took too long to stop the sequence";
 }

@@ -43,7 +43,7 @@ inline nlohmann::json StartIsExecutedOnlyOnce_json = R"(
 }
 )"_json;
 
-inline nlohmann::json LinearInterpolationTest1 = R"(
+inline nlohmann::json LinearInterpolationTest1_json = R"(
 {
   "globals": {
     "endTime": 1,
