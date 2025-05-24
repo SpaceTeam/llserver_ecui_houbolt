@@ -117,8 +117,7 @@ void SequenceManager::AbortSequence(std::string abortMsg)
 		
 	sequenceThread.join();
 
-	while(sequenceRunning); // Todo probably remove since it does not work with thread
-		
+
 	abortSequence();
     }
     else
@@ -559,7 +558,7 @@ void SequenceManager::abortSequence()
 
         for (auto it = jsonAbortSequence["actions"].begin(); it != jsonAbortSequence["actions"].end(); ++it)
         {
-            if (it.key().compare("timestamp") != 0)
+            if (it.key() != "timestamp")
             {
             	std::vector<double> valueList = it.value();
                 //TODO: potential undefined state when exception is thrown
