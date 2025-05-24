@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: 'true'
 
       - name: Install dependencies
         run: |
@@ -21,7 +23,7 @@ jobs:
         run: cmake --preset=local-dev
 
       - name: Build
-        run: cmake --build --preset=local-dev
+        run: cmake --build build
 
       - name: Run tests
         run: |
