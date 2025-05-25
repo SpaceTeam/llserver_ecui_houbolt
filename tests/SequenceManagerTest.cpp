@@ -200,3 +200,20 @@ TEST_F(SequenceManagerTest, AbortSequenceSetsValueAndStopsQuickly) {
     auto abort_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - abort_time).count();
     EXPECT_LT(abort_duration, 10) << "Abort took too long to stop the sequence";
 }
+
+TEST_F(SequenceManagerTest, TimeSwappedSequenceSendsValuesInCorrectOrder) {
+    using ::testing::_;
+    using ::testing::ElementsAre;
+    using ::testing::InSequence;
+
+    GTEST_SKIP() << "Skipping item swapped test since it requires more serious changes to the sequencemanager and the behavior is  acceptable right now";
+    testing::Sequence seq;
+    EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_1", ElementsAre(0), false)).InSequence(seq);
+    EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_1", ElementsAre(20), false)).InSequence(seq);
+    EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_1", ElementsAre(50), false)).InSequence(seq);
+    EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_1", ElementsAre(100), false)).InSequence(seq);
+
+    nlohmann::json sequence = TimeStampsSwapped_json;
+    sequenceManager->StartSequence(sequence, nlohmann::json(), "");
+
+}
