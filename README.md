@@ -126,9 +126,8 @@ sudo ip link set up vcan0
 ### Building the LLServer
 Use the following cmake variables to run the LLServer in Dev Mode:
 ```bash
-mkdir build && cd build
-cmake -D NO_PYTHON=true -D NO_CANLIB=true -D NO_INFLUX=true .. -o ./
-make -j
+cmake --preset local-dev
+cmake --build build
 ```
 This disables the python bindings, the canbus interface and the influxdb logging.
 
