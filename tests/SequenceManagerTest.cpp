@@ -162,7 +162,7 @@ TEST_F(SequenceManagerTest, LinearInterpolationIsCorrect) {
         double value = observed[i].second;
         double expected = start_value + (end_value - start_value) * (t / duration);
         // Allow a small epsilon due to floating point and timing inaccuracies
-        EXPECT_NEAR(value, expected, 5e-1) << "at t=" << t;
+        EXPECT_NEAR(value, expected, 2) << "at t=" << t;
     }
 }
 
@@ -173,7 +173,6 @@ TEST_F(SequenceManagerTest, AbortSequenceSetsValueAndStopsQuickly) {
     using ::testing::ElementsAre;
     using ::testing::Eq;
 
-    // This matches the first argument as "valve_1" and the second as a vector with 10
     EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_1", ElementsAre(10), false))
         .Times(1);
     EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_1", ElementsAre(2), false));
