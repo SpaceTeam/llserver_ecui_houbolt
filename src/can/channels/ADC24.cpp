@@ -2,7 +2,7 @@
 // Created by Markus on 31.03.21.
 //
 
-#include "can/ADC24.h"
+#include "can/channels/ADC24.h"
 
 const std::vector<std::string> ADC24::states =
         {

@@ -2,31 +2,32 @@
 // Created by Markus on 31.03.21.
 //
 
-#ifndef LLSERVER_ECUI_HOUBOLT_ADC24_H
-#define LLSERVER_ECUI_HOUBOLT_ADC24_H
-
-#include <utility>
+#ifndef LLSERVER_ECUI_HOUBOLT_ADC16SINGLE_H
+#define LLSERVER_ECUI_HOUBOLT_ADC16SINGLE_H
 
 #include "common.h"
 
-#include "can/Channel.h"
+#include "can/channels/Channel.h"
 #include "can/Node.h"
-#include "can_houbolt/channels/adc24_channel_def.h"
+#include "can_houbolt/channels/adc16_single_channel_def.h"
 
-class ADC24 : public Channel, public NonNodeChannel
+#include <map>
+#include <utility>
+
+class ADC16Single : public Channel, public NonNodeChannel
 {
-public:
+private:
     //TODO: MP check if this is the only and correct way to implement static const with inheritation
     static const std::vector<std::string> states;
     static const std::map<std::string, std::vector<double>> scalingMap;
-    static const std::map<ADC24_VARIABLES , std::string> variableMap;
+    static const std::map<ADC16_SINGLE_VARIABLES , std::string> variableMap;
 
     //-------------------------------RECEIVE Functions-------------------------------//
 
     void CalibrateResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
 
 public:
-    ADC24(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
+    ADC16Single(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
 
     std::vector<std::string> GetStates() override;
 
@@ -36,14 +37,15 @@ public:
 
     //-------------------------------SEND Functions-------------------------------//
 
-	void SetLowerThreshold(std::vector<double> &params, bool testOnly);
-	void GetLowerThreshold(std::vector<double> &params, bool testOnly);
+    
+    void SetMeasurement(std::vector<double> &params, bool testOnly);
+	void GetMeasurement(std::vector<double> &params, bool testOnly);
 
-	void SetUpperThreshold(std::vector<double> &params, bool testOnly);
-	void GetUpperThreshold(std::vector<double> &params, bool testOnly);
-
-	void SetRefreshDivider(std::vector<double> &params, bool testOnly);
+    void SetRefreshDivider(std::vector<double> &params, bool testOnly);
 	void GetRefreshDivider(std::vector<double> &params, bool testOnly);
+
+    void SetData(std::vector<double> &params, bool testOnly);
+	void GetData(std::vector<double> &params, bool testOnly);
 
 	void RequestCalibrate(std::vector<double> &params, bool testOnly);
 
@@ -55,4 +57,4 @@ public:
     void RequestCurrentState() override;
 };
 
-#endif //LLSERVER_ECUI_HOUBOLT_ADC24_H
+#endif //LLSERVER_ECUI_HOUBOLT_ADC16SINGLE_H

@@ -2,7 +2,7 @@
 // Created by Markus on 31.03.21.
 //
 
-#include "can/DigitalOut.h"
+#include "can/channels/DigitalOut.h"
 
 const std::vector<std::string> DigitalOut::states =
         {

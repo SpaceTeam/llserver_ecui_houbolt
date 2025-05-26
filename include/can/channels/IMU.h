@@ -2,27 +2,32 @@
 // Created by Markus on 31.03.21.
 //
 
-#ifndef LLSERVER_ECUI_HOUBOLT_DIGITALOUT_H
-#define LLSERVER_ECUI_HOUBOLT_DIGITALOUT_H
+#ifndef LLSERVER_ECUI_HOUBOLT_IMU_H
+#define LLSERVER_ECUI_HOUBOLT_IMU_H
 
+#include "common.h"
+
+#include "can/channels/Channel.h"
+#include "can/Node.h"
+#include "can_houbolt/channels/imu_channel_def.h"
+
+#include <map>
 #include <utility>
 
-#include "can/Channel.h"
-#include "can/Node.h"
-#include "can_houbolt/channels/digital_out_channel_def.h"
-
-class DigitalOut : public Channel, public NonNodeChannel
+class IMU : public Channel, public NonNodeChannel
 {
-public:
+private:
     //TODO: MP check if this is the only and correct way to implement static const with inheritation
     static const std::vector<std::string> states;
     static const std::map<std::string, std::vector<double>> scalingMap;
-    static const std::map<DIGITAL_OUT_VARIABLES , std::string> variableMap;
+    static const std::map<IMU_VARIABLES , std::string> variableMap;
 
     //-------------------------------RECEIVE Functions-------------------------------//
 
+    void CalibrateResponse(Can_MessageData_t *canMsg, uint32_t &canMsgLength, uint64_t &timestamp);
+
 public:
-    DigitalOut(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
+    IMU(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
 
     std::vector<std::string> GetStates() override;
 
@@ -32,20 +37,14 @@ public:
 
     //-------------------------------SEND Functions-------------------------------//
 
-	void SetState(std::vector<double> &params, bool testOnly);
-	void GetState(std::vector<double> &params, bool testOnly);
-
-	void SetDutyCycle(std::vector<double> &params, bool testOnly);
-	void GetDutyCycle(std::vector<double> &params, bool testOnly);
-
-	void SetFrequency(std::vector<double> &params, bool testOnly);
-	void GetFrequency(std::vector<double> &params, bool testOnly);
-
+    
     void SetMeasurement(std::vector<double> &params, bool testOnly);
 	void GetMeasurement(std::vector<double> &params, bool testOnly);
 
-	void SetRefreshDivider(std::vector<double> &params, bool testOnly);
+    void SetRefreshDivider(std::vector<double> &params, bool testOnly);
 	void GetRefreshDivider(std::vector<double> &params, bool testOnly);
+
+	void RequestCalibrate(std::vector<double> &params, bool testOnly);
 
 	void RequestStatus(std::vector<double> &params, bool testOnly) override;
 	void RequestResetSettings(std::vector<double> &params, bool testOnly) override;
@@ -55,4 +54,4 @@ public:
     void RequestCurrentState() override;
 };
 
-#endif //LLSERVER_ECUI_HOUBOLT_DIGITALOUT_H
+#endif //LLSERVER_ECUI_HOUBOLT_IMU_H

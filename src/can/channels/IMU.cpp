@@ -2,8 +2,8 @@
 // Created by Markus on 31.03.21.
 //
 
-#include "can/IMU.h"
-#include "StateController.h"
+#include "can/channels/IMU.h"
+#include "../../../include/StateController.h"
 
 #include <vector>
 

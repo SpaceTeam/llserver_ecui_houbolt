@@ -2,25 +2,25 @@
 // Created by Markus on 03.09.21.
 //
 
-#ifndef LLSERVER_ECUI_HOUBOLT_CONTROL_H
-#define LLSERVER_ECUI_HOUBOLT_CONTROL_H
+#ifndef LLSERVER_ECUI_HOUBOLT_PI_CONTROL_H
+#define LLSERVER_ECUI_HOUBOLT_PI_CONTROL_H
 
-#include "can/Channel.h"
+#include "can/channels/Channel.h"
 #include "can/Node.h"
-#include "can_houbolt/channels/control_channel_def.h"
+#include "can_houbolt/channels/pi_control_channel_def.h"
 
-class Control : public Channel, public NonNodeChannel
+class PIControl : public Channel, public NonNodeChannel
 {
 public:
     //TODO: MP check if this is the only and correct way to implement static const with inheritation
     static const std::vector<std::string> states;
     static const std::map<std::string, std::vector<double>> scalingMap;
-    static const std::map<CONTROL_VARIABLES , std::string> variableMap;
+    static const std::map<PI_CONTROL_VARIABLES, std::string> variableMap;
 
     //-------------------------------RECEIVE Functions-------------------------------//
 
 public:
-    Control(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
+    PIControl(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent);
 
     std::vector<std::string> GetStates() override;
 
@@ -36,11 +36,26 @@ public:
     void SetTarget(std::vector<double> &params, bool testOnly);
 	void GetTarget(std::vector<double> &params, bool testOnly);
 
-    void SetThreshold(std::vector<double> &params, bool testOnly);
-	void GetThreshold(std::vector<double> &params, bool testOnly);
+    void SetP_POS(std::vector<double> &params, bool testOnly);
+	void GetP_POS(std::vector<double> &params, bool testOnly);
 
-    void SetHysteresis(std::vector<double> &params, bool testOnly);
-	void GetHysteresis(std::vector<double> &params, bool testOnly);
+    void SetI_POS(std::vector<double> &params, bool testOnly);
+	void GetI_POS(std::vector<double> &params, bool testOnly);
+
+    void SetP_NEG(std::vector<double> &params, bool testOnly);
+	void GetP_NEG(std::vector<double> &params, bool testOnly);
+
+    void SetI_NEG(std::vector<double> &params, bool testOnly);
+	void GetI_NEG(std::vector<double> &params, bool testOnly);
+
+    void SetSensorSlope(std::vector<double> &params, bool testOnly);
+	void GetSensorSlope(std::vector<double> &params, bool testOnly);
+
+    void SetSensorOffset(std::vector<double> &params, bool testOnly);
+	void GetSensorOffset(std::vector<double> &params, bool testOnly);
+
+    void SetOperatingPoint(std::vector<double> &params, bool testOnly);
+	void GetOperatingPoint(std::vector<double> &params, bool testOnly);
 
     void SetActuatorChannelID(std::vector<double> &params, bool testOnly);
 	void GetActuatorChannelID(std::vector<double> &params, bool testOnly);
@@ -59,4 +74,4 @@ public:
     void RequestCurrentState() override;
 };
 
-#endif //LLSERVER_ECUI_HOUBOLT_CONTROL_H
+#endif //LLSERVER_ECUI_HOUBOLT_PI_CONTROL_H

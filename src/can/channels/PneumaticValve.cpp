@@ -2,7 +2,7 @@
 // Created by Markus on 03.09.21.
 //
 
-#include "can/PneumaticValve.h"
+#include "can/channels/PneumaticValve.h"
 
 const std::vector<std::string> PneumaticValve::states =
         {

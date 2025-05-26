@@ -2,8 +2,8 @@
 // Created by Markus on 31.03.21.
 //
 
-#include "can/ADC16.h"
-#include "StateController.h"
+#include "can/channels/ADC16.h"
+#include "../../../include/StateController.h"
 
 #include <vector>
 

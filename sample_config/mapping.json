@@ -1,0 +1,1447 @@
+{
+    "CANMapping": {
+        "3": {
+            "0": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "blmb_valve"
+            },
+            "1": {
+                "stringID": "blmb_unused_unused_pressure"
+            },
+            "2": {
+                "stringID": "blmb_unused_unused_what"
+            },
+            "stringID": "blmb"
+        },
+        "31": {
+            "0": {
+                "offset": -15,
+                "slope": 0.01888275146,
+                "stringID": "fuel_tank_pressure"
+            },
+            "1": {
+                "offset": -100,
+                "slope": 0.125885,
+                "stringID": "fuel_pressurant_pressure"
+            },
+            "10": {
+                "stringID": "fuel_igniter_1"
+            },
+            "11": {
+                "stringID": "fuel_igniter_1_cont"
+            },
+            "12": {
+                "stringID": "fuel_igniter_2"
+            },
+            "13": {
+                "stringID": "fuel_igniter_2_cont"
+            },
+            "14": {
+                "stringID": "fuel_igniter_3"
+            },
+            "15": {
+                "stringID": "fuel_igniter_3_cont"
+            },
+            "16": {
+                "slope": 0.001525879,
+                "stringID": "fuel_pi_controller"
+            },
+            "17": {
+                "stringID": "fuel_rocket"
+            },
+            "18": {
+                "slope": 0.001622020152,
+                "stringID": "fuel_sense_5V"
+            },
+            "19": {
+                "slope": 0.008921110838,
+                "stringID": "fuel_sense_12V"
+            },
+            "2": {
+                "offset": -100,
+                "slope": 0.125885,
+                "stringID": "fuel_pressure_2"
+            },
+            "20": {
+                "slope": 0.008921110838,
+                "stringID": "fuel_sense_12VA"
+            },
+            "3": {
+                "offset": 0,
+                "slope": 1,
+                "stringID": "fuel_pressure_3"
+            },
+            "4": {
+                "offset": -313,
+                "slope": 0.0188,
+                "stringID": "fuel_temp_0"
+            },
+            "5": {
+                "offset": -313,
+                "slope": 0.0188,
+                "stringID": "fuel_temp_1"
+            },
+            "6": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "fuel_pressurant_valve"
+            },
+            "7": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "fuel_servo_1"
+            },
+            "8": {
+                "stringID": "fuel_vent"
+            },
+            "9": {
+                "stringID": "fuel_vent_cont"
+            },
+            "stringID": "fuel_ecu"
+        },
+        "32": {
+            "0": {
+                "offset": -15,
+                "slope": 0.01888275146,
+                "stringID": "ox_tank_pressure"
+            },
+            "1": {
+                "offset": -100,
+                "slope": 0.125885,
+                "stringID": "ox_pressurant_pressure"
+            },
+            "10": {
+                "stringID": "ox_igniter_1"
+            },
+            "11": {
+                "stringID": "ox_igniter_1_cont"
+            },
+            "12": {
+                "stringID": "ox_igniter_2"
+            },
+            "13": {
+                "stringID": "ox_igniter_2_cont"
+            },
+            "14": {
+                "stringID": "ox_igniter_3"
+            },
+            "15": {
+                "stringID": "ox_igniter_3_cont"
+            },
+            "16": {
+                "slope": 0.001525879,
+                "stringID": "ox_pi_controller"
+            },
+            "17": {
+                "stringID": "ox_rocket"
+            },
+            "18": {
+                "slope": 0.001622020152,
+                "stringID": "ox_sense_5V"
+            },
+            "19": {
+                "slope": 0.008921110838,
+                "stringID": "ox_sense_12V"
+            },
+            "2": {
+                "offset": -100,
+                "slope": 0.125885,
+                "stringID": "ox_pressure_2"
+            },
+            "20": {
+                "slope": 0.008921110838,
+                "stringID": "ox_sense_12VA"
+            },
+            "3": {
+                "offset": 0,
+                "slope": 1,
+                "stringID": "ox_pressure_3"
+            },
+            "4": {
+                "offset": -313,
+                "slope": 0.0188,
+                "stringID": "ox_temp_0"
+            },
+            "5": {
+                "offset": -308,
+                "slope": 0.0188,
+                "stringID": "ox_temp_1"
+            },
+            "6": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "ox_pressurant_valve"
+            },
+            "7": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "ox_servo_1"
+            },
+            "8": {
+                "stringID": "ox_vent"
+            },
+            "9": {
+                "stringID": "ox_vent_cont"
+            },
+            "stringID": "ox_ecu"
+        },
+        "33": {
+            "0": {
+                "offset": -15,
+                "slope": 0.01888275146,
+                "stringID": "fuel_venturi_pressure"
+            },
+            "1": {
+                "offset": -15,
+                "slope": 0.01888275146,
+                "stringID": "ox_venturi_pressure"
+            },
+            "10": {
+                "stringID": "internal_igniter_1"
+            },
+            "11": {
+                "stringID": "internal_igniter_1_cont"
+            },
+            "12": {
+                "stringID": "internal_igniter_2"
+            },
+            "13": {
+                "stringID": "internal_igniter_2_cont"
+            },
+            "14": {
+                "stringID": "engine_igniter_3"
+            },
+            "15": {
+                "stringID": "engine_igniter_3_cont"
+            },
+            "16": {
+                "slope": 0.001525879,
+                "stringID": "engine_ox_main_pi_controller"
+            },
+            "17": {
+                "stringID": "rocket"
+            },
+            "18": {
+                "slope": 0.001622020152,
+                "stringID": "engine_sense_5V"
+            },
+            "19": {
+                "slope": 0.008921110838,
+                "stringID": "engine_sense_12V"
+            },
+            "2": {
+                "offset": -15,
+                "slope": 0.01888275146,
+                "stringID": "chamber_pressure"
+            },
+            "20": {
+                "slope": 0.008921110838,
+                "stringID": "engine_sense_12VA"
+            },
+            "3": {
+                "offset": 0,
+                "slope": 1,
+                "stringID": "engine_pressure_3"
+            },
+            "4": {
+                "stringID": "engine_temp_0"
+            },
+            "5": {
+                "stringID": "engine_temp_1"
+            },
+            "6": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "fuel_main_valve"
+            },
+            "7": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "ox_main_valve"
+            },
+            "8": {
+                "stringID": "engine_igniter_0"
+            },
+            "9": {
+                "stringID": "engine_igniter_0_cont"
+            },
+            "stringID": "engine_ecu"
+        },
+        "34": {
+            "0": {
+                "offset": 2200,
+                "slope": -2,
+                "stringID": "pressurant_tanking_valve_feedback"
+            },
+            "1": {
+                "offset": 2200,
+                "slope": -2,
+                "stringID": "pressurant_vent_valve_feedback"
+            },
+            "10": {
+                "stringID": "pressurant_vent_valve"
+            },
+            "11": {
+                "stringID": "pressurant_vent_valve_cont"
+            },
+            "12": {
+                "stringID": "ox_tanking_valve"
+            },
+            "13": {
+                "stringID": "ox_tanking_valve_cont"
+            },
+            "14": {
+                "stringID": "holddown"
+            },
+            "15": {
+                "stringID": "holddown_cont"
+            },
+            "16": {
+                "slope": 0.001525879,
+                "stringID": "gse_pneu_unused_pi_controller"
+            },
+            "17": {
+                "stringID": "gse_pneu_unused_rocket"
+            },
+            "18": {
+                "slope": 0.001622020152,
+                "stringID": "gse_pneu_sense_5V"
+            },
+            "19": {
+                "slope": 0.008921110838,
+                "stringID": "gse_pneu_sense_12V"
+            },
+            "2": {
+                "offset": 2200,
+                "slope": -2,
+                "stringID": "ox_tanking_valve_feedback"
+            },
+            "20": {
+                "slope": 0.008921110838,
+                "stringID": "gse_pneu_sense_12VA"
+            },
+            "3": {
+                "offset": 0,
+                "slope": 1,
+                "stringID": "ox_decoupler_feedback"
+            },
+            "4": {
+                "stringID": "gse_pneu_temp_0"
+            },
+            "5": {
+                "stringID": "gse_pneu_temp_1"
+            },
+            "6": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "gse_pneu_servo_0"
+            },
+            "7": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "gse_pneu_servo_1"
+            },
+            "8": {
+                "stringID": "pressurant_tanking_valve"
+            },
+            "9": {
+                "stringID": "pressurant_tanking_valve_cont"
+            },
+            "stringID": "gse_pneu_ecu"
+        },
+        "35": {
+            "0": {
+                "offset": -100,
+                "slope": 0.125885,
+                "stringID": "pressurant_tanking_pressure"
+            },
+            "1": {
+                "offset": 0,
+                "slope": 1,
+                "stringID": "gse_elec_press_1"
+            },
+            "10": {
+                "stringID": "strongback"
+            },
+            "11": {
+                "stringID": "strongback_cont"
+            },
+            "12": {
+                "stringID": "dewar_pressurize_solenoid"
+            },
+            "13": {
+                "stringID": "dewar_pressurize_solenoid_cont"
+            },
+            "14": {
+                "stringID": "gse_igniter_3"
+            },
+            "15": {
+                "stringID": "gse_igniter_3_cont"
+            },
+            "16": {
+                "slope": 0.001525879,
+                "stringID": "gse_elec_unused_pi_controller"
+            },
+            "17": {
+                "stringID": "gse_elec_unused_rocket"
+            },
+            "18": {
+                "slope": 0.001622020152,
+                "stringID": "gse_elec_sense_5V"
+            },
+            "19": {
+                "slope": 0.008921110838,
+                "stringID": "gse_elec_sense_12V"
+            },
+            "2": {
+                "offset": 0,
+                "slope": 1,
+                "stringID": "gse_elec_press_2"
+            },
+            "20": {
+                "slope": 0.008921110838,
+                "stringID": "gse_elec_sense_12VA"
+            },
+            "3": {
+                "offset": 0,
+                "slope": 1,
+                "stringID": "gse_elec_press_3"
+            },
+            "4": {
+                "stringID": "gse_elec_temp_0"
+            },
+            "5": {
+                "stringID": "gse_elec_temp_1"
+            },
+            "6": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "gse_elec_servo_0"
+            },
+            "7": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "gse_elec_servo_1"
+            },
+            "8": {
+                "stringID": "ox_decoupler"
+            },
+            "9": {
+                "stringID": "ox_decoupler_cont"
+            },
+            "stringID": "gse_elec_ecu"
+        },
+        "8": {
+            "0": {
+                "offset": -18.935077,
+                "slope": 5.32e-06,
+                "stringID": "rocket_weight"
+            },
+            "1": {
+                "offset": -37.171132400000005,
+                "slope": -1.48e-05,
+                "stringID": "dewar_weight"
+            },
+            "2": {
+                "offset": -10.2876298,
+                "slope": 5.32e-06,
+                "stringID": "fuel_weight"
+            },
+            "3": {
+                "offset": -14.20285865926,
+                "slope": 5.57269e-06,
+                "stringID": "ox_weight"
+            },
+            "4": {
+                "offset": -0.23615210499999995,
+                "slope": 4.46075e-05,
+                "stringID": "unused_lcb_force_4"
+            },
+            "5": {
+                "offset": -1794695.0,
+                "slope": 1.0,
+                "stringID": "unused_lcb_force_5"
+            },
+            "6": {
+                "offset": -452668.0,
+                "slope": 1.0,
+                "stringID": "unused_lcb_force_6"
+            },
+            "7": {
+                "offset": -1360714.0,
+                "slope": 1.0,
+                "stringID": "unused_lcb_force_7"
+            },
+            "stringID": "teststand_lcb"
+        },
+        "29": {
+            "18": {
+                "slope": 0.001622020152,
+                "stringID": "engine_sense_5V"
+            },
+            "19": {
+                "slope": 0.008921110838,
+                "stringID": "engine_sense_12V"
+            },
+            "0": {
+                "offset": 0,
+                "slope": 0.001622020152,
+                "stringID": "rcu_5V_voltage"
+            },
+            "1": {
+                "offset": 0,
+                "slope": 0.00535,
+                "stringID": "rcu_12V_voltage"
+            },
+            "10": {
+                "offset": 0,
+                "slope": 0.0000001,
+                "stringID": "gps_latitude"
+            },
+            "11": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "gps_altitude"
+            },
+            "2": {
+                "offset": 0,
+                "slope": 0.00024414,
+                "stringID": "rcu_barometer"
+            },
+            "3": {
+                "offset": -16,
+                "slope": 0.0078125,
+                "stringID": "rcu_accel_x"
+            },
+            "4": {
+                "offset": -16,
+                "slope": 0.0078125,
+                "stringID": "rcu_accel_y"
+            },
+            "5": {
+                "offset": -16,
+                "slope": 0.0078125,
+                "stringID": "rcu_accel_z"
+            },
+            "6": {
+                "offset": -2000,
+                "slope": 0.97656,
+                "stringID": "rcu_gyro_x"
+            },
+            "7": {
+                "offset": -2000,
+                "slope": 0.97656,
+                "stringID": "rcu_gyro_y"
+            },
+            "8": {
+                "offset": -2000,
+                "slope": 0.97656,
+                "stringID": "rcu_gyro_z"
+            },
+            "9": {
+                "offset": 0,
+                "slope": 0.0000001,
+                "stringID": "gps_longitude"
+            },
+            "12": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "gps_status"
+            },
+            "13": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "rcu_out_0"
+            },
+            "14": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "camera_1"
+            },
+            "15": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "camera_2"
+            },
+            "16": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "rcu_out_3"
+            },
+            "stringID": "rcu"
+        },
+        "11": {
+            "0": {
+                "offset": -15,
+                "slope": 0.01888275146,
+                "stringID": "lora:fuel_tank_pressure"
+            },
+            "1": {
+                "offset": -100,
+                "slope": 0.125885,
+                "stringID": "lora:fuel_pressurant_pressure"
+            },
+            "10": {
+                "stringID": "lora:fuel_igniter_1"
+            },
+            "11": {
+                "stringID": "lora:fuel_igniter_1_cont"
+            },
+            "12": {
+                "stringID": "lora:fuel_igniter_2"
+            },
+            "13": {
+                "stringID": "lora:fuel_igniter_2_cont"
+            },
+            "14": {
+                "stringID": "lora:fuel_igniter_3"
+            },
+            "15": {
+                "stringID": "lora:fuel_igniter_3_cont"
+            },
+            "16": {
+                "slope": 0.001525879,
+                "stringID": "lora:fuel_pi_controller"
+            },
+            "17": {
+                "stringID": "lora:fuel_rocket"
+            },
+            "18": {
+                "slope": 0.001622020152,
+                "stringID": "lora:fuel_sense_5V"
+            },
+            "19": {
+                "slope": 0.008921110838,
+                "stringID": "lora:fuel_sense_12V"
+            },
+            "2": {
+                "offset": -100,
+                "slope": 0.125885,
+                "stringID": "lora:fuel_pressure_2"
+            },
+            "20": {
+                "slope": 0.008921110838,
+                "stringID": "lora:fuel_sense_12VA"
+            },
+            "3": {
+                "offset": 0,
+                "slope": 1,
+                "stringID": "lora:fuel_pressure_3"
+            },
+            "4": {
+                "offset": -313,
+                "slope": 0.0188,
+                "stringID": "lora:fuel_temp_0"
+            },
+            "5": {
+                "offset": -313,
+                "slope": 0.0188,
+                "stringID": "lora:fuel_temp_1"
+            },
+            "6": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "lora:fuel_pressurant_valve"
+            },
+            "7": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "lora:fuel_servo_1"
+            },
+            "8": {
+                "stringID": "lora:fuel_vent"
+            },
+            "9": {
+                "stringID": "lora:fuel_vent_cont"
+            },
+            "stringID": "lora:fuel_ecu"
+        },
+        "12": {
+            "0": {
+                "offset": -15,
+                "slope": 0.01888275146,
+                "stringID": "lora:ox_tank_pressure"
+            },
+            "1": {
+                "offset": -100,
+                "slope": 0.125885,
+                "stringID": "lora:ox_pressurant_pressure"
+            },
+            "10": {
+                "stringID": "lora:ox_igniter_1"
+            },
+            "11": {
+                "stringID": "lora:ox_igniter_1_cont"
+            },
+            "12": {
+                "stringID": "lora:ox_igniter_2"
+            },
+            "13": {
+                "stringID": "lora:ox_igniter_2_cont"
+            },
+            "14": {
+                "stringID": "lora:ox_igniter_3"
+            },
+            "15": {
+                "stringID": "lora:ox_igniter_3_cont"
+            },
+            "16": {
+                "slope": 0.001525879,
+                "stringID": "lora:ox_pi_controller"
+            },
+            "17": {
+                "stringID": "lora:ox_rocket"
+            },
+            "18": {
+                "slope": 0.001622020152,
+                "stringID": "lora:ox_sense_5V"
+            },
+            "19": {
+                "slope": 0.008921110838,
+                "stringID": "lora:ox_sense_12V"
+            },
+            "2": {
+                "offset": -100,
+                "slope": 0.125885,
+                "stringID": "lora:ox_pressure_2"
+            },
+            "20": {
+                "slope": 0.008921110838,
+                "stringID": "lora:ox_sense_12VA"
+            },
+            "3": {
+                "offset": 0,
+                "slope": 1,
+                "stringID": "lora:ox_pressure_3"
+            },
+            "4": {
+                "offset": -313,
+                "slope": 0.0188,
+                "stringID": "lora:ox_temp_0"
+            },
+            "5": {
+                "offset": -308,
+                "slope": 0.0188,
+                "stringID": "lora:ox_temp_1"
+            },
+            "6": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "lora:ox_pressurant_valve"
+            },
+            "7": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "lora:ox_servo_1"
+            },
+            "8": {
+                "stringID": "lora:ox_vent"
+            },
+            "9": {
+                "stringID": "lora:ox_vent_cont"
+            },
+            "stringID": "lora:ox_ecu"
+        },
+        "13": {
+            "0": {
+                "offset": -15,
+                "slope": 0.01888275146,
+                "stringID": "lora:fuel_venturi_pressure"
+            },
+            "1": {
+                "offset": -15,
+                "slope": 0.01888275146,
+                "stringID": "lora:ox_venturi_pressure"
+            },
+            "10": {
+                "stringID": "lora:internal_igniter_1"
+            },
+            "11": {
+                "stringID": "lora:internal_igniter_1_cont"
+            },
+            "12": {
+                "stringID": "lora:internal_igniter_2"
+            },
+            "13": {
+                "stringID": "lora:internal_igniter_2_cont"
+            },
+            "14": {
+                "stringID": "lora:engine_igniter_3"
+            },
+            "15": {
+                "stringID": "lora:engine_igniter_3_cont"
+            },
+            "16": {
+                "slope": 0.001525879,
+                "stringID": "lora:engine_ox_main_pi_controller"
+            },
+            "17": {
+                "stringID": "lora:rocket"
+            },
+            "18": {
+                "slope": 0.001622020152,
+                "stringID": "lora:engine_sense_5V"
+            },
+            "19": {
+                "slope": 0.008921110838,
+                "stringID": "lora:engine_sense_12V"
+            },
+            "2": {
+                "offset": -15,
+                "slope": 0.01888275146,
+                "stringID": "lora:chamber_pressure"
+            },
+            "20": {
+                "slope": 0.008921110838,
+                "stringID": "lora:engine_sense_12VA"
+            },
+            "3": {
+                "offset": 0,
+                "slope": 1,
+                "stringID": "lora:engine_pressure_3"
+            },
+            "4": {
+                "stringID": "lora:engine_temp_0"
+            },
+            "5": {
+                "stringID": "lora:engine_temp_1"
+            },
+            "6": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "lora:fuel_main_valve"
+            },
+            "7": {
+                "offset": 0.0,
+                "slope": 0.00152590219,
+                "stringID": "lora:ox_main_valve"
+            },
+            "8": {
+                "stringID": "lora:engine_igniter_0"
+            },
+            "9": {
+                "stringID": "lora:engine_igniter_0_cont"
+            },
+            "stringID": "lora:engine_ecu"
+        },
+        "19": {
+            "18": {
+                "slope": 0.001622020152,
+                "stringID": "lora:engine_sense_5V"
+            },
+            "19": {
+                "slope": 0.008921110838,
+                "stringID": "lora:engine_sense_12V"
+            },
+            "0": {
+                "offset": 0,
+                "slope": 0.001622020152,
+                "stringID": "lora:rcu_5V_voltage"
+            },
+            "1": {
+                "offset": 0,
+                "slope": 0.00535,
+                "stringID": "lora:rcu_12V_voltage"
+            },
+            "10": {
+                "offset": 0,
+                "slope": 0.0000001,
+                "stringID": "lora:gps_latitude"
+            },
+            "11": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "lora:gps_altitude"
+            },
+            "2": {
+                "offset": 0,
+                "slope": 0.00024414,
+                "stringID": "lora:rcu_barometer"
+            },
+            "3": {
+                "offset": -16,
+                "slope": 0.0078125,
+                "stringID": "lora:rcu_accel_x"
+            },
+            "4": {
+                "offset": -16,
+                "slope": 0.0078125,
+                "stringID": "lora:rcu_accel_y"
+            },
+            "5": {
+                "offset": -16,
+                "slope": 0.0078125,
+                "stringID": "lora:rcu_accel_z"
+            },
+            "6": {
+                "offset": -2000,
+                "slope": 0.97656,
+                "stringID": "lora:rcu_gyro_x"
+            },
+            "7": {
+                "offset": -2000,
+                "slope": 0.97656,
+                "stringID": "lora:rcu_gyro_y"
+            },
+            "8": {
+                "offset": -2000,
+                "slope": 0.97656,
+                "stringID": "lora:rcu_gyro_z"
+            },
+            "9": {
+                "offset": 0,
+                "slope": 0.0000001,
+                "stringID": "lora:gps_longitude"
+            },
+            "12": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "lora:gps_status"
+            },
+            "13": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "lora:rcu_out_0"
+            },
+            "14": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "lora:camera_1"
+            },
+            "15": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "lora:camera_2"
+            },
+            "16": {
+                "offset": 0,
+                "slope": 1.0,
+                "stringID": "lora:rcu_out_3"
+            },
+            "stringID": "lora:rcu"
+        }
+    },
+    "DefaultEventMapping": {
+        "DigitalOut": [
+            {
+                "command": "DigitalOut:SetState",
+                "parameters": [
+                    "DigitalOut"
+                ]
+            }
+        ],
+        "Servo": [
+            {
+                "command": "Servo:SetTargetPosition",
+                "parameters": [
+                    "Servo"
+                ]
+            }
+        ]
+    },
+    "EventMapping": {
+        "engine_ecu:FlashStatus": [
+            {
+                "state": "gui:Flash:Clear",
+                "triggerType": "!=",
+                "triggerValue": 0,
+                "value": 0
+            }
+        ],
+        "ox_ecu:FlashStatus": [
+            {
+                "state": "gui:Flash:Clear",
+                "triggerType": "!=",
+                "triggerValue": 0,
+                "value": 0
+            }
+        ],
+        "fuel_ecu:FlashStatus": [
+            {
+                "state": "gui:Flash:Clear",
+                "triggerType": "!=",
+                "triggerValue": 0,
+                "value": 0
+            }
+        ],
+        "rcu:FlashStatus": [
+            {
+                "state": "gui:Flash:Clear",
+                "triggerType": "!=",
+                "triggerValue": 0,
+                "value": 0
+            }
+        ],
+        "gui:Flash:Clear": [
+            {
+                "command": "engine_ecu:RequestFlashClear",
+                "parameters": []
+            },
+            {
+                "command": "ox_ecu:RequestFlashClear",
+                "parameters": []
+            },
+            {
+                "command": "fuel_ecu:RequestFlashClear",
+                "parameters": []
+            },
+            {
+                "command": "rcu:RequestFlashClear",
+                "parameters": []
+            }
+        ],
+        "gui:FlushDatabase": [
+            {
+                "command": "FlushDatabase",
+                "parameters": []
+            }
+        ],
+        "gui:Logging": [
+            {
+                "command": "engine_ecu:SetLoggingEnabled",
+                "parameters": [
+                    "gui:Logging"
+                ]
+            },
+            {
+                "command": "ox_ecu:SetLoggingEnabled",
+                "parameters": [
+                    "gui:Logging"
+                ]
+            },
+            {
+                "command": "fuel_ecu:SetLoggingEnabled",
+                "parameters": [
+                    "gui:Logging"
+                ]
+            },
+            {
+                "command": "rcu:SetLoggingEnabled",
+                "parameters": [
+                    "gui:Logging"
+                ]
+            }
+        ],
+        "gui:LoraEnabled": [
+            {
+                "command": "rcu:SetLoraEnabled",
+                "parameters": [
+                    "gui:LoraEnabled"
+                ]
+            }
+        ],
+        "gui:dewar_weight:Tare": [
+            {
+                "command": "Tare",
+                "parameters": [
+                    8,
+                    1,
+                    "dewar_weight:sensor"
+                ]
+            }
+        ],
+        "gui:fuel_pi_controller:GetI_NEG": [
+            {
+                "command": "fuel_pi_controller:GetI_NEG",
+                "parameters": []
+            }
+        ],
+        "gui:fuel_pi_controller:GetI_POS": [
+            {
+                "command": "fuel_pi_controller:GetI_POS",
+                "parameters": []
+            }
+        ],
+        "gui:fuel_pi_controller:GetOperatingPoint": [
+            {
+                "command": "fuel_pi_controller:GetOperatingPoint",
+                "parameters": []
+            }
+        ],
+        "gui:fuel_pi_controller:GetP_NEG": [
+            {
+                "command": "fuel_pi_controller:GetP_NEG",
+                "parameters": []
+            }
+        ],
+        "gui:fuel_pi_controller:GetP_POS": [
+            {
+                "command": "fuel_pi_controller:GetP_POS",
+                "parameters": []
+            }
+        ],
+        "gui:fuel_pi_controller:GetSensorChannelID": [
+            {
+                "command": "fuel_pi_controller:GetSensorChannelID",
+                "parameters": []
+            }
+        ],
+        "gui:fuel_pi_controller:GetSensorOffset": [
+            {
+                "command": "fuel_pi_controller:GetSensorOffset",
+                "parameters": []
+            }
+        ],
+        "gui:fuel_pi_controller:GetSensorSlope": [
+            {
+                "command": "fuel_pi_controller:GetSensorSlope",
+                "parameters": []
+            }
+        ],
+        "gui:fuel_pi_controller:GetTarget": [
+            {
+                "command": "fuel_pi_controller:GetTarget",
+                "parameters": []
+            }
+        ],
+        "gui:fuel_weight:Tare": [
+            {
+                "command": "Tare",
+                "parameters": [
+                    8,
+                    2,
+                    "fuel_weight:sensor"
+                ]
+            }
+        ],
+        "gui:holddown:sensor": [
+            {
+                "command": "holddown:SetState",
+                "parameters": [
+                    0
+                ],
+                "triggerType": "==",
+                "triggerValue": 0
+            },
+            {
+                "command": "holddown:SetState",
+                "parameters": [
+                    1
+                ],
+                "triggerType": "==",
+                "triggerValue": 1
+            }
+        ],
+        "gui:ox_pi_controller:GetI_NEG": [
+            {
+                "command": "ox_pi_controller:GetI_NEG",
+                "parameters": []
+            }
+        ],
+        "gui:ox_pi_controller:GetI_POS": [
+            {
+                "command": "ox_pi_controller:GetI_POS",
+                "parameters": []
+            }
+        ],
+        "gui:ox_pi_controller:GetOperatingPoint": [
+            {
+                "command": "ox_pi_controller:GetOperatingPoint",
+                "parameters": []
+            }
+        ],
+        "gui:ox_pi_controller:GetP_NEG": [
+            {
+                "command": "ox_pi_controller:GetP_NEG",
+                "parameters": []
+            }
+        ],
+        "gui:ox_pi_controller:GetP_POS": [
+            {
+                "command": "ox_pi_controller:GetP_POS",
+                "parameters": []
+            }
+        ],
+        "gui:ox_pi_controller:GetSensorChannelID": [
+            {
+                "command": "ox_pi_controller:GetSensorChannelID",
+                "parameters": []
+            }
+        ],
+        "gui:ox_pi_controller:GetSensorOffset": [
+            {
+                "command": "ox_pi_controller:GetSensorOffset",
+                "parameters": []
+            }
+        ],
+        "gui:ox_pi_controller:GetSensorSlope": [
+            {
+                "command": "ox_pi_controller:GetSensorSlope",
+                "parameters": []
+            }
+        ],
+        "gui:ox_pi_controller:GetTarget": [
+            {
+                "command": "ox_pi_controller:GetTarget",
+                "parameters": []
+            }
+        ],
+        "gui:ox_weight:Tare": [
+            {
+                "command": "Tare",
+                "parameters": [
+                    8,
+                    3,
+                    "ox_weight:sensor"
+                ]
+            }
+        ],
+        "gui:pressure_control:GetHysteresis": [
+            {
+                "command": "pressure_control:GetHysteresis",
+                "parameters": []
+            }
+        ],
+        "gui:pressure_control:SetEnabled": [
+            {
+                "command": "pressure_control:SetEnabled",
+                "parameters": [
+                    "gui:pressure_control:SetEnabled"
+                ]
+            }
+        ],
+        "gui:pressure_control:SetHysteresis": [
+            {
+                "command": "pressure_control:SetHysteresis",
+                "parameters": [
+                    "gui:pressure_control:SetHysteresis"
+                ]
+            }
+        ],
+        "gui:pressure_control:SetTarget": [
+            {
+                "command": "pressure_control:SetTarget",
+                "parameters": [
+                    "gui:pressure_control:SetTarget"
+                ]
+            }
+        ],
+        "gui:rocket:Abort": [
+            {
+                "command": "rocket:Abort",
+                "parameters": []
+            }
+        ],
+        "gui:rocket:AutoCheck": [
+            {
+                "command": "rocket:AutoCheck",
+                "parameters": []
+            }
+        ],
+        "gui:rocket:EndOfFlight": [
+            {
+                "command": "rocket:EndOfFlight",
+                "parameters": []
+            }
+        ],
+        "gui:rocket:InternalControl": [
+            {
+                "command": "rocket:ActivateInternalControl",
+                "parameters": []
+            }
+        ],
+        "gui:rocket:ReleaseHolddown": [
+            {
+                "command": "rocket:SetRocketState",
+                "parameters": [
+                    4
+                ]
+            },
+            {
+                "command": "holddown:SetTargetPosition",
+                "parameters": [
+                    65535
+                ]
+            }
+        ],
+        "gui:rocket:RequestResetSettings": [
+            {
+                "command": "rocket:RequestResetSettings",
+                "parameters": []
+            }
+        ],
+        "gui:rocket:ResetStateMachine": [
+            {
+                "command": "rocket:SetRocketState",
+                "parameters": [
+                    0
+                ]
+            }
+        ],
+        "gui:rocket:SetHolddownTimeout": [
+            {
+                "command": "rocket:SetHolddownTimeout",
+                "parameters": [
+                    "gui:rocket:SetHolddownTimeout"
+                ]
+            }
+        ],
+        "gui:rocket:SetMinimumChamberPressure": [
+            {
+                "command": "rocket:SetMinimumChamberPressure",
+                "parameters": [
+                    "gui:rocket:SetMinimumChamberPressure"
+                ]
+            }
+        ],
+        "gui:rocket:SetMinimumFuelPressure": [
+            {
+                "command": "rocket:SetMinimumFuelPressure",
+                "parameters": [
+                    "gui:rocket:SetMinimumFuelPressure"
+                ]
+            }
+        ],
+        "gui:rocket:SetMinimumOxPressure": [
+            {
+                "command": "rocket:SetMinimumOxPressure",
+                "parameters": [
+                    "gui:rocket:SetMinimumOxPressure"
+                ]
+            }
+        ],
+        "gui:rocket_weight:Tare": [
+            {
+                "command": "Tare",
+                "parameters": [
+                    8,
+                    0,
+                    "rocket_weight:sensor"
+                ]
+            }
+        ],
+        "gui:thrust:Tare": [
+            {
+                "command": "Tare",
+                "parameters": [
+                    8,
+                    0,
+                    "thrust:sensor"
+                ]
+            }
+        ],
+        "gui:venturi_weight:Tare": [
+            {
+                "command": "Tare",
+                "parameters": [
+                    9,
+                    1,
+                    "venturi_weight:sensor"
+                ]
+            }
+        ],
+        "fuel_rocket:GetRocketState": [
+            {
+                "state": "fuel_rocket:GetRocketState",
+                "parameters": []
+            }
+        ],
+        "ox_rocket:GetRocketState": [
+            {
+                "state": "ox_rocket:GetRocketState",
+                "parameters": []
+            }
+        ],
+        "rocket:sensor": [
+            {
+                "state": "rocket:PadIdle",
+                "triggerType": "==",
+                "triggerValue": 0,
+                "value": 1
+            },
+            {
+                "state": "rocket:PadIdle",
+                "triggerType": "!=",
+                "triggerValue": 0,
+                "value": 0
+            },
+            {
+                "state": "rocket:AutoCheck",
+                "triggerType": "==",
+                "triggerValue": 1,
+                "value": 1
+            },
+            {
+                "state": "rocket:AutoCheck",
+                "triggerType": "!=",
+                "triggerValue": 1,
+                "value": 0
+            },
+            {
+                "state": "rocket:IgnitionSequence",
+                "triggerType": "==",
+                "triggerValue": 2,
+                "value": 1
+            },
+            {
+                "state": "rocket:IgnitionSequence",
+                "triggerType": "!=",
+                "triggerValue": 2,
+                "value": 0
+            },
+            {
+                "state": "rocket:HoldDown",
+                "triggerType": "==",
+                "triggerValue": 3,
+                "value": 1
+            },
+            {
+                "state": "rocket:HoldDown",
+                "triggerType": "!=",
+                "triggerValue": 3,
+                "value": 0
+            },
+            {
+                "state": "rocket:PoweredAscent",
+                "triggerType": "==",
+                "triggerValue": 4,
+                "value": 1
+            },
+            {
+                "state": "rocket:PoweredAscent",
+                "triggerType": "!=",
+                "triggerValue": 4,
+                "value": 0
+            },
+            {
+                "state": "rocket:UnpoweredAscent",
+                "triggerType": "==",
+                "triggerValue": 5,
+                "value": 1
+            },
+            {
+                "state": "rocket:UnpoweredAscent",
+                "triggerType": "!=",
+                "triggerValue": 5,
+                "value": 0
+            },
+            {
+                "state": "rocket:Depress",
+                "triggerType": "==",
+                "triggerValue": 6,
+                "value": 1
+            },
+            {
+                "state": "rocket:Depress",
+                "triggerType": "!=",
+                "triggerValue": 6,
+                "value": 0
+            },
+            {
+                "state": "rocket:AbortFlowChart",
+                "triggerType": "==",
+                "triggerValue": 7,
+                "value": 1
+            },
+            {
+                "state": "rocket:AbortFlowChart",
+                "triggerType": "!=",
+                "triggerValue": 7,
+                "value": 0
+            }
+        ]
+    },
+    "GUIMapping": [],
+    "GUIMappingAdvanced": {}
+}

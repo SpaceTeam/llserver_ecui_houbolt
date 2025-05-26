@@ -2,7 +2,7 @@
 // Created by Markus on 31.08.21.
 //
 
-#include "can/Servo.h"
+#include "can/channels/Servo.h"
 
 const std::vector<std::string> Servo::states =
     {

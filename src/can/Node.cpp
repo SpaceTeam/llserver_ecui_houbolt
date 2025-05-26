@@ -1,24 +1,26 @@
-#include "can/Node.h"
+#include "../../include/can/Node.h"
 
 #include <map>
 #include <cstring>
 #include <string>
 #include <functional>
 #include <utility>
-#include "utility/Config.h"
-#include "can/DigitalOut.h"
-#include "can/ADC16.h"
-#include "can/ADC16Single.h"
-#include "can/ADC24.h"
-#include "can/DATA32.h"
-#include "can/Servo.h"
-#include "can/PneumaticValve.h"
-#include "can/Control.h"
-#include "can/PIControl.h"
-#include "can/IMU.h"
-#include "can/Rocket.h"
-#include "StateController.h"
+#include "../../include/utility/Config.h"
+#include "../../include/can/channels/DigitalOut.h"
+#include "../../include/can/channels/ADC16.h"
+#include "../../include/can/channels/ADC16Single.h"
+#include "../../include/can/channels/ADC24.h"
+#include "../../include/can/channels/DATA32.h"
+#include "../../include/can/channels/Servo.h"
+#include "../../include/can/channels/PneumaticValve.h"
+#include "../../include/can/channels/Control.h"
+#include "../../include/can/channels/PIControl.h"
+#include "../../include/can/channels/IMU.h"
+#include "../../include/can/channels/Rocket.h"
+#include "../../include/StateController.h"
 #include <unistd.h>
+
+#include "can/channels/CANMonitor.h"
 
 const std::vector<std::string> Node::states =
         {
@@ -90,6 +92,7 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
     if (logger == nullptr)
     {
         Debug::info("%d, %s, %d, %s, %s, %d", enableFastLogging, influxIP.c_str(), influxPort, databaseName.c_str(), measurementName.c_str(), influxBufferSize);
+#ifndef NO_INFLUX
         if (enableFastLogging)
         {
             Debug::print("Fast logging enabled");
@@ -102,8 +105,12 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
         }
         else
         {
+#endif
             Debug::print("Fast logging disabled");
+#ifndef NO_INFLUX
         }
+#endif
+
     }
 
     commandMap = {
@@ -197,6 +204,9 @@ void Node::InitChannels(NodeInfoMsg_t &nodeInfo, std::map<uint8_t, std::tuple<st
                     break;
                 case CHANNEL_TYPE_ROCKET:
                     ch = new Rocket(channelID, std::get<0>(channelInfo[channelID]), std::get<1>(channelInfo[channelID]), this);
+                    break;
+                case CHANNEL_TYPE_CAN_MONITOR:
+                    ch = new CANMonitor(channelID, std::get<0>(channelInfo[channelID]), this);
                     break;
                 default:
                     throw std::runtime_error("channel type not recognized");
@@ -368,7 +378,8 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                 }
                 ch = channelMap[channelID];
 
-                ch->GetSensorValue(valuePtr, currValueLength, currValue);
+                ch->GetSensorValue(valuePtr, currValueLength, nameValueMap);
+
                 // Debug::print("Hello chid %d, value %f", channelID, currValue);
                 if (currValueLength <= 0)
                 {
@@ -376,16 +387,22 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                 }
 
                 {
-                    std::lock_guard<std::mutex> lock(bufferMtx);
+                    std::lock_guard lock(bufferMtx);
 
-                    latestSensorBuffer[channelID] = {currValue, timestamp};
+                    latestSensorBuffer[channelID] = {nameValueMap[0].second, timestamp};
 
+#ifndef NO_INFLUX
                     if (enableFastLogging)
                     {
-                        std::lock_guard<std::mutex> lock(loggerMtx);
-                        logger->log(ch->GetSensorName(), currValue, timestamp);
+                        std::lock_guard loglock(loggerMtx);
+                        for (auto it = nameValueMap.begin(); it != nameValueMap.end();) {
+                            logger->log(it->first, it->second, timestamp);
+                            nameValueMap.erase(it);
+                        }
+
                         //logger->flush();
                     }
+#endif
                     //buffer.push_back(sensor); //TODO: uncomment if implemented
                 }
 

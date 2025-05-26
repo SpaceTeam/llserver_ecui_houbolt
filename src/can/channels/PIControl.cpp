@@ -2,7 +2,7 @@
 // Created by Markus on 03.09.21.
 //
 
-#include "can/PIControl.h"
+#include "can/channels/PIControl.h"
 
 const std::vector<std::string> PIControl::states =
     {

@@ -17,7 +17,7 @@
 
 #include "StateController.h"
 #include "can_houbolt/cmds.h"
-#include "CANDriver.h"
+#include "../CANDriver.h"
 #include "EventManager.h"
 
 class Channel
@@ -172,7 +172,7 @@ public:
 
     virtual const std::string GetChannelTypeName();
 
-    virtual void GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, double &value);
+    virtual void GetSensorValue(uint8_t *valuePtr, uint8_t &valueLength, std::vector<std::pair<std::string, double>> &nameValueMap);
 
     virtual uint8_t GetChannelID()
     { return this->channelID; };
