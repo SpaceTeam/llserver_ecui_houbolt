@@ -274,6 +274,8 @@ void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonA
             startTime_us = utils::toMicros(jsonSeq["globals"]["startTime"]);
             endTime_us = utils::toMicros(jsonSeq["globals"]["endTime"]);
             int64_t interval_us = utils::toMicros(jsonSeq["globals"]["interval"]);
+            nextTimePrint_us = startTime_us;
+            nextTimeSync_us = startTime_us;
             Debug::info("%d %d %d", startTime_us, endTime_us, interval_us);
 
             EcuiSocket::SendJson("timer-start");
@@ -399,18 +401,16 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 			break;
 		}
 
-		static int32_t nextTimePrint_us = startTime_us;
 		if(sequenceTime_us >= nextTimePrint_us)
 		{
 			Debug::info("Sequence Time: %dus", sequenceTime_us);
 			nextTimePrint_us += 500000;
 		}
 
-		static int32_t nextTimerSync_us = startTime_us;
-		if(sequenceTime_us >= nextTimerSync_us)
+		if(sequenceTime_us >= nextTimeSync_us)
 		{
 			EcuiSocket::SendJson("timer-sync", ((sequenceTime_us/1000) / 1000.0));
-			nextTimerSync_us += timerSyncInterval;
+			nextTimeSync_us += timerSyncInterval;
 		}
 
 		std::string msg = std::to_string(sequenceTime_us / 1000000.0) + ";";
