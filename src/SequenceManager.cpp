@@ -383,6 +383,8 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 
 	LoopTimer sequenceLoopTimer(interval_us, "sequenceThread");
 	sequenceLoopTimer.init();
+	int32_t nextTimePrint_us = startTime_us;
+	int32_t nextTimerSync_us = startTime_us;
 
 	while(!sequenceToStop)
 	{
@@ -397,14 +399,12 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 			break;
 		}
 
-		static int32_t nextTimePrint_us = startTime_us;
 		if(sequenceTime_us >= nextTimePrint_us)
 		{
 			Debug::info("Sequence Time: %dus", sequenceTime_us);
 			nextTimePrint_us += 300000;
 		}
 
-		static int32_t nextTimerSync_us = startTime_us;
 		if(sequenceTime_us >= nextTimerSync_us)
 		{
 			EcuiSocket::SendJson("timer-sync", ((sequenceTime_us/1000) / 1000.0));
