@@ -157,7 +157,7 @@ TEST_F(SequenceManagerTest, LinearInterpolationIsCorrect) {
     // We should have approximatly 100 calls.
     EXPECT_NEAR(observed.size(), expected_calls,1);
     // Check linearity: value should be start_value + (end_value - start_value) * (t/duration)
-    for (int i = 0; i < expected_calls; ++i) {
+    for (int i = 0; i < observed.size(); ++i) {
         double t = observed[i].first;
         double value = observed[i].second;
         double expected = start_value + (end_value - start_value) * (t / duration);

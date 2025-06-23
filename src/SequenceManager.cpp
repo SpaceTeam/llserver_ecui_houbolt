@@ -436,85 +436,72 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 			msg += std::to_string(sensor.second.begin()->second[1]) + ";";
 		}
 
-		bool shallExec;
-		std::vector<double> nextValue = {0};
-
 		for (const auto &devItem : deviceMap)
 		{
+            if (devItem.second.empty())
+            {
+                continue;
+            }
+            auto currentItem = *devItem.second.begin();
+            auto nextItem = devItem.second.size() > 1
+                                ? std::optional(*std::next(devItem.second.begin()))
+                                : std::nullopt;
+            std::optional<std::vector<double>> nextValue;
+            bool shouldAdvance;
 
-			shallExec = true;
+            Interpolation inter = Interpolation::NONE;
+            if (interpolationMap.find(devItem.first) == interpolationMap.end())
+            {
+                Debug::error("%s not found in interpolation map, falling back to no interpolation",
+                             devItem.first.c_str());
+            }
+            else
+            {
+                inter = interpolationMap[devItem.first];
+            }
 
-			if (devItem.second.size() > 1)
-			{
-				auto currentItem = devItem.second.begin();
-				auto nextItem = std::next(devItem.second.begin());
+            switch (inter)
+            {
+            case Interpolation::LINEAR:
+                {
+                    std::tie(nextValue, shouldAdvance) = interpolateLinear(
+                        currentItem,
+                        nextItem,
+                        sequenceTime_us
+                    );
+                    break;
+                }
+            case Interpolation::NONE:
+            default:
+                std::tie(nextValue, shouldAdvance) = interpolateNone(
+                    currentItem,
+                    nextItem,
+                    sequenceTime_us
+                );
+                break;
+            }
 
-				if (sequenceTime_us >= nextItem->first)
-				{
-					nextValue = nextItem->second;
-					deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
-				}
-				else
-				{
-					Interpolation inter = Interpolation::NONE;
-					if (interpolationMap.find(devItem.first) == interpolationMap.end())
-					{
-						Debug::error("%s not found in interpolation map, falling back to no interpolation", devItem.first.c_str());
-					}
-					else
-					{
-						inter = interpolationMap[devItem.first];
-					}
-					switch (inter)
-					{
-						case Interpolation::LINEAR:
-						{
-							nextValue = currentItem->second;
-							double scale = ((nextItem->second[0] - currentItem->second[0]) * 1.0) / (nextItem->first - currentItem->first);
-							nextValue[0] = (scale * (sequenceTime_us - currentItem->first)) + currentItem->second[0];
-							break;
-						}
-						case Interpolation::NONE:
-						default:
-							nextValue = currentItem->second;
-							if (sequenceStartTime == currentItem->first)
-							{
-								shallExec = true;
-								deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
+            if (nextValue.has_value())
+            {
+                try
+                {
+                    //Debug::error("%d: %s, %f", microTime, devItem.first.c_str(), nextValue[0]);
+                    eventManager->ExecuteCommand(devItem.first, nextValue.value(), false);
+                }
+                catch (const std::exception& e)
+                {
+                    Debug::error("SequenceManager::sequenceLoop ExecuteCommand error: %s", e.what());
+			    }
 
-							}
-							else {
-								shallExec = false;
-							}
-					}
-				}
-
-				if (shallExec)
-				{
-					try
-					{
-						//Debug::error("%d: %s, %f", microTime, devItem.first.c_str(), nextValue[0]);
-						eventManager->ExecuteCommand(devItem.first, nextValue, false);
-					}
-					catch(const std::exception& e)
-					{
-						Debug::error("SequenceManager::sequenceLoop ExecuteCommand error: %s", e.what());
-					}
-				}
-			}
-			else if (devItem.second.size() ==1)
-			{
-				auto currentItem = devItem.second.begin();
-				if (sequenceTime_us >= currentItem->first) {
-					nextValue = currentItem->second;
-					deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
-					eventManager->ExecuteCommand(devItem.first, nextValue, false);
-				}
+			    std::stringstream nextValueStringStream;
+			    std::copy(nextValue.value().begin(), nextValue.value().end(), std::ostream_iterator<double>(nextValueStringStream, ", "));
+			    msg += "[" + nextValueStringStream.str() + "];";
 			}
 
-			std::stringstream nextValueStringStream;
-			std::copy(nextValue.begin(), nextValue.end(), std::ostream_iterator<double>(nextValueStringStream, ", "));
-			msg += "[" + nextValueStringStream.str() + "];";
+		    if (shouldAdvance)
+		    {
+				deviceMap[devItem.first].erase(deviceMap[devItem.first].begin());
+		    }
 		}
 
 		//delete depricated timestamp and update sensorsNominalRangeMap as well
@@ -526,26 +513,82 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 			{
 				for (const auto& sensor : beginRangeIt->second)
 				{
-					sensorsNominalRangeMap[sensor.first].erase(sensorsNominalRangeMap[sensor.first].begin());
-				}
-				sensorsNominalRangeTimeMap.erase(beginRangeIt);
-				//plotMaps();
-				Debug::info("updated sensor ranges at time: %d in ms", sequenceTime_us/1000);
-			}
-		}
+                    sensorsNominalRangeMap[sensor.first].erase(sensorsNominalRangeMap[sensor.first].begin());
+                }
+                sensorsNominalRangeTimeMap.erase(beginRangeIt);
+                //plotMaps();
+                Debug::info("updated sensor ranges at time: %d in ms", sequenceTime_us / 1000);
+            }
+        }
 
-		CheckSensors(sequenceTime_us);
+        CheckSensors(sequenceTime_us);
 
-		syncMtx.unlock();
-		Debug::log(msg + "\n");
-	}
-	sequenceToStop = false;
+        syncMtx.unlock();
+        Debug::log(msg + "\n");
+    }
+    sequenceToStop = false;
 
-	Debug::info("Sequence ended");
+    Debug::info("Sequence ended");
 
     Debug::flush();
 
-	sequenceRunning = false;
+    sequenceRunning = false;
+}
+
+std::tuple<std::optional<std::vector<double>>, bool> SequenceManager::interpolateLinear(
+    const std::tuple<int64_t, std::vector<double>>& startTimeAndValues,
+    const std::optional<std::tuple<int64_t, std::vector<double>>>& endTimeAndValues,
+    const int64_t currentTime
+)
+{
+    if (currentTime < std::get<0>(startTimeAndValues))
+    {
+        return {std::nullopt, false}; // We have not yet started the interpolation
+    }
+
+    if (!endTimeAndValues.has_value())
+    {
+        // No end, return the start value and finish this interpolation
+        return {std::get<1>(startTimeAndValues), true};
+    }
+
+    if (currentTime >= std::get<0>(endTimeAndValues.value()))
+    {
+        // We have reached the end time, return the end value and finish this interpolation
+        return {std::get<1>(endTimeAndValues.value()), true};
+    }
+
+    // We are in the middle of the interpolation
+    const std::vector<double>& startValues = std::get<1>(startTimeAndValues);
+    const std::vector<double>& endValues = std::get<1>(endTimeAndValues.value());
+
+    const int64_t startTime = std::get<0>(startTimeAndValues);
+    const int64_t endTime = std::get<0>(endTimeAndValues.value());
+
+    const double scale = static_cast<double>(currentTime - startTime) / static_cast<double>(endTime - startTime);
+
+    std::vector<double> interpolatedValues(startValues.size());
+    for (size_t i = 0; i < startValues.size(); ++i)
+    {
+        interpolatedValues[i] = startValues[i] + scale * (endValues[i] - startValues[i]);
+    }
+
+    return {interpolatedValues, false}; // Return the interpolated values and indicate that we are not done yet
+}
+
+std::tuple<std::optional<std::vector<double>>, bool> SequenceManager::interpolateNone(
+    const std::tuple<int64_t, std::vector<double>> &startTimeAndValues,
+    const std::optional<std::tuple<int64_t, std::vector<double>>>& endTimeAndValues,
+    const int64_t currentTime
+)
+{
+    if (currentTime < std::get<0>(startTimeAndValues))
+    {
+        return {std::nullopt, false}; // We have not yet started the interpolation
+    } else {
+        // return the start value and indicate we're done.
+       return {std::get<1>(startTimeAndValues), true};
+    }
 }
 
 void SequenceManager::abortSequence()
