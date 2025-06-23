@@ -216,3 +216,18 @@ TEST_F(SequenceManagerTest, TimeSwappedSequenceSendsValuesInCorrectOrder) {
     sequenceManager->StartSequence(sequence, nlohmann::json(), "");
 
 }
+
+TEST_F(SequenceManagerTest, UTF8CharacterIn_json) {
+    using ::testing::_;
+    using ::testing::ElementsAre;
+    using ::testing::InSequence;
+
+    testing::Sequence seq;
+    EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_öä😀", ElementsAre(2), false)).InSequence(seq);
+    EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_öä😀", ElementsAre(1), false)).InSequence(seq);
+    EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_öä😀", ElementsAre(0), false)).InSequence(seq);
+
+    nlohmann::json sequence = UTF8CharacterIn_json;
+    sequenceManager->StartSequence(sequence, nlohmann::json(), "");
+
+}

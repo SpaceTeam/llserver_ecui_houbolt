@@ -155,4 +155,59 @@ inline nlohmann::json TimeStampsSwapped_json = R"({
     }
   ]
 })"_json;
+
+inline nlohmann::json UTF8CharacterIn_json = R"(
+{
+  "globals": {
+    "endTime": 1,
+    "interpolation": {
+      "valve_öä😀": "none"
+    },
+    "interval": 0.01,
+    "startTime": -0.5
+  },
+  "data": [
+    {
+      "timestamp": "START",
+      "name": "start",
+      "desc": "start",
+      "actions": [
+        {
+          "timestamp": 0.0,
+          "valve_öä😀": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": 0.5,
+      "name": "middle",
+      "desc": "middle",
+      "actions": [
+        {
+          "timestamp": 0.0,
+          "valve_öä😀": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": "END",
+      "name": "end",
+      "desc": "end",
+      "actions": [
+        {
+          "timestamp": 0.0,
+          "valve_öä😀": [
+            0
+          ]
+        }
+      ]
+    }
+  ]
+}
+)"_json;
+
 #endif //SEQUENCEMANAGERTESTDATA_H
