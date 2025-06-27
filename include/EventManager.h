@@ -51,26 +51,28 @@ private:
     double GetArgument(const std::string &stateName, nlohmann::json& param, double& newValue);
     void GetArgumentList(const std::string &stateName, nlohmann::json& event, std::vector<double>& argumentList, double& newValue);
 
-    ~EventManager();
 public:
-
-    void Init(Config &config);
+    virtual void Init(Config &config);
 
     /**
      * this is used, so mapping and command loading don't need to be done at the same time,
      * this way, the event manager doesn't need to call any classes below the llinterface
      */
-    void Start();
+    virtual void Start();
 
-    void AddChannelTypes(std::map<std::string, std::string>& channelTypes);
-    void AddCommands(std::map<std::string, command_t> commands);
-    std::map<std::string, command_t> GetCommands();
-    void OnStateChange(const std::string& stateName, double oldValue, double newValue);
+    virtual void AddChannelTypes(std::map<std::string, std::string>& channelTypes);
 
-    void ExecuteRegexCommandOrState(const std::string &regexKey, nlohmann::json &events, const std::string &stateName, double oldValue, double newValue, bool testOnly);
-    void ExecuteCommandOrState(const std::string &stateName, double oldValue, double newValue, bool useDefaultMapping, bool testOnly);
-    void ExecuteCommand(const std::string &commandName, std::vector<double> &params, bool testOnly);
+    virtual void AddCommands(std::map<std::string, command_t> commands);
 
+    virtual std::map<std::string, command_t> GetCommands();
+
+    virtual void OnStateChange(const std::string& stateName, double oldValue, double newValue);
+
+    virtual void ExecuteRegexCommandOrState(const std::string &regexKey, nlohmann::json &events, const std::string &stateName, double oldValue, double newValue, bool testOnly);
+    virtual void ExecuteCommandOrState(const std::string &stateName, double oldValue, double newValue, bool useDefaultMapping, bool testOnly);
+    virtual void ExecuteCommand(const std::string &commandName, std::vector<double> &params, bool testOnly);
+
+    virtual ~EventManager();
 
 };
 #endif //LLSERVER_ECUI_HOUBOLT_EVENTMANAGER_H

@@ -5,15 +5,14 @@
 #ifndef TXV_ECUI_LLSERVER_DEBUG_H
 #define TXV_ECUI_LLSERVER_DEBUG_H
 
-#include <mutex>
-#include <string>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <unistd.h>
-#include <thread>
+#include <cstdint>
+#include <cstdio>
 #include <fstream>
+#include <mutex>
 #include <sstream>
+#include <string>
+#include <thread>
+#include <unistd.h>
 
 #include "common.h"
 #include "utility/Config.h"
@@ -47,14 +46,14 @@ public:
 
     static void close();
     static void flush();
-    static void changeOutputFile(std::string outFilePath);
-    static void log(std::string msg);
+    static void changeOutputFile(const std::string &outFilePath);
+    static void log(const std::string &msg);
 
-    static int32_t print(std::string fmt, ...);
+    static int32_t print(const std::string &fmt, ...);
     static int32_t printNoTime(std::string fmt, ...);
-    static int32_t error(std::string fmt, ...);
-    static int32_t info(std::string fmt, ...);
-    static int32_t warning(std::string fmt, ...);
+    static int32_t error(const std::string &fmt, ...);
+    static int32_t info(const std::string &fmt, ...);
+    static int32_t warning(const std::string& fmt, ...);
 
 };
 

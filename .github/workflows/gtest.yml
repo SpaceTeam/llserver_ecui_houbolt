@@ -1,0 +1,31 @@
+name: Run GTests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ 
+
+      - name: Configure with CMake Preset
+        run: cmake --preset=local-dev
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest --output-on-failure

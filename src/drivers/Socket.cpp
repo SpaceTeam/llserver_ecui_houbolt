@@ -40,7 +40,7 @@ Socket::~Socket()
 int Socket::Connect(int32_t tries)
 {
 
-    struct sockaddr_in serv_addr;
+    sockaddr_in serv_addr{};
 
     if ((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -84,14 +84,14 @@ int Socket::Connect(int32_t tries)
 
 }
 
-void Socket::Send(std::string msg)
+void Socket::Send(const std::string& msg)
 {
     std::lock_guard<std::mutex> lock(socketMtx);
     if (connectionActive)
     {
         if (msg.size() > MAX_MSG_LENGTH)
         {
-            Debug::error("Socket - %s: error message longer than supported, closing socket..."), name.c_str();
+            Debug::error("Socket - %s: error message longer than supported, closing socket...", name.c_str());
             Close();
         }
         else
@@ -105,14 +105,14 @@ void Socket::Send(std::string msg)
             int sentHeaderBytes = send(socketfd, header, HEADER_SIZE, 0);
             if (sentHeaderBytes < 0 || sentHeaderBytes != HEADER_SIZE)
             {
-                Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
+                Debug::error("Socket - %s: error at send occured, closing socket...", name.c_str());
                 Close();
                 return;
             }
             int sentBytes = send(socketfd, msg.c_str(), msg.size(), 0);
             if (sentBytes < 0 || sentBytes != (int)(msg.size()))
             {
-                Debug::error("Socket - %s: error at send occured, closing socket..."), name.c_str();
+                Debug::error("Socket - %s: error at send occured, closing socket...",name.c_str()) ;
                 Close();
             }
         }

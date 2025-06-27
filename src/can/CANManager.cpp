@@ -392,7 +392,7 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 				msg += "\nNode ID: " + std::to_string(nodeID) + "\n";
 				msg += "Channel ID: " + std::to_string(canMsg->bit.info.channel_id) + "\n";
 				msg += "CMD ID: " + std::to_string(canMsg->bit.cmd_id) + "\n";
-				for (int i = 0; i < payloadLength; i++)
+				for (uint32_t i = 0; i < payloadLength; i++)
 				{
 				    msg += std::to_string(canMsg->bit.data.uint8[i]) + " ";
 				}
