@@ -119,7 +119,7 @@ void SequenceManager::AbortSequence(std::string abortMsg)
     {
         EcuiSocket::SendJson("abort", abortMsg);
         #ifndef NO_INFLUX
-        logger.log("sequence_abort", "Sequenz xyz: " + abortMsg, utils::getCurrentTimestamp());
+        logger.log("sequence_abort", this->sequenceName + ": " + abortMsg, utils::getCurrentTimestamp());
         #endif
         Debug::info("Aborting... " + abortMsg);
 
@@ -241,12 +241,13 @@ bool SequenceManager::LoadSequence(nlohmann::json jsonSeq)
     return true;
 }
 
-void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments)
+void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments, std::string sequenceName)
 {
     if (sequenceThread.joinable())
     	sequenceThread.join();
     if (!sequenceRunning && !isAbortRunning)
     {
+this->sequenceName = sequenceName;
         jsonSequence = jsonSeq;
         jsonAbortSequence = jsonAbortSeq;
         SequenceManager::comments = comments;
@@ -407,7 +408,7 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 	bool firstIteration = true;
 
     #ifndef NO_INFLUX
-    logger.log("sequence_start", std::string("Sequenz xyz"), utils::getCurrentTimestamp());
+    logger.log("sequence_start", this->sequenceName, utils::getCurrentTimestamp());
     #endif
 
 	while(!sequenceToStop)
@@ -549,7 +550,7 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
     Debug::info("Sequence ended");
 
     #ifndef NO_INFLUX
-    logger.log("sequence_end", std::string("Sequenz xyz"), utils::getCurrentTimestamp());
+    logger.log("sequence_end", this->sequenceName, utils::getCurrentTimestamp());
     logger.flush();
     #endif
 
