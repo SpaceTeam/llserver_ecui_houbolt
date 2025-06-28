@@ -89,6 +89,14 @@ void SequenceManager::Init(Config &config)
 
     isInitialized = true;
 	fileSystem = FileSystemAbstraction::Instance();
+
+    #ifndef NO_INFLUX
+    logger.Init(config["/INFLUXDB/database_ip"],
+                    config["/INFLUXDB/database_port"],
+                    config["/INFLUXDB/database_name"],
+                    config["/INFLUXDB/sequences_measurement"], MICROSECONDS,
+                    config["/INFLUXDB/buffer_size"]);
+    #endif
 }
 
 bool SequenceManager::GetAutoAbort()
@@ -110,6 +118,9 @@ void SequenceManager::AbortSequence(std::string abortMsg)
     if(sequenceRunning)
     {
         EcuiSocket::SendJson("abort", abortMsg);
+        #ifndef NO_INFLUX
+        logger.log("sequence_abort", "Sequenz xyz: " + abortMsg, utils::getCurrentTimestamp());
+        #endif
         Debug::info("Aborting... " + abortMsg);
 
         sequenceToStop = true;
@@ -395,6 +406,10 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 
 	bool firstIteration = true;
 
+    #ifndef NO_INFLUX
+    logger.log("sequence_start", std::string("Sequenz xyz"), utils::getCurrentTimestamp());
+    #endif
+
 	while(!sequenceToStop)
 	{
 		if (!firstIteration) {
@@ -422,6 +437,9 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 		if(sequenceTime_us >= nextTimerSync_us)
 		{
 			EcuiSocket::SendJson("timer-sync", ((sequenceTime_us/1000.0) / 1000.0));
+            #ifndef NO_INFLUX
+            logger.log("sequence_time", sequenceTime_us / 1000000.0, utils::getCurrentTimestamp());
+            #endif
 			nextTimerSync_us += timerSyncInterval;
 		}
 
@@ -529,6 +547,11 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
     sequenceToStop = false;
 
     Debug::info("Sequence ended");
+
+    #ifndef NO_INFLUX
+    logger.log("sequence_end", std::string("Sequenz xyz"), utils::getCurrentTimestamp());
+    logger.flush();
+    #endif
 
     Debug::flush();
 

@@ -128,5 +128,7 @@ class SequenceManager : public Singleton<SequenceManager>
 		EventManager *eventManager = nullptr;
 		FileSystemAbstraction *fileSystem = nullptr;
 
+		InfluxDbLogger logger;
+
 		std::thread sequenceThread;
 };
