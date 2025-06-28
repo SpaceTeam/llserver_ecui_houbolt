@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include <atomic>
+#include <utility/FileSystemAbstraction.h>
 
 #include "utility/json.hpp"
 #include "utility/Logging.h"
@@ -36,7 +37,7 @@ class SequenceManager : public Singleton<SequenceManager>
 		bool GetAutoAbort();
 		void SetAutoAbort(bool active);
 
-		void StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments);
+		void StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments, std::string sequenceName);
 		void AbortSequence(std::string abortMsg="abort");
 
 		void WritePostSeqComment(std::string msg);
@@ -59,6 +60,36 @@ class SequenceManager : public Singleton<SequenceManager>
 
 		void plotMaps(uint8_t option);
 
+		/**
+		 * Interpolate linearly between start and end values.
+		 *
+		 * @param startTimeAndValues A tuple containing the start time and values.
+		 *                           The first element is the start time,
+		 *                           and the second element is a vector of values.
+		 * @param endTimeAndValues   An optional tuple containing the end time and values.
+		 *                           The first element is the end ,
+		 *                           and the second element is a vector of values.
+		 * @param currentTime        The current time.
+		 * @return A tuple containing:
+		 *         - A vector of interpolated values, if one could be computed.
+		 *         - A boolean indicating whether the interpolation is complete. If true,
+		 *           the end value should be used as the new start value for the next interpolation.
+		 */
+		static std::tuple<std::optional<std::vector<double>>, bool> interpolateLinear(
+			const std::tuple<int64_t, std::vector<double>> &startTimeAndValues,
+			const std::optional<std::tuple<int64_t, std::vector<double>>>& endTimeAndValues,
+			int64_t currentTime
+		);
+
+		/**
+		 * No interpolation. Conforms to the api of interpolateLinear.
+		 */
+		static std::tuple<std::optional<std::vector<double>>, bool> interpolateNone(
+			const std::tuple<int64_t, std::vector<double>> &startTimeAndValues,
+			const std::optional<std::tuple<int64_t, std::vector<double>>>& endTimeAndValues,
+			int64_t currentTime
+		);
+
 		bool sequenceRunning = false;
 		bool sequenceToStop = false;
 
@@ -76,10 +107,11 @@ class SequenceManager : public Singleton<SequenceManager>
 		nlohmann::json jsonSequence = nlohmann::json::object();
 		nlohmann::json jsonAbortSequence = nlohmann::json::object();
 
-		std::string comments = "";
-		std::string currentDirPath = "";
-		std::string logFileName = "";
-		std::string lastDir = "";
+		std::string sequenceName;
+		std::string comments;
+		std::string currentDirPath;
+		std::string logFileName;
+		std::string lastDir;
 
 		std::atomic_bool isInitialized = false;
 
@@ -95,6 +127,9 @@ class SequenceManager : public Singleton<SequenceManager>
 
 		LLInterface *llInterface = nullptr;
 		EventManager *eventManager = nullptr;
-		
+		FileSystemAbstraction *fileSystem = nullptr;
+
+		InfluxDbLogger logger;
+
 		std::thread sequenceThread;
 };

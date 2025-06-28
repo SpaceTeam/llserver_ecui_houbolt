@@ -35,6 +35,9 @@ public:
             instance = nullptr;
         }
     }
+    static void SetInstance(T* new_instance) {
+        instance = new_instance;
+    }
 
 };
 

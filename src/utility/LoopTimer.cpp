@@ -19,6 +19,7 @@ void LoopTimer::init()
 	startTime = std::chrono::steady_clock::now();
 	lastTime = startTime;
 	nextTime = startTime;
+	time = startTime;
 }
 
 int LoopTimer::wait()
@@ -39,12 +40,10 @@ int LoopTimer::wait()
 	return EXIT_SUCCESS;
 }
 
-uint64_t LoopTimer::getTimePoint_us()
-{
+uint64_t LoopTimer::getTimePoint_us() const {
 	return std::chrono::time_point_cast<std::chrono::microseconds>(time).time_since_epoch().count();
 }
 
-uint64_t LoopTimer::getTimeElapsed_us()
-{
+uint64_t LoopTimer::getTimeElapsed_us() const {
 	return std::chrono::duration_cast<std::chrono::microseconds>(time - startTime).count();
 }
