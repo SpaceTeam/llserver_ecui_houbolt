@@ -231,3 +231,17 @@ TEST_F(SequenceManagerTest, UTF8CharacterIn_json) {
     sequenceManager->StartSequence(sequence, nlohmann::json(), "");
 
 }
+
+
+TEST_F(SequenceManagerTest, SingleValueIsExecuted) {
+
+    testing::Sequence executeCommandSequence;
+
+    std::vector<double> value = {2};
+    EXPECT_CALL(*event_manager_mock,ExecuteCommand("valve_1",value,false));
+
+    nlohmann::json sequence = SingleValueIsExecuted_json;
+
+    sequenceManager->StartSequence(sequence,nlohmann::json(),"");
+
+}

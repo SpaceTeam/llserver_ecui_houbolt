@@ -27,8 +27,11 @@ add_library(${PROJECT_NAME}_lib STATIC ${sources})
 # Create an executable that links to this library
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
-option(TEST "test with simple CAN Driver simulation" OFF)
-if(TEST)
+option(E2E_TEST  "test with simple CAN Driver simulation" OFF)
+option(NO_INFLUX "Disable influxdb logging" OFF)
+option(NO_CANLIB "Disable Kvaser CANLIB" OFF)
+option(NO_PYTHON "Disable Python" OFF)
+if(E2E_TEST)
    add_compile_definitions(TEST_LLSERVER)
 endif()
 
