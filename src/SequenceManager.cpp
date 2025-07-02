@@ -1,6 +1,7 @@
 #include "SequenceManager.h"
 
 #include <iomanip>
+#include <optional>
 
 #include "utility/json.hpp"
 #include "utility/utils.h"

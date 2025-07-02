@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include <atomic>
+#include <optional>
 #include <utility/FileSystemAbstraction.h>
 
 #include "utility/json.hpp"

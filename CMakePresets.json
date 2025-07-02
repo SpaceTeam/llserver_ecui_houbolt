@@ -32,6 +32,19 @@
         "CMAKE_BUILD_TYPE": "Release"
       }
     }
-
+    ,
+    {
+      "name": "release",
+      "displayName": "Release",
+      "description": "Release build ",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/releaseBuild",
+      "cacheVariables": {
+        "NO_PYTHON": "OFF",
+        "NO_CANLIB": "OFF",
+        "NO_INFLUX": "OFF",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
   ]
 }
