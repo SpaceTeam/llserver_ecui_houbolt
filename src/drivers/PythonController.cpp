@@ -211,10 +211,10 @@ void PythonController::StartPythonScript(std::string scriptPath, std::vector<std
 void PythonController::SetupImports()
 {
     if (PyImport_AppendInittab("_state_controller", PyInit_StateController) == -1) {
-        throw new std::runtime_error("PythonController - SetupImports: could not extend _state_controller module");
+        throw std::runtime_error("PythonController - SetupImports: could not extend _state_controller module");
     }
     if (PyImport_AppendInittab("_event_manager", PyInit_EventManager) == -1) {
-        throw new std::runtime_error("PythonController - SetupImports: could not extend _event_manager module");
+        throw std::runtime_error("PythonController - SetupImports: could not extend _event_manager module");
     }
 
     Py_Initialize();
