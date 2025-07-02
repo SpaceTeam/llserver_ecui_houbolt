@@ -72,7 +72,7 @@ public:
     virtual void ExecuteCommandOrState(const std::string &stateName, double oldValue, double newValue, bool useDefaultMapping, bool testOnly);
     virtual void ExecuteCommand(const std::string &commandName, std::vector<double> &params, bool testOnly);
 
-    virtual ~EventManager();
+    virtual ~EventManager() = default;
 
 };
 #endif //LLSERVER_ECUI_HOUBOLT_EVENTMANAGER_H

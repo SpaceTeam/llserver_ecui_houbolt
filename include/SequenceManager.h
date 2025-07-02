@@ -67,7 +67,7 @@ class SequenceManager : public Singleton<SequenceManager>
 		 *                           The first element is the start time,
 		 *                           and the second element is a vector of values.
 		 * @param endTimeAndValues   An optional tuple containing the end time and values.
-		 *                           The first element is the end ,
+		 *                           The first element is the end time,
 		 *                           and the second element is a vector of values.
 		 * @param currentTime        The current time.
 		 * @return A tuple containing:

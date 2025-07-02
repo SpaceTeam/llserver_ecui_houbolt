@@ -47,7 +47,7 @@ class LLInterface : public Singleton<LLInterface>
 		static nlohmann::json StatesToJson(std::map<std::string, std::tuple<double, uint64_t, bool>> &states);
 
 public:
-		virtual ~LLInterface();
+		virtual ~LLInterface() = default;
 
 		virtual void Init(Config &config);
 
