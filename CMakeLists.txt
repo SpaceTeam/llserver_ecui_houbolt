@@ -47,7 +47,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(LINUX)
-   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic)
+   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -latomic)
       
    if(NOT NO_CANLIB)
       target_link_libraries(${PROJECT_NAME} PRIVATE -lcanlib)

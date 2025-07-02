@@ -1,7 +1,6 @@
 #include "SequenceManager.h"
 
 #include <iomanip>
-#include <experimental/filesystem>
 
 #include "utility/json.hpp"
 #include "utility/utils.h"
@@ -318,7 +317,7 @@ void SequenceManager::CheckSensors(int64_t microTime)
 
     for (const auto& sensor : sensors)
     {
-        if (autoAbortEnabled && (sensorsNominalRangeMap.find(sensor.first) != sensorsNominalRangeMap.end()))
+        if (autoAbortEnabled && (sensorsNominalRangeMap.contains(sensor.first)))
         {
             auto currInterval = sensorsNominalRangeMap[sensor.first].begin();
             double currValue = std::get<0>(sensor.second);
@@ -364,14 +363,14 @@ double SequenceManager::GetTimestamp(nlohmann::json obj)
             {
                 time = jsonSequence["globals"]["endTime"];
             } else {
-	            Debug::error("in GetTimestamp: string timestamps have to be START or END. It was: %s", obj["timestamp"]);
+	            Debug::error("in GetTimestamp: string timestamps have to be START or END. It was: %s", obj["timestamp"].dump().c_str());
             }
         } else if (obj["timestamp"].type() == nlohmann::json::value_t::number_float
                    || obj["timestamp"].type() == nlohmann::json::value_t::number_integer
                    || obj["timestamp"].type() == nlohmann::json::value_t::number_unsigned) {
 	        time = obj["timestamp"];
         } else {
-        	Debug::error("in SequenceManager GetTimestamp: timestamp has to be a string or a number. It was: %s",obj["timestamp"]);
+        	Debug::error("in SequenceManager GetTimestamp: timestamp has to be a string or a number. It was: %s",obj["timestamp"].dump().c_str());
         }
     }
     else {
@@ -425,7 +424,7 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 			nextTimerSync_us += timerSyncInterval;
 		}
 
-		std::string msg = std::to_string(sequenceTime_us / 1000000) + ";";
+		std::string msg = std::to_string(sequenceTime_us / 1000000.0) + ";";
 		syncMtx.lock();
 
 		//log nominal ranges
@@ -450,7 +449,7 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
             bool shouldAdvance;
 
             Interpolation inter = Interpolation::NONE;
-            if (interpolationMap.find(devItem.first) == interpolationMap.end())
+            if (!interpolationMap.contains(devItem.first))
             {
                 Debug::error("%s not found in interpolation map, falling back to no interpolation",
                              devItem.first.c_str());
