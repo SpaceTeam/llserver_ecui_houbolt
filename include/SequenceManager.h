@@ -38,7 +38,7 @@ class SequenceManager : public Singleton<SequenceManager>
 		bool GetAutoAbort();
 		void SetAutoAbort(bool active);
 
-		void StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments);
+		void StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments, std::string sequenceName);
 		void AbortSequence(std::string abortMsg="abort");
 
 		void WritePostSeqComment(std::string msg);
@@ -108,6 +108,7 @@ class SequenceManager : public Singleton<SequenceManager>
 		nlohmann::json jsonSequence = nlohmann::json::object();
 		nlohmann::json jsonAbortSequence = nlohmann::json::object();
 
+		std::string sequenceName;
 		std::string comments;
 		std::string currentDirPath;
 		std::string logFileName;
@@ -128,6 +129,8 @@ class SequenceManager : public Singleton<SequenceManager>
 		LLInterface *llInterface = nullptr;
 		EventManager *eventManager = nullptr;
 		FileSystemAbstraction *fileSystem = nullptr;
+
+		InfluxDbLogger logger;
 
 		std::thread sequenceThread;
 };

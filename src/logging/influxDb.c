@@ -42,8 +42,45 @@ void set_credentials(influxDbContext *cntxt, const char *username, const char *p
     safe_str_cpy(cntxt->password, password, SETTINGS_LENGTH);
 }
 
-int initDbContext(influxDbContext *cntxt, const char *hostname, const char *port, const char *database) {
+int createSocket(influxDbContext *cntxt)
+{
+    if (cntxt->sock_fd >= 0) {
+        // close the existing socket if it is open
+        close(cntxt->sock_fd);
+        cntxt->sock_fd = -1;
+    }
+
     struct addrinfo hints, *ai = NULL;
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if (getaddrinfo(cntxt->hostname, cntxt->port, &hints, &ai) != 0)
+    {
+        return -1;
+    }
+
+    cntxt->sock_fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+    if (cntxt->sock_fd < 0)
+    {
+        freeaddrinfo(ai);
+        return -1;
+    }
+
+    if (connect(cntxt->sock_fd, ai->ai_addr, ai->ai_addrlen) < 0)
+    {
+        close(cntxt->sock_fd);
+        cntxt->sock_fd = -1;
+        freeaddrinfo(ai);
+        return -1;
+    }
+
+    freeaddrinfo(ai);
+    return cntxt->sock_fd;
+}
+
+int initDbContext(influxDbContext *cntxt, const char *hostname, const char *port, const char *database) {
 
     cntxt->sock_fd = -1;
     memset(cntxt->user, 0, SETTINGS_LENGTH);
@@ -54,31 +91,7 @@ int initDbContext(influxDbContext *cntxt, const char *hostname, const char *port
     safe_str_cpy(cntxt->port, port, SETTINGS_LENGTH);
     safe_str_cpy(cntxt->db_name, database, SETTINGS_LENGTH);
 
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-
-    do {
-        if(getaddrinfo(hostname, port, &hints, &ai) != 0) {
-            break;
-        }
-
-        cntxt->sock_fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-
-        if(cntxt->sock_fd < 0) {
-            break;
-        }
-
-        if(connect(cntxt->sock_fd, ai->ai_addr, ai->ai_addrlen) < 0) {
-            (void) close(cntxt->sock_fd);
-            cntxt->sock_fd = -1;
-        }
-    }
-    while (0);
-
-    freeaddrinfo(ai);
-
-    return cntxt->sock_fd;
+    return createSocket(cntxt);
 }
 
 int deInitDbContext(influxDbContext *cntxt) {
@@ -86,7 +99,9 @@ int deInitDbContext(influxDbContext *cntxt) {
 }
 
 
-int sendData(influxDbContext *cntxt, char *data, size_t length) {
+int sendData(influxDbContext *cntxt, char *data, size_t length)
+{
+    createSocket(cntxt);
     char http_header[2048];
     size_t ret;
     size_t header_length = 0, sent = 0;

@@ -118,7 +118,7 @@ TEST_F(SequenceManagerTest, StartIsExecutedOnlyOnce) {
 
     nlohmann::json sequence = StartIsExecutedOnlyOnce_json;
 
-    sequenceManager->StartSequence(sequence,nlohmann::json(),"");
+    sequenceManager->StartSequence(sequence,nlohmann::json(),"", "");
 
 }
 
@@ -149,7 +149,7 @@ TEST_F(SequenceManagerTest, LinearInterpolationIsCorrect) {
         }));
 
     nlohmann::json sequence = LinearInterpolationTest1_json;
-    sequenceManager->StartSequence(sequence, nlohmann::json(), "");
+    sequenceManager->StartSequence(sequence, nlohmann::json(), "", "");
 
     // Wait for sequence to finish
     while (sequenceManager->IsSequenceRunning()) {}
@@ -157,7 +157,7 @@ TEST_F(SequenceManagerTest, LinearInterpolationIsCorrect) {
     // We should have approximatly 100 calls.
     EXPECT_NEAR(observed.size(), expected_calls,1);
     // Check linearity: value should be start_value + (end_value - start_value) * (t/duration)
-    for (size_t i = 0; i < observed.size(); ++i) {
+    for (int i = 0; i < observed.size(); ++i) {
         double t = observed[i].first;
         double value = observed[i].second;
         double expected = start_value + (end_value - start_value) * (t / duration);
@@ -180,7 +180,7 @@ TEST_F(SequenceManagerTest, AbortSequenceSetsValueAndStopsQuickly) {
     nlohmann::json sequence = StartIsExecutedOnlyOnce_json;
     nlohmann::json abort_sequence = SimpleAbortScenario_json;
 
-    sequenceManager->StartSequence(sequence, abort_sequence, "");
+    sequenceManager->StartSequence(sequence, abort_sequence, "", "");
 
     // Wait 0.5s, then abort
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -213,7 +213,7 @@ TEST_F(SequenceManagerTest, TimeSwappedSequenceSendsValuesInCorrectOrder) {
     EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_1", ElementsAre(100), false)).InSequence(seq);
 
     nlohmann::json sequence = TimeStampsSwapped_json;
-    sequenceManager->StartSequence(sequence, nlohmann::json(), "");
+    sequenceManager->StartSequence(sequence, nlohmann::json(), "", "");
 
 }
 
@@ -228,7 +228,7 @@ TEST_F(SequenceManagerTest, UTF8CharacterIn_json) {
     EXPECT_CALL(*event_manager_mock, ExecuteCommand("valve_öä😀", ElementsAre(0), false)).InSequence(seq);
 
     nlohmann::json sequence = UTF8CharacterIn_json;
-    sequenceManager->StartSequence(sequence, nlohmann::json(), "");
+    sequenceManager->StartSequence(sequence, nlohmann::json(), "", "");
 
 }
 
@@ -242,6 +242,6 @@ TEST_F(SequenceManagerTest, SingleValueIsExecuted) {
 
     nlohmann::json sequence = SingleValueIsExecuted_json;
 
-    sequenceManager->StartSequence(sequence,nlohmann::json(),"");
+    sequenceManager->StartSequence(sequence,nlohmann::json(),"", "");
 
 }
