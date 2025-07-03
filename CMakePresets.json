@@ -18,6 +18,19 @@
         "NO_INFLUX": "ON",
         "CMAKE_BUILD_TYPE": "Debug"
       }
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "description": "Release build ",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/releaseBuild",
+      "cacheVariables": {
+        "NO_PYTHON": "OFF",
+        "NO_CANLIB": "OFF",
+        "NO_INFLUX": "OFF",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
     }
   ]
 }

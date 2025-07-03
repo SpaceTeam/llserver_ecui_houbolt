@@ -9,7 +9,8 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall")
 
 include_directories(include include/can_houbolt)
 
-file(GLOB_RECURSE sources main.cpp src/*.cpp src/*.c include/*.h)
+file(GLOB_RECURSE sources src/*.cpp src/*.c include/*.h)
+
 
 if(NO_PYTHON)
   MESSAGE(STATUS "Python features are not used")
@@ -20,10 +21,17 @@ else()
   include_directories(${Python3_INCLUDE_DIRS})
 endif()
 
-add_executable(${PROJECT_NAME} ${sources})
+# Define a library for the main project
+add_library(${PROJECT_NAME}_lib STATIC ${sources})
 
-option(TEST "test with simple CAN Driver simulation" OFF)
-if(TEST)
+# Create an executable that links to this library
+add_executable(${PROJECT_NAME} main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
+option(E2E_TEST  "test with simple CAN Driver simulation" OFF)
+option(NO_INFLUX "Disable influxdb logging" OFF)
+option(NO_CANLIB "Disable Kvaser CANLIB" OFF)
+option(NO_PYTHON "Disable Python" OFF)
+if(E2E_TEST)
    add_compile_definitions(TEST_LLSERVER)
 endif()
 
@@ -42,7 +50,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(LINUX)
-   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -lstdc++fs -latomic)
+   target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads -latomic)
       
    if(NOT NO_CANLIB)
       target_link_libraries(${PROJECT_NAME} PRIVATE -lcanlib)
@@ -53,3 +61,8 @@ if(LINUX)
 else()
    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 endif()
+
+if(TEST)
+    enable_testing()
+    add_subdirectory(tests)
+endif ()

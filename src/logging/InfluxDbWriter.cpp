@@ -20,7 +20,7 @@ void InfluxDbWriter::Init() {
     }
 
     if(initDbContext(&cntxt, host.c_str(), portStr.c_str(), db.c_str()) < 0) {
-        throw new std::runtime_error("Couldn't initialize influxDbWriter (bad context)");
+        throw std::runtime_error("Couldn't initialize influxDbWriter (bad context)");
     }
 }
 
