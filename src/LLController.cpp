@@ -122,7 +122,8 @@ void LLController::OnECUISocketRecv(nlohmann::json msg)
                 //send(sock, strmsg.c_str(), strmsg.size(), 0);
                 nlohmann::json seq = msg["content"][0];
                 nlohmann::json abortSeq = msg["content"][1];
-                seqManager->StartSequence(msg["content"][0], msg["content"][1], msg["content"][2]);
+                std::string seqName = (msg["content"].size() > 3) ? msg["content"][3].get<std::string>() : "Unknown Sequence";
+                seqManager->StartSequence(msg["content"][0], msg["content"][1], msg["content"][2], seqName);
             }
             else if (type.compare("send-postseq-comment") == 0)
             {

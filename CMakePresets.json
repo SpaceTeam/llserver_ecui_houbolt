@@ -17,6 +17,9 @@
         "NO_CANLIB": "ON",
         "NO_INFLUX": "ON",
         "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "environment": {
+        "ECUI_CONFIG_PATH": "${sourceDir}/sample_config"
       }
     },
     {
