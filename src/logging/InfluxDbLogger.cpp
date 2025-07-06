@@ -30,6 +30,14 @@ void InfluxDbLogger::log(std::string source, std::string msg, std::size_t timest
     dbWriter->endDataPoint(timestamp);
 }
 
+void InfluxDbLogger::log(const std::string &key, const std::string &msg, const std::size_t timestamp) const {
+    dbWriter->startDataPoint();
+    dbWriter->addTag("key", key);
+    dbWriter->tagsDone();
+    dbWriter->addField("msg", msg);
+    dbWriter->endDataPoint(timestamp);
+}
+
 void InfluxDbLogger::log(std::string key, std::size_t value, std::size_t timestamp){
     dbWriter->startDataPoint();
     dbWriter->addTag("key", key);

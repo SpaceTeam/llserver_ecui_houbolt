@@ -14,6 +14,9 @@ class InfluxDbLogger
             void Init(std::string db_hostname, unsigned db_port, std::string db_name, std::string measurement, timestamp_precision_t precision, std::size_t buffer_size);
 
             void log(std::string source, std::string msg, std::size_t timestamp, Severity severity);
+
+            void log(const std::string &key, const std::string &msg, std::size_t timestamp) const;
+
             void log(std::string key, std::size_t value, std::size_t timestamp);
             void log(std::string key, double value, std::size_t timestamp);
             void log(std::string key, bool value, std::size_t timestamp);

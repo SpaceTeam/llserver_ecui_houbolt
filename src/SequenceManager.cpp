@@ -89,6 +89,14 @@ void SequenceManager::Init(Config &config)
 
     isInitialized = true;
 	fileSystem = FileSystemAbstraction::Instance();
+
+    #ifndef NO_INFLUX
+    logger.Init(config["/INFLUXDB/database_ip"],
+                    config["/INFLUXDB/database_port"],
+                    config["/INFLUXDB/database_name"],
+                    config["/INFLUXDB/sequences_measurement"], MICROSECONDS,
+                    config["/INFLUXDB/buffer_size"]);
+    #endif
 }
 
 bool SequenceManager::GetAutoAbort()
@@ -110,6 +118,9 @@ void SequenceManager::AbortSequence(std::string abortMsg)
     if(sequenceRunning)
     {
         EcuiSocket::SendJson("abort", abortMsg);
+        #ifndef NO_INFLUX
+        logger.log("sequence_abort", this->sequenceName + ": " + abortMsg, utils::getCurrentTimestamp());
+        #endif
         Debug::info("Aborting... " + abortMsg);
 
         sequenceToStop = true;
@@ -230,12 +241,13 @@ bool SequenceManager::LoadSequence(nlohmann::json jsonSeq)
     return true;
 }
 
-void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments)
+void SequenceManager::StartSequence(nlohmann::json jsonSeq, nlohmann::json jsonAbortSeq, std::string comments, std::string sequenceName)
 {
     if (sequenceThread.joinable())
     	sequenceThread.join();
     if (!sequenceRunning && !isAbortRunning)
     {
+        this->sequenceName = sequenceName;
         jsonSequence = jsonSeq;
         jsonAbortSequence = jsonAbortSeq;
         SequenceManager::comments = comments;
@@ -395,6 +407,10 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 
 	bool firstIteration = true;
 
+    #ifndef NO_INFLUX
+    logger.log("sequence_start", this->sequenceName, utils::getCurrentTimestamp());
+    #endif
+
 	while(!sequenceToStop)
 	{
 		if (!firstIteration) {
@@ -402,7 +418,6 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 			sequenceLoopTimer.wait();
 		}
 		firstIteration = false;
-
 
 		int64_t sequenceTime_us = sequenceLoopTimer.getTimeElapsed_us() + startTime_us;
 
@@ -422,6 +437,9 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 		if(sequenceTime_us >= nextTimerSync_us)
 		{
 			EcuiSocket::SendJson("timer-sync", ((sequenceTime_us/1000.0) / 1000.0));
+            #ifndef NO_INFLUX
+            logger.log("sequence_time", sequenceTime_us / 1000000.0, utils::getCurrentTimestamp());
+            #endif
 			nextTimerSync_us += timerSyncInterval;
 		}
 
@@ -529,6 +547,11 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
     sequenceToStop = false;
 
     Debug::info("Sequence ended");
+
+    #ifndef NO_INFLUX
+    logger.log("sequence_end", this->sequenceName, utils::getCurrentTimestamp());
+    logger.flush();
+    #endif
 
     Debug::flush();
 

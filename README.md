@@ -661,6 +661,12 @@ in case of an abort.
 	    }  
 	}
 
+### Logging of sequence start/end/abort to influx
+
+The llserver logs the start, end and abort of a sequence to influx under the measurement "sequences".
+This can be useful to be displayed in grafana as an annotation (in the dashboard settings), for example using this query:
+`SELECT msg AS "text", "key" AS "tags" FROM "sequences" WHERE ("key" = 'sequence_start' OR "key" = 'sequence_end' OR "key" = 'sequence_abort') AND $timeFilter`, and then set text as Text and tags as Tags in the Field mappings.
+
 ## TCP Socket Message Types
 
 In order to communicate with the webserver, a tcp socket connection is 
