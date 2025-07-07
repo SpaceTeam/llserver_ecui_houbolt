@@ -6,7 +6,7 @@
 #include "can_houbolt/can_cmds.h"
 #include "utility/utils.h"
 
-CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
+CANDriverKvaser::CANDriverKvaser(canRecvCallback_t onRecvCallback,
 								 std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs, Config &config) :
 	CANDriver(onRecvCallback, onErrorCallback)
 {
@@ -207,7 +207,12 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                 {
                     try
                     {
-                        canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, softwareTime, canDriver);
+                        // Copy the received data into a new buffer for the thread
+                        auto threadData = std::make_unique<uint8_t[]>(dlc);
+                        std::copy_n(data, dlc, threadData.get());
+                        std::thread([canDriver, canBusChannelID, id, dlc, softwareTime, threadData = std::move(threadData)]() {
+                            canDriver->onRecvCallback(canBusChannelID, id, threadData.get(), dlc, softwareTime, canDriver);
+                        }).detach();
                     }
                     catch(const std::exception& e)
                     {

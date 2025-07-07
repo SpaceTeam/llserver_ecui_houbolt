@@ -68,15 +68,21 @@ CANResult CANManager::Init(Config &config)
             	throw std::runtime_error("Can driver \"Kvaser\" specified in config but excluded by Cmake argument NO_CANLIB");
 				#else
             	Debug::print("Using Kvaser CAN driver");
-				canDriver = new CANDriverKvaser(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6),
-				                                std::bind(&CANManager::OnCANError, this, std::placeholders::_1), canBusChannelIDs, config);
+				canDriver = new CANDriverKvaser(
+					[this](auto&&... args) { OnCANRecv(std::forward<decltype(args)>(args)...); },
+					[this](auto&&... args) { OnCANError(std::forward<decltype(args)>(args)...); },
+					canBusChannelIDs, config
+				);
 				#endif
             }
             else if(can_driver == "SocketCAN")
 			{
             	Debug::print("Using SocketCAN driver");
-            	canDriver = new CANDriverSocketCAN(std::bind(&CANManager::OnCANRecv,  this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6),
-				                                   std::bind(&CANManager::OnCANError, this, std::placeholders::_1), config);
+				canDriver = new CANDriverSocketCAN(
+					[this](auto&&... args) { OnCANRecv(std::forward<decltype(args)>(args)...); },
+					[this](auto&&... args) { OnCANError(std::forward<decltype(args)>(args)...); },
+					config
+				);
 			}
             else
             {
