@@ -114,7 +114,9 @@ void InfluxDbWriter::flush() {
 
     // spawn a thread to send the buffer
     threads.emplace_back([this, buf = std::move(buf_to_send)]() mutable {
-        sendData(&cntxt, buf.data(), buf.size());
+        influxDbContext context = cntxt;
+        createSocket(&context); // create a new socket to ensure thread safety
+        sendData(&context, buf.data(), buf.size());
         // return the buffer to the pool
         std::lock_guard thread_lock(buffer_mutex);
         available_buffers.emplace_back(std::move(buf));

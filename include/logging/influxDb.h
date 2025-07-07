@@ -33,6 +33,8 @@ extern "C" {
     int initDbContext(influxDbContext *cntxt, const char *hostname, const char *port, const char *database);
     int deInitDbContext(influxDbContext *cntxt);
 
+    int createSocket(influxDbContext *cntxt);
+
     int sendData(influxDbContext *cntxt, char *data, size_t length);
 #ifdef __cplusplus
 }
