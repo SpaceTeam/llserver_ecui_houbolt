@@ -9,7 +9,7 @@
 #include "can/Node.h"
 
 
-CANDriverUDP::CANDriverUDP(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
+CANDriverUDP::CANDriverUDP(canRecvCallback_t onRecvCallback,
 									   std::function<void(std::string *)> onErrorCallback, Config &config) :
 	CANDriver(onRecvCallback, onErrorCallback)
 {
