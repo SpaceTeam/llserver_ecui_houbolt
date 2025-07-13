@@ -1,23 +1,25 @@
 #include "can/Node.h"
 
-#include <map>
-#include <cstring>
-#include <string>
-#include <functional>
-#include <utility>
-#include "utility/Config.h"
-#include "can/DigitalOut.h"
+#include "StateController.h"
 #include "can/ADC16.h"
 #include "can/ADC16Single.h"
 #include "can/ADC24.h"
-#include "can/DATA32.h"
-#include "can/Servo.h"
-#include "can/PneumaticValve.h"
 #include "can/Control.h"
-#include "can/PIControl.h"
+#include "can/DATA32.h"
+#include "can/DigitalOut.h"
 #include "can/IMU.h"
+#include "can/PIControl.h"
+#include "can/PneumaticValve.h"
 #include "can/Rocket.h"
-#include "StateController.h"
+#include "can/Servo.h"
+#include "utility/Config.h"
+#include <cstring>
+#include <functional>
+#include <map>
+#include <string>
+#include <utility>
+
+#include <format>
 #include <unistd.h>
 
 const std::vector<std::string> Node::states =
@@ -369,7 +371,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
             {
                 if (channelMap.find(channelID) == channelMap.end())
                 {
-                    throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: Channel not found");
+                    throw std::runtime_error(std::format("Node %d - ProcessSensorDataAndWriteToRingBuffer: Channel %d not found",nodeID,channelID));
                 }
                 ch = channelMap[channelID];
 
@@ -377,7 +379,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                 // Debug::print("Hello chid %d, value %f", channelID, currValue);
                 if (currValueLength <= 0)
                 {
-                    throw std::logic_error("Node - ProcessSensorDataAndWriteToRingBuffer: value length from channel is 0");
+                    throw std::logic_error(std::format("Node %d - ProcessSensorDataAndWriteToRingBuffer: value length from channel is 0",nodeID));
                 }
 
                 {
@@ -400,7 +402,7 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
             }
             catch (std::exception &e)
             {
-                throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: " + std::string(e.what()));
+                throw std::runtime_error(std::format("Node %d  - ProcessSensorDataAndWriteToRingBuffer: %s ",nodeID, std::string(e.what())));
             }
 
         }
@@ -419,7 +421,7 @@ void Node::ProcessCANCommand(Can_MessageData_t *canMsg, uint32_t &canMsgLength, 
         {
             if (channelMap.find(canMsg->bit.info.channel_id) == channelMap.end())
             {
-                throw std::runtime_error("Node - ProcessSensorDataAndWriteToRingBuffer: Channel not found");
+                throw std::runtime_error(std::format("Node %d- ProcessSensorDataAndWriteToRingBuffer: Channel %d not found",nodeID,canMsg->bit.info.channel_id));
             }
             Channel *channel = channelMap[canMsg->bit.info.channel_id];
             channel->ProcessCANCommand(canMsg, canMsgLength, timestamp);
