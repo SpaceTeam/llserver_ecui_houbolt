@@ -109,16 +109,14 @@ void SequenceManager::AbortSequence(std::string abortMsg)
 {
     if(sequenceRunning)
     {
-        EcuiSocket::SendJson("abort", abortMsg);
         Debug::info("Aborting... " + abortMsg);
 
         sequenceToStop = true;
 		Debug::print("Asked sequence to stop...");
-		
-	sequenceThread.join();
+	    sequenceThread.join();
+	    abortSequence();
+        EcuiSocket::SendJson("abort", abortMsg);
 
-
-	abortSequence();
     }
     else
     {
@@ -408,8 +406,6 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
 
 		if(sequenceTime_us > endTime_us)
 		{
-			EcuiSocket::SendJson("timer-done");
-
 			sequenceToStop = true;
 		}
 
@@ -527,7 +523,7 @@ void SequenceManager::sequenceLoop(int64_t interval_us)
         Debug::log(msg + "\n");
     }
     sequenceToStop = false;
-
+    EcuiSocket::SendJson("timer-done");
     Debug::info("Sequence ended");
 
     Debug::flush();
