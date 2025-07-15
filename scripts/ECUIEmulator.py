@@ -40,10 +40,17 @@ def start_server():
 
 # Function to send JSON messages to all clients, with a custom header
 def send_message_to_all_clients(type,message):
-    msg = {
-        "type": type,
-        "content": [message,"",""]
-    }
+    if type == "sequence-start":
+        print("Starting sequence with message: %s", message)
+        msg = {
+            "type": type,
+            "content": [message,"",""]
+        }
+    else:
+        msg = {
+            "type": type,
+            "content": message
+        }
 
     str_msg = json.dumps(msg) + '\n'
     str_msg_len = len(str_msg)
