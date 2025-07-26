@@ -51,7 +51,7 @@ private:
     void AsyncListen();
 
 public:
-    CANDriverUDP(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
+    CANDriverUDP(canRecvCallback_t onRecvCallback,
                  std::function<void(std::string *)> onErrorCallback, Config &config);
     ~CANDriverUDP();
 
