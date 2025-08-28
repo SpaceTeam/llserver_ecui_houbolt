@@ -249,6 +249,7 @@ std::map<std::string, std::tuple<double, uint64_t>> Node::GetLatestSensorData()
     /* if (nodeID==8)
     Debug::print("NodeID %d, %zd sensor data transmissions", nodeID, uint64_t(count));*/
     count = 0;
+    delete[] copy;
     return sensorData;
 }
 

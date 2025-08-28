@@ -10,8 +10,11 @@
 #include <functional>
 #include <string>
 #include <canlib.h>
-#include "common.h"
+#include <readerwriterqueue.h>
 #include "utility/Config.h"
+#include "CanKvaserReceiveThread.h"
+#include "CommonKvaser.h"
+
 
 class CANDriverKvaser : public CANDriver
 {
@@ -20,6 +23,9 @@ class CANDriverKvaser : public CANDriver
 
 		std::map<uint32_t, CANParams> arbitrationParamsMap = std::map<uint32_t, CANParams>();
 		std::map<uint32_t, CANParams> dataParamsMap = std::map<uint32_t, CANParams>();
+
+        std::shared_ptr<::moodycamel::ReaderWriterQueue<std::unique_ptr<RawKvaserMessage>>> receivedMessagesQueue;
+        std::unique_ptr<CanKvaserReceiveThread> receiveThread;
 
         uint64_t blockingTimeout;
 
