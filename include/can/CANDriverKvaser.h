@@ -24,7 +24,6 @@ class CANDriverKvaser : public CANDriver
 		std::map<uint32_t, CANParams> arbitrationParamsMap = std::map<uint32_t, CANParams>();
 		std::map<uint32_t, CANParams> dataParamsMap = std::map<uint32_t, CANParams>();
 
-        std::shared_ptr<::moodycamel::ReaderWriterQueue<std::unique_ptr<RawKvaserMessage>>> receivedMessagesQueue;
         std::unique_ptr<CanKvaserReceiveThread> receiveThread;
 
         uint64_t blockingTimeout;
@@ -36,7 +35,7 @@ class CANDriverKvaser : public CANDriver
     public:
         CANDriverKvaser(canRecvCallback_t onRecvCallback,
 						std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs, Config &config);
-        ~CANDriverKvaser();
+        ~CANDriverKvaser() override;
 
         void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking);
 

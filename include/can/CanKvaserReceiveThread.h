@@ -27,6 +27,7 @@ public:
 private:
     std::atomic_bool running{false};
     std::atomic_int32_t messagesInQueue{0};
+    std::mutex enqueueMutex;
     std::shared_ptr<moodycamel::ReaderWriterQueue<std::unique_ptr<RawKvaserMessage>> > queue;
     canRecvCallback_t onRecvCallback;
     void receiveLoop();

@@ -137,7 +137,6 @@ int32_t Debug::warning(const std::string& fmt, ...)
         int printed;
         va_list args;
         char msg[1024];
-        std::size_t time_ms = getTime();
         std::string time_str = getTimeString();
 
         va_start(args, fmt);
