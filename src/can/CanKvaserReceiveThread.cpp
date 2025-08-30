@@ -7,7 +7,7 @@
 #include <utility>
 
 CanKvaserReceiveThread::CanKvaserReceiveThread(canRecvCallback_t onRecvCallback): queue(std::make_shared<moodycamel::ReaderWriterQueue<std::unique_ptr<RawKvaserMessage>>>(100)),
-    onRecvCallback(std::move(onRecvCallback)) {
+    onRecvCallback(onRecvCallback) {
     running = true;
 
     std::thread([this]() { this->receiveLoop(); }).detach();

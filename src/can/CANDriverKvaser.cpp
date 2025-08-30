@@ -8,7 +8,7 @@
 
 CANDriverKvaser::CANDriverKvaser(canRecvCallback_t onRecvCallback,
 								 std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs, Config &config) :
-	CANDriver(std::move(onRecvCallback), std::move(onErrorCallback))
+	CANDriver(onRecvCallback, std::move(onErrorCallback))
 {
     //arbitration bus parameters
     int32_t bitrate = config["/CAN/BUS/ARBITRATION/bitrate"];
