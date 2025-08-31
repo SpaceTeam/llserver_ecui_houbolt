@@ -43,6 +43,7 @@ void set_credentials(influxDbContext *cntxt, const char *username, const char *p
 }
 
 int initDbContext(influxDbContext *cntxt, const char *hostname, const char *port, const char *database) {
+    struct addrinfo hints, *ai = NULL;
 
     cntxt->sock_fd = -1;
     memset(cntxt->user, 0, SETTINGS_LENGTH);
@@ -53,18 +54,12 @@ int initDbContext(influxDbContext *cntxt, const char *hostname, const char *port
     safe_str_cpy(cntxt->port, port, SETTINGS_LENGTH);
     safe_str_cpy(cntxt->db_name, database, SETTINGS_LENGTH);
 
-    return createSocket(cntxt);
-}
-
-int createSocket(influxDbContext *cntxt) {
-    struct addrinfo hints, *ai = NULL;
-
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
 
     do {
-        if(getaddrinfo(cntxt->hostname, cntxt->port, &hints, &ai) != 0) {
+        if(getaddrinfo(hostname, port, &hints, &ai) != 0) {
             break;
         }
 
