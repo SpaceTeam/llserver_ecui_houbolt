@@ -1,33 +1,41 @@
 #include <iostream>
 
 #include "logging/InfluxDbWriter.h"
-
-#include <format>
-#include <iterator>
-#include <string>
-
 #include "logging/influxDb.h"
 #include "utility/Debug.h"
 
 using namespace std::chrono_literals;
 
-InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string dbName,
-                               std::size_t bufferSize) : buffer_size_max(bufferSize) {
+InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string dbName, std::size_t bufferSize) : buffer_size(bufferSize) {
     host = hostname;
     db = dbName;
     portStr = std::to_string(port);
 }
 
 void InfluxDbWriter::Init() {
-    if (initDbContext(&cntxt, host.c_str(), portStr.c_str(), db.c_str()) < 0) {
+    buffer = new char*[buffer_amount];
+    for (size_t i = 0; i < buffer_amount; i++)
+    {
+        buffer[i] = new char[buffer_size];
+    }
+
+    if(initDbContext(&cntxt, host.c_str(), portStr.c_str(), db.c_str()) < 0) {
         throw std::runtime_error("Couldn't initialize influxDbWriter (bad context)");
     }
 }
 
-InfluxDbWriter::~InfluxDbWriter() {
-    flush();
+InfluxDbWriter::~InfluxDbWriter() { 
+    push();
     joinThreads();
 
+    if(buffer != nullptr) {
+        for (size_t i = 0; i < buffer_amount; i++)
+        {
+            delete buffer[i];
+        }
+        delete buffer;
+    }
+    
     (void) deInitDbContext(&cntxt);
 }
 
@@ -42,81 +50,113 @@ void InfluxDbWriter::setTimestampPrecision(timestamp_precision_t precision) {
 }
 
 void InfluxDbWriter::setMeasurement(std::string measurement) {
-    this->measurement = std::move(measurement);
+    this->measurement = measurement;
 }
 
 void InfluxDbWriter::startDataPoint() {
-    std::format_to(std::back_inserter(current_buffer), "{}", measurement);
+    if((buffer_size - buffer_pos) < (measurement.length())) {
+        push();
+    }
+    
+    buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], "%s", this->measurement.c_str());
 }
 
-void InfluxDbWriter::addTag(const std::string_view key, const std::string_view value) {
-    std::format_to(std::back_inserter(current_buffer), ",{}={}", key, value);
+void InfluxDbWriter::addTag(std::string key, std::string value) {
+    if((buffer_size - buffer_pos) < (key.length() + value.length() + 2)) {
+        push();
+    }
+    buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], ",%s=%s", key.c_str(), value.c_str());
 }
 
 void InfluxDbWriter::tagsDone() {
-    std::format_to(std::back_inserter(current_buffer), " ");
+    if((buffer_size - buffer_pos) < 1) {
+        push();
+    }
+    buffer[buffer_sel][buffer_pos] = ' ';
+    buffer_pos++;
 }
 
 // Properly sanitize strings if needed, neglected so far because of the overhead (DB)
-void InfluxDbWriter::addField(const std::string_view key, const std::string_view value) {
-    std::format_to(std::back_inserter(current_buffer), "{}=\"{}\",", key, value);
+void InfluxDbWriter::addField(std::string key, std::string value) {
+    if((buffer_size - buffer_pos) < (key.length() + value.length() + 4)) {
+        push();
+    }
+    buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], "%s=\"%s\",", key.c_str(), value.c_str());
 }
 
-void InfluxDbWriter::addField(const std::string_view key, const std::size_t value) {
-    std::format_to(std::back_inserter(current_buffer), "{}={}i,", key, value);
+
+void InfluxDbWriter::addField(std::string key, std::size_t value) {
+    std::string str = std::to_string(value);
+    if((buffer_size - buffer_pos) < (key.length() + str.length() + 3)) {
+        push();
+    }
+    buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], "%s=%si,", key.c_str(), str.c_str());
 }
 
 // Might let user select the precision and scientific notation
-void InfluxDbWriter::addField(const std::string_view key, const double value) {
-    std::format_to(std::back_inserter(current_buffer), "{}={:.6f},", key, value);
+void InfluxDbWriter::addField(std::string key, double value) {
+    std::string str = std::to_string(value);
+
+    if((buffer_size - buffer_pos) < (key.length() + str.length() + 2)) {
+        push();
+    }
+    buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], "%s=%s,", key.c_str(), str.c_str());
 }
 
-void InfluxDbWriter::addField(const std::string_view key, const bool value) {
-    std::format_to(std::back_inserter(current_buffer), "{}={},", key, value ? "t" : "f");
+void InfluxDbWriter::addField(std::string key, bool value) {
+    char c = value ? 't' : 'f';
+
+    if((buffer_size - buffer_pos) < (key.length() + 2)) {
+        push();
+    }
+    buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], "%s=%c,", key.c_str(), c);
 }
 
-void InfluxDbWriter::endDataPoint(const std::size_t timestamp) {
-    // replace the last comma with a space
-    if (!current_buffer.empty() && current_buffer.back() == ',') {
-        current_buffer.pop_back();
+void InfluxDbWriter::endDataPoint(std::size_t timestamp) {
+    std::string ts_str = std::to_string(timestamp);
+    
+    if((buffer_size - buffer_pos) < (ts_str.length() + 1)) {
+        push();
     }
-    std::format_to(std::back_inserter(current_buffer), " {}", timestamp);
-    if (current_buffer.size() >= buffer_size_max) {
-        flush();
+    buffer[buffer_sel][buffer_pos-1] = ' ';
+    buffer_pos += sprintf(&buffer[buffer_sel][buffer_pos], "%s\n", ts_str.c_str());
+    last_measurement = buffer_pos-1;
+}
+
+void InfluxDbWriter::push() { 
+    // Might throw an exception if last measurement = 0 as this equals a too long entry (DB)
+    if (last_measurement > 0) {
+        joinThreads();
+        threads.push_back(std::thread(sendData, &cntxt, this->buffer[buffer_sel],  last_measurement));
+        transferPartialWrite();
+        buffer_sel = (buffer_sel + 1) & 0b1;
     }
+}
+
+void InfluxDbWriter::transferPartialWrite() {
+    std::size_t i = last_measurement;
+    
+    while(i < buffer_pos)
+    {
+        buffer[(buffer_sel + 1) & 0b1][i - last_measurement] = buffer[buffer_sel][i];   
+        i++;
+    }
+
+    buffer_pos = i - last_measurement;
+    last_measurement = 0;
 }
 
 void InfluxDbWriter::joinThreads() {
-    for (std::thread &t: threads) {
-        if (t.joinable()) {
-            t.join();
-        } else
-            Debug::warning("InfluxDbWriter thread was not joinable.");
+    for (std::thread &t : threads) {
+        if(t.joinable()) 
+        {
+            std::this_thread::sleep_for(10ms);
+            if(t.joinable()) t.join();
+        }
+        else Debug::warning("InfluxDbWriter thread was not joinable.");
     }
-}
+} 
 
 void InfluxDbWriter::flush() {
-    std::lock_guard lock(buffer_mutex);
-    if (current_buffer.empty()) {
-        Debug::warning("InfluxDbWriter flush called with empty buffer, nothing to push.");
-        return;
-    }
-
-    std::string buf_to_send = std::move(current_buffer);
-
-    // get a new buffer
-    if (!available_buffers.empty()) {
-        current_buffer = std::move(available_buffers.back());
-        available_buffers.pop_back();
-    } else {
-        current_buffer.clear();
-    }
-
-    // spawn a thread to send the buffer
-    threads.emplace_back([this, buf = std::move(buf_to_send)]() mutable {
-        sendData(&cntxt, buf.data(), buf.size());
-        // return the buffer to the pool
-        std::lock_guard thread_lock(buffer_mutex);
-        available_buffers.emplace_back(std::move(buf));
-    });
+    push();
 }
