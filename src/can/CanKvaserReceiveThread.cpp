@@ -6,7 +6,7 @@
 
 #include <utility>
 
-CanKvaserReceiveThread::CanKvaserReceiveThread(canRecvCallback_t onRecvCallback): queue(std::make_shared<moodycamel::ReaderWriterQueue<std::unique_ptr<RawKvaserMessage>>>(100)),
+CanKvaserReceiveThread::CanKvaserReceiveThread(canRecvCallback_t onRecvCallback): queue(std::make_shared<moodycamel::BlockingReaderWriterQueue<std::unique_ptr<RawKvaserMessage>>>(100)),
     onRecvCallback(onRecvCallback) {
     running = true;
 
@@ -34,7 +34,7 @@ bool CanKvaserReceiveThread::isRunning() const {
 void CanKvaserReceiveThread::receiveLoop(){
     while (running.load()) {
         std::unique_ptr<RawKvaserMessage> msg;
-        if (queue->try_dequeue(msg)) {
+        if (queue->wait_dequeue_timed(msg,std::chrono::milliseconds(1))) {
             --messagesInQueue;
             onRecvCallback(msg->busChannelID, msg->messageID, msg->data, msg->dlc, msg->timestamp, msg->driver);
         }
