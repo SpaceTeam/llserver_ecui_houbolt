@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-CANDriver::CANDriver(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
+CANDriver::CANDriver(canRecvCallback_t onRecvCallback,
                      std::function<void(std::string *)> onErrorCallback) :
 	onRecvCallback(std::move(onRecvCallback)),
 	onErrorCallback(std::move(onErrorCallback))

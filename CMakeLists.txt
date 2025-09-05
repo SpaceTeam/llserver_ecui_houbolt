@@ -24,6 +24,18 @@ endif()
 # Define a library for the main project
 add_library(${PROJECT_NAME}_lib STATIC ${sources})
 
+include(FetchContent)
+
+FetchContent_Declare(
+        readerwriterqueue
+        GIT_REPOSITORY    https://github.com/cameron314/readerwriterqueue
+        GIT_TAG           v1.0.7
+)
+
+FetchContent_MakeAvailable(readerwriterqueue)
+
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC readerwriterqueue)
+
 # Create an executable that links to this library
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)

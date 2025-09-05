@@ -13,7 +13,7 @@
 #include "utility/utils.h"
 
 
-CANDriverSocketCAN::CANDriverSocketCAN(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
+CANDriverSocketCAN::CANDriverSocketCAN(canRecvCallback_t onRecvCallback,
 									   std::function<void(std::string *)> onErrorCallback, Config &config) :
 	CANDriver(onRecvCallback, onErrorCallback)
 {
@@ -133,7 +133,7 @@ void CANDriverSocketCAN::receiveLoop() // TODO: read errors, call onErrorCallbac
 
 		try
 		{
-			onRecvCallback(canChannelID, (uint32_t&)frame.can_id, frame.data, (uint32_t&)frame.len, timestamp_us, this);
+			onRecvCallback(canChannelID, frame.can_id, frame.data, frame.len, timestamp_us, this);
 		}
 		catch(const std::exception& e)
 		{

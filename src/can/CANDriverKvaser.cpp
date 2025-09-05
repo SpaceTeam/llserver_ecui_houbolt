@@ -6,9 +6,9 @@
 #include "can_houbolt/can_cmds.h"
 #include "utility/utils.h"
 
-CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
+CANDriverKvaser::CANDriverKvaser(canRecvCallback_t onRecvCallback,
 								 std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs, Config &config) :
-	CANDriver(onRecvCallback, onErrorCallback)
+	CANDriver(onRecvCallback, std::move(onErrorCallback))
 {
     //arbitration bus parameters
     int32_t bitrate = config["/CAN/BUS/ARBITRATION/bitrate"];
@@ -28,6 +28,8 @@ CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8
     blockingTimeout = config["/CAN/blocking_timeout"];
 
     nlohmann::json busExtra = config["/CAN/BUS_EXTRA"];
+
+    receiveThread = std::make_unique<CanKvaserReceiveThread>(onRecvCallback);
 
     canStatus stat;
     for (auto &channelID : canBusChannelIDs)
@@ -70,6 +72,7 @@ CANDriverKvaser::CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8
 
 CANDriverKvaser::~CANDriverKvaser()
 {
+    receiveThread->stop();
     // Empty transfer queues (not strictly necessary but recommended by Kvaser)
     for (auto &handle : canHandlesMap)
     {
@@ -167,7 +170,7 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                 std::string errorMsg = "canNOTIFY_ERROR: " + canDriver->CANError(stat);
                 canDriver->onErrorCallback(&errorMsg);
             }
-            break;   
+            break;
         }
         case canNOTIFY_STATUS:
         {
@@ -175,7 +178,7 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
             stat = canReadStatus(handle, &statFlags);
             Debug::print("canNOTIFY_STATUS changed");
             if(statFlags & canSTAT_OVERRUN) {
-                Debug::print("canNOTIFY_STATUS: buffer overflow");
+                Debug::warning("canNOTIFY_STATUS: buffer overflow");
             }
             break;
         }
@@ -207,7 +210,15 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                 {
                     try
                     {
-                        canDriver->onRecvCallback(canBusChannelID, (uint32_t &) id, data, dlc, softwareTime, canDriver);
+                        // Copy the received data into a new buffer for the thread
+                        std::unique_ptr<RawKvaserMessage> threadData = std::make_unique<RawKvaserMessage>();
+                        std::ranges::copy(data, threadData->data);
+                        threadData->dlc = dlc;
+                        threadData->busChannelID = canBusChannelID;
+                        threadData->messageID = id;
+                        threadData->timestamp = softwareTime;
+                        threadData->driver = canDriver;
+                        canDriver->receiveThread->pushMessage(std::move(threadData));
                     }
                     catch(const std::exception& e)
                     {
@@ -231,7 +242,7 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
                     }
                     Debug::print("\t\tCAN Status Flags: 0x%016x", statFlags);
                 }
-                
+
                 stat = canRead(handle, &id, data, &dlc, &flags, &timestamp);
             }
             // stat is either canERR_NOMSG or any different error code
@@ -241,7 +252,7 @@ void CANDriverKvaser::OnCANCallback(int handle, void *driver, unsigned int event
             }
             break;
         }
-        
+
         default:
             //TODO: MP since this thread is managed by the canlib, should we really throw exceptions?
             throw std::runtime_error("Callback got called with neither ERROR nor RX, gigantic UFF");

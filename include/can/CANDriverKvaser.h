@@ -10,8 +10,11 @@
 #include <functional>
 #include <string>
 #include <canlib.h>
-#include "common.h"
+#include <readerwriterqueue.h>
 #include "utility/Config.h"
+#include "CanKvaserReceiveThread.h"
+#include "CommonKvaser.h"
+
 
 class CANDriverKvaser : public CANDriver
 {
@@ -21,6 +24,8 @@ class CANDriverKvaser : public CANDriver
 		std::map<uint32_t, CANParams> arbitrationParamsMap = std::map<uint32_t, CANParams>();
 		std::map<uint32_t, CANParams> dataParamsMap = std::map<uint32_t, CANParams>();
 
+        std::unique_ptr<CanKvaserReceiveThread> receiveThread;
+
         uint64_t blockingTimeout;
 
         static void OnCANCallback(int handle, void *driver, unsigned int event);
@@ -28,9 +33,9 @@ class CANDriverKvaser : public CANDriver
         canStatus InitializeCANChannel(uint32_t canChannelID);
 
     public:
-        CANDriverKvaser(std::function<void(uint8_t &, uint32_t &, uint8_t *, uint32_t &, uint64_t &, CANDriver *driver)> onRecvCallback,
+        CANDriverKvaser(canRecvCallback_t onRecvCallback,
 						std::function<void(std::string *)> onErrorCallback, std::vector<uint32_t> &canBusChannelIDs, Config &config);
-        ~CANDriverKvaser();
+        ~CANDriverKvaser() override;
 
         void SendCANMessage(uint32_t canBusChannelID, uint32_t canID, uint8_t *payload, uint32_t payloadLength, bool blocking);
 
