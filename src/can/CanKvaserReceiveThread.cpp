@@ -42,7 +42,7 @@ void CanKvaserReceiveThread::receiveLoop(){
         if (messagesInQueue>40) {
             Debug::error("CanKvaserReceiveThread::receiveLoop: High message load, messages in queue: %d", messagesInQueue.load());
         }
-        Debug::error("Time offset between messages is %d",utils::getCurrentTimestamp()-msg->timestamp);
+        Debug::error("Time offset between messages is %i",utils::getCurrentTimestamp()-msg->timestamp);
     }
 }
 
