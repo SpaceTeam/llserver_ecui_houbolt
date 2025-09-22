@@ -27,7 +27,7 @@ const std::map<std::string, std::vector<double>> Rocket::scalingMap =
             {"MinimumChamberPressure", {0.0037, 0.0}},
             {"MinimumFuelPressure", {0.00367, 0.0}},
             {"MinimumOxPressure", {0.003735, 0.0}},
-            {"MaximumTankPressure", {0.003735, 0.0}},
+            {"MaximumTankPressure", {0.001, 0.0}},
             {"HolddownTimeout", {1.0, 0.0}},
             {"StateRefreshDivider", {1.0, 0.0}},
         };
@@ -40,7 +40,6 @@ const std::map<ROCKET_VARIABLES , std::string> Rocket::variableMap =
             {ROCKET_MAXIMUM_TANK_PRESSURE, "MaximumTankPressure"},
             {ROCKET_HOLDDOWN_TIMEOUT, "HolddownTimeout"},
             {ROCKET_STATE_REFRESH_DIVIDER, "StateRefreshDivider"},
-            {ROCKET_MAXIMUM_TANK_PRESSURE, "MaximumTankPressure"},
         };
 
 Rocket::Rocket(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
