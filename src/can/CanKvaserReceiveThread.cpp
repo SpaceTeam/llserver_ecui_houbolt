@@ -1,6 +1,7 @@
 //
 // Created by raffael on 24.08.25.
 //
+#include "utility/utils.h"
 #ifndef NO_CANLIB
 #include "can/CanKvaserReceiveThread.h"
 
@@ -39,8 +40,9 @@ void CanKvaserReceiveThread::receiveLoop(){
             onRecvCallback(msg->busChannelID, msg->messageID, msg->data, msg->dlc, msg->timestamp, msg->driver);
         }
         if (messagesInQueue>40) {
-            Debug::warning("CanKvaserReceiveThread::receiveLoop: High message load, messages in queue: %d", messagesInQueue.load());
+            Debug::error("CanKvaserReceiveThread::receiveLoop: High message load, messages in queue: %d", messagesInQueue.load());
         }
+        Debug::error("Time offset between messages is %d",utils::getCurrentTimestamp()-msg->timestamp);
     }
 }
 
