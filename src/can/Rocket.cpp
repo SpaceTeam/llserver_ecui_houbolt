@@ -11,6 +11,7 @@ const std::vector<std::string> Rocket::states =
             "MinimumChamberPressure",
             "MinimumFuelPressure",
             "MinimumOxPressure",
+            "MaximumTankPressure",
             "HolddownTimeout",
             "InternalControl",
             "Abort",
@@ -26,6 +27,7 @@ const std::map<std::string, std::vector<double>> Rocket::scalingMap =
             {"MinimumChamberPressure", {0.0037, 0.0}},
             {"MinimumFuelPressure", {0.00367, 0.0}},
             {"MinimumOxPressure", {0.003735, 0.0}},
+            {"MaximumTankPressure", {0.003735, 0.0}},
             {"HolddownTimeout", {1.0, 0.0}},
             {"StateRefreshDivider", {1.0, 0.0}},
         };
@@ -35,6 +37,7 @@ const std::map<ROCKET_VARIABLES , std::string> Rocket::variableMap =
             {ROCKET_MINIMUM_CHAMBER_PRESSURE, "MinimumChamberPressure"},
             {ROCKET_MINIMUM_FUEL_PRESSURE, "MinimumFuelPressure"},
             {ROCKET_MINIMUM_OX_PRESSURE, "MinimumOxPressure"},
+            {ROCKET_MAXIMUM_TANK_PRESSURE, "MaximumTankPressure"},
             {ROCKET_HOLDDOWN_TIMEOUT, "HolddownTimeout"},
             {ROCKET_STATE_REFRESH_DIVIDER, "StateRefreshDivider"},
             {ROCKET_MAXIMUM_TANK_PRESSURE, "MaximumTankPressure"},
@@ -50,6 +53,8 @@ Rocket::Rocket(uint8_t channelID, std::string channelName, std::vector<double> s
         {"GetMinimumFuelPressure", {std::bind(&Rocket::GetMinimumFuelPressure, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetMinimumOxPressure", {std::bind(&Rocket::SetMinimumOxPressure, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetMinimumOxPressure", {std::bind(&Rocket::GetMinimumOxPressure, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetMaximumTankPressure", {std::bind(&Rocket::SetMaximumTankPressure, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
+        {"GetMaximumTankPressure", {std::bind(&Rocket::GetMaximumTankPressure, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetHolddownTimeout", {std::bind(&Rocket::SetHolddownTimeout, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"GetHolddownTimeout", {std::bind(&Rocket::GetHolddownTimeout, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetStateRefreshDivider", {std::bind(&Rocket::SetStateRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
@@ -253,6 +258,34 @@ void Rocket::GetMinimumOxPressure(std::vector<double> &params, bool testOnly)
     }
 }
 
+void Rocket::SetMaximumTankPressure(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("MaximumTankPressure");
+
+    try
+    {
+        SetVariable(ROCKET_REQ_SET_VARIABLE, parent->GetNodeID(), ROCKET_MAXIMUM_TANK_PRESSURE,
+                    scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Rocket - SetMaximumTankPressure: " + std::string(e.what()));
+    }
+}
+
+void Rocket::GetMaximumTankPressure(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(ROCKET_REQ_GET_VARIABLE, parent->GetNodeID(), ROCKET_MAXIMUM_TANK_PRESSURE,
+                    params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Rocket - GetMaximumTankPressure: " + std::string(e.what()));
+    }
+}
+
 void Rocket::SetHolddownTimeout(std::vector<double> &params, bool testOnly)
 {
     std::vector<double> scalingParams = scalingMap.at("HolddownTimeout");
@@ -424,6 +457,7 @@ void Rocket::RequestCurrentState()
 	GetMinimumChamberPressure(params, false);
 	GetMinimumFuelPressure(params, false);
 	GetMinimumOxPressure(params, false);
+	GetMaximumTankPressure(params, false);
 	GetHolddownTimeout(params, false);
 	GetStateRefreshDivider(params, false);
     GetRocketState(params, false);
