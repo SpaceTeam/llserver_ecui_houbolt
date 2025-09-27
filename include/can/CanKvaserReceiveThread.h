@@ -10,8 +10,14 @@
 #include <readerwriterqueue.h>
 #include <functional>
 #include <atomic>
+#include <memory>
 #include "CANDriver.h"
 
+// Forward declarations for tracing components
+namespace llserver { namespace trace {
+    class HeartbeatEmitter;
+    class BacklogDetector;
+}}
 
 class CanKvaserReceiveThread {
 public:
@@ -29,6 +35,12 @@ private:
     std::mutex enqueueMutex;
     std::shared_ptr<moodycamel::BlockingReaderWriterQueue<std::unique_ptr<RawKvaserMessage>> > queue;
     canRecvCallback_t onRecvCallback;
+
+    // Tracing components
+    std::unique_ptr<llserver::trace::HeartbeatEmitter> heartbeat_emitter;
+    std::unique_ptr<llserver::trace::BacklogDetector> backlog_detector;
+    std::atomic<uint64_t> sequence_number{0};
+
     void receiveLoop();
 };
 

@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED)
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall")
 
-include_directories(include include/can_houbolt)
+# Include trace directory globally so all source files can find tracepoint_wrapper.h
+include_directories(include include/can_houbolt trace)
 
 file(GLOB_RECURSE sources src/*.cpp src/*.c include/*.h)
 
@@ -36,10 +37,11 @@ FetchContent_MakeAvailable(readerwriterqueue)
 
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC readerwriterqueue)
 
+# LTTng UST Tracing Support
 option(ENABLE_LTTNG "Enable LTTng UST tracepoints" ON)
 
-add_library(tracepoints OBJECT trace/tracepoint_impl.cpp)
-target_include_directories(tracepoints PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/trace)
+add_library(tracepoints OBJECT trace/tracepoint_impl.cpp trace/tracepoint_static.cpp)
+target_include_directories(tracepoints PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/trace ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if(ENABLE_LTTNG)
     find_package(PkgConfig QUIET)
@@ -51,23 +53,39 @@ if(ENABLE_LTTNG)
             target_link_libraries(tracepoints PUBLIC ${LTTNGUST_LIBRARIES})
             target_compile_definitions(tracepoints PUBLIC HAVE_LTTNG=1)
 
-            # Ensure callers (your main lib or exe) also see HAVE_LTTNG
+            # Ensure main library also sees HAVE_LTTNG and links tracepoints
             target_compile_definitions(${PROJECT_NAME}_lib PUBLIC HAVE_LTTNG=1)
+            target_link_libraries(${PROJECT_NAME}_lib PUBLIC tracepoints)
+
+            message(STATUS "LTTng-UST tracing enabled")
         else()
             message(WARNING "LTTng-UST not found; tracing disabled.")
+            target_compile_definitions(tracepoints PUBLIC HAVE_LTTNG=0)
+            target_compile_definitions(${PROJECT_NAME}_lib PUBLIC HAVE_LTTNG=0)
         endif()
     else()
         message(WARNING "pkg-config not found; tracing disabled.")
+        target_compile_definitions(tracepoints PUBLIC HAVE_LTTNG=0)
+        target_compile_definitions(${PROJECT_NAME}_lib PUBLIC HAVE_LTTNG=0)
     endif()
+else()
+    message(STATUS "LTTng-UST tracing disabled by user")
+    target_compile_definitions(tracepoints PUBLIC HAVE_LTTNG=0)
+    target_compile_definitions(${PROJECT_NAME}_lib PUBLIC HAVE_LTTNG=0)
 endif()
+
+# Always link tracepoints (contains no-op macros when LTTNG disabled)
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC tracepoints)
 
 # Create an executable that links to this library
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
+
 option(E2E_TEST  "test with simple CAN Driver simulation" OFF)
 option(NO_INFLUX "Disable influxdb logging" OFF)
 option(NO_CANLIB "Disable Kvaser CANLIB" OFF)
 option(NO_PYTHON "Disable Python" OFF)
+
 if(E2E_TEST)
    add_compile_definitions(TEST_LLSERVER)
 endif()
@@ -103,9 +121,3 @@ if(TEST)
     enable_testing()
     add_subdirectory(tests)
 endif ()
-
-if(ENABLE_LTTNG)
-
-    target_include_directories(${PROJECT_NAME} PRIVATE trace)
-    target_link_libraries(${PROJECT_NAME} PRIVATE tracepoints)
-endif()

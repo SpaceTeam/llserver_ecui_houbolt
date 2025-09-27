@@ -15,6 +15,10 @@ struct RawKvaserMessage {
     uint8_t  dlc;
     uint64_t timestamp;
     CANDriver *driver;
+
+    // Tracing fields
+    uint64_t trace_produced_ns = 0;
+    uint64_t trace_seqno = 0;
 };
 
 #endif //COMMONKVASER_H

@@ -3,6 +3,7 @@
 #include "logging/InfluxDbWriter.h"
 #include "logging/influxDb.h"
 #include "utility/Debug.h"
+#include "tracepoint_wrapper.h"
 
 using namespace std::chrono_literals;
 
@@ -127,7 +128,13 @@ void InfluxDbWriter::push() {
     // Might throw an exception if last measurement = 0 as this equals a too long entry (DB)
     if (last_measurement > 0) {
         joinThreads();
-        threads.push_back(std::thread(sendData, &cntxt, this->buffer[buffer_sel],  last_measurement));
+
+        // Instrument the network I/O operation
+        {
+            llserver::trace::IOTracker io_tracker(last_measurement, llserver::trace::LoggingOp::NET_SEND);
+            threads.push_back(std::thread(sendData, &cntxt, this->buffer[buffer_sel], last_measurement));
+        }
+
         transferPartialWrite();
         buffer_sel = (buffer_sel + 1) & 0b1;
     }
@@ -147,15 +154,15 @@ void InfluxDbWriter::transferPartialWrite() {
 }
 
 void InfluxDbWriter::joinThreads() {
+    // Instrument thread join operations as they can block
     for (std::thread &t : threads) {
-        if(t.joinable()) 
-        {
-            std::this_thread::sleep_for(10ms);
-            if(t.joinable()) t.join();
+        if(t.joinable()) {
+            llserver::trace::IOTracker join_tracker(0, llserver::trace::LoggingOp::FLUSH);
+            t.join();
         }
-        else Debug::warning("InfluxDbWriter thread was not joinable.");
     }
-} 
+    threads.clear();
+}
 
 void InfluxDbWriter::flush() {
     push();
