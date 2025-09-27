@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <atomic>
 
+
 // Simple tracepoint macro approach to avoid LTTng include conflicts
 #if defined(HAVE_LTTNG) && HAVE_LTTNG
 
@@ -63,6 +64,26 @@ static constexpr const char* MUTEX_LOGGING = "logging";
 static constexpr const char* MUTEX_QUEUE = "queue";
 static constexpr const char* MUTEX_STATE = "state";
 static constexpr const char* MUTEX_CONFIG = "config";
+static constexpr const char* MUTEX_SENSOR_BUFFER = "sensor_buffer";
+static constexpr const char* MUTEX_FAST_LOGGING = "fast_logging";
+static constexpr const char* MUTEX_INFLUX_LOGGER = "influx_logger";
+static constexpr const char* MUTEX_DEBUG_OUTPUT = "debug_output";
+
+// Function-specific mutex names for better tracing granularity
+static constexpr const char* MUTEX_DEBUG_LOG_OUTFILE = "debug::log:outfile";
+static constexpr const char* MUTEX_DEBUG_CLOSE_OUTFILE = "debug::close:outfile";
+static constexpr const char* MUTEX_DEBUG_FLUSH_OUTFILE = "debug::flush:outfile";
+static constexpr const char* MUTEX_DEBUG_CHANGEFILE_OUTFILE = "debug::changeOutputFile:outfile";
+static constexpr const char* MUTEX_NODE_SENSOR_BUFFER_WRITE = "node::ProcessSensorData:sensor_buffer";
+static constexpr const char* MUTEX_NODE_SENSOR_BUFFER_READ = "node::GetLatestSensorData:sensor_buffer";
+static constexpr const char* MUTEX_NODE_FAST_LOGGING_WRITE = "node::ProcessSensorData:fast_logging";
+static constexpr const char* MUTEX_STATE_ADD_UNINIT = "stateController::AddUninitializedStates:state";
+static constexpr const char* MUTEX_STATE_ADD_STATES = "stateController::AddStates:state";
+static constexpr const char* MUTEX_STATE_GET_STATE = "stateController::GetState:state";
+static constexpr const char* MUTEX_STATE_SET_STATE = "stateController::SetState:state";
+static constexpr const char* MUTEX_STATE_GET_VALUE = "stateController::GetStateValue:state";
+static constexpr const char* MUTEX_STATE_GET_DIRTY = "stateController::GetDirtyStates:state";
+static constexpr const char* MUTEX_STATE_GET_ALL = "stateController::GetAllStates:state";
 
 // High-resolution timing helper
 inline uint64_t steady_time_ns() {

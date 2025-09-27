@@ -1,4 +1,6 @@
 #include "can/Node.h"
+#include "utility/Debug.h"
+#include "tracepoint_wrapper.h"
 
 #include <map>
 #include <cstring>
@@ -233,9 +235,10 @@ std::map<std::string, std::tuple<double, uint64_t>> Node::GetLatestSensorData()
     SensorData_t *copy = new SensorData_t[latestSensorBufferLength];
     size_t bytes = latestSensorBufferLength * sizeof(SensorData_t);
 
-    bufferMtx.lock();
-    std::memcpy(copy, latestSensorBuffer, bytes);
-    bufferMtx.unlock();
+    {
+        LLSERVER_INSTRUMENTED_LOCK(bufferMtx, llserver::trace::MUTEX_NODE_SENSOR_BUFFER_READ);
+        std::memcpy(copy, latestSensorBuffer, bytes);
+    }
 
     for (size_t i = 0; i < latestSensorBufferLength; i++)
     {
@@ -382,14 +385,14 @@ void Node::ProcessSensorDataAndWriteToRingBuffer(Can_MessageData_t *canMsg, uint
                 }
 
                 {
-                    std::lock_guard<std::mutex> lock(bufferMtx);
+                    LLSERVER_INSTRUMENTED_LOCK(bufferMtx, llserver::trace::MUTEX_NODE_SENSOR_BUFFER_WRITE);
 
                     latestSensorBuffer[channelID] = {currValue, timestamp};
 
 #ifndef NO_INFLUX
                     if (enableFastLogging)
                     {
-                        std::lock_guard<std::mutex> lock(loggerMtx);
+                        LLSERVER_INSTRUMENTED_LOCK(loggerMtx, llserver::trace::MUTEX_NODE_FAST_LOGGING_WRITE);
                         logger->log(ch->GetSensorName(), currValue, timestamp);
                         //logger->flush();
                     }

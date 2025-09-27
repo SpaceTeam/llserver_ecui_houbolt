@@ -11,6 +11,7 @@
 #include <thread>
 
 #include "utility/Debug.h"
+#include "tracepoint_wrapper.h"
 
 std::recursive_mutex Debug::_outMutex;
 std::mutex Debug::outFileMutex;
@@ -159,7 +160,7 @@ int32_t Debug::warning(const std::string& fmt, ...)
 
 void Debug::close()
 {
-    std::lock_guard<std::mutex> lock(outFileMutex);
+    LLSERVER_INSTRUMENTED_LOCK(outFileMutex, llserver::trace::MUTEX_DEBUG_CLOSE_OUTFILE);
     if (logFile.is_open())
     {
         logFile << logStream.str();
@@ -180,7 +181,7 @@ void Debug::close()
 
 void Debug::flush()
 {
-    std::lock_guard<std::mutex> lock(outFileMutex);
+    LLSERVER_INSTRUMENTED_LOCK(outFileMutex, llserver::trace::MUTEX_DEBUG_FLUSH_OUTFILE);
     if (logFile.is_open())
     {
         writeToFile();
@@ -200,7 +201,7 @@ void Debug::flush()
 
 void Debug::changeOutputFile(const std::string &outFilePath)
 {
-    std::lock_guard<std::mutex> lock(outFileMutex);
+    LLSERVER_INSTRUMENTED_LOCK(outFileMutex, llserver::trace::MUTEX_DEBUG_CHANGEFILE_OUTFILE);
     if (logFile.is_open())
     {
         writeToFile();
@@ -222,7 +223,7 @@ void Debug::changeOutputFile(const std::string &outFilePath)
 
 void Debug::log(const std::string &msg)
 {
-    std::lock_guard<std::mutex> lock(outFileMutex);
+    LLSERVER_INSTRUMENTED_LOCK(outFileMutex, llserver::trace::MUTEX_DEBUG_LOG_OUTFILE);
     logStream << msg;
     if(initialized) {
         //TODO: MP this makes no sense here, since it is only used to write to files in csv format

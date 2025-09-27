@@ -3,6 +3,8 @@
 //
 
 #include "StateController.h"
+#include "utility/Debug.h"
+#include "tracepoint_wrapper.h"
 
 StateController::~StateController()
 {
@@ -60,7 +62,7 @@ void StateController::WaitUntilStatesInitialized()
 
 void StateController::AddUninitializedStates(std::vector<std::string> &states)
 {
-    std::lock_guard<std::mutex> lock(stateMtx);
+    LLSERVER_INSTRUMENTED_LOCK(stateMtx, llserver::trace::MUTEX_STATE_ADD_UNINIT);
     for (std::string &state : states)
     {
         this->states[state] = {0.0, 0, false};
@@ -73,7 +75,7 @@ void StateController::AddUninitializedStates(std::vector<std::string> &states)
  */
 void StateController::AddStates(std::map<std::string, std::tuple<double, uint64_t>> &states)
 {
-    std::lock_guard<std::mutex> lock(stateMtx);
+    LLSERVER_INSTRUMENTED_LOCK(stateMtx, llserver::trace::MUTEX_STATE_ADD_STATES);
     for (auto& state : states)
     {
         this->states[state.first] = {std::get<0>(state.second), std::get<1>(state.second), false};
@@ -82,7 +84,7 @@ void StateController::AddStates(std::map<std::string, std::tuple<double, uint64_
 
 std::tuple<double, uint64_t, bool> StateController::GetState(std::string stateName)
 {
-    std::lock_guard<std::mutex> lock(stateMtx);
+    LLSERVER_INSTRUMENTED_LOCK(stateMtx, llserver::trace::MUTEX_STATE_GET_STATE);
     std::tuple<double, uint64_t, bool> value;
     try
     {
@@ -102,8 +104,8 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
         double oldValue;
         bool firstEntry = false;
         {
-            std::lock_guard<std::mutex> lock(stateMtx);
-            
+            LLSERVER_INSTRUMENTED_LOCK(stateMtx, llserver::trace::MUTEX_STATE_SET_STATE);
+
             if (this->states.find(stateName) == this->states.end())
             {
                 firstEntry = true;
@@ -139,7 +141,7 @@ void StateController::SetState(std::string stateName, double value, uint64_t tim
 
 double StateController::GetStateValue(std::string stateName)
 {
-    std::lock_guard<std::mutex> lock(stateMtx);
+    LLSERVER_INSTRUMENTED_LOCK(stateMtx, llserver::trace::MUTEX_STATE_GET_VALUE);
     double value;
     try
     {
@@ -154,7 +156,7 @@ double StateController::GetStateValue(std::string stateName)
 
 std::map<std::string, std::tuple<double, uint64_t>> StateController::GetDirtyStates()
 {
-    std::lock_guard<std::mutex> lock(stateMtx);
+    LLSERVER_INSTRUMENTED_LOCK(stateMtx, llserver::trace::MUTEX_STATE_GET_DIRTY);
     std::map<std::string, std::tuple<double, uint64_t>> dirties;
     for (auto& state : this->states)
     {
@@ -170,7 +172,7 @@ std::map<std::string, std::tuple<double, uint64_t>> StateController::GetDirtySta
 
 std::map<std::string, std::tuple<double, uint64_t, bool>> StateController::GetAllStates()
 {
-    std::lock_guard<std::mutex> lock(stateMtx);
+    LLSERVER_INSTRUMENTED_LOCK(stateMtx, llserver::trace::MUTEX_STATE_GET_ALL);
     std::map<std::string, std::tuple<double, uint64_t, bool>> statesCopy;
     statesCopy.insert(states.begin(), states.end());
     return statesCopy;

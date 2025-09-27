@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tmfxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="xml/xmlDefinition.xsd">
+
+    <!-- State Provider for llserver backlog analysis -->
+    <stateProvider version="1" id="llserver.backlog.analysis">
+        <head>
+            <traceType id="org.eclipse.tracecompass.lttng2.ust.tracetype" />
+            <label value="llserver Backlog Analysis" />
+        </head>
+
+        <!-- Define processing states -->
+        <definedValue name="IDLE" value="0" />
+        <definedValue name="PROCESSING" value="1" />
+        <definedValue name="WAITING_LOCK" value="2" />
+        <definedValue name="HOLDING_LOCK" value="3" />
+        <definedValue name="IO_BLOCKED" value="4" />
+        <definedValue name="BACKLOG_DETECTED" value="5" />
+
+        <!-- Handler for packet_received events -->
+        <eventHandler eventName="llserver:packet_received">
+            <stateChange>
+                <stateAttribute type="constant" value="Queue" />
+                <stateAttribute type="constant" value="size" />
+                <stateValue type="eventField" value="queue_size" />
+            </stateChange>
+            <stateChange>
+                <stateAttribute type="constant" value="Queue" />
+                <stateAttribute type="constant" value="produced_total" />
+                <stateValue type="eventField" value="seqno" />
+            </stateChange>
+        </eventHandler>
+
+        <!-- Handler for process_start events -->
+        <eventHandler eventName="llserver:process_start">
+            <stateChange>
+                <stateAttribute type="constant" value="Processing" />
+                <stateAttribute type="eventField" value="seqno" />
+                <stateAttribute type="constant" value="queue_delay_ns" />
+                <stateValue type="eventField" value="queue_delay_ns" />
+            </stateChange>
+        </eventHandler>
+
+        <!-- Handler for process_end events -->
+        <eventHandler eventName="llserver:process_end">
+            <stateChange>
+                <stateAttribute type="constant" value="Processing" />
+                <stateAttribute type="eventField" value="seqno" />
+                <stateAttribute type="constant" value="processing_ns" />
+                <stateValue type="eventField" value="processing_ns" />
+            </stateChange>
+        </eventHandler>
+
+        <!-- Handler for lock_wait events -->
+        <eventHandler eventName="llserver:lock_wait">
+            <stateChange>
+                <stateAttribute type="constant" value="Locks" />
+                <stateAttribute type="eventField" value="mutex_name" />
+                <stateAttribute type="constant" value="wait_ns" />
+                <stateValue type="eventField" value="wait_ns" />
+            </stateChange>
+        </eventHandler>
+
+        <!-- Handler for lock_hold events -->
+        <eventHandler eventName="llserver:lock_hold">
+            <stateChange>
+                <stateAttribute type="constant" value="Locks" />
+                <stateAttribute type="eventField" value="mutex_name" />
+                <stateAttribute type="constant" value="hold_ns" />
+                <stateValue type="eventField" value="hold_ns" />
+            </stateChange>
+        </eventHandler>
+
+        <!-- Handler for logging_io events -->
+        <eventHandler eventName="llserver:logging_io">
+            <stateChange>
+                <stateAttribute type="constant" value="IO" />
+                <stateAttribute type="constant" value="duration_ns" />
+                <stateValue type="eventField" value="io_ns" />
+            </stateChange>
+            <stateChange>
+                <stateAttribute type="constant" value="IO" />
+                <stateAttribute type="constant" value="operation_type" />
+                <stateValue type="eventField" value="op" />
+            </stateChange>
+        </eventHandler>
+
+        <!-- Handler for queue_snapshot events -->
+        <eventHandler eventName="llserver:queue_snapshot">
+            <stateChange>
+                <stateAttribute type="constant" value="Queue" />
+                <stateAttribute type="constant" value="size" />
+                <stateValue type="eventField" value="queue_size" />
+            </stateChange>
+            <stateChange>
+                <stateAttribute type="constant" value="Queue" />
+                <stateAttribute type="constant" value="produced_total" />
+                <stateValue type="eventField" value="produced_total" />
+            </stateChange>
+            <stateChange>
+                <stateAttribute type="constant" value="Queue" />
+                <stateAttribute type="constant" value="consumed_total" />
+                <stateValue type="eventField" value="consumed_total" />
+            </stateChange>
+        </eventHandler>
+
+        <!-- Handler for backlog_trigger events -->
+        <eventHandler eventName="llserver:backlog_trigger">
+            <stateChange>
+                <stateAttribute type="constant" value="Backlog" />
+                <stateAttribute type="constant" value="queue_size" />
+                <stateValue type="eventField" value="queue_size" />
+            </stateChange>
+            <stateChange>
+                <stateAttribute type="constant" value="Backlog" />
+                <stateAttribute type="constant" value="growth_rate" />
+                <stateValue type="eventField" value="growth_rate_per_sec" />
+            </stateChange>
+        </eventHandler>
+    </stateProvider>
+
+    <!-- XY Chart for Queue Size Over Time -->
+    <xyView id="llserver.queue.size.chart">
+        <head>
+            <analysis id="llserver.backlog.analysis" />
+            <label value="Queue Size Over Time" />
+        </head>
+
+        <entry path="Queue">
+            <display type="constant" value="size" />
+            <name type="constant" value="Queue Size" />
+        </entry>
+    </xyView>
+
+    <!-- XY Chart for Lock Wait Times -->
+    <xyView id="llserver.lock.wait.chart">
+        <head>
+            <analysis id="llserver.backlog.analysis" />
+            <label value="Lock Wait Times" />
+        </head>
+
+        <entry path="Locks/*">
+            <display type="constant" value="wait_ns" />
+            <name type="self" />
+        </entry>
+    </xyView>
+
+    <!-- XY Chart for I/O Duration -->
+    <xyView id="llserver.io.duration.chart">
+        <head>
+            <analysis id="llserver.backlog.analysis" />
+            <label value="I/O Operation Duration" />
+        </head>
+
+        <entry path="IO">
+            <display type="constant" value="duration_ns" />
+            <name type="constant" value="I/O Duration (ns)" />
+        </entry>
+    </xyView>
+
+    <!-- XY Chart for Processing Latency -->
+    <xyView id="llserver.processing.latency.chart">
+        <head>
+            <analysis id="llserver.backlog.analysis" />
+            <label value="Processing Latency" />
+        </head>
+
+        <entry path="Processing/*">
+            <display type="constant" value="processing_ns" />
+            <name type="self" />
+        </entry>
+    </xyView>
+
+    <!-- XY Chart for Queue Delay -->
+    <xyView id="llserver.queue.delay.chart">
+        <head>
+            <analysis id="llserver.backlog.analysis" />
+            <label value="Queue Delay" />
+        </head>
+
+        <entry path="Processing/*">
+            <display type="constant" value="queue_delay_ns" />
+            <name type="self" />
+        </entry>
+    </xyView>
+
+</tmfxml>
