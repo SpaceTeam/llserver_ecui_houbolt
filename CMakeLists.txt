@@ -36,6 +36,31 @@ FetchContent_MakeAvailable(readerwriterqueue)
 
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC readerwriterqueue)
 
+option(ENABLE_LTTNG "Enable LTTng UST tracepoints" ON)
+
+add_library(tracepoints OBJECT trace/tracepoint_impl.cpp)
+target_include_directories(tracepoints PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/trace)
+
+if(ENABLE_LTTNG)
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(LTTNGUST QUIET lttng-ust)
+        if(LTTNGUST_FOUND)
+            message(STATUS "Found LTTng-UST: ${LTTNGUST_VERSION}")
+            target_include_directories(tracepoints PUBLIC ${LTTNGUST_INCLUDE_DIRS})
+            target_link_libraries(tracepoints PUBLIC ${LTTNGUST_LIBRARIES})
+            target_compile_definitions(tracepoints PUBLIC HAVE_LTTNG=1)
+
+            # Ensure callers (your main lib or exe) also see HAVE_LTTNG
+            target_compile_definitions(${PROJECT_NAME}_lib PUBLIC HAVE_LTTNG=1)
+        else()
+            message(WARNING "LTTng-UST not found; tracing disabled.")
+        endif()
+    else()
+        message(WARNING "pkg-config not found; tracing disabled.")
+    endif()
+endif()
+
 # Create an executable that links to this library
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
@@ -78,3 +103,9 @@ if(TEST)
     enable_testing()
     add_subdirectory(tests)
 endif ()
+
+if(ENABLE_LTTNG)
+
+    target_include_directories(${PROJECT_NAME} PRIVATE trace)
+    target_link_libraries(${PROJECT_NAME} PRIVATE tracepoints)
+endif()

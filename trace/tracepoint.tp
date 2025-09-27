@@ -1,0 +1,81 @@
+/* LTTng tracepoint provider for llserver */
+
+#undef TRACEPOINT_PROVIDER
+#define TRACEPOINT_PROVIDER llserver
+
+/* This tells the second pass how to re-include this file */
+#undef TRACEPOINT_INCLUDE
+#define TRACEPOINT_INCLUDE "./tracepoint.tp"
+
+#if !defined(LLSERVER_TRACEPOINT_TP_H) || defined(TRACEPOINT_HEADER_MULTI_READ)
+#define LLSERVER_TRACEPOINT_TP_H
+
+#include <lttng/tracepoint.h>
+#include <stdint.h>
+
+/* packet_received: producer inserted an item */
+TRACEPOINT_EVENT(
+    llserver,
+    packet_received,
+    TP_ARGS(
+        uint64_t, seqno,
+        int,      size_bytes,
+        int,      queue_size
+    ),
+    TP_FIELDS(
+        ctf_integer(uint64_t, seqno, seqno)
+        ctf_integer(int, size_bytes, size_bytes)
+        ctf_integer(int, queue_size, queue_size)
+    )
+)
+
+/* lock_wait: a thread waited for a mutex (you measure wait time externally) */
+TRACEPOINT_EVENT(
+    llserver,
+    lock_wait,
+    TP_ARGS(
+        const char*, mutex_name,
+        uint64_t,    wait_ns
+    ),
+    TP_FIELDS(
+        ctf_string(mutex_name, mutex_name)
+        ctf_integer(uint64_t, wait_ns, wait_ns)
+    )
+)
+
+/* process_latency: consumer processed an item */
+TRACEPOINT_EVENT(
+    llserver,
+    process_latency,
+    TP_ARGS(
+        uint64_t, seqno,
+        uint64_t, queue_delay_ns,
+        uint64_t, processing_ns
+    ),
+    TP_FIELDS(
+        ctf_integer(uint64_t, seqno, seqno)
+        ctf_integer(uint64_t, queue_delay_ns, queue_delay_ns)
+        ctf_integer(uint64_t, processing_ns, processing_ns)
+    )
+)
+
+/* queue_snapshot: periodic status */
+TRACEPOINT_EVENT(
+    llserver,
+    queue_snapshot,
+    TP_ARGS(
+        int,      queue_size,
+        uint64_t, produced_total,
+        uint64_t, consumed_total
+    ),
+    TP_FIELDS(
+        ctf_integer(int, queue_size, queue_size)
+        ctf_integer(uint64_t, produced_total, produced_total)
+        ctf_integer(uint64_t, consumed_total, consumed_total)
+    )
+)
+
+#endif /* LLSERVER_TRACEPOINT_TP_H */
+
+/* Second pass: expands to provider object + metadata */
+#include <lttng/tracepoint-event.h>
