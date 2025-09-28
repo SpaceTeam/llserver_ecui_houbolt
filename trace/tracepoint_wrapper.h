@@ -16,10 +16,18 @@ extern "C" {
     void __tracepoint_llserver___lock_wait(const char* mutex_name, uint64_t wait_ns);
     void __tracepoint_llserver___lock_hold(const char* mutex_name, uint64_t hold_ns);
     void __tracepoint_llserver___logging_io(uint32_t bytes, uint64_t io_ns, uint8_t op);
+    void __tracepoint_llserver___logging_io_error(uint32_t attempted_bytes, uint64_t io_ns, uint8_t op, int32_t err_no); // new error wrapper
     void __tracepoint_llserver___queue_snapshot(uint32_t queue_size, uint64_t produced_total, uint64_t consumed_total, uint64_t dropped_total, uint64_t t_snapshot_ns);
     void __tracepoint_llserver___backlog_trigger(uint32_t queue_size, int64_t growth_rate_per_sec, uint8_t reason_code, uint64_t t_trigger_ns);
     void __tracepoint_llserver___item_dropped(uint64_t seqno, uint32_t queue_size, uint8_t cause);
     void __tracepoint_llserver___thread_heartbeat(uint8_t thread_role, uint64_t t_beat_ns);
+    // New unique network + writer join events
+    void __tracepoint_llserver___net_send(uint32_t bytes, uint64_t io_ns);
+    void __tracepoint_llserver___net_send_error(uint32_t attempted_bytes, uint64_t io_ns, int32_t err_no);
+    void __tracepoint_llserver___net_recv(uint32_t bytes, uint64_t io_ns);
+    void __tracepoint_llserver___net_recv_error(uint32_t attempted_bytes, uint64_t io_ns, int32_t err_no);
+    void __tracepoint_llserver___writer_join_threads(uint32_t thread_count);
+    void __tracepoint_llserver___writer_thread_join(uint64_t join_ns);
 }
 
 // Simplified tracepoint macro
@@ -37,7 +45,8 @@ enum class LoggingOp : uint8_t {
     FILE_WRITE = 0,
     NET_SEND = 1,
     FLUSH = 2,
-    ROTATE = 3
+    ROTATE = 3,
+    NET_RECV = 4 // Added receive operation for network reads
 };
 
 enum class BacklogReason : uint8_t {

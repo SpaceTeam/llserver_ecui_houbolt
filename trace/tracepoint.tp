@@ -111,6 +111,24 @@ TRACEPOINT_EVENT(
     )
 )
 
+/* logging_io_error: On I/O error capturing errno */
+TRACEPOINT_EVENT(
+    llserver,
+    logging_io_error,
+    TP_ARGS(
+        uint32_t, attempted_bytes,
+        uint64_t, io_ns,
+        uint8_t,  op,
+        int32_t,  err_no
+    ),
+    TP_FIELDS(
+        ctf_integer(uint32_t, attempted_bytes, attempted_bytes)
+        ctf_integer(uint64_t, io_ns, io_ns)
+        ctf_integer(uint8_t, op, op)
+        ctf_integer(int32_t, err_no, err_no)
+    )
+)
+
 /* queue_snapshot: Periodic (e.g. 1 Hz) */
 TRACEPOINT_EVENT(
     llserver,
@@ -176,6 +194,150 @@ TRACEPOINT_EVENT(
     TP_FIELDS(
         ctf_integer(uint8_t, thread_role, thread_role)
         ctf_integer(uint64_t, t_beat_ns, t_beat_ns)
+    )
+)
+
+/* network send: On successful send operation */
+TRACEPOINT_EVENT(
+    llserver,
+    net_send,
+    TP_ARGS(
+        uint32_t, bytes,
+        uint64_t, io_ns
+    ),
+    TP_FIELDS(
+        ctf_integer(uint32_t, bytes, bytes)
+        ctf_integer(uint64_t, io_ns, io_ns)
+    )
+)
+
+/* network send error: On send error capturing errno */
+TRACEPOINT_EVENT(
+    llserver,
+    net_send_error,
+    TP_ARGS(
+        uint32_t, attempted_bytes,
+        uint64_t, io_ns,
+        int32_t,  err_no
+    ),
+    TP_FIELDS(
+        ctf_integer(uint32_t, attempted_bytes, attempted_bytes)
+        ctf_integer(uint64_t, io_ns, io_ns)
+        ctf_integer(int32_t, err_no, err_no)
+    )
+)
+
+/* network send header: On successful header send operation */
+TRACEPOINT_EVENT(
+    llserver,
+    net_send_header,
+    TP_ARGS(
+        uint32_t, bytes,
+        uint64_t, io_ns
+    ),
+    TP_FIELDS(
+        ctf_integer(uint32_t, bytes, bytes)
+        ctf_integer(uint64_t, io_ns, io_ns)
+    )
+)
+
+/* network send header error: On header send error capturing errno */
+TRACEPOINT_EVENT(
+    llserver,
+    net_send_header_error,
+    TP_ARGS(
+        uint32_t, attempted_bytes,
+        uint64_t, io_ns,
+        int32_t,  err_no
+    ),
+    TP_FIELDS(
+        ctf_integer(uint32_t, attempted_bytes, attempted_bytes)
+        ctf_integer(uint64_t, io_ns, io_ns)
+        ctf_integer(int32_t, err_no, err_no)
+    )
+)
+
+/* network send body: On successful body send operation */
+TRACEPOINT_EVENT(
+    llserver,
+    net_send_body,
+    TP_ARGS(
+        uint32_t, bytes,
+        uint64_t, io_ns
+    ),
+    TP_FIELDS(
+        ctf_integer(uint32_t, bytes, bytes)
+        ctf_integer(uint64_t, io_ns, io_ns)
+    )
+)
+
+/* network send body error: On body send error capturing errno */
+TRACEPOINT_EVENT(
+    llserver,
+    net_send_body_error,
+    TP_ARGS(
+        uint32_t, attempted_bytes,
+        uint64_t, io_ns,
+        int32_t,  err_no
+    ),
+    TP_FIELDS(
+        ctf_integer(uint32_t, attempted_bytes, attempted_bytes)
+        ctf_integer(uint64_t, io_ns, io_ns)
+        ctf_integer(int32_t, err_no, err_no)
+    )
+)
+
+/* network receive: On successful receive operation */
+TRACEPOINT_EVENT(
+    llserver,
+    net_recv,
+    TP_ARGS(
+        uint32_t, bytes,
+        uint64_t, io_ns
+    ),
+    TP_FIELDS(
+        ctf_integer(uint32_t, bytes, bytes)
+        ctf_integer(uint64_t, io_ns, io_ns)
+    )
+)
+
+/* network receive error: On receive error capturing errno */
+TRACEPOINT_EVENT(
+    llserver,
+    net_recv_error,
+    TP_ARGS(
+        uint32_t, attempted_bytes,
+        uint64_t, io_ns,
+        int32_t,  err_no
+    ),
+    TP_FIELDS(
+        ctf_integer(uint32_t, attempted_bytes, attempted_bytes)
+        ctf_integer(uint64_t, io_ns, io_ns)
+        ctf_integer(int32_t, err_no, err_no)
+    )
+)
+
+/* writer join threads: Before waiting for writer threads to finish */
+TRACEPOINT_EVENT(
+    llserver,
+    writer_join_threads,
+    TP_ARGS(
+        uint32_t, thread_count
+    ),
+    TP_FIELDS(
+        ctf_integer(uint32_t, thread_count, thread_count)
+    )
+)
+
+/* writer thread join: After a writer thread has been joined */
+TRACEPOINT_EVENT(
+    llserver,
+    writer_thread_join,
+    TP_ARGS(
+        uint64_t, join_ns
+    ),
+    TP_FIELDS(
+        ctf_integer(uint64_t, join_ns, join_ns)
     )
 )
 

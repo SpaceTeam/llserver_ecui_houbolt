@@ -21,17 +21,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
 from collections import defaultdict
-import babeltrace2 as bt2
+import bt2
+import pickle
+import argparse
 
 class LLServerTraceAnalyzer:
-    def __init__(self, trace_path):
+    def __init__(self, trace_path, debug=False, cache_events=False, legends_outside=True, legend_mode='below'):
         self.trace_path = trace_path
+        self.debug = debug
+        self.cache_events = cache_events
         self.events = []
         self.queue_snapshots = []
         self.processing_events = defaultdict(dict)
         self.lock_events = []
         self.io_events = []
         self.backlog_triggers = []
+        self.heartbeat_events = []  # Store thread_heartbeat events
+        self.dropped_events = []    # Store item_dropped events
+        self.field_names = set()  # Collect all unique field names
+        self.legends_outside = legends_outside
+        self.legend_mode = legend_mode  # 'right', 'below', 'inside'
+
+    def debug_log(self, msg):
+        if self.debug:
+            print(f"[DEBUG] {msg}")
 
     def parse_traces(self):
         """Parse LTTng traces using babeltrace2"""
@@ -40,25 +53,89 @@ class LLServerTraceAnalyzer:
         # Create a trace collection and add the trace
         tc = bt2.TraceCollectionMessageIterator([self.trace_path])
 
+
         event_count = 0
         for msg in tc:
-            if isinstance(msg, bt2._EventMessage):
-                self._process_event(msg.event)
+            if isinstance(msg, bt2._EventMessageConst):
+                self._process_event(msg.event,msg.default_clock_snapshot.ns_from_origin)
                 event_count += 1
                 if event_count % 10000 == 0:
                     print(f"Processed {event_count} events...")
+                if event_count > 500000 and False:
+                    print("Reached 500,000 events, stopping for demo purposes")
+                    break
+            else:
+                pass
+                #print(f"Skipping non-event message: {msg} with type {type(msg)}")
 
         print(f"Finished parsing {event_count} total events")
+        print(f"  thread_heartbeat events: {len(self.heartbeat_events)}")
+        print(f"  item_dropped events: {len(self.dropped_events)}")
 
-    def _process_event(self, event):
+    def _to_primitive(self, v):
+        """Best-effort convert babeltrace field objects (SwigPyObject) to plain Python primitives."""
+        if isinstance(v, (int, float, str, bool)) or v is None:
+            return v
+        # Try common attribute 'value'
+        for attr in ('value', 'py', 'as_integer'):  # heuristic
+            if hasattr(v, attr):
+                try:
+                    candidate = getattr(v, attr)
+                    if callable(candidate):
+                        candidate = candidate()
+                    if isinstance(candidate, (int, float, str, bool)):
+                        return candidate
+                except Exception:
+                    pass
+        # Try int conversion
+        try:
+            return int(v)
+        except Exception:
+            pass
+        # Try float conversion
+        try:
+            return float(v)
+        except Exception:
+            pass
+        # Fallback to string (last resort)
+        try:
+            s = str(v)
+            # Attempt parse numeric from string
+            if s.isdigit():
+                return int(s)
+            return s
+        except Exception:
+            return None
+
+    def _sanitize_structures(self):
+        """Convert all stored data structures to primitives to allow pickling and numeric ops."""
+        def sanitize_list(lst):
+            for d in lst:
+                for k, val in list(d.items()):
+                    d[k] = self._to_primitive(val)
+        sanitize_list(self.queue_snapshots)
+        sanitize_list(self.lock_events)
+        sanitize_list(self.io_events)
+        sanitize_list(self.backlog_triggers)
+        sanitize_list(self.heartbeat_events)
+        sanitize_list(self.dropped_events)
+        # processing_events dict of seqno -> dict
+        for seq, d in list(self.processing_events.items()):
+            for k, val in list(d.items()):
+                d[k] = self._to_primitive(val)
+        if self.debug:
+            self.debug_log("Sanitization complete for all data structures")
+
+    def _process_event(self, event, timestamp):
         """Process individual LTTng events"""
-        timestamp = event.default_clock_snapshot.ns_from_origin
         event_name = event.name
 
         # Extract common fields
         fields = {}
-        for field_name, field_value in event.payload.items():
-            fields[field_name] = field_value
+        for field_name, field_value in event.payload_field.items():
+            fields[field_name] = self._to_primitive(field_value)
+        # Collect all field names
+        self.field_names.update(fields.keys())
 
         # Store all events for general analysis
         self.events.append({
@@ -84,6 +161,12 @@ class LLServerTraceAnalyzer:
             self._process_logging_io(timestamp, fields)
         elif event_name == 'llserver:backlog_trigger':
             self._process_backlog_trigger(timestamp, fields)
+        elif event_name == 'llserver:thread_heartbeat':
+            self._process_thread_heartbeat(timestamp, fields)
+        elif event_name == 'llserver:item_dropped':
+            self._process_item_dropped(timestamp, fields)
+        else:
+            print(f"Unknown event type: {event_name}")
 
     def _process_packet_received(self, timestamp, fields):
         """Process packet_received events"""
@@ -154,6 +237,61 @@ class LLServerTraceAnalyzer:
             'reason': reason_codes.get(fields.get('reason_code', 0), 'unknown')
         })
 
+    def _process_thread_heartbeat(self, timestamp, fields):
+        """Process thread_heartbeat events"""
+        self.heartbeat_events.append({
+            'timestamp': timestamp,
+            'thread_role': fields.get('thread_role', 0),
+            't_beat_ns': fields.get('t_beat_ns', 0)
+        })
+
+    def _process_item_dropped(self, timestamp, fields):
+        """Process item_dropped events"""
+        self.dropped_events.append({
+            'timestamp': timestamp,
+            'seqno': fields.get('seqno', 0),
+            'queue_size': fields.get('queue_size', 0),
+            'cause': fields.get('cause', 0)
+        })
+
+    def save_cache(self, cache_file):
+        """Serialize all arrays to a cache file."""
+        self._sanitize_structures()
+        data = {
+            # Optionally include raw events (sanitized) if requested; otherwise skip to reduce size & avoid non-primitive data.
+            'events': self.events if self.cache_events else None,
+            'queue_snapshots': self.queue_snapshots,
+            'processing_events': dict(self.processing_events),
+            'lock_events': self.lock_events,
+            'io_events': self.io_events,
+            'backlog_triggers': self.backlog_triggers,
+            'heartbeat_events': self.heartbeat_events,
+            'dropped_events': self.dropped_events,
+            'field_names': list(self.field_names),
+            'version': 2,
+            'cache_events': self.cache_events,
+        }
+        with open(cache_file, 'wb') as f:
+            pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+        print(f"Serialized parsed data to {cache_file} (events included={self.cache_events})")
+
+    def load_cache(self, cache_file):
+        """Load all arrays from a cache file."""
+        with open(cache_file, 'rb') as f:
+            data = pickle.load(f)
+        # Backward compatibility handling
+        self.queue_snapshots = data.get('queue_snapshots', [])
+        self.processing_events = defaultdict(dict, data.get('processing_events', {}))
+        self.lock_events = data.get('lock_events', [])
+        self.io_events = data.get('io_events', [])
+        self.backlog_triggers = data.get('backlog_triggers', [])
+        self.heartbeat_events = data.get('heartbeat_events', [])
+        self.dropped_events = data.get('dropped_events', [])
+        self.field_names = set(data.get('field_names', []))
+        if data.get('events') and self.cache_events:
+            self.events = data['events']
+        print(f"Loaded parsed data from {cache_file} (cached events present={data.get('events') is not None})")
+
     def generate_plots(self, output_dir='plots'):
         """Generate all analysis plots"""
         os.makedirs(output_dir, exist_ok=True)
@@ -172,6 +310,49 @@ class LLServerTraceAnalyzer:
 
         print("All plots generated successfully!")
 
+    def _coerce_numeric(self, df, columns):
+        """Ensure listed columns are numeric, coercing errors to NaN. Provides debug details on coercion losses."""
+        for c in columns:
+            if c in df.columns:
+                orig = df[c]
+                # Keep copy only if debug
+                if self.debug:
+                    orig_non_null = orig[~orig.isna()].copy()
+                df[c] = pd.to_numeric(df[c], errors='coerce')
+                if self.debug:
+                    coerced = df[c]
+                    # Values that became NaN during coercion (were not NaN before)
+                    loss_mask = (~orig_non_null.index.isin(orig[orig.isna()].index)) & (coerced.isna().reindex(orig_non_null.index, fill_value=True))
+                    # Simpler: identify indices where orig not NaN and coerced is NaN
+                    loss_mask = (~orig.isna()) & (coerced.isna())
+                    loss_count = int(loss_mask.sum())
+                    if loss_count > 0:
+                        samples = orig[loss_mask].head(5).tolist()
+                        self.debug_log(f"Column '{c}': {loss_count} values could not be coerced to numeric. Sample problematic values: {samples}")
+        return df
+
+    def _drop_non_finite(self, df, columns):
+        """Replace inf with NaN then drop rows where any of columns are non-finite. Debug logs rows removed and columns causing removal."""
+        before = len(df)
+        df = df.replace([np.inf, -np.inf], np.nan)
+        if self.debug:
+            inf_counts = {c: int((~np.isfinite(df[c])).sum()) for c in columns if c in df.columns}
+            problematic = {k: v for k, v in inf_counts.items() if v > 0}
+            if problematic:
+                self.debug_log(f"Non-finite counts before drop: {problematic}")
+        # Build combined mask
+        combined_mask = np.ones(len(df), dtype=bool)
+        for c in columns:
+            if c in df.columns:
+                colmask = np.isfinite(df[c])
+                combined_mask &= colmask
+        df = df[combined_mask]
+        after = len(df)
+        removed = before - after
+        if self.debug:
+            self.debug_log(f"Filtered non-finite rows: removed {removed} / {before} ({(removed / before * 100) if before else 0:.2f}%) based on columns {columns}")
+        return df
+
     def plot_queue_size_over_time(self, output_dir):
         """Plot queue size over time to identify backlog patterns"""
         if not self.queue_snapshots:
@@ -180,6 +361,9 @@ class LLServerTraceAnalyzer:
 
         df = pd.DataFrame(self.queue_snapshots)
         df['time_seconds'] = (df['timestamp'] - df['timestamp'].min()) / 1e9
+
+        df = self._coerce_numeric(df, ['queue_size','produced_total','consumed_total','dropped_total','time_seconds'])
+        df = self._drop_non_finite(df, ['queue_size'])
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 10))
 
@@ -195,7 +379,7 @@ class LLServerTraceAnalyzer:
             trigger_df['time_seconds'] = (trigger_df['timestamp'] - df['timestamp'].min()) / 1e9
             ax1.scatter(trigger_df['time_seconds'], trigger_df['queue_size'],
                        color='red', s=50, marker='x', label='Backlog Triggers')
-            ax1.legend()
+            ax1.legend(loc="upper right")
 
         # Producer vs Consumer rate
         ax2.plot(df['time_seconds'], df['produced_total'], 'g-', label='Produced Total', linewidth=2)
@@ -205,7 +389,7 @@ class LLServerTraceAnalyzer:
         ax2.set_ylabel('Total Count')
         ax2.set_xlabel('Time (seconds)')
         ax2.set_title('Producer vs Consumer Totals')
-        ax2.legend()
+        ax2.legend(loc="upper right")
         ax2.grid(True, alpha=0.3)
 
         plt.tight_layout()
@@ -235,6 +419,12 @@ class LLServerTraceAnalyzer:
         df['processing_ms'] = df['processing_ns'] / 1e6
         df['queue_delay_ms'] = df['queue_delay_ns'] / 1e6
 
+        df = self._coerce_numeric(df, ['processing_ms','queue_delay_ms','time_seconds'])
+        df = self._drop_non_finite(df, ['processing_ms','queue_delay_ms'])
+        if df.empty:
+            print('Processing latency dataframe empty after filtering non-finite values; skipping plot.')
+            return
+
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(18, 12))
 
         # Processing latency over time
@@ -253,7 +443,7 @@ class LLServerTraceAnalyzer:
                    label=f'Mean: {df["processing_ms"].mean():.2f}ms')
         ax2.axvline(df['processing_ms'].quantile(0.95), color='orange', linestyle='--',
                    label=f'95th percentile: {df["processing_ms"].quantile(0.95):.2f}ms')
-        ax2.legend()
+        ax2.legend(loc="upper right")
         ax2.grid(True, alpha=0.3)
 
         # Queue delay over time
@@ -272,8 +462,12 @@ class LLServerTraceAnalyzer:
                    label=f'Mean: {df["queue_delay_ms"].mean():.2f}ms')
         ax4.axvline(df['queue_delay_ms'].quantile(0.95), color='darkred', linestyle='--',
                    label=f'95th percentile: {df["queue_delay_ms"].quantile(0.95):.2f}ms')
-        ax4.legend()
+        ax4.legend(loc="upper right")
         ax4.grid(True, alpha=0.3)
+
+        # Place legends for axes with legend content
+        self._place_legend(ax2)
+        self._place_legend(ax4)
 
         plt.tight_layout()
         plt.savefig(f'{output_dir}/processing_latencies.png', dpi=300, bbox_inches='tight')
@@ -297,6 +491,12 @@ class LLServerTraceAnalyzer:
         df['time_seconds'] = (df['start_time'] - df['start_time'].min()) / 1e9
         df['queue_delay_ms'] = df['queue_delay_ns'] / 1e6
 
+        df = self._coerce_numeric(df, ['queue_delay_ms','time_seconds'])
+        df = self._drop_non_finite(df, ['queue_delay_ms'])
+        if df.empty:
+            print('Queue delay dataframe empty after filtering non-finite values; skipping plot.')
+            return
+
         # Calculate moving averages
         window_size = max(len(df) // 100, 10)  # 1% of data points or minimum 10
         df = df.sort_values('time_seconds')
@@ -311,7 +511,7 @@ class LLServerTraceAnalyzer:
         ax1.set_xlabel('Time (seconds)')
         ax1.set_ylabel('Queue Delay (ms)')
         ax1.set_title('Queue Delay Analysis Over Time')
-        ax1.legend()
+        ax1.legend(loc="upper right")
         ax1.grid(True, alpha=0.3)
 
         # Percentile analysis over time
@@ -337,8 +537,12 @@ class LLServerTraceAnalyzer:
             ax2.set_xlabel('Time (seconds)')
             ax2.set_ylabel('Queue Delay (ms)')
             ax2.set_title('Queue Delay Percentiles Over Time')
-            ax2.legend()
+            ax2.legend(loc="upper right")
             ax2.grid(True, alpha=0.3)
+
+        # Place legends last
+        self._place_legend(ax1)
+        self._place_legend(ax2)
 
         plt.tight_layout()
         plt.savefig(f'{output_dir}/queue_delays_detailed.png', dpi=300, bbox_inches='tight')
@@ -354,6 +558,12 @@ class LLServerTraceAnalyzer:
         df['time_seconds'] = (df['timestamp'] - df['timestamp'].min()) / 1e9
         df['duration_ms'] = df['duration_ns'] / 1e6
 
+        df = self._coerce_numeric(df, ['duration_ms','time_seconds'])
+        df = self._drop_non_finite(df, ['duration_ms'])
+        if df.empty:
+            print('Lock events dataframe empty after filtering non-finite values; skipping plot.')
+            return
+
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(18, 12))
 
         # Lock wait times by mutex
@@ -367,9 +577,9 @@ class LLServerTraceAnalyzer:
             ax1.set_xlabel('Time (seconds)')
             ax1.set_ylabel('Lock Wait Time (ms)')
             ax1.set_title('Lock Wait Times Over Time')
-            ax1.legend()
-            ax1.grid(True, alpha=0.3)
             ax1.set_yscale('log')
+            #ax1.legend(loc="upper right")
+            #ax1.grid(True, alpha=0.3)
 
             # Lock wait time distribution by mutex
             for mutex in mutex_names:
@@ -379,9 +589,9 @@ class LLServerTraceAnalyzer:
             ax2.set_xlabel('Lock Wait Time (ms)')
             ax2.set_ylabel('Count')
             ax2.set_title('Lock Wait Time Distribution by Mutex')
-            ax2.legend()
-            ax2.grid(True, alpha=0.3)
             ax2.set_xscale('log')
+            #ax2.legend(loc="upper right")
+            #ax2.grid(True, alpha=0.3)
 
         # Lock hold times by mutex
         hold_events = df[df['type'] == 'hold']
@@ -394,9 +604,9 @@ class LLServerTraceAnalyzer:
             ax3.set_xlabel('Time (seconds)')
             ax3.set_ylabel('Lock Hold Time (ms)')
             ax3.set_title('Lock Hold Times Over Time')
-            ax3.legend()
-            ax3.grid(True, alpha=0.3)
             ax3.set_yscale('log')
+            #ax3.legend(loc="upper right")
+            #ax3.grid(True, alpha=0.3)
 
             # Average lock metrics per mutex
             mutex_stats = []
@@ -422,8 +632,14 @@ class LLServerTraceAnalyzer:
             ax4.set_title('Average Lock Wait vs Hold Times by Mutex')
             ax4.set_xticks(x)
             ax4.set_xticklabels(stats_df['mutex'], rotation=45)
-            ax4.legend()
+            ax4.legend(loc="upper right")
             ax4.grid(True, alpha=0.3)
+
+        # Place legends last
+        if 'ax1' in locals(): self._place_legend(ax1)
+        if 'ax2' in locals(): self._place_legend(ax2)
+        if 'ax3' in locals(): self._place_legend(ax3)
+        if 'ax4' in locals(): self._place_legend(ax4)
 
         plt.tight_layout()
         plt.savefig(f'{output_dir}/lock_contention.png', dpi=300, bbox_inches='tight')
@@ -439,6 +655,11 @@ class LLServerTraceAnalyzer:
         df['time_seconds'] = (df['timestamp'] - df['timestamp'].min()) / 1e9
         df['duration_ms'] = df['duration_ns'] / 1e6
 
+        df = self._coerce_numeric(df, ['bytes','duration_ns','duration_ms'])
+        df['throughput_mbps'] = (df['bytes'] * 8) / (df['duration_ns'] / 1e9) / 1e6
+        df = self._coerce_numeric(df, ['throughput_mbps','time_seconds'])
+        df = self._drop_non_finite(df, ['duration_ms'])
+
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(18, 12))
 
         # I/O duration over time by operation type
@@ -450,9 +671,9 @@ class LLServerTraceAnalyzer:
         ax1.set_xlabel('Time (seconds)')
         ax1.set_ylabel('I/O Duration (ms)')
         ax1.set_title('I/O Operation Duration Over Time')
-        ax1.legend()
-        ax1.grid(True, alpha=0.3)
         ax1.set_yscale('log')
+        #ax1.legend(loc="upper right")
+        #ax1.grid(True, alpha=0.3)
 
         # I/O duration distribution by operation
         for op in operations:
@@ -462,23 +683,23 @@ class LLServerTraceAnalyzer:
         ax2.set_xlabel('I/O Duration (ms)')
         ax2.set_ylabel('Count')
         ax2.set_title('I/O Duration Distribution by Operation')
-        ax2.legend()
-        ax2.grid(True, alpha=0.3)
         ax2.set_xscale('log')
+        #ax2.legend(loc="upper right")
+        #ax2.grid(True, alpha=0.3)
 
         # Bytes vs duration scatter
         ax3.scatter(df['bytes'], df['duration_ms'], alpha=0.6, s=10)
         ax3.set_xlabel('Bytes')
         ax3.set_ylabel('I/O Duration (ms)')
         ax3.set_title('I/O Duration vs Bytes Transferred')
-        ax3.grid(True, alpha=0.3)
         ax3.set_xscale('log')
         ax3.set_yscale('log')
+        ax3.grid(True, alpha=0.3)
 
         # I/O throughput over time
         df['throughput_mbps'] = (df['bytes'] * 8) / (df['duration_ns'] / 1e9) / 1e6  # Mbps
-        # Filter out infinite values
-        df = df[df['throughput_mbps'].isfinite()]
+        df['throughput_mbps'] = pd.to_numeric(df['throughput_mbps'], errors='coerce')
+        df = df[np.isfinite(df['throughput_mbps'])]
 
         if not df.empty:
             for op in operations:
@@ -489,9 +710,14 @@ class LLServerTraceAnalyzer:
             ax4.set_xlabel('Time (seconds)')
             ax4.set_ylabel('Throughput (Mbps)')
             ax4.set_title('I/O Throughput Over Time')
-            ax4.legend()
-            ax4.grid(True, alpha=0.3)
             ax4.set_yscale('log')
+            #ax4.legend(loc="upper right")
+            #ax4.grid(True, alpha=0.3)
+
+        # Place legends for axes with legend content
+        self._place_legend(ax1)
+        self._place_legend(ax2)
+        if 'ax4' in locals(): self._place_legend(ax4)
 
         plt.tight_layout()
         plt.savefig(f'{output_dir}/io_performance.png', dpi=300, bbox_inches='tight')
@@ -514,7 +740,19 @@ class LLServerTraceAnalyzer:
 
         # Remove infinite/NaN values
         df = df.dropna()
-        df = df[df['producer_rate'].isfinite() & df['consumer_rate'].isfinite()]
+        # Ensure numeric types before np.isfinite
+        df['producer_rate'] = pd.to_numeric(df['producer_rate'], errors='coerce')
+        df['consumer_rate'] = pd.to_numeric(df['consumer_rate'], errors='coerce')
+        df['drop_rate'] = pd.to_numeric(df['drop_rate'], errors='coerce')
+        df['queue_size'] = pd.to_numeric(df['queue_size'], errors='coerce')
+        mask = np.isfinite(df['producer_rate']) & np.isfinite(df['consumer_rate'])
+        df = df[mask]
+
+        df = self._coerce_numeric(df, ['producer_rate','consumer_rate','drop_rate','queue_size','time_seconds'])
+        df = self._drop_non_finite(df, ['producer_rate','consumer_rate'])
+        if df.empty:
+            print('Producer/consumer rate dataframe empty after filtering; skipping plot.')
+            return
 
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(18, 12))
 
@@ -526,7 +764,6 @@ class LLServerTraceAnalyzer:
         ax1.set_xlabel('Time (seconds)')
         ax1.set_ylabel('Rate (items/second)')
         ax1.set_title('Producer vs Consumer Rates Over Time')
-        ax1.legend()
         ax1.grid(True, alpha=0.3)
 
         # Rate difference (producer - consumer)
@@ -557,8 +794,11 @@ class LLServerTraceAnalyzer:
         ax4.set_xlabel('Time (seconds)')
         ax4.set_ylabel('Rate (items/second)')
         ax4.set_title('Smoothed Producer vs Consumer Rates')
-        ax4.legend()
         ax4.grid(True, alpha=0.3)
+
+        # Place legends for axes with legend content
+        self._place_legend(ax1)
+        self._place_legend(ax4)
 
         plt.tight_layout()
         plt.savefig(f'{output_dir}/producer_consumer_rates.png', dpi=300, bbox_inches='tight')
@@ -574,6 +814,12 @@ class LLServerTraceAnalyzer:
 
         trigger_df = pd.DataFrame(self.backlog_triggers)
         trigger_df['time_seconds'] = (trigger_df['timestamp'] - trigger_df['timestamp'].min()) / 1e9
+
+        trigger_df = self._coerce_numeric(trigger_df, ['queue_size','growth_rate','time_seconds'])
+        trigger_df = self._drop_non_finite(trigger_df, ['queue_size','growth_rate'])
+        if trigger_df.empty:
+            print('Backlog trigger dataframe empty after filtering non-finite values; skipping backlog plots.')
+            return
 
         # Backlog episodes over time
         ax1.scatter(trigger_df['time_seconds'], trigger_df['queue_size'],
@@ -592,7 +838,7 @@ class LLServerTraceAnalyzer:
         ax2.set_title('Backlog Growth Rate Distribution')
         ax2.axvline(trigger_df['growth_rate'].mean(), color='red', linestyle='--',
                    label=f'Mean: {trigger_df["growth_rate"].mean():.0f}')
-        ax2.legend()
+        ax2.legend(loc="upper right")
         ax2.grid(True, alpha=0.3)
 
         # Queue size at trigger histogram
@@ -602,13 +848,17 @@ class LLServerTraceAnalyzer:
         ax3.set_title('Queue Size at Backlog Trigger Distribution')
         ax3.axvline(trigger_df['queue_size'].mean(), color='red', linestyle='--',
                    label=f'Mean: {trigger_df["queue_size"].mean():.0f}')
-        ax3.legend()
+        ax3.legend(loc="upper right")
         ax3.grid(True, alpha=0.3)
 
         # Trigger reasons
         reason_counts = trigger_df['reason'].value_counts()
         ax4.pie(reason_counts.values, labels=reason_counts.index, autopct='%1.1f%%')
         ax4.set_title('Backlog Trigger Reasons')
+
+        # Place legends for axes with legend content
+        self._place_legend(ax2)
+        self._place_legend(ax3)
 
         plt.tight_layout()
         plt.savefig(f'{output_dir}/backlog_analysis.png', dpi=300, bbox_inches='tight')
@@ -687,20 +937,63 @@ class LLServerTraceAnalyzer:
 
         print(f"Summary report written to {report_file}")
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python3 analyze_traces.py /path/to/trace/directory")
-        sys.exit(1)
+    def _place_legend(self, ax, loc="upper right"):
+        # Updated flexible legend handling
+        leg_handles, leg_labels = ax.get_legend_handles_labels()
+        if not leg_handles:
+            return
+        mode = self.legend_mode
+        if mode == 'right':
+            ax.legend(leg_handles, leg_labels, loc='center left', bbox_to_anchor=(1.02, 0.5),
+                      borderaxespad=0., frameon=False, fontsize='small')
+        elif mode == 'below':
+            ax.legend(leg_handles, leg_labels, loc='upper center', bbox_to_anchor=(0.5, -0.18),
+                      ncol=min(4, len(leg_labels)), frameon=False, fontsize='small')
+        else:  # inside
+            ax.legend(loc=loc, fontsize='small', frameon=False)
 
-    trace_path = sys.argv[1]
+def main():
+    parser = argparse.ArgumentParser(description='Analyze llserver LTTng traces')
+    parser.add_argument('trace_path', help='Path to LTTng trace directory')
+    parser.add_argument('--debug', action='store_true', help='Enable verbose debug output')
+    parser.add_argument('--no-cache', action='store_true', help='Do not use existing cache; force reparse')
+    parser.add_argument('--use-cache', action='store_true', help='Use cache automatically without prompt if present')
+    parser.add_argument('--cache-events', action='store_true', help='Store per-event records in cache (larger file)')
+    parser.add_argument('--legend-mode', choices=['right','below','inside'], default='right', help='Legend placement strategy to avoid overlap (default: right outside)')
+    args = parser.parse_args()
+
+    trace_path = args.trace_path
     if not os.path.exists(trace_path):
         print(f"Error: Trace path {trace_path} does not exist")
         sys.exit(1)
 
-    analyzer = LLServerTraceAnalyzer(trace_path)
+    analyzer = LLServerTraceAnalyzer(trace_path, debug=args.debug, cache_events=args.cache_events,
+                                     legends_outside=(args.legend_mode!='inside'), legend_mode=args.legend_mode)
+    cache_dir = 'plots'
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = os.path.join(cache_dir, 'trace_cache.pkl')
+
+    use_cache = False
+    if not args.no_cache and os.path.exists(cache_file):
+        if args.use_cache:
+            use_cache = True
+            if args.debug:
+                print("[DEBUG] Using cache (auto mode)")
+        else:
+            resp = input(f"Cached parsed data found at {cache_file}. Use cached data? [y/N]: ").strip().lower()
+            if resp == 'y':
+                use_cache = True
 
     try:
-        analyzer.parse_traces()
+        if use_cache:
+            analyzer.load_cache(cache_file)
+        else:
+            analyzer.parse_traces()
+            analyzer.save_cache(cache_file)
+        # Print all unique field names after parsing
+        print("\nUnique field names found in trace events:")
+        for name in sorted(analyzer.field_names):
+            print(f"  {name}")
         analyzer.generate_plots()
         analyzer.generate_summary_report()
         print("\nAnalysis complete! Check the 'plots' directory for results.")

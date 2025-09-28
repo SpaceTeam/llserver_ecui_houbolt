@@ -5,14 +5,37 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
+#include <time.h>
+#include <stdint.h>
 //#include <zlib.h>
 
 #include "logging/influxDb.h"
+
+// Minimal forward declaration for tracing (avoid pulling in C++ header)
+#if defined(HAVE_LTTNG) && HAVE_LTTNG
+void __tracepoint_llserver___net_send_header(uint32_t bytes, uint64_t io_ns);
+void __tracepoint_llserver___net_send_header_error(uint32_t attempted_bytes, uint64_t io_ns, int32_t err_no);
+void __tracepoint_llserver___net_send_body(uint32_t bytes, uint64_t io_ns);
+void __tracepoint_llserver___net_send_body_error(uint32_t attempted_bytes, uint64_t io_ns, int32_t err_no);
+void __tracepoint_llserver___net_recv(uint32_t bytes, uint64_t io_ns);
+void __tracepoint_llserver___net_recv_error(uint32_t attempted_bytes, uint64_t io_ns, int32_t err_no);
+#endif
 
 static void safe_str_cpy(char *src, const char *dest, size_t length) {
     strncpy(src, dest, length-1);
     src[length-1] = '\0';
 }
+
+// Monotonic time helper (nanoseconds)
+static inline uint64_t monotonic_ns() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t) ts.tv_sec * 1000000000ULL + (uint64_t) ts.tv_nsec;
+}
+
+// LoggingOp::NET_SEND op code from tracepoint_wrapper.h (enum value = 1)
+#define LLSERVER_LOGGING_OP_NET_SEND 1
+#define LLSERVER_LOGGING_OP_NET_RECV 4
 
 void set_timestamp_precision(influxDbContext *cntxt, timestamp_precision_t precision) {
     switch(precision) {
@@ -88,7 +111,7 @@ int deInitDbContext(influxDbContext *cntxt) {
 
 int sendData(influxDbContext *cntxt, char *data, size_t length) {
     char http_header[2048];
-    size_t ret;
+    ssize_t ret; // changed from size_t to ssize_t for proper error detection
     size_t header_length = 0, sent = 0;
     char result[1024];
 
@@ -96,26 +119,53 @@ int sendData(influxDbContext *cntxt, char *data, size_t length) {
             cntxt->db_name, cntxt->user, cntxt->password, cntxt->ts_precision, cntxt->hostname, cntxt->port, length);
 
     while (sent < header_length) {
+        uint64_t t0 = monotonic_ns();
         ret = write(cntxt->sock_fd, &http_header[sent], header_length - sent);
+        uint64_t t1 = monotonic_ns();
+#if defined(HAVE_LTTNG) && HAVE_LTTNG
+        if (ret < 0) {
+            __tracepoint_llserver___net_send_header_error((uint32_t)(header_length - sent), t1 - t0, errno);
+        } else if (ret > 0) {
+            __tracepoint_llserver___net_send_header((uint32_t)ret, t1 - t0);
+        }
+#endif
         if (ret < 0) {
             return -1;
         }
-        sent = sent + ret;
+        sent += (size_t)ret;
     }
     sent = 0;
 
     while (sent < length) {
+        uint64_t t0 = monotonic_ns();
         ret = write(cntxt->sock_fd, &data[sent], length - sent);
+        uint64_t t1 = monotonic_ns();
+#if defined(HAVE_LTTNG) && HAVE_LTTNG
+        if (ret < 0) {
+            __tracepoint_llserver___net_send_body_error((uint32_t)(length - sent), t1 - t0, errno);
+        } else if (ret > 0) {
+            __tracepoint_llserver___net_send_body((uint32_t)ret, t1 - t0);
+        }
+#endif
         if (ret < 0) {
             return -1;
         }
-        sent = sent + ret;
+        sent += (size_t)ret;
     }
 
     // If needed -> extract response code (DB)
-    read(cntxt->sock_fd, result, sizeof(result));
+    uint64_t t0r = monotonic_ns();
+    ssize_t rret = read(cntxt->sock_fd, result, sizeof(result));
+    uint64_t t1r = monotonic_ns();
+#if defined(HAVE_LTTNG) && HAVE_LTTNG
+    if (rret < 0) {
+        __tracepoint_llserver___net_recv_error((uint32_t)sizeof(result), t1r - t0r, errno);
+    } else if (rret > 0) {
+        __tracepoint_llserver___net_recv((uint32_t)rret, t1r - t0r);
+    }
+#endif
+    (void) rret; // suppress unused warning if LTTng disabled
     // fprintf(stdout, "Result %s\n", result);
 
     return 0;
 }
-

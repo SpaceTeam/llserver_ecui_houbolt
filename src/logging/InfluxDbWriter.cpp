@@ -154,11 +154,22 @@ void InfluxDbWriter::transferPartialWrite() {
 }
 
 void InfluxDbWriter::joinThreads() {
-    // Instrument thread join operations as they can block
+#if defined(HAVE_LTTNG) && HAVE_LTTNG
+    if (!threads.empty()) {
+        tracepoint(llserver, writer_join_threads, (uint32_t)threads.size());
+    }
+#endif
     for (std::thread &t : threads) {
         if(t.joinable()) {
-            llserver::trace::IOTracker join_tracker(0, llserver::trace::LoggingOp::FLUSH);
+#if defined(HAVE_LTTNG) && HAVE_LTTNG
+            auto t0 = std::chrono::steady_clock::now();
+#endif
             t.join();
+#if defined(HAVE_LTTNG) && HAVE_LTTNG
+            auto t1 = std::chrono::steady_clock::now();
+            uint64_t ns = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+            tracepoint(llserver, writer_thread_join, ns);
+#endif
         }
     }
     threads.clear();
