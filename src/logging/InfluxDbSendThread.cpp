@@ -50,8 +50,9 @@ void InfluxDbSendThread::messageSendingLoop() {
             sendData(context.get(), msg.data(), msg.size());
             writer.returnBuffer(std::move(msg));
         }
-        if (messagesInQueue>40) {
-            Debug::error("Queue size above 40, size: %i", messagesInQueue.load());
+        int size_approx = queue->size_approx();
+        if (size_approx>20) {
+            Debug::error("Queue size above 40, size: %i",size_approx );
         }
     }
 }

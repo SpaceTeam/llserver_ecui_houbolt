@@ -40,10 +40,10 @@ private:
     const std::size_t buffer_size_max = 1024;
     // allocations that can be reused as buffers
     std::vector<std::string> available_buffers;
+    std::vector<std::shared_ptr<influxDbContext>> contexts;
     std::mutex buffer_mutex;
     // the current buffer being filled
     std::string current_buffer;
-    std::shared_ptr<::influxDbContext> cntxt;
     std::string host, portStr, db, measurement;
     std::vector<std::unique_ptr<InfluxDbSendThread>> threads;
     std::shared_ptr<moodycamel::BlockingConcurrentQueue<std::string>> queue;

@@ -15,18 +15,21 @@
 using namespace std::chrono_literals;
 
 InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string dbName,
-                               std::size_t bufferSize) : buffer_size_max(bufferSize),cntxt(std::make_shared<influxDbContext>()) {
+                               std::size_t bufferSize) : buffer_size_max(bufferSize) {
     host = std::move(hostname);
     db = std::move(dbName);
     portStr = std::to_string(port);
 
-    if (initDbContext(cntxt.get(), host.c_str(), portStr.c_str(), db.c_str()) < 0) {
-        throw std::runtime_error("Couldn't initialize influxDbWriter (bad context)");
-    }
+
 
     queue = std::make_shared<moodycamel::BlockingConcurrentQueue<std::string>>();
     // spawn worker threads referencing *this
     for (int i = 0; i < 1; ++i) {
+        std::shared_ptr<influxDbContext> cntxt = std::make_shared<influxDbContext>();
+        if (initDbContext(cntxt.get(), host.c_str(), portStr.c_str(), db.c_str()) < 0) {
+            throw std::runtime_error("Couldn't initialize influxDbWriter (bad context)");
+        }
+        contexts.push_back(cntxt);
         threads.emplace_back(std::make_unique<InfluxDbSendThread>(cntxt, queue, *this));
     }
     current_buffer = std::string();
@@ -39,17 +42,23 @@ InfluxDbWriter::~InfluxDbWriter() {
     flush();
     joinThreads();
 
-    (void) deInitDbContext(cntxt.get());
+    for (auto& context: contexts) {
+        deInitDbContext(context.get());
+    }
 }
 
 void InfluxDbWriter::setCredentials(const std::string& user, const std::string& password) {
     std::string user_http = "&u=" + user;
     std::string pw_http = "&p=" + password;
-    set_credentials(cntxt.get(), user_http.c_str(), pw_http.c_str());
+    for (auto& cntxt: contexts) {
+        set_credentials(cntxt.get(), user_http.c_str(), pw_http.c_str());
+    }
 }
 
 void InfluxDbWriter::setTimestampPrecision(timestamp_precision_t precision) {
-    set_timestamp_precision(cntxt.get(), precision);
+    for (auto& cntxt: contexts) {
+        set_timestamp_precision(cntxt.get(), precision);
+    }
 }
 
 void InfluxDbWriter::setMeasurement(std::string _measurement) {
