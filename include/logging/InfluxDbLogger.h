@@ -1,7 +1,7 @@
 #ifndef INFLUXDBLOGGER_H
 #define INFLUXDBLOGGER_H
 
-#include "logging/InfluxDbWriter.h"
+#include "logging/InfluxDbWriter.hpp"
 #include "logging/MessageLogger.h"
 #include "logging/DataLogger.h"
 
@@ -24,7 +24,7 @@ class InfluxDbLogger
 
             void flush();
         private:
-            InfluxDbWriter *dbWriter;
+            std::shared_ptr<InfluxDbWriter> dbWriter;
 };
 
 #endif

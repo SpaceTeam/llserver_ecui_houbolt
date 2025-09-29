@@ -5,14 +5,12 @@ InfluxDbLogger::InfluxDbLogger() {
 }
 
 InfluxDbLogger::~InfluxDbLogger() {
-    delete dbWriter;
 }
 
 void InfluxDbLogger::Init(std::string db_hostname, unsigned db_port, std::string db_name, std::string measurement,
                             timestamp_precision_t precision, std::size_t buffer_size) {
     try {
-        dbWriter = new InfluxDbWriter(db_hostname, db_port, db_name, buffer_size);
-        dbWriter->Init();
+        dbWriter = std::make_shared<InfluxDbWriter>(db_hostname, db_port, db_name, buffer_size);
         dbWriter->setMeasurement(measurement);
         dbWriter->setTimestampPrecision(precision);
     }

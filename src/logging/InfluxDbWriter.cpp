@@ -1,26 +1,33 @@
 #include <iostream>
 
-#include "logging/InfluxDbWriter.h"
+#include "logging/InfluxDbWriter.hpp"
 
 #include <format>
 #include <iterator>
 #include <string>
+#include <utility>
 
 #include "logging/influxDb.h"
 #include "utility/Debug.h"
+#include "blockingconcurrentqueue.h" // ensure complete type for queue
+#include "logging/InfluxDbSendThread.h"
 
 using namespace std::chrono_literals;
 
 InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string dbName,
-                               std::size_t bufferSize) : buffer_size_max(bufferSize) {
-    host = hostname;
-    db = dbName;
+                               std::size_t bufferSize) : buffer_size_max(bufferSize),cntxt(std::make_shared<influxDbContext>()) {
+    host = std::move(hostname);
+    db = std::move(dbName);
     portStr = std::to_string(port);
-}
 
-void InfluxDbWriter::Init() {
-    if (initDbContext(&cntxt, host.c_str(), portStr.c_str(), db.c_str()) < 0) {
+    if (initDbContext(cntxt.get(), host.c_str(), portStr.c_str(), db.c_str()) < 0) {
         throw std::runtime_error("Couldn't initialize influxDbWriter (bad context)");
+    }
+
+    queue = std::make_shared<moodycamel::BlockingConcurrentQueue<std::string>>();
+    // spawn worker threads referencing *this
+    for (int i = 0; i < 2; ++i) {
+        threads.emplace_back(std::make_unique<InfluxDbSendThread>(cntxt, queue, *this));
     }
 }
 
@@ -28,21 +35,21 @@ InfluxDbWriter::~InfluxDbWriter() {
     flush();
     joinThreads();
 
-    (void) deInitDbContext(&cntxt);
+    (void) deInitDbContext(cntxt.get());
 }
 
-void InfluxDbWriter::setCredentials(std::string user, std::string password) {
+void InfluxDbWriter::setCredentials(const std::string& user, const std::string& password) {
     std::string user_http = "&u=" + user;
     std::string pw_http = "&p=" + password;
-    set_credentials(&cntxt, user_http.c_str(), pw_http.c_str());
+    set_credentials(cntxt.get(), user_http.c_str(), pw_http.c_str());
 }
 
 void InfluxDbWriter::setTimestampPrecision(timestamp_precision_t precision) {
-    set_timestamp_precision(&cntxt, precision);
+    set_timestamp_precision(cntxt.get(), precision);
 }
 
-void InfluxDbWriter::setMeasurement(std::string measurement) {
-    this->measurement = std::move(measurement);
+void InfluxDbWriter::setMeasurement(std::string _measurement) {
+    this->measurement = std::move(_measurement);
 }
 
 void InfluxDbWriter::startDataPoint() {
@@ -87,11 +94,12 @@ void InfluxDbWriter::endDataPoint(const std::size_t timestamp) {
 }
 
 void InfluxDbWriter::joinThreads() {
-    for (std::thread &t: threads) {
-        if (t.joinable()) {
-            t.join();
-        } else
-            Debug::warning("InfluxDbWriter thread was not joinable.");
+    // signal threads to stop and join them
+    for (auto & t : threads) {
+        if (t) t->stop();
+    }
+    for (auto & t : threads) {
+        if (t) t->join();
     }
 }
 
@@ -99,6 +107,10 @@ void InfluxDbWriter::flush() {
     std::lock_guard lock(buffer_mutex);
     if (current_buffer.empty()) {
         Debug::warning("InfluxDbWriter flush called with empty buffer, nothing to push.");
+        return;
+    }
+    if (!queue) {
+        Debug::warning("InfluxDbWriter flush called before queue initialization");
         return;
     }
 
@@ -112,11 +124,11 @@ void InfluxDbWriter::flush() {
         current_buffer.clear();
     }
 
-    // spawn a thread to send the buffer
-    threads.emplace_back([this, buf = std::move(buf_to_send)]() mutable {
-        sendData(&cntxt, buf.data(), buf.size());
-        // return the buffer to the pool
-        std::lock_guard thread_lock(buffer_mutex);
-        available_buffers.emplace_back(std::move(buf));
-    });
+    // enqueue buffer for sending
+    queue->enqueue(std::move(buf_to_send));
+}
+
+void InfluxDbWriter::returnBuffer(std::string buffer) {
+    std::lock_guard thread_lock(buffer_mutex);
+    available_buffers.emplace_back(std::move(buffer));
 }
