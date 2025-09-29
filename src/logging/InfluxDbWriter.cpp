@@ -29,6 +29,10 @@ InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string 
     for (int i = 0; i < 2; ++i) {
         threads.emplace_back(std::make_unique<InfluxDbSendThread>(cntxt, queue, *this));
     }
+    current_buffer = std::string();
+    for (int i = 0; i < 10; ++i) {
+        available_buffers.emplace_back(std::string());
+    }
 }
 
 InfluxDbWriter::~InfluxDbWriter() {
