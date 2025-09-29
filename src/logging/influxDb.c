@@ -8,7 +8,9 @@
 //#include <zlib.h>
 
 #include "logging/influxDb.h"
+#include <time.h>
 
+#define MS_TO_NS(x) ((x) * 1000000ULL)
 static void safe_str_cpy(char *src, const char *dest, size_t length) {
     strncpy(src, dest, length-1);
     src[length-1] = '\0';
@@ -84,7 +86,12 @@ int initDbContext(influxDbContext *cntxt, const char *hostname, const char *port
 int deInitDbContext(influxDbContext *cntxt) {
     return close(cntxt->sock_fd);
 }
-
+// Monotonic time helper (nanoseconds)
+static inline uint64_t monotonic_ns() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t) ts.tv_sec * 1000000000ULL + (uint64_t) ts.tv_nsec;
+}
 
 int sendData(influxDbContext *cntxt, char *data, size_t length) {
     char http_header[2048];
@@ -113,9 +120,12 @@ int sendData(influxDbContext *cntxt, char *data, size_t length) {
     }
 
     // If needed -> extract response code (DB)
+    uint64_t t1 = monotonic_ns();
     read(cntxt->sock_fd, result, sizeof(result));
-    // fprintf(stdout, "Result %s\n", result);
-
+    uint64_t t2 = monotonic_ns();
+    if (t2-t1>MS_TO_NS(100)) {
+        fprintf(stderr,"High read time, td= %lu, result=%s",t2-t1,result);
+    }
     return 0;
 }
 

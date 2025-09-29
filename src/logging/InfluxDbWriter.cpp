@@ -91,7 +91,7 @@ void InfluxDbWriter::endDataPoint(const std::size_t timestamp) {
     if (!current_buffer.empty() && current_buffer.back() == ',') {
         current_buffer.pop_back();
     }
-    std::format_to(std::back_inserter(current_buffer), " {}", timestamp);
+     std::format_to(std::back_inserter(current_buffer), " {}\n", timestamp);
     if (current_buffer.size() >= buffer_size_max) {
         flush();
     }
