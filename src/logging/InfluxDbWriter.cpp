@@ -26,7 +26,7 @@ InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string 
 
     queue = std::make_shared<moodycamel::BlockingConcurrentQueue<std::string>>();
     // spawn worker threads referencing *this
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 1; ++i) {
         threads.emplace_back(std::make_unique<InfluxDbSendThread>(cntxt, queue, *this));
     }
     current_buffer = std::string();
