@@ -2,15 +2,14 @@
 """
 LTTng Trace Analysis for llserver Backlog Diagnosis
 
-This script parses LTTng traces and generates plots to analyze:
-- Queue size over time
-- Processing latencies and queue delays
-- Lock contention patterns
-- I/O operation durations
-- Producer vs consumer rates
+Extended to include dedicated network and writer thread join tracepoints:
+  - net_send_header / net_send_header_error
+  - net_send_body / net_send_body_error
+  - net_recv / net_recv_error
+  - writer_join_threads (thread_count)
+  - writer_thread_join (join_ns)
 
-Usage:
-    python3 analyze_traces.py /path/to/trace/directory
+Generates additional graphs for these events.
 """
 
 import sys
@@ -41,6 +40,15 @@ class LLServerTraceAnalyzer:
         self.field_names = set()  # Collect all unique field names
         self.legends_outside = legends_outside
         self.legend_mode = legend_mode  # 'right', 'below', 'inside'
+
+        # New attributes for extended analysis
+        self.net_send_header = []
+        self.net_send_body = []
+        self.net_send_errors = []
+        self.net_recv = []
+        self.net_recv_errors = []
+        self.writer_joins = []          # writer_join_threads events (thread_count)
+        self.writer_thread_join = []     # writer_thread_join events (join_ns)
 
     def debug_log(self, msg):
         if self.debug:
@@ -123,6 +131,14 @@ class LLServerTraceAnalyzer:
         for seq, d in list(self.processing_events.items()):
             for k, val in list(d.items()):
                 d[k] = self._to_primitive(val)
+        # New structures
+        sanitize_list(self.net_send_header)
+        sanitize_list(self.net_send_body)
+        sanitize_list(self.net_send_errors)
+        sanitize_list(self.net_recv)
+        sanitize_list(self.net_recv_errors)
+        sanitize_list(self.writer_joins)
+        sanitize_list(self.writer_thread_join)
         if self.debug:
             self.debug_log("Sanitization complete for all data structures")
 
@@ -165,6 +181,22 @@ class LLServerTraceAnalyzer:
             self._process_thread_heartbeat(timestamp, fields)
         elif event_name == 'llserver:item_dropped':
             self._process_item_dropped(timestamp, fields)
+        elif event_name == 'llserver:net_send_header':
+            self._process_net_send(timestamp, fields, kind='header')
+        elif event_name == 'llserver:net_send_header_error':
+            self._process_net_send_error(timestamp, fields, kind='header')
+        elif event_name == 'llserver:net_send_body':
+            self._process_net_send(timestamp, fields, kind='body')
+        elif event_name == 'llserver:net_send_body_error':
+            self._process_net_send_error(timestamp, fields, kind='body')
+        elif event_name == 'llserver:net_recv':
+            self._process_net_recv(timestamp, fields)
+        elif event_name == 'llserver:net_recv_error':
+            self._process_net_recv_error(timestamp, fields)
+        elif event_name == 'llserver:writer_join_threads':
+            self._process_writer_join_threads(timestamp, fields)
+        elif event_name == 'llserver:writer_thread_join':
+            self._process_writer_thread_join(timestamp, fields)
         else:
             print(f"Unknown event type: {event_name}")
 
@@ -254,6 +286,53 @@ class LLServerTraceAnalyzer:
             'cause': fields.get('cause', 0)
         })
 
+    # --- New event processors ---
+    def _process_net_send(self, timestamp, fields, kind):
+        entry = {
+            'timestamp': timestamp,
+            'bytes': fields.get('bytes', 0),
+            'io_ns': fields.get('io_ns', 0),
+            'kind': kind
+        }
+        (self.net_send_header if kind == 'header' else self.net_send_body).append(entry)
+
+    def _process_net_send_error(self, timestamp, fields, kind):
+        entry = {
+            'timestamp': timestamp,
+            'attempted_bytes': fields.get('attempted_bytes', 0),
+            'io_ns': fields.get('io_ns', 0),
+            'err_no': fields.get('err_no', 0),
+            'kind': kind
+        }
+        self.net_send_errors.append(entry)
+
+    def _process_net_recv(self, timestamp, fields):
+        self.net_recv.append({
+            'timestamp': timestamp,
+            'bytes': fields.get('bytes', 0),
+            'io_ns': fields.get('io_ns', 0)
+        })
+
+    def _process_net_recv_error(self, timestamp, fields):
+        self.net_recv_errors.append({
+            'timestamp': timestamp,
+            'attempted_bytes': fields.get('attempted_bytes', 0),
+            'io_ns': fields.get('io_ns', 0),
+            'err_no': fields.get('err_no', 0)
+        })
+
+    def _process_writer_join_threads(self, timestamp, fields):
+        self.writer_joins.append({
+            'timestamp': timestamp,
+            'thread_count': fields.get('thread_count', 0)
+        })
+
+    def _process_writer_thread_join(self, timestamp, fields):
+        self.writer_thread_join.append({
+            'timestamp': timestamp,
+            'join_ns': fields.get('join_ns', 0)
+        })
+
     def save_cache(self, cache_file):
         """Serialize all arrays to a cache file."""
         self._sanitize_structures()
@@ -267,6 +346,14 @@ class LLServerTraceAnalyzer:
             'backlog_triggers': self.backlog_triggers,
             'heartbeat_events': self.heartbeat_events,
             'dropped_events': self.dropped_events,
+            # New data
+            'net_send_header': self.net_send_header,
+            'net_send_body': self.net_send_body,
+            'net_send_errors': self.net_send_errors,
+            'net_recv': self.net_recv,
+            'net_recv_errors': self.net_recv_errors,
+            'writer_joins': self.writer_joins,
+            'writer_thread_join': self.writer_thread_join,
             'field_names': list(self.field_names),
             'version': 2,
             'cache_events': self.cache_events,
@@ -288,6 +375,14 @@ class LLServerTraceAnalyzer:
         self.heartbeat_events = data.get('heartbeat_events', [])
         self.dropped_events = data.get('dropped_events', [])
         self.field_names = set(data.get('field_names', []))
+        # New data loading
+        self.net_send_header = data.get('net_send_header', [])
+        self.net_send_body = data.get('net_send_body', [])
+        self.net_send_errors = data.get('net_send_errors', [])
+        self.net_recv = data.get('net_recv', [])
+        self.net_recv_errors = data.get('net_recv_errors', [])
+        self.writer_joins = data.get('writer_joins', [])
+        self.writer_thread_join = data.get('writer_thread_join', [])
         if data.get('events') and self.cache_events:
             self.events = data['events']
         print(f"Loaded parsed data from {cache_file} (cached events present={data.get('events') is not None})")
@@ -307,8 +402,285 @@ class LLServerTraceAnalyzer:
         self.plot_io_performance(output_dir)
         self.plot_producer_consumer_rates(output_dir)
         self.plot_backlog_analysis(output_dir)
+        self.plot_network_send(output_dir)
+        self.plot_network_receive(output_dir)
+        self.plot_writer_joins(output_dir)
+        self.plot_network_overview(output_dir)
+        self.plot_network_errors(output_dir)  # NEW aggregated error view
 
         print("All plots generated successfully!")
+
+    # --- New plotting functions ---
+    def _prepare_time_df(self, data_list, bytes_field='bytes', duration_field='io_ns'):
+        if not data_list:
+            return None
+        df = pd.DataFrame(data_list)
+        base = df['timestamp'].min()
+        df['time_seconds'] = (df['timestamp'] - base) / 1e9
+        if bytes_field in df.columns:
+            df[bytes_field] = pd.to_numeric(df[bytes_field], errors='coerce')
+        if duration_field in df.columns:
+            df[duration_field] = pd.to_numeric(df[duration_field], errors='coerce')
+            df['duration_ms'] = df[duration_field] / 1e6
+        return df
+
+    def plot_network_send(self, output_dir):
+        if not (self.net_send_header or self.net_send_body):
+            print("No network send events (header/body) to plot")
+            return
+        header_df = self._prepare_time_df(self.net_send_header)
+        body_df = self._prepare_time_df(self.net_send_body)
+        err_df = self._prepare_time_df(self.net_send_errors, bytes_field='attempted_bytes') if self.net_send_errors else None
+
+        fig, axes = plt.subplots(3, 2, figsize=(20, 15))
+        ax1, ax2, ax3, ax4, ax5, ax6 = axes.flatten()
+
+        if header_df is not None:
+            ax1.scatter(header_df['time_seconds'], header_df['duration_ms'], s=10, alpha=0.6, label='header')
+        if body_df is not None:
+            ax1.scatter(body_df['time_seconds'], body_df['duration_ms'], s=10, alpha=0.6, label='body', color='orange')
+        ax1.set_title('Send Duration Over Time (Header vs Body)')
+        ax1.set_xlabel('Time (s)'); ax1.set_ylabel('Duration (ms)'); ax1.set_yscale('log'); ax1.grid(True, alpha=0.3)
+        self._place_legend(ax1)
+
+        # Histograms
+        if header_df is not None:
+            ax2.hist(header_df['duration_ms'], bins=40, alpha=0.7, label='header')
+        if body_df is not None:
+            ax2.hist(body_df['duration_ms'], bins=40, alpha=0.7, label='body')
+        ax2.set_xscale('log'); ax2.set_title('Send Duration Distribution'); ax2.set_xlabel('Duration (ms)'); ax2.set_ylabel('Count'); ax2.grid(True, alpha=0.3)
+        self._place_legend(ax2)
+
+        # Bytes vs Duration
+        if header_df is not None:
+            ax3.scatter(header_df['bytes'], header_df['duration_ms'], s=10, alpha=0.6, label='header')
+        if body_df is not None:
+            ax3.scatter(body_df['bytes'], body_df['duration_ms'], s=10, alpha=0.6, label='body')
+        ax3.set_xscale('log'); ax3.set_yscale('log'); ax3.set_title('Bytes vs Duration'); ax3.set_xlabel('Bytes'); ax3.set_ylabel('Duration (ms)'); ax3.grid(True, alpha=0.3)
+        self._place_legend(ax3)
+
+        # Throughput over time
+        for df_, lbl, col in [(header_df,'header','tab:blue'), (body_df,'body','tab:orange')]:
+            if df_ is not None and not df_.empty:
+                df_['throughput_mbps'] = (df_['bytes'] * 8) / (df_['io_ns'] / 1e9) / 1e6
+                df_valid = df_[np.isfinite(df_['throughput_mbps'])]
+                ax4.scatter(df_valid['time_seconds'], df_valid['throughput_mbps'], s=10, alpha=0.6, label=lbl, color=col)
+        ax4.set_yscale('log'); ax4.set_title('Throughput Over Time (Mbps)'); ax4.set_xlabel('Time (s)'); ax4.set_ylabel('Throughput (Mbps)'); ax4.grid(True, alpha=0.3)
+        self._place_legend(ax4)
+
+        # Error timeline
+        if err_df is not None and not err_df.empty:
+            ax5.scatter((err_df['timestamp'] - err_df['timestamp'].min())/1e9, err_df['attempted_bytes'], c=err_df['err_no'], cmap='viridis', s=30, alpha=0.8)
+            cbar = plt.colorbar(ax5.collections[0], ax=ax5)
+            cbar.set_label('errno')
+            ax5.set_title('Send Errors: Attempted Bytes vs Time')
+            ax5.set_xlabel('Time (s)'); ax5.set_ylabel('Attempted Bytes'); ax5.set_yscale('log'); ax5.grid(True, alpha=0.3)
+        else:
+            ax5.set_visible(False)
+
+        # Error counts by errno
+        if err_df is not None and not err_df.empty:
+            counts = err_df['err_no'].value_counts()
+            ax6.bar(counts.index.astype(str), counts.values, color='red', alpha=0.7)
+            ax6.set_title('Send Error Count by errno')
+            ax6.set_xlabel('errno'); ax6.set_ylabel('Count'); ax6.grid(True, alpha=0.3)
+        else:
+            ax6.set_visible(False)
+
+        plt.tight_layout()
+        plt.savefig(f'{output_dir}/network_send.png', dpi=300, bbox_inches='tight')
+        plt.close()
+
+    def plot_network_receive(self, output_dir):
+        if not self.net_recv and not self.net_recv_errors:
+            print("No network receive events to plot")
+            return
+        recv_df = self._prepare_time_df(self.net_recv)
+        err_df = self._prepare_time_df(self.net_recv_errors, bytes_field='attempted_bytes') if self.net_recv_errors else None
+
+        fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+        ax1, ax2, ax3, ax4 = axes.flatten()
+
+        if recv_df is not None:
+            ax1.scatter(recv_df['time_seconds'], recv_df['duration_ms'], s=10, alpha=0.6)
+            ax1.set_title('Receive Duration Over Time'); ax1.set_xlabel('Time (s)'); ax1.set_ylabel('Duration (ms)'); ax1.set_yscale('log'); ax1.grid(True, alpha=0.3)
+
+            ax2.hist(recv_df['duration_ms'], bins=40, alpha=0.7, edgecolor='black')
+            ax2.set_xscale('log'); ax2.set_title('Receive Duration Distribution'); ax2.set_xlabel('Duration (ms)'); ax2.set_ylabel('Count'); ax2.grid(True, alpha=0.3)
+
+            ax3.scatter(recv_df['bytes'], recv_df['duration_ms'], s=10, alpha=0.6)
+            ax3.set_xscale('log'); ax3.set_yscale('log'); ax3.set_title('Receive Bytes vs Duration'); ax3.set_xlabel('Bytes'); ax3.set_ylabel('Duration (ms)'); ax3.grid(True, alpha=0.3)
+
+            recv_df['throughput_mbps'] = (recv_df['bytes'] * 8) / (recv_df['io_ns'] / 1e9) / 1e6
+            valid = recv_df[np.isfinite(recv_df['throughput_mbps'])]
+            ax4.scatter(valid['time_seconds'], valid['throughput_mbps'], s=10, alpha=0.6)
+            ax4.set_yscale('log'); ax4.set_title('Receive Throughput Over Time (Mbps)'); ax4.set_xlabel('Time (s)'); ax4.set_ylabel('Throughput (Mbps)'); ax4.grid(True, alpha=0.3)
+        if err_df is not None and not err_df.empty:
+            # overlay errors on ax1
+            ax1.scatter((err_df['timestamp'] - err_df['timestamp'].min())/1e9, err_df['duration_ms'], marker='x', c='red', s=30, label='errors')
+            self._place_legend(ax1)
+        plt.tight_layout()
+        plt.savefig(f'{output_dir}/network_receive.png', dpi=300, bbox_inches='tight')
+        plt.close()
+
+    def plot_writer_joins(self, output_dir):
+        if not self.writer_joins and not self.writer_thread_join:
+            print("No writer join events to plot")
+            return
+        joins_df = self._prepare_time_df(self.writer_joins, bytes_field='thread_count', duration_field='thread_count') if self.writer_joins else None
+        joins_thread_df = self._prepare_time_df(self.writer_thread_join, bytes_field='join_ns', duration_field='join_ns') if self.writer_thread_join else None
+        fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+        ax1, ax2, ax3, ax4 = axes.flatten()
+        if joins_df is not None:
+            ax1.step(joins_df['time_seconds'], joins_df['thread_count'], where='post')
+            ax1.set_title('Writer Threads Pending per Join Call'); ax1.set_xlabel('Time (s)'); ax1.set_ylabel('Thread Count'); ax1.grid(True, alpha=0.3)
+            ax2.hist(joins_df['thread_count'], bins=range(1, int(joins_df['thread_count'].max())+2), align='left', rwidth=0.8)
+            ax2.set_title('Distribution of Thread Counts per Join'); ax2.set_xlabel('Thread Count'); ax2.set_ylabel('Frequency'); ax2.grid(True, alpha=0.3)
+        if joins_thread_df is not None:
+            joins_thread_df['join_ms'] = joins_thread_df['join_ns'] / 1e6
+            ax3.scatter((joins_thread_df['timestamp'] - joins_thread_df['timestamp'].min())/1e9, joins_thread_df['join_ms'], s=10, alpha=0.6)
+            ax3.set_yscale('log'); ax3.set_title('Individual Thread Join Durations Over Time'); ax3.set_xlabel('Time (s)'); ax3.set_ylabel('Join Duration (ms)'); ax3.grid(True, alpha=0.3)
+            ax4.hist(joins_thread_df['join_ms'], bins=40, alpha=0.7, edgecolor='black')
+            ax4.set_xscale('log'); ax4.set_title('Thread Join Duration Distribution'); ax4.set_xlabel('Join Duration (ms)'); ax4.set_ylabel('Count'); ax4.grid(True, alpha=0.3)
+        plt.tight_layout(); plt.savefig(f'{output_dir}/writer_joins.png', dpi=300, bbox_inches='tight'); plt.close()
+
+    def plot_network_overview(self, output_dir):
+        if not (self.net_send_header or self.net_send_body or self.net_recv):
+            return
+        header_df = self._prepare_time_df(self.net_send_header) if self.net_send_header else None
+        body_df = self._prepare_time_df(self.net_send_body) if self.net_send_body else None
+        recv_df = self._prepare_time_df(self.net_recv) if self.net_recv else None
+        fig, ax = plt.subplots(1, 1, figsize=(15, 6))
+        if header_df is not None:
+            header_df = header_df.sort_values('time_seconds')
+            header_df['cum_bytes'] = header_df['bytes'].cumsum()
+            ax.plot(header_df['time_seconds'], header_df['cum_bytes'], label='header cumulative')
+        if body_df is not None:
+            body_df = body_df.sort_values('time_seconds')
+            body_df['cum_bytes'] = body_df['bytes'].cumsum()
+            ax.plot(body_df['time_seconds'], body_df['cum_bytes'], label='body cumulative')
+        if recv_df is not None:
+            recv_df = recv_df.sort_values('time_seconds')
+            recv_df['cum_bytes'] = recv_df['bytes'].cumsum()
+            ax.plot(recv_df['time_seconds'], recv_df['cum_bytes'], label='recv cumulative')
+        ax.set_xlabel('Time (s)'); ax.set_ylabel('Cumulative Bytes'); ax.set_title('Cumulative Network Bytes (Header, Body, Receive)'); ax.legend(); ax.grid(True, alpha=0.3)
+        plt.tight_layout(); plt.savefig(f'{output_dir}/network_overview.png', dpi=300, bbox_inches='tight'); plt.close()
+
+    def generate_summary_report(self, output_dir='plots'):
+        """Generate a summary report with key statistics"""
+        report_file = f'{output_dir}/analysis_summary.txt'
+
+        with open(report_file, 'w') as f:
+            f.write("LLServer Trace Analysis Summary Report\n")
+            f.write("=" * 50 + "\n\n")
+
+            f.write(f"Total events processed: {len(self.events)}\n")
+
+            # Processing statistics
+            processing_data = [data for data in self.processing_events.values()
+                             if 'processing_ns' in data and 'queue_delay_ns' in data]
+            if processing_data:
+                processing_times = [d['processing_ns'] / 1e6 for d in processing_data]  # ms
+                queue_delays = [d['queue_delay_ns'] / 1e6 for d in processing_data]  # ms
+
+                f.write("Processing Latency Statistics:\n")
+                f.write(f"  Mean processing time: {np.mean(processing_times):.2f} ms\n")
+                f.write(f"  95th percentile: {np.percentile(processing_times, 95):.2f} ms\n")
+                f.write(f"  99th percentile: {np.percentile(processing_times, 99):.2f} ms\n")
+                f.write(f"  Max processing time: {np.max(processing_times):.2f} ms\n\n")
+
+                f.write("Queue Delay Statistics:\n")
+                f.write(f"  Mean queue delay: {np.mean(queue_delays):.2f} ms\n")
+                f.write(f"  95th percentile: {np.percentile(queue_delays, 95):.2f} ms\n")
+                f.write(f"  99th percentile: {np.percentile(queue_delays, 99):.2f} ms\n")
+                f.write(f"  Max queue delay: {np.max(queue_delays):.2f} ms\n\n")
+
+            # Queue statistics
+            if self.queue_snapshots:
+                queue_sizes = [s['queue_size'] for s in self.queue_snapshots]
+                f.write("Queue Size Statistics:\n")
+                f.write(f"  Mean queue size: {np.mean(queue_sizes):.1f}\n")
+                f.write(f"  Max queue size: {np.max(queue_sizes)}\n")
+                f.write(f"  95th percentile: {np.percentile(queue_sizes, 95):.1f}\n\n")
+
+            # Lock statistics
+            if self.lock_events:
+                wait_times = [e['duration_ns'] / 1e6 for e in self.lock_events if e['type'] == 'wait']
+                hold_times = [e['duration_ns'] / 1e6 for e in self.lock_events if e['type'] == 'hold']
+
+                if wait_times:
+                    f.write("Lock Wait Time Statistics:\n")
+                    f.write(f"  Mean wait time: {np.mean(wait_times):.2f} ms\n")
+                    f.write(f"  95th percentile: {np.percentile(wait_times, 95):.2f} ms\n")
+                    f.write(f"  Max wait time: {np.max(wait_times):.2f} ms\n\n")
+
+                if hold_times:
+                    f.write("Lock Hold Time Statistics:\n")
+                    f.write(f"  Mean hold time: {np.mean(hold_times):.2f} ms\n")
+                    f.write(f"  95th percentile: {np.percentile(hold_times, 95):.2f} ms\n")
+                    f.write(f"  Max hold time: {np.max(hold_times):.2f} ms\n\n")
+
+            # I/O statistics
+            if self.io_events:
+                io_times = [e['duration_ns'] / 1e6 for e in self.io_events]
+                f.write("I/O Operation Statistics:\n")
+                f.write(f"  Mean I/O time: {np.mean(io_times):.2f} ms\n")
+                f.write(f"  95th percentile: {np.percentile(io_times, 95):.2f} ms\n")
+                f.write(f"  Max I/O time: {np.max(io_times):.2f} ms\n\n")
+
+            # Backlog statistics
+            if self.backlog_triggers:
+                f.write("Backlog Episode Statistics:\n")
+                f.write(f"  Total backlog episodes: {len(self.backlog_triggers)}\n")
+                growth_rates = [t['growth_rate'] for t in self.backlog_triggers]
+                f.write(f"  Mean growth rate: {np.mean(growth_rates):.0f} items/sec\n")
+                f.write(f"  Max growth rate: {np.max(growth_rates):.0f} items/sec\n\n")
+
+            # New network statistics
+            if self.net_send_header or self.net_send_body:
+                def collect_ms(lst, key_ns='io_ns'):
+                    return [(e.get(key_ns, 0))/1e6 for e in lst if e.get(key_ns, 0) > 0]
+                header_times = collect_ms(self.net_send_header)
+                body_times = collect_ms(self.net_send_body)
+                f.write("Network Send (Header/Body) Statistics:\n")
+                if header_times:
+                    f.write(f"  Header mean duration: {np.mean(header_times):.3f} ms (p95 {np.percentile(header_times,95):.3f} ms)\n")
+                if body_times:
+                    f.write(f"  Body mean duration: {np.mean(body_times):.3f} ms (p95 {np.percentile(body_times,95):.3f} ms)\n")
+                f.write(f"  Header sends: {len(self.net_send_header)} Body sends: {len(self.net_send_body)} Errors: {len(self.net_send_errors)}\n\n")
+            if self.net_recv:
+                recv_times = [(e.get('io_ns',0))/1e6 for e in self.net_recv if e.get('io_ns',0)>0]
+                if recv_times:
+                    f.write("Network Receive Statistics:\n")
+                    f.write(f"  Mean duration: {np.mean(recv_times):.3f} ms (p95 {np.percentile(recv_times,95):.3f} ms) Count: {len(recv_times)} Errors: {len(self.net_recv_errors)}\n\n")
+            if self.writer_joins or self.writer_thread_join:
+                f.write("Writer Thread Join Statistics:\n")
+                if self.writer_joins:
+                    counts = [e['thread_count'] for e in self.writer_joins]
+                    f.write(f"  Join call mean thread count: {np.mean(counts):.2f} max: {np.max(counts)}\n")
+                if self.writer_thread_join:
+                    join_ms = [e['join_ns']/1e6 for e in self.writer_thread_join if e.get('join_ns',0)>0]
+                    if join_ms:
+                        f.write(f"  Thread join mean: {np.mean(join_ms):.3f} ms p95: {np.percentile(join_ms,95):.3f} ms max: {np.max(join_ms):.3f} ms\n")
+                f.write("\n")
+
+        print(f"Summary report written to {report_file}")
+
+    def _place_legend(self, ax, loc="upper right"):
+        # Updated flexible legend handling
+        leg_handles, leg_labels = ax.get_legend_handles_labels()
+        if not leg_handles:
+            return
+        mode = self.legend_mode
+        if mode == 'right':
+            ax.legend(leg_handles, leg_labels, loc='center left', bbox_to_anchor=(1.02, 0.5),
+                      borderaxespad=0., frameon=False, fontsize='small')
+        elif mode == 'below':
+            ax.legend(leg_handles, leg_labels, loc='upper center', bbox_to_anchor=(0.5, -0.18),
+                      ncol=min(4, len(leg_labels)), frameon=False, fontsize='small')
+        else:  # inside
+            ax.legend(loc=loc, fontsize='small', frameon=False)
+
 
     def _coerce_numeric(self, df, columns):
         """Ensure listed columns are numeric, coercing errors to NaN. Provides debug details on coercion losses."""
@@ -378,7 +750,7 @@ class LLServerTraceAnalyzer:
             trigger_df = pd.DataFrame(self.backlog_triggers)
             trigger_df['time_seconds'] = (trigger_df['timestamp'] - df['timestamp'].min()) / 1e9
             ax1.scatter(trigger_df['time_seconds'], trigger_df['queue_size'],
-                       color='red', s=50, marker='x', label='Backlog Triggers')
+                        color='red', s=50, marker='x', label='Backlog Triggers')
             ax1.legend(loc="upper right")
 
         # Producer vs Consumer rate
@@ -440,9 +812,9 @@ class LLServerTraceAnalyzer:
         ax2.set_ylabel('Count')
         ax2.set_title('Processing Latency Distribution')
         ax2.axvline(df['processing_ms'].mean(), color='red', linestyle='--',
-                   label=f'Mean: {df["processing_ms"].mean():.2f}ms')
+                    label=f'Mean: {df["processing_ms"].mean():.2f}ms')
         ax2.axvline(df['processing_ms'].quantile(0.95), color='orange', linestyle='--',
-                   label=f'95th percentile: {df["processing_ms"].quantile(0.95):.2f}ms')
+                    label=f'95th percentile: {df["processing_ms"].quantile(0.95):.2f}ms')
         ax2.legend(loc="upper right")
         ax2.grid(True, alpha=0.3)
 
@@ -459,9 +831,9 @@ class LLServerTraceAnalyzer:
         ax4.set_ylabel('Count')
         ax4.set_title('Queue Delay Distribution')
         ax4.axvline(df['queue_delay_ms'].mean(), color='red', linestyle='--',
-                   label=f'Mean: {df["queue_delay_ms"].mean():.2f}ms')
+                    label=f'Mean: {df["queue_delay_ms"].mean():.2f}ms')
         ax4.axvline(df['queue_delay_ms'].quantile(0.95), color='darkred', linestyle='--',
-                   label=f'95th percentile: {df["queue_delay_ms"].quantile(0.95):.2f}ms')
+                    label=f'95th percentile: {df["queue_delay_ms"].quantile(0.95):.2f}ms')
         ax4.legend(loc="upper right")
         ax4.grid(True, alpha=0.3)
 
@@ -507,7 +879,7 @@ class LLServerTraceAnalyzer:
         # Queue delay over time with moving average
         ax1.scatter(df['time_seconds'], df['queue_delay_ms'], alpha=0.3, s=1, label='Individual delays')
         ax1.plot(df['time_seconds'], df['queue_delay_ma'], 'r-', linewidth=2,
-                label=f'Moving Average (window={window_size})')
+                 label=f'Moving Average (window={window_size})')
         ax1.set_xlabel('Time (seconds)')
         ax1.set_ylabel('Queue Delay (ms)')
         ax1.set_title('Queue Delay Analysis Over Time')
@@ -573,7 +945,7 @@ class LLServerTraceAnalyzer:
             for mutex in mutex_names:
                 mutex_data = wait_events[wait_events['mutex_name'] == mutex]
                 ax1.scatter(mutex_data['time_seconds'], mutex_data['duration_ms'],
-                           alpha=0.6, s=10, label=mutex)
+                            alpha=0.6, s=10, label=mutex)
             ax1.set_xlabel('Time (seconds)')
             ax1.set_ylabel('Lock Wait Time (ms)')
             ax1.set_title('Lock Wait Times Over Time')
@@ -585,7 +957,7 @@ class LLServerTraceAnalyzer:
             for mutex in mutex_names:
                 mutex_data = wait_events[wait_events['mutex_name'] == mutex]
                 ax2.hist(mutex_data['duration_ms'], bins=30, alpha=0.7,
-                        label=f'{mutex} (mean: {mutex_data["duration_ms"].mean():.2f}ms)')
+                         label=f'{mutex} (mean: {mutex_data["duration_ms"].mean():.2f}ms)')
             ax2.set_xlabel('Lock Wait Time (ms)')
             ax2.set_ylabel('Count')
             ax2.set_title('Lock Wait Time Distribution by Mutex')
@@ -600,7 +972,7 @@ class LLServerTraceAnalyzer:
             for mutex in mutex_names:
                 mutex_data = hold_events[hold_events['mutex_name'] == mutex]
                 ax3.scatter(mutex_data['time_seconds'], mutex_data['duration_ms'],
-                           alpha=0.6, s=10, label=mutex)
+                            alpha=0.6, s=10, label=mutex)
             ax3.set_xlabel('Time (seconds)')
             ax3.set_ylabel('Lock Hold Time (ms)')
             ax3.set_title('Lock Hold Times Over Time')
@@ -667,7 +1039,7 @@ class LLServerTraceAnalyzer:
         for op in operations:
             op_data = df[df['operation'] == op]
             ax1.scatter(op_data['time_seconds'], op_data['duration_ms'],
-                       alpha=0.6, s=10, label=op)
+                        alpha=0.6, s=10, label=op)
         ax1.set_xlabel('Time (seconds)')
         ax1.set_ylabel('I/O Duration (ms)')
         ax1.set_title('I/O Operation Duration Over Time')
@@ -679,7 +1051,7 @@ class LLServerTraceAnalyzer:
         for op in operations:
             op_data = df[df['operation'] == op]
             ax2.hist(op_data['duration_ms'], bins=30, alpha=0.7,
-                    label=f'{op} (mean: {op_data["duration_ms"].mean():.2f}ms)')
+                     label=f'{op} (mean: {op_data["duration_ms"].mean():.2f}ms)')
         ax2.set_xlabel('I/O Duration (ms)')
         ax2.set_ylabel('Count')
         ax2.set_title('I/O Duration Distribution by Operation')
@@ -706,7 +1078,7 @@ class LLServerTraceAnalyzer:
                 op_data = df[df['operation'] == op]
                 if not op_data.empty:
                     ax4.scatter(op_data['time_seconds'], op_data['throughput_mbps'],
-                               alpha=0.6, s=10, label=op)
+                                alpha=0.6, s=10, label=op)
             ax4.set_xlabel('Time (seconds)')
             ax4.set_ylabel('Throughput (Mbps)')
             ax4.set_title('I/O Throughput Over Time')
@@ -788,9 +1160,9 @@ class LLServerTraceAnalyzer:
         df['consumer_rate_ma'] = df['consumer_rate'].rolling(window=window_size, center=True).mean()
 
         ax4.plot(df['time_seconds'], df['producer_rate_ma'], 'g-',
-                label=f'Producer Rate (MA-{window_size})', linewidth=3)
+                 label=f'Producer Rate (MA-{window_size})', linewidth=3)
         ax4.plot(df['time_seconds'], df['consumer_rate_ma'], 'b-',
-                label=f'Consumer Rate (MA-{window_size})', linewidth=3)
+                 label=f'Consumer Rate (MA-{window_size})', linewidth=3)
         ax4.set_xlabel('Time (seconds)')
         ax4.set_ylabel('Rate (items/second)')
         ax4.set_title('Smoothed Producer vs Consumer Rates')
@@ -823,7 +1195,7 @@ class LLServerTraceAnalyzer:
 
         # Backlog episodes over time
         ax1.scatter(trigger_df['time_seconds'], trigger_df['queue_size'],
-                   c=trigger_df['growth_rate'], s=60, alpha=0.7, cmap='viridis')
+                    c=trigger_df['growth_rate'], s=60, alpha=0.7, cmap='viridis')
         cbar = plt.colorbar(ax1.collections[0], ax=ax1)
         cbar.set_label('Growth Rate (items/sec)')
         ax1.set_xlabel('Time (seconds)')
@@ -837,7 +1209,7 @@ class LLServerTraceAnalyzer:
         ax2.set_ylabel('Count')
         ax2.set_title('Backlog Growth Rate Distribution')
         ax2.axvline(trigger_df['growth_rate'].mean(), color='red', linestyle='--',
-                   label=f'Mean: {trigger_df["growth_rate"].mean():.0f}')
+                    label=f'Mean: {trigger_df["growth_rate"].mean():.0f}')
         ax2.legend(loc="upper right")
         ax2.grid(True, alpha=0.3)
 
@@ -847,7 +1219,7 @@ class LLServerTraceAnalyzer:
         ax3.set_ylabel('Count')
         ax3.set_title('Queue Size at Backlog Trigger Distribution')
         ax3.axvline(trigger_df['queue_size'].mean(), color='red', linestyle='--',
-                   label=f'Mean: {trigger_df["queue_size"].mean():.0f}')
+                    label=f'Mean: {trigger_df["queue_size"].mean():.0f}')
         ax3.legend(loc="upper right")
         ax3.grid(True, alpha=0.3)
 
@@ -864,93 +1236,72 @@ class LLServerTraceAnalyzer:
         plt.savefig(f'{output_dir}/backlog_analysis.png', dpi=300, bbox_inches='tight')
         plt.close()
 
-    def generate_summary_report(self, output_dir='plots'):
-        """Generate a summary report with key statistics"""
-        report_file = f'{output_dir}/analysis_summary.txt'
-
-        with open(report_file, 'w') as f:
-            f.write("LLServer Trace Analysis Summary Report\n")
-            f.write("=" * 50 + "\n\n")
-
-            f.write(f"Total events processed: {len(self.events)}\n")
-            f.write(f"Analysis duration: {(max(e['timestamp'] for e in self.events) - min(e['timestamp'] for e in self.events)) / 1e9:.2f} seconds\n\n")
-
-            # Processing statistics
-            processing_data = [data for data in self.processing_events.values()
-                             if 'processing_ns' in data and 'queue_delay_ns' in data]
-            if processing_data:
-                processing_times = [d['processing_ns'] / 1e6 for d in processing_data]  # ms
-                queue_delays = [d['queue_delay_ns'] / 1e6 for d in processing_data]  # ms
-
-                f.write("Processing Latency Statistics:\n")
-                f.write(f"  Mean processing time: {np.mean(processing_times):.2f} ms\n")
-                f.write(f"  95th percentile: {np.percentile(processing_times, 95):.2f} ms\n")
-                f.write(f"  99th percentile: {np.percentile(processing_times, 99):.2f} ms\n")
-                f.write(f"  Max processing time: {np.max(processing_times):.2f} ms\n\n")
-
-                f.write("Queue Delay Statistics:\n")
-                f.write(f"  Mean queue delay: {np.mean(queue_delays):.2f} ms\n")
-                f.write(f"  95th percentile: {np.percentile(queue_delays, 95):.2f} ms\n")
-                f.write(f"  99th percentile: {np.percentile(queue_delays, 99):.2f} ms\n")
-                f.write(f"  Max queue delay: {np.max(queue_delays):.2f} ms\n\n")
-
-            # Queue statistics
-            if self.queue_snapshots:
-                queue_sizes = [s['queue_size'] for s in self.queue_snapshots]
-                f.write("Queue Size Statistics:\n")
-                f.write(f"  Mean queue size: {np.mean(queue_sizes):.1f}\n")
-                f.write(f"  Max queue size: {np.max(queue_sizes)}\n")
-                f.write(f"  95th percentile: {np.percentile(queue_sizes, 95):.1f}\n\n")
-
-            # Lock statistics
-            if self.lock_events:
-                wait_times = [e['duration_ns'] / 1e6 for e in self.lock_events if e['type'] == 'wait']
-                hold_times = [e['duration_ns'] / 1e6 for e in self.lock_events if e['type'] == 'hold']
-
-                if wait_times:
-                    f.write("Lock Wait Time Statistics:\n")
-                    f.write(f"  Mean wait time: {np.mean(wait_times):.2f} ms\n")
-                    f.write(f"  95th percentile: {np.percentile(wait_times, 95):.2f} ms\n")
-                    f.write(f"  Max wait time: {np.max(wait_times):.2f} ms\n\n")
-
-                if hold_times:
-                    f.write("Lock Hold Time Statistics:\n")
-                    f.write(f"  Mean hold time: {np.mean(hold_times):.2f} ms\n")
-                    f.write(f"  95th percentile: {np.percentile(hold_times, 95):.2f} ms\n")
-                    f.write(f"  Max hold time: {np.max(hold_times):.2f} ms\n\n")
-
-            # I/O statistics
-            if self.io_events:
-                io_times = [e['duration_ns'] / 1e6 for e in self.io_events]
-                f.write("I/O Operation Statistics:\n")
-                f.write(f"  Mean I/O time: {np.mean(io_times):.2f} ms\n")
-                f.write(f"  95th percentile: {np.percentile(io_times, 95):.2f} ms\n")
-                f.write(f"  Max I/O time: {np.max(io_times):.2f} ms\n\n")
-
-            # Backlog statistics
-            if self.backlog_triggers:
-                f.write("Backlog Episode Statistics:\n")
-                f.write(f"  Total backlog episodes: {len(self.backlog_triggers)}\n")
-                growth_rates = [t['growth_rate'] for t in self.backlog_triggers]
-                f.write(f"  Mean growth rate: {np.mean(growth_rates):.0f} items/sec\n")
-                f.write(f"  Max growth rate: {np.max(growth_rates):.0f} items/sec\n\n")
-
-        print(f"Summary report written to {report_file}")
-
-    def _place_legend(self, ax, loc="upper right"):
-        # Updated flexible legend handling
-        leg_handles, leg_labels = ax.get_legend_handles_labels()
-        if not leg_handles:
+    def plot_network_errors(self, output_dir):
+        """Aggregate view of network send/receive errors.
+        Produces a figure with:
+          1) Counts per second (header send errors, body send errors, receive errors)
+          2) Scatter of each error over time vs errno (color-coded by category)
+        """
+        if not (self.net_send_errors or self.net_recv_errors):
+            print("No network errors to plot")
             return
-        mode = self.legend_mode
-        if mode == 'right':
-            ax.legend(leg_handles, leg_labels, loc='center left', bbox_to_anchor=(1.02, 0.5),
-                      borderaxespad=0., frameon=False, fontsize='small')
-        elif mode == 'below':
-            ax.legend(leg_handles, leg_labels, loc='upper center', bbox_to_anchor=(0.5, -0.18),
-                      ncol=min(4, len(leg_labels)), frameon=False, fontsize='small')
-        else:  # inside
-            ax.legend(loc=loc, fontsize='small', frameon=False)
+        # Build unified error list
+        rows = []
+        base_ts = None
+        # Send errors (header/body)
+        for e in self.net_send_errors:
+            ts = e.get('timestamp')
+            if base_ts is None or ts < base_ts:
+                base_ts = ts
+            rows.append({
+                'timestamp': ts,
+                'errno': e.get('err_no', 0),
+                'kind': f"send_{e.get('kind', 'unknown')}"
+            })
+        # Receive errors
+        for e in self.net_recv_errors:
+            ts = e.get('timestamp')
+            if base_ts is None or ts < base_ts:
+                base_ts = ts
+            rows.append({
+                'timestamp': ts,
+                'errno': e.get('err_no', 0),
+                'kind': 'recv'
+            })
+        if not rows:
+            print("No network errors (post filtering)")
+            return
+        df = pd.DataFrame(rows)
+        df['time_seconds'] = (df['timestamp'] - base_ts) / 1e9
+        # Bucket into whole seconds for counts
+        df['sec_bucket'] = df['time_seconds'].astype(int)
+        counts = (df.groupby(['sec_bucket','kind']).size()
+                    .reset_index(name='count'))
+        # Pivot for plotting counts per second
+        pivot = counts.pivot(index='sec_bucket', columns='kind', values='count').fillna(0)
+        # Prepare figure
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(18, 10))
+        # Plot counts as lines (or points if sparse)
+        for col in pivot.columns:
+            ax1.plot(pivot.index, pivot[col], marker='o', linestyle='-', linewidth=1, label=col)
+        ax1.set_xlabel('Time (s)')
+        ax1.set_ylabel('Errors / sec')
+        ax1.set_title('Network Error Counts Per Second')
+        ax1.grid(True, alpha=0.3)
+        self._place_legend(ax1)
+        # Scatter of errno over time
+        color_map = {'send_header':'tab:blue','send_body':'tab:orange','recv':'tab:red'}
+        for kind, sub in df.groupby('kind'):
+            ax2.scatter(sub['time_seconds'], sub['errno'], s=30, alpha=0.7,
+                        label=kind, color=color_map.get(kind, None))
+        ax2.set_xlabel('Time (s)')
+        ax2.set_ylabel('errno')
+        ax2.set_title('Network Error errno Codes Over Time')
+        # Jitter duplicate errno points slightly if many overlap (optional quick jitter)
+        # (Skipping complex jitter; matplotlib overlap is usually acceptable.)
+        ax2.grid(True, alpha=0.3)
+        self._place_legend(ax2)
+        plt.tight_layout()
 
 def main():
     parser = argparse.ArgumentParser(description='Analyze llserver LTTng traces')
