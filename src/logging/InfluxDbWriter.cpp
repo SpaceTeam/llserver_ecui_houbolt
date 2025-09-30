@@ -143,5 +143,5 @@ void InfluxDbWriter::flush() {
 
 void InfluxDbWriter::returnBuffer(std::string buffer) {
     std::lock_guard thread_lock(buffer_mutex);
-    available_buffers.emplace_back(std::move(buffer));
+    available_buffers.push_back(std::move(buffer));
 }
