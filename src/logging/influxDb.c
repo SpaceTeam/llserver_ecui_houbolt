@@ -95,7 +95,7 @@ static inline uint64_t monotonic_ns() {
 
 int sendData(influxDbContext *cntxt, char *data, size_t length) {
     char http_header[2048];
-    size_t ret;
+    int ret;
     size_t header_length = 0, sent = 0;
     char result[1024];
 
