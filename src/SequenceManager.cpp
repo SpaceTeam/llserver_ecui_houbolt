@@ -95,7 +95,8 @@ void SequenceManager::Init(Config &config)
                     config["/INFLUXDB/database_port"],
                     config["/INFLUXDB/database_name"],
                     config["/INFLUXDB/sequences_measurement"], MICROSECONDS,
-                    config["/INFLUXDB/buffer_size"]);
+                    config["/INFLUXDB/buffer_size"],
+                    config["/INFLUXDB/number_of_sending_threads"]);
     #endif
 }
 

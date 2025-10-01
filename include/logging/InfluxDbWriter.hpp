@@ -15,9 +15,8 @@ extern "C" {
 class InfluxDbSendThread; // forward declaration
 
 class InfluxDbWriter {
-    // Might want to make the buffer size and concurrency configurable (DB)
 public:
-    InfluxDbWriter(std::string hostname, unsigned port, std::string dbName, std::size_t buffer_size);
+    InfluxDbWriter(std::string hostname, unsigned port, std::string dbName, std::size_t buffer_size, int numberOfThreads);
     InfluxDbWriter(const InfluxDbWriter &) = delete;
     ~InfluxDbWriter();
 

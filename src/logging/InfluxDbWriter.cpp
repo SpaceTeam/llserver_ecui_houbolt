@@ -15,7 +15,7 @@
 using namespace std::chrono_literals;
 
 InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string dbName,
-                               std::size_t bufferSize) : buffer_size_max(bufferSize) {
+                               std::size_t bufferSize, int numberOfThreads) : buffer_size_max(bufferSize) {
     host = std::move(hostname);
     db = std::move(dbName);
     portStr = std::to_string(port);
@@ -24,8 +24,7 @@ InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string 
 
     queue = std::make_shared<moodycamel::BlockingConcurrentQueue<std::string>>();
     // spawn worker threads referencing *this
-    int threadsNum = buffer_size_max > 40000 ? 2:1;
-    for (int i = 0; i < threadsNum; ++i) {
+    for (int i = 0; i < numberOfThreads; ++i) {
         std::shared_ptr<influxDbContext> cntxt = std::make_shared<influxDbContext>();
         if (initDbContext(cntxt.get(), host.c_str(), portStr.c_str(), db.c_str()) < 0) {
             throw std::runtime_error("Couldn't initialize influxDbWriter (bad context)");
@@ -35,7 +34,7 @@ InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string 
     }
     current_buffer = std::string();
     for (int i = 0; i < 10; ++i) {
-        available_buffers.emplace_back(std::string());
+        available_buffers.emplace_back();
     }
 }
 

@@ -1,5 +1,6 @@
 #include "logging/InfluxDbLogger.h"
 #include <iostream>
+#include <utility>
 
 InfluxDbLogger::InfluxDbLogger() {
 }
@@ -8,10 +9,10 @@ InfluxDbLogger::~InfluxDbLogger() {
 }
 
 void InfluxDbLogger::Init(std::string db_hostname, unsigned db_port, std::string db_name, std::string measurement,
-                            timestamp_precision_t precision, std::size_t buffer_size) {
+                            timestamp_precision_t precision, std::size_t buffer_size,int numOfThreads) {
     try {
-        dbWriter = std::make_shared<InfluxDbWriter>(db_hostname, db_port, db_name, buffer_size);
-        dbWriter->setMeasurement(measurement);
+        dbWriter = std::make_shared<InfluxDbWriter>(db_hostname, db_port, db_name, buffer_size,numOfThreads);
+        dbWriter->setMeasurement(std::move(measurement));
         dbWriter->setTimestampPrecision(precision);
     }
     catch (const std::runtime_error &e) {

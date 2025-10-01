@@ -21,8 +21,7 @@ public:
     ~InfluxDbSendThread();
 
     void stop();
-    void join(); // new: join underlying thread
-    void pushBuffer(std::string buffer);
+    void join();
     [[nodiscard]] bool isRunning() const;
 
 

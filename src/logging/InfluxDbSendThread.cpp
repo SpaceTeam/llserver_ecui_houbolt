@@ -37,11 +37,6 @@ void InfluxDbSendThread::join() {
     if (thread.joinable()) thread.join();
 }
 
-void InfluxDbSendThread::pushBuffer(std::string msg) {
-    queue->enqueue(std::move(msg));
-    ++messagesInQueue;
-}
-
 void InfluxDbSendThread::messageSendingLoop() {
     while (running.load()) {
         std::string buffer;

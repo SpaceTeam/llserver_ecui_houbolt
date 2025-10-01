@@ -73,6 +73,7 @@ int Node::influxPort;
 std::string Node::databaseName;
 std::string Node::measurementName;
 int Node::influxBufferSize;
+int Node::numberOfLoggingThreads;
 
 std::mutex Node::loggerMtx;
 
@@ -99,7 +100,8 @@ Node::Node(uint8_t nodeID, std::string nodeChannelName, NodeInfoMsg_t& nodeInfo,
                         influxPort,
                         databaseName,
                         measurementName, MICROSECONDS,
-                        influxBufferSize);
+                        influxBufferSize,
+                        numberOfLoggingThreads);
         }
         else
         {
@@ -150,6 +152,7 @@ void Node::InitConfig(Config &config) {
     databaseName = config["/INFLUXDB/database_name"];
     measurementName = config["/INFLUXDB/fast_sensor_measurement"];
     influxBufferSize = config["/INFLUXDB/fast_sensor_buffer_size"];
+    numberOfLoggingThreads = config["/INFLUXDB/fast_number_of_sending_threads"];
 }
 
 /**
