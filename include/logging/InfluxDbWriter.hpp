@@ -22,7 +22,7 @@ public:
     ~InfluxDbWriter();
 
     void setCredentials(const std::string& user, const std::string& password);
-    void setTimestampPrecision(timestamp_precision_t precision);
+    void setTimestampPrecision(timestamp_precision_t precision) const;
     void setMeasurement(std::string _measurement);
 
     void startDataPoint();
@@ -48,7 +48,7 @@ private:
     std::vector<std::unique_ptr<InfluxDbSendThread>> threads;
     std::shared_ptr<moodycamel::BlockingConcurrentQueue<std::string>> queue;
 
-    void joinThreads();
+    void joinThreads() const;
 };
 
 #endif

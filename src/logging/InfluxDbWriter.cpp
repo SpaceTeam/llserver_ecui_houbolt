@@ -24,13 +24,14 @@ InfluxDbWriter::InfluxDbWriter(std::string hostname, unsigned port, std::string 
 
     queue = std::make_shared<moodycamel::BlockingConcurrentQueue<std::string>>();
     // spawn worker threads referencing *this
-    for (int i = 0; i < 1; ++i) {
+    int threadsNum = buffer_size_max > 40000 ? 2:1;
+    for (int i = 0; i < threadsNum; ++i) {
         std::shared_ptr<influxDbContext> cntxt = std::make_shared<influxDbContext>();
         if (initDbContext(cntxt.get(), host.c_str(), portStr.c_str(), db.c_str()) < 0) {
             throw std::runtime_error("Couldn't initialize influxDbWriter (bad context)");
         }
         contexts.push_back(cntxt);
-        threads.emplace_back(std::make_unique<InfluxDbSendThread>(cntxt, queue, *this));
+        threads.push_back(std::make_unique<InfluxDbSendThread>(cntxt, queue, *this));
     }
     current_buffer = std::string();
     for (int i = 0; i < 10; ++i) {
@@ -55,7 +56,7 @@ void InfluxDbWriter::setCredentials(const std::string& user, const std::string& 
     }
 }
 
-void InfluxDbWriter::setTimestampPrecision(timestamp_precision_t precision) {
+void InfluxDbWriter::setTimestampPrecision(timestamp_precision_t precision) const {
     for (auto& cntxt: contexts) {
         set_timestamp_precision(cntxt.get(), precision);
     }
@@ -100,13 +101,13 @@ void InfluxDbWriter::endDataPoint(const std::size_t timestamp) {
     if (!current_buffer.empty() && current_buffer.back() == ',') {
         current_buffer.pop_back();
     }
-     std::format_to(std::back_inserter(current_buffer), " {}\n", timestamp);
+    std::format_to(std::back_inserter(current_buffer), " {}\n", timestamp);
     if (current_buffer.size() >= buffer_size_max) {
         flush();
     }
 }
 
-void InfluxDbWriter::joinThreads() {
+void InfluxDbWriter::joinThreads() const {
     // signal threads to stop and join them
     for (auto & t : threads) {
         if (t) t->stop();
@@ -143,5 +144,6 @@ void InfluxDbWriter::flush() {
 
 void InfluxDbWriter::returnBuffer(std::string buffer) {
     std::lock_guard thread_lock(buffer_mutex);
+    buffer.clear();
     available_buffers.push_back(std::move(buffer));
 }

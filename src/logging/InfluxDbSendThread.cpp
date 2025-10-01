@@ -44,15 +44,15 @@ void InfluxDbSendThread::pushBuffer(std::string msg) {
 
 void InfluxDbSendThread::messageSendingLoop() {
     while (running.load()) {
-        std::string msg;
-        if (queue->wait_dequeue_timed(msg, std::chrono::milliseconds(100))) {
+        std::string buffer;
+        if (queue->wait_dequeue_timed(buffer, std::chrono::milliseconds(100))) {
             --messagesInQueue;
-            sendData(context.get(), msg.data(), msg.size());
-            writer.returnBuffer(std::move(msg));
+            sendData(context.get(), buffer.data(), buffer.size());
+            writer.returnBuffer(std::move(buffer));
         }
         int size_approx = queue->size_approx();
-        if (size_approx>20) {
-            Debug::error("Queue size above 40, size: %i",size_approx );
+        if (size_approx>50) {
+            Debug::warning("Queue size above 50, size: %i",size_approx );
         }
     }
 }
