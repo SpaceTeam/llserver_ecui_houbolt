@@ -4,11 +4,8 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <errno.h>
-//#include <zlib.h>
 
 #include "logging/influxDb.h"
-#include <time.h>
 
 static void safe_str_cpy(char *src, const char *dest, size_t length) {
     strncpy(src, dest, length-1);

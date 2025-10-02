@@ -27,13 +27,12 @@ public:
 
 private:
     std::atomic_bool running{false};
-    std::atomic_int32_t messagesInQueue{0};
     std::mutex enqueueMutex;
     std::shared_ptr<moodycamel::BlockingConcurrentQueue<std::string>> queue;
     std::shared_ptr<influxDbContext> context;
     std::thread thread;
     InfluxDbWriter& writer; // reference to owning writer
 
-    void messageSendingLoop();
+    void messageSendingLoop() const;
 };
 #endif //LLSERVER_ECUI_HOUBOLT_INFLUXDBSENDTHREAD_H

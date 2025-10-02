@@ -37,15 +37,14 @@ void InfluxDbSendThread::join() {
     if (thread.joinable()) thread.join();
 }
 
-void InfluxDbSendThread::messageSendingLoop() {
+void InfluxDbSendThread::messageSendingLoop() const {
     while (running.load()) {
         std::string buffer;
         if (queue->wait_dequeue_timed(buffer, std::chrono::milliseconds(100))) {
-            --messagesInQueue;
             sendData(context.get(), buffer.data(), buffer.size());
             writer.returnBuffer(std::move(buffer));
         }
-        int size_approx = queue->size_approx();
+        std::size_t size_approx = queue->size_approx();
         if (size_approx>50) {
             Debug::warning("Queue size above 50, size: %i",size_approx );
         }
