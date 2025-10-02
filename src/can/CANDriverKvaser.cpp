@@ -72,7 +72,6 @@ CANDriverKvaser::CANDriverKvaser(canRecvCallback_t onRecvCallback,
 
 CANDriverKvaser::~CANDriverKvaser()
 {
-    receiveThread->stop();
     // Empty transfer queues (not strictly necessary but recommended by Kvaser)
     for (auto &handle : canHandlesMap)
     {
@@ -80,6 +79,8 @@ CANDriverKvaser::~CANDriverKvaser()
         (void) canBusOff(handle.second);
         (void) canClose(handle.second);
     }
+    receiveThread->stop();
+    receiveThread->join();
     canUnloadLibrary();
 }
 

@@ -44,6 +44,7 @@ private:
 	static std::string databaseName;
 	static std::string measurementName;
 	static int influxBufferSize;
+	static int numberOfLoggingThreads;
 
     static InfluxDbLogger *logger;
     static std::mutex loggerMtx;

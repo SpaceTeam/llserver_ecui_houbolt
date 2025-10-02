@@ -36,6 +36,18 @@ FetchContent_MakeAvailable(readerwriterqueue)
 
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC readerwriterqueue)
 
+include(FetchContent)
+
+FetchContent_Declare(
+        concurrentqueue
+        GIT_REPOSITORY    https://github.com/cameron314/concurrentqueue
+        GIT_TAG           c68072129c8a5b4025122ca5a0c82ab14b30cb03
+)
+
+FetchContent_MakeAvailable(concurrentqueue)
+
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC concurrentqueue)
+
 # Create an executable that links to this library
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)

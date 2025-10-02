@@ -10,15 +10,21 @@ CanKvaserReceiveThread::CanKvaserReceiveThread(canRecvCallback_t onRecvCallback)
     onRecvCallback(onRecvCallback) {
     running = true;
 
-    std::thread([this]() { this->receiveLoop(); }).detach();
+    thread = std::thread([this]() { this->receiveLoop(); });
 }
 
 CanKvaserReceiveThread::~CanKvaserReceiveThread() {
     stop();
+    join();
 }
 
 void CanKvaserReceiveThread::stop() {
     running = false;
+}
+void CanKvaserReceiveThread::join() {
+    if (thread.joinable()) {
+        thread.join();
+    }
 }
 
 void CanKvaserReceiveThread::pushMessage(std::unique_ptr<RawKvaserMessage> msg) {

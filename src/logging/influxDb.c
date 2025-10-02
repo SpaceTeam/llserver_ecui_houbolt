@@ -4,8 +4,6 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <errno.h>
-//#include <zlib.h>
 
 #include "logging/influxDb.h"
 
@@ -85,10 +83,9 @@ int deInitDbContext(influxDbContext *cntxt) {
     return close(cntxt->sock_fd);
 }
 
-
 int sendData(influxDbContext *cntxt, char *data, size_t length) {
     char http_header[2048];
-    size_t ret;
+    int ret;
     size_t header_length = 0, sent = 0;
     char result[1024];
 
@@ -114,8 +111,6 @@ int sendData(influxDbContext *cntxt, char *data, size_t length) {
 
     // If needed -> extract response code (DB)
     read(cntxt->sock_fd, result, sizeof(result));
-    // fprintf(stdout, "Result %s\n", result);
-
     return 0;
 }
 

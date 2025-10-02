@@ -20,6 +20,7 @@ public:
     ~CanKvaserReceiveThread();
 
     void stop();
+    void join();
     void pushMessage(std::unique_ptr<RawKvaserMessage> msg);
     [[nodiscard]] bool isRunning() const;
 
@@ -29,6 +30,8 @@ private:
     std::mutex enqueueMutex;
     std::shared_ptr<moodycamel::BlockingReaderWriterQueue<std::unique_ptr<RawKvaserMessage>> > queue;
     canRecvCallback_t onRecvCallback;
+    std::thread thread;
+
     void receiveLoop();
 };
 
