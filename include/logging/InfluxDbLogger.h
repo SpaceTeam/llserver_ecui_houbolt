@@ -1,7 +1,7 @@
 #ifndef INFLUXDBLOGGER_H
 #define INFLUXDBLOGGER_H
 
-#include "logging/InfluxDbWriter.h"
+#include "logging/InfluxDbWriter.hpp"
 #include "logging/MessageLogger.h"
 #include "logging/DataLogger.h"
 
@@ -11,7 +11,7 @@ class InfluxDbLogger
             InfluxDbLogger();
             InfluxDbLogger(const InfluxDbLogger&) = delete;
             ~InfluxDbLogger();
-            void Init(std::string db_hostname, unsigned db_port, std::string db_name, std::string measurement, timestamp_precision_t precision, std::size_t buffer_size);
+            void Init(std::string db_hostname, unsigned db_port, std::string db_name, std::string measurement, timestamp_precision_t precision, std::size_t buffer_size,int numberOfThreads);
 
             void log(std::string source, std::string msg, std::size_t timestamp, Severity severity);
 
@@ -24,7 +24,7 @@ class InfluxDbLogger
 
             void flush();
         private:
-            InfluxDbWriter *dbWriter;
+            std::shared_ptr<InfluxDbWriter> dbWriter;
 };
 
 #endif

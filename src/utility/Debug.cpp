@@ -33,7 +33,8 @@ void Debug::Init(Config &config)
                      config["/INFLUXDB/database_port"],
                      config["/INFLUXDB/database_name"],
                      config["/INFLUXDB/debug_measurement"], MILLISECONDS,
-                     config["/INFLUXDB/buffer_size"]);
+                     config["/INFLUXDB/buffer_size"],
+                     config["/INFLUXDB/number_of_sending_threads"]);
 #endif
          initialized = true;
     }

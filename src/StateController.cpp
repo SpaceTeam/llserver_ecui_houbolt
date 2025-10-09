@@ -24,7 +24,8 @@ void StateController::Init(std::function<void(std::string, double, double)> onSt
                      config["/INFLUXDB/database_port"],
                      config["/INFLUXDB/database_name"],
                      config["/INFLUXDB/state_measurement"], MICROSECONDS,
-                     config["/INFLUXDB/buffer_size"]);
+                     config["/INFLUXDB/buffer_size"],
+                     config["/INFLUXDB/number_of_sending_threads"]);
 #endif
         initialized = true;
     }
