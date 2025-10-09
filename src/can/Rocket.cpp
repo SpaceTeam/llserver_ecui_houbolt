@@ -30,6 +30,8 @@ const std::map<std::string, std::vector<double>> Rocket::scalingMap =
             {"MaximumTankPressure", {0.001, 0.0}},
             {"HolddownTimeout", {1.0, 0.0}},
             {"StateRefreshDivider", {1.0, 0.0}},
+            {"GSEConnectionAbortEnable", {1.0, 0.0}},
+            {"GSEConnectionAbortTimer", {1.0, 0.0}},
         };
 
 const std::map<ROCKET_VARIABLES , std::string> Rocket::variableMap =
@@ -41,7 +43,7 @@ const std::map<ROCKET_VARIABLES , std::string> Rocket::variableMap =
             {ROCKET_HOLDDOWN_TIMEOUT, "HolddownTimeout"},
             {ROCKET_STATE_REFRESH_DIVIDER, "StateRefreshDivider"},
              {ROCKET_GSE_CONNECTION_ABORT_ENABLED,"GSEConnectionAbortEnable"},
-            {ROCKET_GSE_CONNECTION_ABORT_ENABLED,"GSEConnectionAbortTimer"}
+            {ROCKET_GSE_CONNECTION_ABORT_TIMER,"GSEConnectionAbortTimer"}
 
         };
 
@@ -65,7 +67,7 @@ Rocket::Rocket(uint8_t channelID, std::string channelName, std::vector<double> s
         {"GetRocketState", {std::bind(&Rocket::GetRocketState, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"GSEConnectionAbortTimer", {std::bind(&Rocket::GetGSEConnectionAbortTimer, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"GetGSEConnectionAbortEnable", {std::bind(&Rocket::GetGSEConnectionAbortEnable, this, std::placeholders::_1, std::placeholders::_2), {}}},
-        {"SetGSEConnectionAbortEnable", {std::bind(&Rocket::SetGSEConnectionAbortEnable, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetGSEConnectionAbortEnable", {std::bind(&Rocket::SetGSEConnectionAbortEnable, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"ActivateInternalControl", {std::bind(&Rocket::RequestInternalControl, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"Abort", {std::bind(&Rocket::RequestAbort, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"EndOfFlight", {std::bind(&Rocket::RequestEndOfFlight, this, std::placeholders::_1, std::placeholders::_2), {}}},
