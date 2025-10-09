@@ -40,6 +40,9 @@ const std::map<ROCKET_VARIABLES , std::string> Rocket::variableMap =
             {ROCKET_MAXIMUM_TANK_PRESSURE, "MaximumTankPressure"},
             {ROCKET_HOLDDOWN_TIMEOUT, "HolddownTimeout"},
             {ROCKET_STATE_REFRESH_DIVIDER, "StateRefreshDivider"},
+             {ROCKET_GSE_CONNECTION_ABORT_ENABLED,"GSEConnectionAbortEnable"},
+            {ROCKET_GSE_CONNECTION_ABORT_ENABLED,"GSEConnectionAbortTimer"}
+
         };
 
 Rocket::Rocket(uint8_t channelID, std::string channelName, std::vector<double> sensorScaling, Node *parent)
@@ -60,11 +63,15 @@ Rocket::Rocket(uint8_t channelID, std::string channelName, std::vector<double> s
         {"GetStateRefreshDivider", {std::bind(&Rocket::GetStateRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetRocketState", {std::bind(&Rocket::SetRocketState, this, std::placeholders::_1, std::placeholders::_2), {"State"}}},
         {"GetRocketState", {std::bind(&Rocket::GetRocketState, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"GSEConnectionAbortTimer", {std::bind(&Rocket::GetGSEConnectionAbortTimer, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"GetGSEConnectionAbortEnable", {std::bind(&Rocket::GetGSEConnectionAbortEnable, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"SetGSEConnectionAbortEnable", {std::bind(&Rocket::SetGSEConnectionAbortEnable, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"ActivateInternalControl", {std::bind(&Rocket::RequestInternalControl, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"Abort", {std::bind(&Rocket::RequestAbort, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"EndOfFlight", {std::bind(&Rocket::RequestEndOfFlight, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"AutoCheck", {std::bind(&Rocket::RequestAutoCheck, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"RequestStatus", {std::bind(&Rocket::RequestStatus, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"RequestResetSettings", {std::bind(&Rocket::RequestResetSettings, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"RequestResetSettings", {std::bind(&Rocket::RequestResetSettings, this, std::placeholders::_1, std::placeholders::_2), {}}},
     };
 }
@@ -272,6 +279,22 @@ void Rocket::SetMaximumTankPressure(std::vector<double> &params, bool testOnly)
     }
 }
 
+void Rocket::SetGSEConnectionAbortEnable(std::vector<double> &params, bool testOnly)
+{
+    std::vector<double> scalingParams = scalingMap.at("MinimumChamberPressure");
+
+    try
+    {
+        SetVariable(ROCKET_REQ_SET_VARIABLE, parent->GetNodeID(), ROCKET_GSE_CONNECTION_ABORT_ENABLED,
+                    scalingParams, params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Rocket - SetGSEConnectionAbortEnable: " + std::string(e.what()));
+    }
+}
+
+
 void Rocket::GetMaximumTankPressure(std::vector<double> &params, bool testOnly)
 {
     try
@@ -448,6 +471,32 @@ void Rocket::RequestResetSettings(std::vector<double> &params, bool testOnly)
         throw std::runtime_error("Rocket - RequestResetSettings: " + std::string(e.what()));
     }
 }
+
+void Rocket::GetGSEConnectionAbortEnable(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(ROCKET_REQ_GET_VARIABLE, parent->GetNodeID(),ROCKET_GSE_CONNECTION_ABORT_ENABLED,
+                    params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Rocket - GetGSEConnectionAbortEnable: " + std::string(e.what()));
+    }
+}
+void Rocket::GetGSEConnectionAbortTimer(std::vector<double> &params, bool testOnly)
+{
+    try
+    {
+        GetVariable(ROCKET_REQ_GET_VARIABLE, parent->GetNodeID(),ROCKET_GSE_CONNECTION_ABORT_TIMER,
+                    params, parent->GetCANBusChannelID(), parent->GetCANDriver(), testOnly);
+    }
+    catch (std::exception &e)
+    {
+        throw std::runtime_error("Rocket - GetGSEConnectionAbortTimer: " + std::string(e.what()));
+    }
+}
+
 
 void Rocket::RequestCurrentState()
 {
