@@ -65,7 +65,7 @@ Rocket::Rocket(uint8_t channelID, std::string channelName, std::vector<double> s
         {"GetStateRefreshDivider", {std::bind(&Rocket::GetStateRefreshDivider, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetRocketState", {std::bind(&Rocket::SetRocketState, this, std::placeholders::_1, std::placeholders::_2), {"State"}}},
         {"GetRocketState", {std::bind(&Rocket::GetRocketState, this, std::placeholders::_1, std::placeholders::_2), {}}},
-        {"GSEConnectionAbortTimer", {std::bind(&Rocket::GetGSEConnectionAbortTimer, this, std::placeholders::_1, std::placeholders::_2), {}}},
+        {"GetGSEConnectionAbortTimer", {std::bind(&Rocket::GetGSEConnectionAbortTimer, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"GetGSEConnectionAbortEnable", {std::bind(&Rocket::GetGSEConnectionAbortEnable, this, std::placeholders::_1, std::placeholders::_2), {}}},
         {"SetGSEConnectionAbortEnable", {std::bind(&Rocket::SetGSEConnectionAbortEnable, this, std::placeholders::_1, std::placeholders::_2), {"Value"}}},
         {"ActivateInternalControl", {std::bind(&Rocket::RequestInternalControl, this, std::placeholders::_1, std::placeholders::_2), {}}},
