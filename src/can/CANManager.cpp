@@ -393,7 +393,7 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 		{
 			if (canIDStruct->info.direction == 0)
 			{
-				Debug::print("Direction bit master to node %d on bus %d, delegating msg...", nodeID, canBusChannelID);
+				Debug::info("Direction bit master to node %d on bus %d, delegating msg...", nodeID, canBusChannelID);
 				std::string msg;
 				msg += "\nNode ID: " + std::to_string(nodeID) + "\n";
 				msg += "Channel ID: " + std::to_string(canMsg->bit.info.channel_id) + "\n";
@@ -403,7 +403,7 @@ void CANManager::OnCANRecv(uint8_t canBusChannelID, uint32_t canID, uint8_t *pay
 				    msg += std::to_string(canMsg->bit.data.uint8[i]) + " ";
 				}
 				msg += "\n";
-				Debug::print(msg);
+				Debug::info(msg);
 				//TODO: DIRTY HOTFIX, remove it
 				std::vector<uint8_t> channels = {0,1,2,3};
 				channels.erase(channels.begin()+canBusChannelID);

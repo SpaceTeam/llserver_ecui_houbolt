@@ -45,6 +45,15 @@ public:
 	void SetMinimumOxPressure(std::vector<double> &params, bool testOnly);
 	void GetMinimumOxPressure(std::vector<double> &params, bool testOnly);
 
+	void SetMaximumTankPressure(std::vector<double> &params, bool testOnly);
+
+    void SetGSEConnectionAbortEnable(std::vector<double> &params, bool testOnly);
+	void GetGSEConnectionAbortTimer(std::vector<double> &params, bool testOnly);
+
+    void GetGSEConnectionAbortEnable(std::vector<double> &params, bool testOnly);
+
+    void GetMaximumTankPressure(std::vector<double> &params, bool testOnly);
+
 	void SetHolddownTimeout(std::vector<double> &params, bool testOnly);
 	void GetHolddownTimeout(std::vector<double> &params, bool testOnly);
 
@@ -61,6 +70,8 @@ public:
 
 	void RequestStatus(std::vector<double> &params, bool testOnly) override;
 	void RequestResetSettings(std::vector<double> &params, bool testOnly) override;
+
+
 
     //-------------------------------Utility Functions-------------------------------//
 
