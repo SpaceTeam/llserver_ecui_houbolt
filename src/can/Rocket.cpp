@@ -509,4 +509,6 @@ void Rocket::RequestCurrentState()
 	GetHolddownTimeout(params, false);
 	GetStateRefreshDivider(params, false);
     GetRocketState(params, false);
+    GetGSEConnectionAbortEnable(params,false);
+    GetGSEConnectionAbortTimer(params, false);
 }
